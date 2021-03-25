@@ -1,0 +1,16 @@
+[Unit]
+Description=P1 monitor
+After=network.target
+
+[Service]
+ExecStart=/p1mon/scripts/p1mon.sh start
+ExecStop=/p1mon/scripts/p1mon.sh stop
+ExecReload=/p1mon/scripts/p1mon.sh restart
+WorkingDirectory=/p1mon/scripts
+StandardOutput=inherit
+StandardError=inherit
+User=p1mon
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
