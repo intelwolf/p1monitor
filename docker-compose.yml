@@ -7,8 +7,6 @@ services:
     #image: rvleij/p1monitor
     ports:
       - 81:80
-      - 10721:10721
-      - 40721:40721
     volumes:
       - ./alldata/data:/p1mon/data
       - ./alldata/usbdisk:/p1mon/mnt/usb
