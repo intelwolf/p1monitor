@@ -3,7 +3,6 @@
 <head>
 <title>Demo custom UI</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<script src="../js/jquery.min.js"></script>
 
 <style>
 body {
@@ -49,36 +48,35 @@ p {
     function showStuff(boxid){document.getElementById(boxid).style.display="block";}
     function hideStuff(boxid){document.getElementById(boxid).style.display="none";}
 
-    function readJsonApiSmartMeter(){ 
-    $.getScript( "../api/v1/smartmeter?limit=60", function( data, textStatus, jqxhr ) {
-      try {
-    
-        var jsondata = JSON.parse(data); 
-
-        console.log( jsondata[0] );
-
-        if (data != null ) {
+    function loadJSON() {
+        var requestURL = '../json/apiV1p1data.php?order=desc&limit=1&outputmode=array';
+        var request = new XMLHttpRequest();
+        request.open('GET', requestURL);
+        request.responseType = 'json';
+        request.send();
+        request.onload = function() {
+            var data = request.response;
+            if (data != null ) {
                 showStuff('dynamic_content');
                 hideStuff('api_off');
-                document.getElementById("t1").innerHTML = jsondata[0][0] //+ " kWh";
-                document.getElementById("v3").innerHTML = jsondata[0][8]+" W";
-                document.getElementById("v1").innerHTML = jsondata[0][4]+" kWh";
-                document.getElementById("v2").innerHTML = jsondata[0][3]+" kWh";
-        } else {
-            hideStuff('dynamic_content');
-            showStuff('api_off');
+                document.getElementById("t1").innerHTML = data[0][0];
+                document.getElementById("v1").innerHTML = data[0][3]+" kWh";
+                document.getElementById("v2").innerHTML = data[0][2]+" kWh";
+                document.getElementById("v3").innerHTML = data[0][7]+" kWh"; 
+            }   else {
+                hideStuff('dynamic_content');
+                showStuff('api_off');
+            }
+
         }
 
-      } catch(err) {}
-   });
-}
+    }
 
-
-window.onload = function() {
-    readJsonApiSmartMeter(); // set quick for the first time.
-    initloadtimer = setInterval(function(){ readJsonApiSmartMeter();}, 4000);
-};
-
+	window.onload = function() {
+        loadJSON(); // set quick for the first time.
+        initloadtimer = setInterval(function(){loadJSON();}, 4000);
+    };
+	
 </script>
 
 <h1>Welkom bij de demo pagina van de persoonlijke userinterface van de P1 monitor.</h1><br>
@@ -114,11 +112,7 @@ Er kan geen garantie worden gegeven dat een import altijd kan lukken.  Bij een u
 </div> 
 
 <h1 id='api_off' class='hide'>API STAAT UIT AANZETTEN IN SETUP SCHERM</h1>
-<br>
-<br>
-<p>
-    <button type="button" onclick="document.location='../config-ui.php'"  >klik hier om naar de setup pagina's te gaan</button>
-</p>
+
 <br>
 <br>
 </body>

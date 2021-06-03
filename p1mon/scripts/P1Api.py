@@ -7,36 +7,33 @@ import json
 import falcon
 import inspect
 import numbers
-import sqldb
+#import sqldb
 import sys
 import os
+import api_solarpower_lib
+import api_catalog_lib
 
 from apiutil import p1_serializer, validate_timestamp, clean_timestamp_str, list_filter_to_str, validate_timestamp_by_length
-from sqldb import SqlDb1, SqlDb2, SqlDb3, SqlDb4, rtStatusDb, financieelDb, historyWeatherDB, configDB, currentWeatherDB, temperatureDB, WatermeterDBV2, PhaseDB,  powerProductionDB
+from sqldb import SqlDb1, SqlDb2, SqlDb3, SqlDb4, rtStatusDb, financieelDb, historyWeatherDB, configDB, currentWeatherDB, temperatureDB, WatermeterDBV2, PhaseDB, powerProductionDB, powerProductionSolarDB
 
 from sys import exit
 from logger import fileLogger,logging
-from utilnetwork3 import getNicInfo
 
 # INIT
 prgname = 'P1Api'
-e_db_serial             = SqlDb1()
-e_db_history_sqldb2     = SqlDb2() # min
-e_db_history_uur_sqldb3 = SqlDb3() # hour
-e_db_history_uur_sqldb4 = SqlDb4() # day,month, year
-rt_status_db            = rtStatusDb()
-config_db               = configDB()
-e_db_financieel         = financieelDb()
-weer_history_db         = historyWeatherDB()
-weer_db                 = currentWeatherDB()
-temperature_db          = temperatureDB()
-watermeter_db           = WatermeterDBV2()
-#watermeter_db_uur       = WatermeterDB()
-#watermeter_db_dag       = WatermeterDB()
-#watermeter_db_maand     = WatermeterDB()
-#watermeter_db_jaar      = WatermeterDB()
-fase_db                 = PhaseDB()
-power_production_db     = powerProductionDB()
+e_db_serial                 = SqlDb1()
+e_db_history_sqldb2         = SqlDb2() # min
+e_db_history_uur_sqldb3     = SqlDb3() # hour
+e_db_history_uur_sqldb4     = SqlDb4() # day,month, year
+rt_status_db                = rtStatusDb()
+config_db                   = configDB()
+e_db_financieel             = financieelDb()
+weer_history_db             = historyWeatherDB()
+weer_db                     = currentWeatherDB()
+temperature_db              = temperatureDB()
+watermeter_db               = WatermeterDBV2()
+fase_db                     = PhaseDB()
+power_production_db         = powerProductionDB()
 
 try:
     os.umask( 0o002 )
@@ -51,7 +48,8 @@ except Exception as e:
 flog.info("Start van programma.")
 
 # Create the Falcon application object
-app = falcon.API()
+# app = falcon.API()
+app = falcon.App()
 app.set_error_serializer( p1_serializer )
 
 # open databases
@@ -135,38 +133,6 @@ except Exception as e:
     sys.exit(1)
 flog.info( str(__name__) + ": database tabel "+const.DB_TEMPERATUUR_TAB  + " succesvol geopend." )
 
-""" new watermeter datbase in use see below
- # open van watermeter uur.
-try:    
-    watermeter_db_uur.init( const.FILE_DB_WATERMETER, const.DB_WATERMETER_UUR_TAB, flog )
-except Exception as e:
-    flog.critical( str(__name__) + ": Database niet te openen(1)." + const.FILE_DB_WATERMETER + ") melding:"+str(e.args[0]))
-    sys.exit(1)
-flog.info( str(__name__) + ": database tabel " + const.DB_WATERMETER_UUR_TAB + " succesvol geopend." )
-
-try:    
-    watermeter_db_dag.init( const.FILE_DB_WATERMETER ,const.DB_WATERMETER_DAG_TAB , flog )
-except Exception as e:
-    flog.critical( str(__name__) + ": Database niet te openen(1)." + const.FILE_DB_WATERMETER + ") melding:"+str(e.args[0]))
-    sys.exit(1)
-flog.info( str(__name__) + ": database tabel " + const.DB_WATERMETER_DAG_TAB + " succesvol geopend." )
-
-
-try:    
-    watermeter_db_maand.init( const.FILE_DB_WATERMETER ,const.DB_WATERMETER_MAAND_TAB ,flog )
-except Exception as e:
-    flog.critical( str(__name__) + ": Database niet te openen(1)." + const.FILE_DB_WATERMETER + ") melding:"+str(e.args[0]))
-    sys.exit(1)
-flog.info( str(__name__) + ": database tabel " + const.DB_WATERMETER_MAAND_TAB + " succesvol geopend." )
-
-try:
-    watermeter_db_jaar.init( const.FILE_DB_WATERMETER ,const.DB_WATERMETER_JAAR_TAB, flog )
-except Exception as e:
-    flog.critical( str(__name__) + ": Database niet te openen(1)." + const.FILE_DB_WATERMETER + ") melding:"+str(e.args[0]))
-    sys.exit(1)
-flog.info( str(__name__) + ": database tabel " + const.DB_WATERMETER_JAAR_TAB  + " succesvol geopend." )
-"""
-
 # open van watermeter V2 database
 try:
     watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
@@ -188,82 +154,48 @@ flog.info( str(__name__) + ": database tabel " + const.DB_FASE_REALTIME_TAB + " 
 try:
     power_production_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_TAB, flog )
 except Exception as e:
-    flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
+    flog.critical( str(__name__) + ": Database niet te openen(3)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
     sys.exit(1)
 flog.info( str(__name__) + ": database tabel " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
 
+#TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# ********************************************************************************************
+##############################################################################################
+# BELANGRIJK ALLE ROUTES NAAR api_solarpower_lib e.d omzetten als een route wordt aangepast. #
+# TEVENS ALLE HULP ROUTES IN EEN APARTE ROUTE FUNCTIE ZETTEN.                                #
+# TEMPLATE VOOR Function() en FunctionHelp() zie Catalog en CatalogHelp() als voorbeeld      #
+##############################################################################################
+# ********************************************************************************************
 
-class Catalog( object ):
-    
-    def on_get(self, req, resp):
-        """Handles all GET requests."""
+catalog_resource = api_catalog_lib.Catalog()
+catalog_resource.set_flog( flog )
+app.add_route( apiconst.ROUTE_CATALOG, catalog_resource )
 
-        #print ( req.path )
-        if req.path == apiconst.ROUTE_CATALOG_HELP:
-            
-            flog.debug ( str(__name__) + " help data selected.")
-            try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_CATALOG_JSON, sort_keys=True , indent=2 ) )
-            except Exception as _e:
-                flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request on " + \
-                apiconst.ROUTE_CATALOG_HELP  + " failed , reason:" + str(_e.args[0]))
-                raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
-                    code=apierror.API_GENERAL_ERROR['code'] 
-                    )
-            return     
+catalog_resource_help = api_catalog_lib.CatalogHelp()
+catalog_resource_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_CATALOG_HELP, catalog_resource_help )
 
-        try:
-            # get IP adress
-            ipadress = '<IP adres niet gevonden>'
-            result = getNicInfo(nic='eth0')
-            if result['result_ok'] == True and result['ip4'] != None: 
-                ipadress = result['ip4']
-            else:
-                result = getNicInfo(nic='wlan0')
-                if result['result_ok'] == True and result['ip4'] != None: 
-                    ipadress = result['ip4']
-        
-            json_obj_data = [] 
-            with open( const.DIR_SCRIPTS + 'apiconst.py' ) as search:
-                for line in search:
-                    line = line.rstrip()  # remove '\n' at end of line
-                    if line.startswith('ROUTE_'):  # add ROUTE entries 
-                        if '_HELP' in line or '{id}' in line: # remove HELP ROUTES & id's routes
-                            continue
-                        #route = line.split('=')[1].replace("'","").replace('{id}','1').strip()
-                        route = line.split('=')[1].replace("'","").strip()
-                        json_obj_data.append( ipadress + route )
-                        json_obj_data.sort() #sort the routes
+power_production_solar_resource = api_solarpower_lib.powerProductionSolar()
+power_production_solar_resource.set_flog( flog )
+power_production_solar_resource.set_database( power_production_db )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_MIN ,       power_production_solar_resource )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_HOUR,       power_production_solar_resource )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_DAY,        power_production_solar_resource )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_MONTH,      power_production_solar_resource )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_YEAR,       power_production_solar_resource )
 
-                        #json_obj_data.append( ipadress + route + '/help' )
-                # adding help routes
-                json_obj_data_routes = [] 
-                for route in json_obj_data: 
-                    json_obj_data_routes.append( route )
-                    json_obj_data_routes.append( route + '/help')
-
-            resp.body = json.dumps( json_obj_data_routes, ensure_ascii=False )   
-            resp.status = falcon.HTTP_200  # This is the default status
-        
-        except Exception as _e:
-                flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
-                raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
-                    code=apierror.API_GENERAL_ERROR['code'] 
-                    )
-        return     
-        
-catalog_resource = Catalog()
-app.add_route( apiconst.ROUTE_CATALOG,      catalog_resource )
-app.add_route( apiconst.ROUTE_CATALOG_HELP, catalog_resource )
+power_production_solar_resource_help = api_solarpower_lib.powerProductionSolarHelp()
+power_production_solar_resource_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_MIN_HELP,   power_production_solar_resource_help )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_HOUR_HELP,  power_production_solar_resource_help )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_DAY_HELP,   power_production_solar_resource_help )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_MONTH_HELP, power_production_solar_resource_help )
+app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_YEAR_HELP,  power_production_solar_resource_help )
 
 
-class powerProductionS0( object ):
+################ alles hierdonder nog omzetten !!!!!!!!!!! naar api_lib_nnnnn functies. 
+
+class PowerProductionS0( object ):
 
     sqlstr_base_regular = "select \
     TIMESTAMP,\
@@ -284,14 +216,14 @@ class powerProductionS0( object ):
     cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
     TIMEPERIOD_ID,\
     POWER_SOURCE_ID,\
-    ROUND( PRODUCTION_KWH_HIGH ),\
-    ROUND( PRODUCTION_KWH_LOW ),\
-    ROUND( PULS_PER_TIMEUNIT_HIGH ),\
-    ROUND( PULS_PER_TIMEUNIT_LOW ),\
-    ROUND( PRODUCTION_KWH_HIGH_TOTAL ),\
-    ROUND( PRODUCTION_KWH_LOW_TOTAL ),\
-    ROUND( PRODUCTION_KWH_TOTAL ),\
-    ROUND( PRODUCTION_PSEUDO_KW ) from " + const.DB_POWERPRODUCTION_TAB
+    CAST( PRODUCTION_KWH_HIGH as INT ),\
+    CAST( PRODUCTION_KWH_LOW as INT ),\
+    CAST( PULS_PER_TIMEUNIT_HIGH as INT ),\
+    CAST( PULS_PER_TIMEUNIT_LOW as INT ),\
+    CAST( PRODUCTION_KWH_HIGH_TOTAL as INT ),\
+    CAST( PRODUCTION_KWH_LOW_TOTAL as INT ),\
+    CAST( PRODUCTION_KWH_TOTAL as INT ),\
+    CAST( PRODUCTION_PSEUDO_KW as INT ) from " + const.DB_POWERPRODUCTION_TAB
 
     def on_get(self, req, resp):
         """Handles all GET requests."""
@@ -324,13 +256,13 @@ class powerProductionS0( object ):
             
             flog.debug ( str( __name__ ) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_POWER_PRODUCTION_MIN_DAY_MONTH_YEAR_JSON, sort_keys=True , indent=2 ) )
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_POWER_PRODUCTION_MIN_DAY_MONTH_YEAR_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str( __class__.__name__ ) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return
@@ -385,9 +317,9 @@ class powerProductionS0( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
 
@@ -415,9 +347,9 @@ class powerProductionS0( object ):
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -429,9 +361,9 @@ class powerProductionS0( object ):
                         v_rangetimestamp = " and substr(timestamp,1," +  str(len(value)) + ") = '" + value + "' order by timestamp "
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -462,22 +394,24 @@ class powerProductionS0( object ):
                         new_dict[ apiconst.JSON_API_PROD_W_PSEUDO ]    = a[11]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                    
+                    resp.text = json.dumps( records, ensure_ascii=False )
 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
 
             resp.status = falcon.HTTP_200  # This is the default status
 
-power_production_power_s0_resource  = powerProductionS0()
+power_production_power_s0_resource  = PowerProductionS0()
 
 app.add_route( apiconst.ROUTE_POWERPRODUCTION_S0_MIN ,       power_production_power_s0_resource )
 app.add_route( apiconst.ROUTE_POWERPRODUCTION_S0_MIN_HELP,   power_production_power_s0_resource )
@@ -512,14 +446,14 @@ class IndoorTemperature( object ):
     TIMESTAMP, \
     cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
     RECORD_ID, \
-    ROUND( TEMPERATURE_1     ), \
-    ROUND( TEMPERATURE_1_MIN ), \
-    ROUND( TEMPERATURE_1_AVG ), \
-    ROUND( TEMPERATURE_1_MAX ), \
-    ROUND( TEMPERATURE_2     ), \
-    ROUND( TEMPERATURE_2_MIN ), \
-    ROUND( TEMPERATURE_2_AVG ), \
-    ROUND( TEMPERATURE_2_MAX ) \
+    CAST( TEMPERATURE_1 as INT ), \
+    CAST( TEMPERATURE_1_MIN as INT ), \
+    CAST( TEMPERATURE_1_AVG as INT ), \
+    CAST( TEMPERATURE_1_MAX as INT ), \
+    CAST( TEMPERATURE_2 as INT), \
+    CAST( TEMPERATURE_2_MIN as INT ), \
+    CAST( TEMPERATURE_2_AVG as INT ), \
+    CAST( TEMPERATURE_2_MAX as INT ) \
     from temperatuur where RECORD_ID = "
 
 
@@ -554,13 +488,14 @@ class IndoorTemperature( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_INDOOR_TEMPERATURE_JSON, sort_keys=True , indent=2 ) )
+                
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_INDOOR_TEMPERATURE_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -622,9 +557,9 @@ class IndoorTemperature( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -660,9 +595,9 @@ class IndoorTemperature( object ):
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -673,9 +608,9 @@ class IndoorTemperature( object ):
                         v_rangetimestamp = " and substr(timestamp,1," +  str(len(value)) + ") = '" + value + "' order by timestamp "
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -707,16 +642,18 @@ class IndoorTemperature( object ):
                         new_dict[ apiconst.JSON_API_RM_TMPRTR_OUT_H ]   = a[10]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                   
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -759,12 +696,12 @@ class CurrentWeather( object ):
     TIMESTAMP, \
     CITY_ID, \
     CITY, \
-    ROUND( TEMPERATURE ), \
+    CAST( TEMPERATURE as INT ), \
     DESCRIPTION, \
     WEATHER_ICON, \
     PRESSURE, \
     HUMIDITY, \
-    ROUND( WIND_SPEED ), \
+    CAST( WIND_SPEED as INT ), \
     WIND_DEGREE, \
     CLOUDS, \
     WEATHER_ID from "
@@ -798,14 +735,15 @@ class CurrentWeather( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_WEATHER_CURRENT_JSON, sort_keys=True , indent=2 ) )
+                
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_WEATHER_CURRENT_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request on " + \
                 apiconst.ROUTE_WEATHER_CURRENT_HELP  + " failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -845,9 +783,9 @@ class CurrentWeather( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -897,16 +835,18 @@ class CurrentWeather( object ):
                         new_dict[ apiconst.JSON_API_WTHR_WEATHER_ID ] = a[12]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                   
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -947,21 +887,21 @@ class WeatherHistoryHourDayMonthYear( object ):
     cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer),\
     CITY_ID,\
     CITY, \
-    ROUND( TEMPERATURE_MIN ), \
-    ROUND( TEMPERATURE_AVG ), \
-    ROUND( TEMPERATURE_MAX ), \
+    CAST( TEMPERATURE_MIN as INT ), \
+    CAST( TEMPERATURE_AVG as INT ), \
+    CAST( TEMPERATURE_MAX as INT ), \
     PRESSURE_MIN, \
     PRESSURE_AVG, \
     PRESSURE_MAX, \
     HUMIDITY_MIN, \
     HUMIDITY_AVG, \
     HUMIDITY_MAX, \
-    ROUND( WIND_SPEED_MIN ), \
-    ROUND( WIND_SPEED_AVG ), \
-    ROUND( WIND_SPEED_MAX ), \
-    ROUND( WIND_DEGREE_MIN ) , \
-    ROUND( WIND_DEGREE_AVG ) , \
-    ROUND( WIND_DEGREE_MAX )  \
+    CAST( WIND_SPEED_MIN as INT ), \
+    CAST( WIND_SPEED_AVG as INT ), \
+    CAST( WIND_SPEED_MAX as INT ), \
+    CAST( WIND_DEGREE_MIN as INT ) , \
+    CAST( WIND_DEGREE_AVG as INT) , \
+    CAST( WIND_DEGREE_MAX as INT )  \
     from "
 
 
@@ -1002,13 +942,14 @@ class WeatherHistoryHourDayMonthYear( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_WEATHER_DAY_MONTH_YEAR_JSON, sort_keys=True , indent=2 ) )
+                
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_WEATHER_DAY_MONTH_YEAR_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1061,9 +1002,9 @@ class WeatherHistoryHourDayMonthYear( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1119,16 +1060,19 @@ class WeatherHistoryHourDayMonthYear( object ):
                         new_dict[ apiconst.JSON_API_WND_DGRS_H ] = a[18]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                   
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                    
+                    resp.text = json.dumps( records, ensure_ascii=False )
+                
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1162,14 +1106,14 @@ class PowerGasHistoryDayMonthYear( object ):
     sqlstr_base_round = "select \
     TIMESTAMP, \
     cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
-    ROUND( VERBR_KWH_181 ), \
-    ROUND( VERBR_KWH_182 ), \
-    ROUND( GELVR_KWH_281 ), \
-    ROUND( GELVR_KWH_282 ), \
-    ROUND( VERBR_KWH_X ), \
-    ROUND( GELVR_KWH_X ), \
-    ROUND( VERBR_GAS_2421   ), \
-    ROUND( VERBR_GAS_X      )  \
+    CAST( VERBR_KWH_181 as INT ), \
+    CAST( VERBR_KWH_182 as INT ), \
+    CAST( GELVR_KWH_281 as INT ), \
+    CAST( GELVR_KWH_282 as INT ), \
+    CAST( VERBR_KWH_X as INT ), \
+    CAST( GELVR_KWH_X as INT ), \
+    CAST( VERBR_GAS_2421 as INT ), \
+    CAST( VERBR_GAS_X as INT )  \
     from " 
 
     def on_get(self, req, resp):
@@ -1199,13 +1143,14 @@ class PowerGasHistoryDayMonthYear( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_POWER_GAS_DAY_MONTH_YEAR_JSON , sort_keys=True , indent=2 ) )
+               
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_POWER_GAS_DAY_MONTH_YEAR_JSON , sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1256,9 +1201,9 @@ class PowerGasHistoryDayMonthYear( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1282,9 +1227,9 @@ class PowerGasHistoryDayMonthYear( object ):
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1295,9 +1240,9 @@ class PowerGasHistoryDayMonthYear( object ):
                         v_rangetimestamp = "where substr(timestamp,1," +  str(len(value)) + ") = '" + value + "' order by timestamp "
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1327,16 +1272,18 @@ class PowerGasHistoryDayMonthYear( object ):
                         new_dict[ apiconst.JSON_API_CNSMPTN_GAS_DLT_M3 ] = a[9]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                   
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                   
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1369,15 +1316,15 @@ class PowerGasHistoryHour( object ):
     sqlstr_base_round = "select \
     TIMESTAMP, \
     cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
-    ROUND( VERBR_KWH_181 ), \
-    ROUND( VERBR_KWH_182 ), \
-    ROUND( GELVR_KWH_281 ), \
-    ROUND( GELVR_KWH_282 ), \
-    ROUND( VERBR_KWH_X ), \
-    ROUND( GELVR_KWH_X ), \
+    CAST( VERBR_KWH_181 as INT ), \
+    CAST( VERBR_KWH_182 as INT ), \
+    CAST( GELVR_KWH_281 as INT ), \
+    CAST( GELVR_KWH_282 as INT ), \
+    CAST( VERBR_KWH_X as INT), \
+    CAST( GELVR_KWH_X as INT), \
     TARIEFCODE , \
-    ROUND( VERBR_GAS_2421   ), \
-    ROUND( VERBR_GAS_X      )  \
+    CAST( VERBR_GAS_2421 as INT ), \
+    CAST( VERBR_GAS_X as INT )  \
     from " 
 
     def on_get(self, req, resp):
@@ -1406,14 +1353,15 @@ class PowerGasHistoryHour( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_POWER_GAS_HOUR_JSON, sort_keys=True , indent=2 ) )
+                
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_POWER_GAS_HOUR_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request on " + \
                 apiconst.ROUTE_POWER_GAS_HOUR_HELP  + " failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1455,9 +1403,9 @@ class PowerGasHistoryHour( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1481,9 +1429,9 @@ class PowerGasHistoryHour( object ):
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1494,9 +1442,9 @@ class PowerGasHistoryHour( object ):
                         v_rangetimestamp = "where substr(timestamp,1," +  str(len(value)) + ") = '" + value + "' order by timestamp "
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1527,16 +1475,18 @@ class PowerGasHistoryHour( object ):
                         new_dict[ apiconst.JSON_API_CNSMPTN_GAS_DLT_M3 ] = a[10]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                    
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1568,17 +1518,17 @@ class PowerGasHistoryMin( object ):
     sqlstr_base_round = "select \
     TIMESTAMP, \
     cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
-    ROUND( VERBR_KWH_181 ), \
-    ROUND( VERBR_KWH_182 ), \
-    ROUND( GELVR_KWH_281 ), \
-    ROUND( GELVR_KWH_282 ), \
-    ROUND( VERBR_KWH_X ), \
-    ROUND( GELVR_KWH_X ), \
+    CAST( VERBR_KWH_181 as INT ), \
+    CAST( VERBR_KWH_182 as INT ), \
+    CAST( GELVR_KWH_281 as INT ), \
+    CAST( GELVR_KWH_282 as INT ), \
+    CAST( VERBR_KWH_X as INT ), \
+    CAST( GELVR_KWH_X as INT ), \
     TARIEFCODE , \
-    ROUND( ACT_VERBR_KW_170 ), \
-    ROUND( ACT_GELVR_KW_270 ), \
-    ROUND( VERBR_GAS_2421   )  \
-    from " 
+    CAST( ACT_VERBR_KW_170 as INT ), \
+    CAST( ACT_GELVR_KW_270 as INT ), \
+    CAST( VERBR_GAS_2421 as INT ) \
+    from "
 
     def on_get(self, req, resp):
         """Handles all GET requests."""
@@ -1607,14 +1557,15 @@ class PowerGasHistoryMin( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_POWER_GAS_MIN_JSON, sort_keys=True , indent=2 ) )
+               
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_POWER_GAS_MIN_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request on " + \
                 apiconst.ROUTE_POWER_GAS_MIN_HELP + " failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1658,9 +1609,9 @@ class PowerGasHistoryMin( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1684,9 +1635,9 @@ class PowerGasHistoryMin( object ):
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1697,9 +1648,9 @@ class PowerGasHistoryMin( object ):
                         v_rangetimestamp = "where substr(timestamp,1," +  str(len(value)) + ") = '" + value + "' order by timestamp "
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1731,16 +1682,18 @@ class PowerGasHistoryMin( object ):
                         new_dict[ apiconst.JSON_API_CNSMPTN_GAS_M3 ]    = a[11]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                   
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                    titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1765,14 +1718,13 @@ class Financial( object ):
 
     sqlstr_base_round = "select \
     TIMESTAMP, \
-    cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
-    ROUND( VERBR_P ), \
-    ROUND( VERBR_D ), \
-    ROUND( GELVR_P ), \
-    ROUND( GELVR_D ), \
-    ROUND( GELVR_GAS ) \
-    ROUND( VERBR_WATER ) \
-    from "
+    cast( strftime('%s', TIMESTAMP, 'utc' ) AS Integer ), \
+    CAST( VERBR_P as INT ), \
+    CAST( VERBR_D as INT ), \
+    CAST( GELVR_P as INT ), \
+    CAST( GELVR_D as INT ), \
+    CAST( GELVR_GAS as INT ), \
+    CAST( VERBR_WATER as INT ) from "
 
     def on_get(self, req, resp):
         """Handles all GET requests."""
@@ -1798,16 +1750,17 @@ class Financial( object ):
                 req.path == apiconst.ROUTE_FINANCIAL_YEAR_HELP:
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_FINANCIAL_DAY_JSON, sort_keys=True , indent=2 ) )
+                
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_FINANCIAL_DAY_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
-            return     
+            return
             
 
         if req.path == apiconst.ROUTE_FINANCIAL_DAY:
@@ -1852,9 +1805,9 @@ class Financial( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1888,9 +1841,9 @@ class Financial( object ):
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1901,9 +1854,9 @@ class Financial( object ):
                         v_rangetimestamp = " where substr(timestamp,1," +  str(len(value)) + ") = '" + value + "' order by timestamp "
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1931,22 +1884,22 @@ class Financial( object ):
                         new_dict[ apiconst.JSON_API_FNCL_CNSMPTN_WATER ]    = a[7] 
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                    
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                    titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
             resp.status = falcon.HTTP_200  # This is the default status
-            #resp.body = json.dumps( records, ensure_ascii=False )
-            #resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True , indent=4)
 
 financial_resource = Financial()
 app.add_route( apiconst.ROUTE_FINANCIAL_DAY,        financial_resource )
@@ -1987,13 +1940,14 @@ class Status( object ):
 
         if id == 'help':
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_STATUS_JSON, sort_keys=True , indent=2 ) )
+               
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_STATUS_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -2007,9 +1961,9 @@ class Status( object ):
                     err_str = 'id value not ok, value used is ' + str( id )
                     flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                     raise falcon.HTTPError( 
-                        apierror.API_PARAMETER_ERROR['status'], 
-                        apierror.API_PARAMETER_ERROR['title'], 
-                        apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                        status=apierror.API_PARAMETER_ERROR['status'], 
+                        title=apierror.API_PARAMETER_ERROR['title'], 
+                        description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                         code=apierror.API_PARAMETER_ERROR['code'] 
                     )
     
@@ -2044,22 +1998,22 @@ class Status( object ):
                       
                     json_obj_data.append( new_dict )
 
-                resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                
+                resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
             else:
-                resp.body = json.dumps( records, ensure_ascii=False )
+                
+                resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
         except Exception as _e:
             raise falcon.HTTPError( 
-                apierror.API_DB_ERROR['status'], 
-                apierror.API_DB_ERROR['title'], 
-                apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                status=apierror.API_DB_ERROR['status'], 
+                titel=apierror.API_DB_ERROR['title'], 
+                description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                 code=apierror.API_DB_ERROR['code'] 
                 )
                
         resp.status = falcon.HTTP_200  # This is the default status
-        #resp.body = json.dumps( records, ensure_ascii=False )
-        #resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True , indent=4)
 
 status_resource = Status()
 app.add_route( apiconst.ROUTE_STATUS,         status_resource )
@@ -2067,7 +2021,7 @@ app.add_route( apiconst.ROUTE_STATUS_HELP,    status_resource )
 app.add_route( apiconst.ROUTE_STATUS_ID,      status_resource )
 app.add_route( apiconst.ROUTE_STATUS_ID_HELP, status_resource )
 
-
+ 
 class Config( object ):
     
     sqlstr_base_regular = 'select ID,PARAMETER,LABEL from config '
@@ -2096,13 +2050,14 @@ class Config( object ):
 
         if id == 'help':
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_CONFIG_JSON, sort_keys=True , indent=2 ) )
+                
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_CONFIG_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -2116,9 +2071,9 @@ class Config( object ):
                     err_str = 'id value not ok, value used is ' + str( id )
                     flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                     raise falcon.HTTPError( 
-                        apierror.API_PARAMETER_ERROR['status'], 
-                        apierror.API_PARAMETER_ERROR['title'], 
-                        apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                        status=apierror.API_PARAMETER_ERROR['status'], 
+                        title=apierror.API_PARAMETER_ERROR['title'], 
+                        description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                         code=apierror.API_PARAMETER_ERROR['code'] 
                     )
     
@@ -2152,22 +2107,21 @@ class Config( object ):
                       
                     json_obj_data.append( new_dict )
 
-                resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
             else:
-                resp.body = json.dumps( records, ensure_ascii=False )
+                
+                resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
         except Exception as _e:
             raise falcon.HTTPError( 
-                apierror.API_DB_ERROR['status'], 
-                apierror.API_DB_ERROR['title'], 
-                apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                status=apierror.API_DB_ERROR['status'], 
+                titel=apierror.API_DB_ERROR['title'], 
+                description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                 code=apierror.API_DB_ERROR['code'] 
                 )
                
         resp.status = falcon.HTTP_200  # This is the default status
-        #resp.body = json.dumps( records, ensure_ascii=False )
-        #resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True , indent=4)
 
 config_resource = Config()
 app.add_route( apiconst.ROUTE_CONFIG,         config_resource )
@@ -2195,14 +2149,14 @@ class SmartMeter( object ):
         TIMESTAMP, \
         CAST(strftime('%s', TIMESTAMP, 'utc' ) AS INT), \
         RECORD_VERWERKT, \
-        ROUND( VERBR_KWH_181 ), \
-        ROUND( VERBR_KWH_182 ), \
-        ROUND( GELVR_KWH_281 ), \
-        ROUND( GELVR_KWH_282 ), \
+        CAST( VERBR_KWH_181 as INT ), \
+        CAST( VERBR_KWH_182 as INT ), \
+        CAST( GELVR_KWH_281 as INT), \
+        CAST( GELVR_KWH_282 as INT ), \
         TARIEFCODE, \
         CAST(ACT_VERBR_KW_170 * 1000 AS INT), \
         CAST(ACT_GELVR_KW_270 * 1000 AS INT), \
-        ROUND( VERBR_GAS_2421 ) \
+        CAST( VERBR_GAS_2421 as INT ) \
         from " + const.DB_SERIAL_TAB + " "
     
 
@@ -2229,14 +2183,15 @@ class SmartMeter( object ):
 
         if req.path == apiconst.ROUTE_SMARTMETER_HELP:
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_SMARTMETER_JSON, sort_keys=True , indent=2 ) )
+               
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_SMARTMETER_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request on " + \
                 apiconst.ROUTE_SMARTMETER_HELP  + " failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -2272,9 +2227,9 @@ class SmartMeter( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -2322,22 +2277,22 @@ class SmartMeter( object ):
                         new_dict[ apiconst.JSON_API_CNSMPTN_GAS_M3 ] = a[10]
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                    
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                    titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
             resp.status = falcon.HTTP_200  # This is the default status
-            #resp.body = json.dumps( records, ensure_ascii=False )
-            #resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True , indent=4)
 
 smartmeter_resource = SmartMeter()
 app.add_route( apiconst.ROUTE_SMARTMETER,      smartmeter_resource )
@@ -2358,10 +2313,11 @@ class Watermeter( object ):
     TIMESTAMP, \
     cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
     TIMEPERIOD_ID, \
-    ROUND( PULS_PER_TIMEUNIT ), \
-    ROUND(VERBR_PER_TIMEUNIT ), \
-    ROUND( VERBR_IN_M3_TOTAAL ) \
+    CAST( PULS_PER_TIMEUNIT as INT ), \
+    CAST(VERBR_PER_TIMEUNIT as INT ), \
+    CAST( VERBR_IN_M3_TOTAAL as INT ) \
     from " + const.DB_WATERMETERV2_TAB 
+
 
     def on_get(self, req, resp):
         """Handles all GET requests."""
@@ -2370,7 +2326,6 @@ class Watermeter( object ):
         #print ( req.query_string )
         #print ( req.params )
         #print ( req.path )
-
 
         json_data  = {
             apiconst.JSON_TS_LCL                  : '',
@@ -2389,18 +2344,17 @@ class Watermeter( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_WATERMETER_MIN_HOUR_DAY_MONTH_YEAR_JSON, sort_keys=True , indent=2 ) )
+               
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_WATERMETER_MIN_HOUR_DAY_MONTH_YEAR_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return 
-
-
 
         # set period index 
         v_period_id = 0
@@ -2414,7 +2368,6 @@ class Watermeter( object ):
             v_period_id = " 14 "
         elif req.path == apiconst.ROUTE_WATERMETER_YEAR_V2:
             v_period_id = " 15 "
-
 
         # default sql string
         sqlstr = self.sqlstr_base_regular
@@ -2452,9 +2405,9 @@ class Watermeter( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'], 
-                            apierror.API_PARAMETER_ERROR['title'], 
-                            apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            status=apierror.API_PARAMETER_ERROR['status'], 
+                            title=apierror.API_PARAMETER_ERROR['title'], 
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -2467,20 +2420,21 @@ class Watermeter( object ):
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query json naar object type gezet." )
                 if key == apiconst.API_PARAMETER_ROUND: # round to the nearst value
                     if value.lower() == 'on':
-                        sqlstr = sqlstr_base_round
+                        sqlstr =  self.sqlstr_base_round
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query round aangezet." )
                 if key == apiconst.API_PARAMETER_STARTTIMESTAMP:
                     # clear range where clause, there can only be one.
                     v_rangetimestamp = '' 
                     # parse timestamp
                     if validate_timestamp_by_length( value ) == True:
-                        v_starttime = " where TIMESTAMP >= '" + value + "' order by timestamp "
+                        #v_starttime = " where TIMESTAMP >= '" + value + "' order by timestamp " 
+                        v_starttime = " and TIMESTAMP >= '" + value + "' order by timestamp " #BUGFIX by Aad.
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -2492,9 +2446,9 @@ class Watermeter( object ):
                         v_rangetimestamp = " and substr(timestamp,1," +  str(len(value)) + ") = '" + value + "' order by timestamp "
                     else:
                         raise falcon.HTTPError( 
-                            apierror.API_TIMESTAMP_ERROR['status'], 
-                            apierror.API_TIMESTAMP_ERROR['title'], 
-                            apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            status=apierror.API_TIMESTAMP_ERROR['status'], 
+                            title=apierror.API_TIMESTAMP_ERROR['title'], 
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -2523,16 +2477,16 @@ class Watermeter( object ):
 
                         json_obj_data.append( new_dict )
 
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -2570,22 +2524,21 @@ class Phase( object ):
         L3_A \
         FROM " + const.DB_FASE_REALTIME_TAB + " "
 
-    
     sqlstr_base_round = "select \
         TIMESTAMP, \
         cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
-        ROUND( VERBR_L1_KW * 1000 ), \
-        ROUND( VERBR_L2_KW * 1000 ), \
-        ROUND( VERBR_L3_KW * 1000 ), \
-        ROUND( GELVR_L1_KW * 1000 ), \
-        ROUND( GELVR_L2_KW * 1000 ), \
-        ROUND( GELVR_L3_KW * 1000 ), \
-        ROUND( L1_V ), \
-        ROUND( L2_V ), \
-        ROUND( L3_V ), \
-        ROUND( L1_A ), \
-        ROUND( L2_A ), \
-        ROUND( L3_A )  \
+        CAST( VERBR_L1_KW * 1000 as INT ), \
+        CAST( VERBR_L2_KW * 1000 as INT ), \
+        CAST( VERBR_L3_KW * 1000 as INT ), \
+        CAST( GELVR_L1_KW * 1000 as INT ), \
+        CAST( GELVR_L2_KW * 1000 as INT ), \
+        CAST( GELVR_L3_KW * 1000 as INT ), \
+        CAST( L1_V as INT ), \
+        CAST( L2_V as INT ), \
+        CAST( L3_V as INT ), \
+        CAST( L1_A as INT ), \
+        CAST( L2_A as INT ), \
+        CAST( L3_A as INT )  \
         FROM " + const.DB_FASE_REALTIME_TAB + " "
     
     def on_get(self, req, resp):
@@ -2614,14 +2567,15 @@ class Phase( object ):
 
         if req.path == apiconst.ROUTE_PHASE_HELP:
             try:
-                resp.body = ( json.dumps( apiconst.HELP_ROUTE_PHASE_JSON, sort_keys=True , indent=2 ) )
+                
+                resp.text = ( json.dumps( apiconst.HELP_ROUTE_PHASE_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request on " + \
                 apiconst.ROUTE_PHASE_HELP  + " failed , reason:" + str(_e.args[0]))
                 raise falcon.HTTPError( 
-                    apierror.API_GENERAL_ERROR['status'], 
-                    apierror.API_GENERAL_ERROR['title'], 
-                    apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    status=apierror.API_GENERAL_ERROR['status'], 
+                    title=apierror.API_GENERAL_ERROR['title'], 
+                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -2656,9 +2610,9 @@ class Phase( object ):
                         err_str = 'limit value not ok, value used is ' + str(value)
                         flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
                         raise falcon.HTTPError( 
-                            apierror.API_PARAMETER_ERROR['status'],
-                            apierror.API_PARAMETER_ERROR['title'],
-                            apierror.API_PARAMETER_ERROR['description'] + err_str,
+                            status=apierror.API_PARAMETER_ERROR['status'],
+                            title=apierror.API_PARAMETER_ERROR['title'],
+                            description=apierror.API_PARAMETER_ERROR['description'] + err_str,
                             code=apierror.API_PARAMETER_ERROR['code']
                         )
                 if key == apiconst.API_PARAMETER_SORT:
@@ -2691,6 +2645,7 @@ class Phase( object ):
                 if v_json_mode ==  'object': 
                     # process records for JSON opjects
                     json_obj_data = [] 
+                    #json_obj_data = {}
                     for a in records:
                         new_dict = json_data.copy()
                         new_dict[ apiconst.JSON_TS_LCL ]                = a[0] 
@@ -2708,22 +2663,21 @@ class Phase( object ):
                         new_dict[ apiconst.JSON_API_PHS_L2_A ]          = a[12]
                         new_dict[ apiconst.JSON_API_PHS_L3_A ]          = a[13]
                         json_obj_data.append( new_dict )
-                    resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
+                    
+                    resp.text  = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    resp.body = json.dumps( records, ensure_ascii=False )
+                    resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
             except Exception as _e:
                 raise falcon.HTTPError( 
-                    apierror.API_DB_ERROR['status'], 
-                    apierror.API_DB_ERROR['title'], 
-                    apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    status=apierror.API_DB_ERROR['status'], 
+                   titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
             resp.status = falcon.HTTP_200  # This is the default status
-            #resp.body = json.dumps( records, ensure_ascii=False )
-            #resp.body = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True , indent=4)
 
 phase_resource = Phase()
 app.add_route( apiconst.ROUTE_PHASE,       phase_resource )

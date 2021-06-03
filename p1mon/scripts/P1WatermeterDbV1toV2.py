@@ -210,7 +210,7 @@ if __name__ == "__main__":
     try:
         os.umask( 0o002 )
         flog = fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
-        flog.setLevel( logging.DEBUG )
+        flog.setLevel( logging.INFO )
         flog.consoleOutputOn( True ) 
     except Exception as e:
         print ("critical geen logging mogelijke, gestopt.:"+str(e.args[0]))

@@ -1,15 +1,15 @@
 <?php
 session_start(); #must be here for every page using login
-include '/p1mon/www/util/auto_logout.php';
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php';
-include '/p1mon/www/util/menu_control.php';
-include '/p1mon/www/util/p1mon-password.php';
-include '/p1mon/www/util/config_buttons.php';
-include '/p1mon/www/util/config_read.php';
-include '/p1mon/www/util/textlib.php';
-include '/p1mon/www/util/div_err_succes.php';
-include '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/auto_logout.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/menu_control.php';
+include_once '/p1mon/www/util/p1mon-password.php';
+include_once '/p1mon/www/util/config_buttons.php';
+include_once '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/div_err_succes.php';
+include_once '/p1mon/www/util/pageclock.php';
 
 loginInit();
 passwordSessionLogoutCheck();
@@ -197,11 +197,11 @@ if ( isset($_POST["import"]) ) {
     <div id="sql_export_dl_link" ><br><a id='sql_export_dl_href' href="">Als de download niet start klik dan hier</a></div>
 </div>    
 
-
 <div id="import_sql_message"> <!-- new  version 1.2.0 -->
      <div class='close_button' id="import_sql_msg_close">
         <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
     </div>
+    <span class="text-15">import status</span>
     <div id="scroll_window" class="text-29" >
         Even geduld aub.
     </div>
@@ -240,14 +240,12 @@ $(function() {
     }
 });
 
-
 $('#sqlexport_button').click(function(event) {
     hideStuff('sql_export_dl_link');
     event.preventDefault();    
     exportID = Date.now()+'.'+randomIntFromInterval(100,999);
     startSqlExport(exportID,'STARTEXPORT')
 });
-
 
 $('#export_sql_msg_close').click(function() {    
    hideStuff('export_sql_msg');
@@ -357,7 +355,6 @@ function readSqlImportStatusLogging(){
 
     });
 }
-
 
 function readCounterResetLogging(){ 
 

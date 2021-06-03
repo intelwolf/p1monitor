@@ -14,7 +14,6 @@ function updateStatusDb($sql){
     } catch ( Exception $e ) {
         $r=1;
     }
-    return $r; 	
+    return $r;
 }
-
 ?>

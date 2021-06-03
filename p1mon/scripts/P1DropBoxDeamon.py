@@ -9,6 +9,7 @@ import signal
 import systemid
 import time
 import os
+import sys
 import crypto3
 
 from dropbox.files import WriteMode

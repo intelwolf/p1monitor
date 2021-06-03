@@ -4,7 +4,7 @@ $P1MON_PWFILE           = '/p1mon/mnt/ramdisk/session.txt';
 $P1MON_PWFILE_BACKUP    = '/p1mon/data/session.txt';
 $P1MON_SESSION          = 'session';
 $P1MON_HTTP_REFERER     = 'http_ref_password';
-$P1MON_SESSION_MAX_TIME = 900;
+$P1MON_SESSION_MAX_TIME = 1500; // changed in version > 1.2.0 was 900 is 5 minutes. 1500 is 25 minutes.
 
 function passwordSessionLogoutCheck() {
     global $_POST;

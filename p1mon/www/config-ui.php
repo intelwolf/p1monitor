@@ -1,15 +1,16 @@
 <?php
 session_start(); #must be here for every page using login
-include '/p1mon/www/util/auto_logout.php';
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php';
-include '/p1mon/www/util/menu_control.php';
-include '/p1mon/www/util/p1mon-password.php';
-include '/p1mon/www/util/config_buttons.php';
-include '/p1mon/www/util/config_read.php';
-include '/p1mon/www/util/textlib.php';
-include '/p1mon/www/util/div_err_succes.php';
-include '/p1mon/www/util/pageclock.php';
+
+include_once '/p1mon/www/util/auto_logout.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/menu_control.php';
+include_once '/p1mon/www/util/p1mon-password.php';
+include_once '/p1mon/www/util/config_buttons.php';
+include_once '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/div_err_succes.php';
+include_once '/p1mon/www/util/pageclock.php';
 
 #print_r($_POST);
 loginInit();
@@ -24,6 +25,13 @@ if( $localip == False ){
             die();
         }
 }
+
+
+$sw_off  = strIdx( 193 );
+$sw_on   = strIdx( 192 );
+$seconds = strIdx( 194 );
+$minutes = strIdx( 120 );
+$hour   =  strIdx( 129 );
 
 $err_cnt = -1;
 if ( isset($_POST["actueel_e"]) ) { 
@@ -128,6 +136,18 @@ if ( isset($_POST["kWhlevering"]) ) {
     }
 }
 
+if ( isset($_POST["kWhleveringSolarEdge"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["kWhleveringSolarEdge"] == '1' ) {
+        #echo "on<br>";
+        if ( updateConfigDb("update config set parameter = '1' where ID = 147"))$err_cnt += 1;
+    } else {
+        #echo "off<br>";
+        if ( updateConfigDb("update config set parameter = '0' where ID = 147"))$err_cnt += 1;
+    }
+}
+
+
 if ( isset($_POST["verbruik_list_main"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["verbruik_list_main"])."' where ID = 52"))$err_cnt += 1;
@@ -164,6 +184,12 @@ if ( isset($_POST["custom_ui_list"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["custom_ui_list"])."' where ID = 43"))$err_cnt += 1;
 }
+
+if ( isset($_POST["ui_language"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["ui_language"])."' where ID = 148"))$err_cnt += 1;
+}
+
 
 if ( isset($_POST["levering_list_kwh"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -219,8 +245,6 @@ if ( isset($_POST["ui_header"]) ) {
 }
 
 
-
-
 if ( isset($_POST["scrsav_wait"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["scrsav_wait"])."' where ID = 79"))$err_cnt += 1;
@@ -245,6 +269,13 @@ if ( isset($_POST["verwarming_uit_label"]) ) {
 
 
 function makeSelectorSec( $id ) {
+
+    global $sw_off;
+    global $sw_on;
+    global $seconds;
+    global $minutes;
+    global $hour;
+
     $configValue = config_read($id);
     $val_0=$val_10=$val_30=$val_60=$val_300=$val_600=$val_900=$val_1800=$val_3600='';
 
@@ -258,15 +289,15 @@ function makeSelectorSec( $id ) {
     if ($configValue == '1800' ) { $val_1800 = 'selected="selected"'; } 
     if ($configValue == '3600' ) { $val_3600 = 'selected="selected"'; } 
 
-    echo '<option ' . $val_0    . ' value="0"    >uit.</option>';
-    echo '<option ' . $val_10   . ' value="10"   >10 seconden.</option>';
-    echo '<option ' . $val_30   . ' value="30"   >30 seconden.</option>';
-    echo '<option ' . $val_60   . ' value="60"   >60 seconden.</option>';
-    echo '<option ' . $val_300  . ' value="300"  >5 minuten.</option>';
-    echo '<option ' . $val_600  . ' value="600"  >10 minuten.</option>';
-    echo '<option ' . $val_900  . ' value="900"  >15 minuten.</option>';
-    echo '<option ' . $val_1800 . ' value="1800" >30 minuten.</option>';
-    echo '<option ' . $val_3600 . ' value="3600" >1 uur.</option>';
+    echo '<option ' . $val_0    . ' value="0"    >'  .  $sw_off  . '</option>';
+    echo '<option ' . $val_10   . ' value="10"   >10 '. $seconds . '</option>';
+    echo '<option ' . $val_30   . ' value="30"   >30 '. $seconds . '</option>';
+    echo '<option ' . $val_60   . ' value="60"   >60 '. $seconds . '</option>';
+    echo '<option ' . $val_300  . ' value="300"  >5 ' . $minutes . '</option>';
+    echo '<option ' . $val_600  . ' value="600"  >10 '. $minutes . '</option>';
+    echo '<option ' . $val_900  . ' value="900"  >15 '. $minutes . '</option>';
+    echo '<option ' . $val_1800 . ' value="1800" >30 '. $minutes . '</option>';
+    echo '<option ' . $val_3600 . ' value="3600" >1 ' . $hour    . '</option>';
 
 }
 
@@ -277,9 +308,24 @@ function makeSelectorUISelector($id) {
     if ($configValue == '0'  ) { $val_0  = 'selected="selected"'; } 
     if ($configValue == '1'  ) { $val_1  = 'selected="selected"'; } 
 
-    echo '<option ' . $val_0  . ' value="0"  >P1 monitor interface gebruiken (standaard).</option>';
-    echo '<option ' . $val_1  . ' value="1"  >eigen user interface gebruiken.</option>';
+    echo '<option ' . $val_0  . ' value="0"  >' . strIdx( 203 ) . '</option>';
+    echo '<option ' . $val_1  . ' value="1"  >' . strIdx( 204 ) . '</option>';
+
 }
+
+function makeUILanguageSelector($id) {
+    $configValue = config_read($id);
+    $val_0=$val_1=$val_2='';
+
+    if ($configValue == '0'  ) { $val_0  = 'selected="selected"'; } 
+    if ($configValue == '1'  ) { $val_1  = 'selected="selected"'; }
+    if ($configValue == '2'  ) { $val_2  = 'selected="selected"'; }  
+
+    echo '<option ' . $val_0  . ' value="0"  >Nederlands (standaard).</option>';
+    echo '<option ' . $val_1  . ' value="1"  >English</option>';
+    echo '<option ' . $val_2  . ' value="2"  >Français</option>';
+}
+
 
 function makeSelectorHomeSelector($id) {
     $configValue = config_read($id);
@@ -471,60 +517,65 @@ function makeSelectorAmpere( $id ) {
                     <form name="formvalues" id="formvalues" method="POST">
                         
                         <div class="frame-4-top">
-                            <span class="text-15">de-activeren van schermen</span>
+                            <span class="text-15"><?php echo strIdx( 174 );?></span>
                         </div>
                         <div class="frame-4-bot">
                             
                             <div> 
                                 <!-- left side -->
                                 <div class="float-left">
-                                    <div class="text-10">elektriciteit & gas levering / verbruik</div>
-                                    <div class="text-10">elektriciteit historie</div>
-                                    <div class="text-10">gas historie</div>
-                                    <div class="text-10">financiële historie</div>
-                                    <div class="text-10">systeem informatie</div>
-                                    <div class="text-10">verwarming</div>
-                                    <div class="text-10">meterstanden historie</div>
-                                    <div class="text-10">watermeter</div>
-                                    <div class="text-10">opwekking (levering) kWh</div>
+                                    <div class="text-10"><?php echo strIdx( 182 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 183 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 184 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 185 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 186 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 187 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 188 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 189 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 190 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 191 );?></div>
                                 </div>
                                 <!-- right side -->
                                 <div class="float-right">
                                     <div>
-                                        <input class="cursor-pointer" name="actueel_e" type="radio" value="1" <?php if ( config_read(18) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="actueel_e" type="radio" value="0" <?php if ( config_read(18) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="actueel_e" type="radio" value="1" <?php if ( config_read(18) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="actueel_e" type="radio" value="0" <?php if ( config_read(18) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="historie_e" type="radio" value="1" <?php if ( config_read(19) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="historie_e" type="radio" value="0" <?php if ( config_read(19) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="historie_e" type="radio" value="1" <?php if ( config_read(19) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="historie_e" type="radio" value="0" <?php if ( config_read(19) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="historie_g" type="radio" value="1" <?php if ( config_read(20) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="historie_g" type="radio" value="0" <?php if ( config_read(20) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="historie_g" type="radio" value="1" <?php if ( config_read(20) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="historie_g" type="radio" value="0" <?php if ( config_read(20) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="finaciel" type="radio" value="1" <?php if ( config_read(21) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="finaciel" type="radio" value="0" <?php if ( config_read(21) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="finaciel" type="radio" value="1" <?php if ( config_read(21) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="finaciel" type="radio" value="0" <?php if ( config_read(21) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="informatie" type="radio" value="1" <?php if ( config_read(22) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="informatie" type="radio" value="0" <?php if ( config_read(22) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="informatie" type="radio" value="1" <?php if ( config_read(22) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="informatie" type="radio" value="0" <?php if ( config_read(22) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="verwarming" type="radio" value="1" <?php if ( config_read(46) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="verwarming" type="radio" value="0" <?php if ( config_read(46) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="verwarming" type="radio" value="1" <?php if ( config_read(46) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="verwarming" type="radio" value="0" <?php if ( config_read(46) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="meterstanden" type="radio" value="1" <?php if ( config_read(62) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="meterstanden" type="radio" value="0" <?php if ( config_read(62) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="meterstanden" type="radio" value="1" <?php if ( config_read(62) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="meterstanden" type="radio" value="0" <?php if ( config_read(62) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="watermeter" type="radio" value="1" <?php if ( config_read( 102 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="watermeter" type="radio" value="0" <?php if ( config_read( 102 ) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="watermeter" type="radio" value="1" <?php if ( config_read( 102 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="watermeter" type="radio" value="0" <?php if ( config_read( 102 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="kWhlevering" type="radio" value="1" <?php if ( config_read( 129 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="kWhlevering" type="radio" value="0" <?php if ( config_read( 129 ) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="kWhlevering" type="radio" value="1" <?php if ( config_read( 129 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="kWhlevering" type="radio" value="0" <?php if ( config_read( 129 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                    <div>
+                                        <input class="cursor-pointer" name="kWhleveringSolarEdge" type="radio" value="1" <?php if ( config_read( 147 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="kWhleveringSolarEdge" type="radio" value="0" <?php if ( config_read( 147 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
                             </div>
@@ -533,39 +584,39 @@ function makeSelectorAmpere( $id ) {
                         <p></p>
                         
                         <div class="frame-4-top">
-                            <span class="text-15">waarden instellen UI elementen</span>
+                            <span class="text-15"><?php echo strIdx( 175 );?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left">
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
-                                <label class="text-10">max. waarde e-levering</label>
+                                <label class="text-10"><?php echo strIdx( 195 );?></label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
-                                <label class="text-10">max. dagwaarde e-levering</label>
+                                <label class="text-10"><?php echo strIdx( 196 );?></label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fas fa-bolt"></i>
-                                <label class="text-10">max.waarde e-verbruik</label>
+                                <label class="text-10"><?php echo strIdx( 197 );?></label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fas fa-bolt"></i>
-                                <label class="text-10">max. dagwaarde e-verbruik</label>
+                                <label class="text-10"><?php echo strIdx( 198 );?></label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fab fa-gripfire"></i>
-                                <label class="text-10">max. waarde gas verbruik</label>
+                                <label class="text-10"><?php echo strIdx( 199 );?></label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
-                                <label class="text-10">max. waarde e-levering (home scherm)</label>
+                                <label class="text-10"><?php echo strIdx( 195 );?> (home scherm)</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fas fa-bolt"></i>
-                                <label class="text-10">max. waarde e-verbruik main (home scherm)</label>
+                                <label class="text-10"><?php echo strIdx( 197 );?> (home scherm)</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fab fa-gripfire"></i>
-                                <label class="text-10">max. waarde gas verbruik main (home scherm)</label>
+                                <label class="text-10"><?php echo strIdx( 199 );?> (home scherm)</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
-                                <label class="text-10">max. fase meters</label>
+                                <label class="text-10"><?php echo strIdx( 200 );?></label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
-                                <label class="text-10">max. fase meters</label>
+                                <label class="text-10"><?php echo strIdx( 200 );?></label>
                             </div>
                             <div class="float-left pad-1">    
                                 <select class="select-5 color-select color-input-back cursor-pointer" name="levering_list">
@@ -612,7 +663,7 @@ function makeSelectorAmpere( $id ) {
 
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">eigen user interface gebruiken</span>
+                            <span class="text-15"><?php echo strIdx( 176 );?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left">                
@@ -633,29 +684,51 @@ function makeSelectorAmpere( $id ) {
 
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">diversen</span>
+                            <span class="text-15">taal / language / langue</span>
+                        </div>
+                        <div class="frame-4-bot">
+                            <div class="float-left">                
+                                <!-- <i class="text-10 fas fa-home pad-7"></i> -->
+
+                                <span class="fa-layers text-10">
+                                    <i class="fas fa-desktop pad-7"></i>
+                                    <i class="fas fa-pen-square pad-7" data-fa-transform="shrink-8 up-1 right-1"></i>
+                                </span>
+
+                            </div>
+                            <div class="float-left pad-1">
+                                <select class="select-4 color-select color-input-back cursor-pointer" name="ui_language">
+                                    <?php makeUILanguageSelector(148);?>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <p></p>
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo strIdx( 177 );?></span>
                         </div>
                         <div class="frame-4-bot">
                         <div> 
                                 <!-- left side -->
                                 <div class="float-left">
-                                    <div class="text-10">voorspelling aan in de UI</div>
-                                    <div class="text-10">drie fasen informatie zichtbaar in de UI</div>
-                                    <div class="text-10">P1 monitor header verbergen</div>
+                                    <div class="text-10"><?php echo strIdx( 205 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 206 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 207 );?></div>
                                 </div>
                                 <!-- right side -->
                                 <div class="float-right">
                                     <div>
-                                        <input class="cursor-pointer" name="voorspelling" type="radio" value="1" <?php if ( config_read(59) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="voorspelling" type="radio" value="0" <?php if ( config_read(59) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="voorspelling" type="radio" value="1" <?php if ( config_read(59) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="voorspelling" type="radio" value="0" <?php if ( config_read(59) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="drie_fasen" type="radio" value="1" <?php if ( config_read(61) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="drie_fasen" type="radio" value="0" <?php if ( config_read(61) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="drie_fasen" type="radio" value="1" <?php if ( config_read(61) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="drie_fasen" type="radio" value="0" <?php if ( config_read(61) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                     <div>
-                                        <input class="cursor-pointer" name="ui_header" type="radio" value="1" <?php if ( config_read(134) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" name="ui_header" type="radio" value="0" <?php if ( config_read(134) == 0 ) { echo 'checked'; }?>>Uit
+                                        <input class="cursor-pointer" name="ui_header" type="radio" value="1" <?php if ( config_read(134) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="ui_header" type="radio" value="0" <?php if ( config_read(134) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
                             </div>
@@ -663,14 +736,14 @@ function makeSelectorAmpere( $id ) {
 
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">screensaver</span>
+                            <span class="text-15"><?php echo strIdx( 178 );?></span>
                         </div>
                         <div class="frame-4-bot">
                         <div> 
                                 <!-- left side -->
                                 <div class="float-left">
-                                    <div class="text-10 pad-25">screensaver inschakel tijd</div>
-                                    <div class="text-10 pad-26">screensaver uitschakel tijd</div>
+                                    <div class="text-10 pad-25"><?php echo strIdx( 180 );?></div>
+                                    <div class="text-10 pad-26"><?php echo strIdx (181 );?></div>
                                 </div>
                                 <!-- right side -->
                                 <div class="float-right">
@@ -691,14 +764,14 @@ function makeSelectorAmpere( $id ) {
 
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">UI labels</span>
+                            <span class="text-15"><?php echo strIdx( 179 );?></span>
                         </div>
                         <div class="frame-4-bot">
                         <div> 
                             <!-- left side -->
                             <div class="float-left">
-                                    <div class="text-10 pad-25">verwarming IN alternatief</div>
-                                    <div class="text-10 pad-26">verwarming UIT alternatief</div>
+                                    <div class="text-10 pad-25"><?php echo strIdx( 201 );?></div>
+                                    <div class="text-10 pad-26"><?php echo strIdx( 202 );?></div>
                             </div>
                             <!-- right side -->
                             <div class="float-right">
@@ -727,8 +800,10 @@ function makeSelectorAmpere( $id ) {
                         <?php echo strIdx(9);?>
                         <br><br>
                         <?php echo strIdx(36);?>
-                        <br><br>
+                        
                         <?php echo strIdx(69);?>
+                        <br><br>
+                        <?php echo strIdx(116);?>
                         <br><br>
                         <?php echo strIdx( 83 );?>
                     </div>

@@ -20,7 +20,7 @@ import systemid
 import time
 import crypto3
 
-from sqldb import configDB, SqlDb2, financieelDb, currentWeatherDB, historyWeatherDB, temperatureDB, WatermeterDB, PhaseDB, powerProductionDB, WatermeterDBV2
+from sqldb import configDB, SqlDb2, financieelDb, currentWeatherDB, historyWeatherDB, temperatureDB, WatermeterDB, PhaseDB, powerProductionDB, WatermeterDBV2, powerProductionSolarDB
 from logger import fileLogger,logging
 from datetime import datetime, timedelta
 #from semaphore3 import writeSemaphoreFile
@@ -31,24 +31,25 @@ from listOfPidByName import listOfPidByName
 
 prgname = 'P1SqlImport'
 
-config_db             = configDB()
-e_db_history_min      = SqlDb2() 
-e_db_financieel_dag   = financieelDb()
-e_db_financieel_maand = financieelDb()
-e_db_financieel_jaar  = financieelDb()
-weer_db               = currentWeatherDB()
-weer_history_db_uur   = historyWeatherDB()
-temperature_db        = temperatureDB()
-temperature_db        = temperatureDB()
+config_db                   = configDB()
+e_db_history_min            = SqlDb2() 
+e_db_financieel_dag         = financieelDb()
+e_db_financieel_maand       = financieelDb()
+e_db_financieel_jaar        = financieelDb()
+weer_db                     = currentWeatherDB()
+weer_history_db_uur         = historyWeatherDB()
+temperature_db              = temperatureDB()
+temperature_db              = temperatureDB()
 #V1 of the watermeter database, we keep supporting this for older software versions that import data
-watermeter_db_uur     = WatermeterDB()
-watermeter_db_dag     = WatermeterDB()
-watermeter_db_maand   = WatermeterDB()
-watermeter_db_jaar    = WatermeterDB()
+watermeter_db_uur           = WatermeterDB()
+watermeter_db_dag           = WatermeterDB()
+watermeter_db_maand         = WatermeterDB()
+watermeter_db_jaar          = WatermeterDB()
 #V2 of the watermeter database
-watermeter_db         = WatermeterDBV2()
-fase_db               = PhaseDB()
-power_production_db   = powerProductionDB()
+watermeter_db               = WatermeterDBV2()
+fase_db                     = PhaseDB()
+power_production_db         = powerProductionDB()
+power_production_solar_db   = powerProductionSolarDB()
 no_status_messages    = False   # dont write to the status file. 
 
 statusdata = {
@@ -133,6 +134,7 @@ def Main(argv):
         stop( 3 ) 
 
     openDatabases()
+ 
 
     try:
         zf = zipfile.ZipFile( importfile )
@@ -217,8 +219,8 @@ def Main(argv):
             
             _head,tail = os.path.split(fname)
            
-            #print ( fname )
-            #print ( tail ) 
+            #print ( "fname=", fname )
+            #print ( "tail=", tail ) 
             #print ( "configuratie="   +str( tail.startswith( 'configuratie' ) ) )
             #print ( "financieel="      +str( tail.startswith( 'finacieel' ) ) )
             #print ( "historie="       +str( tail.startswith( 'historie' ) ) )
@@ -368,7 +370,7 @@ def msgReplaceDb( db_name , forced=False ):
 
     # change message according to status of percentage.
     if pct_value  == -1:
-        msg = "totaal records ok=" + str( statusdata['records_processed_ok'] ) + "aantal defect="+\
+        msg = "totaal records ok=" + str( statusdata['records_processed_ok'] ) + " aantal defect="+\
             str( statusdata['records_processed_nok']  ) + ". (" + db_name  + ")."
         replaceLastLineInStatusFile( msg )
     else:
@@ -385,7 +387,8 @@ def initStatusFile():
         return
     try:    
         status_fp = open( const.FILE_SQL_IMPORT_STATUS, "w")
-        subprocess.run( ['sudo', 'chmod', '066' , const.FILE_WATERMETER_CNT_STATUS ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
+        #subprocess.run( ['sudo', 'chmod', '066' , const.FILE_WATERMETER_CNT_STATUS ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
+        subprocess.run( ['chmod', '066' , const.FILE_WATERMETER_CNT_STATUS ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
         status_fp.close()
     except Exception as e:
         flog.error( "status file schrijf fout: " + str(e) )
@@ -444,6 +447,11 @@ def replaceLastLineInStatusFile( msg ):
 # starts.                                              #
 ########################################################
 def processImportDataSet( db_tabel_name , db_pointer, zip_file, db_filename, sql_match_str ):
+
+    #print ( "db_filename=", db_filename )
+    #print ( "db_tabel_name=", db_tabel_name )
+    #print ( "sql_match_str=", sql_match_str )
+
     try:
 
         msgToInfoLogAndStatusFile( db_tabel_name + " wordt verwerkt." )
@@ -452,6 +460,8 @@ def processImportDataSet( db_tabel_name , db_pointer, zip_file, db_filename, sql
         data = zip_file.read( db_filename ).decode('utf-8')
         content = data.split('\n')
         content.remove("") # remove empty strings 
+
+        #print ( content )
 
         msgToInfoLogAndStatusFile( db_tabel_name + " tabel bevat " + str(len(content)) + " import records." )
         writeLineToStatusFile( "" ) # make room for the dynamic line
@@ -466,7 +476,7 @@ def processImportDataSet( db_tabel_name , db_pointer, zip_file, db_filename, sql
                     statusdata['records_processed_ok'] += 1
                 else:
                     statusdata['records_processed_nok'] += 1
-                    flog.warning( inspect.stack()[0][3]+": SQL STATEMENT= " + sql  + " -> " + str(e) )
+                    flog.warning( inspect.stack()[0][3]+": SQL STATEMENT= " + sql )
             except Exception as e:
                 statusdata['records_processed_nok'] =+ 1
                 flog.error( inspect.stack()[0][3]+": " + db_tabel_name+ " probleem " + str(e) )
@@ -653,7 +663,7 @@ def openDatabases():
 
     msgToInfoLogAndStatusFile( "database " + const.DB_FASE_REALTIME_TAB + " succesvol geopend." )
 
-    # open van power production database      
+    # open van power production database kWh(S0)
     try:    
         power_production_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_TAB, flog )
     except Exception as e:
@@ -663,6 +673,17 @@ def openDatabases():
         stop( 15 )
 
     msgToInfoLogAndStatusFile( "database " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
+
+    # open van power production database Solar
+    try:
+        power_production_solar_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_SOLAR_TAB, flog )
+    except Exception as e:
+        msg = ": database niet te openen (" + const.DB_POWERPRODUCTION_SOLAR_TAB + ") melding: " + str(e.args[0] )
+        writeLineToStatusFile( msg )
+        flog.critical(inspect.stack()[0][3] + ": " + msg )
+        stop( 16 )
+
+    msgToInfoLogAndStatusFile( "database " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
 
 #####################################################
 # exit the program as clean as possible by closing  #
@@ -693,7 +714,7 @@ if __name__ == "__main__":
         os.umask( 0o002 )
         flog = fileLogger( const.DIR_FILELOG + prgname + ".log", prgname)    
         #### aanpassen bij productie
-        flog.setLevel( logging.DEBUG )
+        flog.setLevel( logging.INFO )
         flog.consoleOutputOn(True)
 
         original_sigint = signal.getsignal(signal.SIGINT)

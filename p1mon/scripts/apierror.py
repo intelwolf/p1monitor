@@ -38,3 +38,10 @@ API_TIMESTAMP_ERROR =  {
     "code"          : "00004"
 }
 
+API_PARAMETER_MISSING_ERROR =  {  
+    "status"        : falcon.HTTP_500,
+    "title"         : "ERROR: parameter missing.",
+    "description"   : "Could not process your input, parameter(s) is missing: ",
+    "code"          : "00005"
+}
+

@@ -131,6 +131,21 @@ ROUTE_POWERPRODUCTION_S0_MONTH_HELP = ROUTE_POWERPRODUCTION_S0_MONTH + '/help'
 ROUTE_POWERPRODUCTION_S0_YEAR       = '/api/v1/powerproduction/year'
 ROUTE_POWERPRODUCTION_S0_YEAR_HELP  = ROUTE_POWERPRODUCTION_S0_YEAR + '/help'
 
+BASE_POWERPRODUCTION_SOLAR          = 'powerproductionsolar' # don't use in path
+ROUTE_POWERPRODUCTION_SOLAR_MIN      = '/api/v1/powerproductionsolar/minute/{power_source_id}/{db_index}'
+ROUTE_POWERPRODUCTION_SOLAR_MIN_HELP = '/api/v1/powerproductionsolar/minute/help'
+
+ROUTE_POWERPRODUCTION_SOLAR_HOUR     = '/api/v1/powerproductionsolar/hour/{power_source_id}/{db_index}'
+ROUTE_POWERPRODUCTION_SOLAR_HOUR_HELP = '/api/v1/powerproductionsolar/hour/help'
+
+ROUTE_POWERPRODUCTION_SOLAR_DAY      = '/api/v1/powerproductionsolar/day/{power_source_id}/{db_index}'
+ROUTE_POWERPRODUCTION_SOLAR_DAY_HELP = '/api/v1/powerproductionsolar/day/help'
+
+ROUTE_POWERPRODUCTION_SOLAR_MONTH    = '/api/v1/powerproductionsolar/month/{power_source_id}/{db_index}'
+ROUTE_POWERPRODUCTION_SOLAR_MONTH_HELP = '/api/v1/powerproductionsolar/month/help'
+
+ROUTE_POWERPRODUCTION_SOLAR_YEAR     = '/api/v1/powerproductionsolar/year/{power_source_id}/{db_index}'
+ROUTE_POWERPRODUCTION_SOLAR_YEAR_HELP = '/api/v1/powerproductionsolar/year/help'
 
 #JSON fields MATCH JSON_xx and EXPL_xxx
 JSON_TS_LCL                 = 'TIMESTAMP_lOCAL'                      # local time in format yyyy-mm-dd hh:mm:ss mkLocalTimeString()
@@ -221,7 +236,7 @@ JSON_API_PHS_L1_A           = 'L1_A'                                 # Amperage 
 JSON_API_PHS_L2_A           = 'L2_A'                                 # Amperage phase L2
 JSON_API_PHS_L3_A           = 'L3_A'                                 # Amperage phase L3
 
-JSON_API_PROD_PERIOD_ID     = 'TIMEPERIOD_ID'                        # Number  / index of time period 11-15 (minute,day,hour,month,year).
+JSON_API_PROD_PERIOD_ID     = 'TIMEPERIOD_ID'                        # Number  / index of time period.
 JSON_API_PROD_PWR_SRC_ID    = 'POWER_SOURCE_ID'                      # Number / index of the power source, 0 is not defined, 1 is S0 kWh puls.
 JSON_API_PROD_KWH_H         = 'PRODUCTION_KWH_HIGH'                  # kWh during the period for the high tariff.
 JSON_API_PROD_KWH_L         = 'PRODUCTION_KWH_LOW'                   # kWh during the period for the low tariff.
@@ -323,7 +338,9 @@ EXPL_API_PHS_L2_A           = 'Amperage phase L2'
 EXPL_API_PHS_L3_A           = 'Amperage phase L3'
 
 EXPL_API_PROD_PERIOD_ID     = 'Number/index of time period 11-15 (minute,day,hour,month,year).'
+EXPL_API_PROD_PERIOD_ID_SOLAR = 'Number/index of time period (minute,day,hour,month,year).'
 EXPL_API_PROD_PWR_SRC_ID    = 'Number/index of the power source, 0 is not defined, 1 is S0 kWh puls.'
+EXPL_API_PROD_PWR_SRC_ID_SOLAR = 'Number/index of the power source, 0 is not defined, 1 is Solar Edge.'
 EXPL_API_PROD_KWH_H         = 'kWh during the period for the high tariff.'
 EXPL_API_PROD_KWH_L         = 'kWh during the period for the low tariff.'
 EXPL_API_PROD_PULS_CNT_H    = 'Number of detected pulses per timeunit (min, hour, day, month, year) for the high tariff.'
@@ -1157,7 +1174,7 @@ HELP_ROUTE_POWER_PRODUCTION_MIN_DAY_MONTH_YEAR_JSON = {
     "api_version"       : 1,
     "api_status"        : API_STATUS_PRODUCTION,
     "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP + ", " + API_OPTION_RANGE,
-    "api_description"   : "Power producion data with an minute, day, month or year interval that is ordered on timestamp",
+    "api_description"   : "Power production data with an minute, day, month or year interval that is ordered on timestamp",
     "api_usage"         : "<ip>{"+ ROUTE_POWERPRODUCTION_S0_MIN + ', ' +  ROUTE_POWERPRODUCTION_S0_HOUR + ', ' + ROUTE_POWERPRODUCTION_S0_DAY + ', ' + ROUTE_POWERPRODUCTION_S0_MONTH + ', ' + ROUTE_POWERPRODUCTION_S0_YEAR + '}?' +\
                                   API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2020-25-10 10:21:55, or ' +\
                                   API_PARAMETER_RANGETIMESTAMP + '=2020-25-10, <ip>{'+ ROUTE_POWERPRODUCTION_S0_MIN + ROUTE_POWERPRODUCTION_S0_HOUR + ', ' + ROUTE_POWERPRODUCTION_S0_DAY + ', ' + ROUTE_POWERPRODUCTION_S0_MONTH + ', ' + ROUTE_POWERPRODUCTION_S0_YEAR  + '},<ip>{' + ROUTE_POWERPRODUCTION_S0_MIN_HELP + ', ' + ROUTE_POWERPRODUCTION_S0_HOUR_HELP + ', ' + ROUTE_POWERPRODUCTION_S0_DAY_HELP + ', ' + ROUTE_POWERPRODUCTION_S0_MONTH_HELP + ', ' + ROUTE_POWERPRODUCTION_S0_YEAR_HELP + '}',
@@ -1225,3 +1242,60 @@ HELP_ROUTE_POWER_PRODUCTION_MIN_DAY_MONTH_YEAR_JSON = {
     ]
 }
 
+
+HELP_ROUTE_POWER_PRODUCTION_SOLAR_MIN_DAY_MONTH_YEAR_JSON = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP + ", " + API_OPTION_RANGE,
+    "api_description"   : "Solar power production data with an minute, day, month or year interval that is ordered on timestamp. Data is built in to support multiple site id’s.  Each dataset starts with a number in de range 20 – 90 (the database ID),  see the configuration page. The tens represent the specific site and the units respectively minutes (1), hours (2), days (3), months (4) and years (5). Examples: site 1 minute value is 21, site 1 hour value is 22, site 2 minute value is 31, site 2 hour value is 32 etc.  The {power_source_id} is a number,  for example for Solar Edge this is 1",
+    "api_usage"         : "<ip>{"+ ROUTE_POWERPRODUCTION_SOLAR_MIN + ', ' +  ROUTE_POWERPRODUCTION_SOLAR_HOUR + ', ' + ROUTE_POWERPRODUCTION_SOLAR_DAY + ', ' + ROUTE_POWERPRODUCTION_SOLAR_MONTH + ', ' + ROUTE_POWERPRODUCTION_SOLAR_YEAR + '}?' +\
+                                  API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2020-25-10 10:21:55, or ' +\
+                                  API_PARAMETER_RANGETIMESTAMP + '=2020-25-10, <ip>{'+ ROUTE_POWERPRODUCTION_SOLAR_MIN + ROUTE_POWERPRODUCTION_SOLAR_HOUR + ', ' + ROUTE_POWERPRODUCTION_SOLAR_DAY + ', ' + ROUTE_POWERPRODUCTION_SOLAR_MONTH + ', ' + ROUTE_POWERPRODUCTION_SOLAR_YEAR  + '},<ip>{' + ROUTE_POWERPRODUCTION_SOLAR_MIN_HELP + ', ' + ROUTE_POWERPRODUCTION_SOLAR_HOUR_HELP + ', ' + ROUTE_POWERPRODUCTION_SOLAR_DAY_HELP + ', ' + ROUTE_POWERPRODUCTION_SOLAR_MONTH_HELP + ', ' + ROUTE_POWERPRODUCTION_SOLAR_YEAR_HELP + '}',
+    "fields": [
+         {
+           "name" : JSON_TS_LCL,
+           "description" : EXPL_TS_LCL,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_TS_LCL_UTC,
+           "description" : EXPL_TS_LCL_UTC,
+           "type": TYPE_JSON_INTEGER
+         },
+         { 
+           "name" : JSON_API_PROD_PERIOD_ID ,
+           "description" : EXPL_API_PROD_PERIOD_ID_SOLAR ,
+           "type": TYPE_JSON_INTEGER
+         },
+         { 
+           "name" : JSON_API_PROD_PWR_SRC_ID,
+           "description" : EXPL_API_PROD_PWR_SRC_ID_SOLAR,
+           "type": TYPE_JSON_INTEGER
+         },
+         {
+           "name" : JSON_API_PROD_KWH_H,
+           "description" : EXPL_API_PROD_KWH_H,
+           "type": TYPE_JSON_NUMBER
+         },
+         {
+           "name" : JSON_API_PROD_KWH_L,
+           "description" : EXPL_API_PROD_KWH_L,
+           "type": TYPE_JSON_NUMBER
+         },
+         {
+           "name" : JSON_API_PROD_KWH_TOTAL_H,
+           "description" : EXPL_API_PROD_KWH_TOTAL_H,
+           "type": TYPE_JSON_NUMBER
+         },
+         {
+           "name" : JSON_API_PROD_KWH_TOTAL_L,
+           "description" : EXPL_API_PROD_KWH_TOTAL_L,
+           "type": TYPE_JSON_NUMBER
+         },
+         {
+           "name" : JSON_API_PROD_KWH_TOTAL,
+           "description" : EXPL_API_PROD_KWH_TOTAL,
+           "type": TYPE_JSON_NUMBER
+         }
+    ]
+}

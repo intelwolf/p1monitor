@@ -1,12 +1,12 @@
 <?php
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php';  
-include '/p1mon/www/util/page_menu.php';
-include '/p1mon/www/util/page_menu_header_gas.php';
-include '/p1mon/www/util/check_display_is_active.php';
-include '/p1mon/www/util/weather_info.php';
-include '/p1mon/www/util/pageclock.php';
-include '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php';  
+include_once '/p1mon/www/util/page_menu.php';
+include_once '/p1mon/www/util/page_menu_header_gas.php';
+include_once '/p1mon/www/util/check_display_is_active.php';
+include_once '/p1mon/www/util/weather_info.php';
+include_once '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/fullscreen.php';
 
 if ( checkDisplayIsActive(20) == false) { return; }
 ?>
@@ -444,34 +444,6 @@ function updateData() {
 
     }
 }
-/*
-function DataLoop() {
-    currentMinutes = Math.floor(secs / 60);
-    currentSeconds = secs % 60;
-    if(currentSeconds <= 9) { currentSeconds = "0" + currentSeconds; }
-    secs--;
-    document.getElementById("timerText").innerHTML = zeroPad(currentMinutes,2) + ":" + zeroPad(currentSeconds,2);
-    if(secs < 0 ) { 
-        mins = 1;  
-        secs = mins * 60;
-        currentSeconds = 0;
-        currentMinutes = 0;
-        colorFader("#timerText","#0C7DAD");
-        //readJsonData(maxrecords);
-        readJsonApiHistoryDay( maxrecords );
-    }
-    // make chart only once and when we have data.
-    createGasChart();
-    
-    if (recordsLoaded !== 0 &&  $('#GasChart').highcharts() == null) {
-      hideStuff('loading-data');
-      updateData();
-      createGasChart();
-    }
-    
-    setTimeout('DataLoop()',1000);
-}
-*/
 
 
 function DataLoop() {
@@ -511,11 +483,8 @@ $(function() {
 </script>
 </head>
 <body>
-<div class="top-wrapper">
-    <div class="content-wrapper">
-        <?php page_header();?>    
-    </div>
-</div>
+
+<?php page_header();?> 
 
 <div class="top-wrapper-2">
     <div class="content-wrapper pad-13">

@@ -1,15 +1,16 @@
 <?php
 session_start(); #must be here for every page using login
-include '/p1mon/www/util/auto_logout.php';
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php';
-include '/p1mon/www/util/menu_control.php';
-include '/p1mon/www/util/p1mon-password.php';
-include '/p1mon/www/util/config_buttons.php';
-include '/p1mon/www/util/config_read.php';
-include '/p1mon/www/util/updateStatusDb.php';
-include '/p1mon/www/util/textlib.php';
-include '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/auto_logout.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/menu_control.php';
+include_once '/p1mon/www/util/p1mon-password.php';
+include_once '/p1mon/www/util/config_buttons.php';
+include_once '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/updateStatusDb.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/config_page_menu_header_powerproduction.php';
 
 //print_r($_POST);
 loginInit();
@@ -189,6 +190,7 @@ function LoadData() {
 }
 
 $(function () {
+    toLocalStorage('config-powerproduction-menu',window.location.pathname);
     centerPosition('#counter_status');
     LoadData();
 });
@@ -212,7 +214,9 @@ $(function () {
             </div>
             
             <div id="right-wrapper-config"> <!-- right block -->
-            <!-- inner block right part of screen -->
+                <!-- inner block right part of screen -->
+                <?php config_page_menu_header_powerproduction( 0 ); ?> 
+
                 <div id="right-wrapper-config-left-4">
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">

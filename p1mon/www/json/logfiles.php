@@ -80,7 +80,4 @@ if ( isset(  $_GET['list'] ) ) {
     return;
 }
 
-
-
-
 ?>

@@ -943,7 +943,7 @@ def updateDbHour():
 # wegschrijven van minuut waarde
 def updateDbMin():
     try:
-        sqlstr= "insert or replace into "+const.DB_HISTORIE_MIN_TAB+" values (\
+        sqlstr= "insert or replace into " + const.DB_HISTORIE_MIN_TAB + " values (\
         '"+timestamp+":00',\
         '"+str(VERBR_KWH_181)+"',\
         '"+str(VERBR_KWH_182)+"',\

@@ -157,7 +157,8 @@ div#scroll_window {
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
-    margin: 30px 10px 10px 10px;
+    /* margin: 30px 10px 10px 10px; */
+    margin: 10px 10px 10px 10px;
     padding: 5px 5px 5px 5px;
     height: 250px;
 }
@@ -195,36 +196,36 @@ div#system_dump {
 
 /*
 div#succes_msg_samba {
-	border-radius: 5px 5px 5px 5px;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px 5px 5px 5px;
-	border: 1px solid #DCE1E3;
-	padding:10px 0px 10px 0px;
-	width: 24em;
-	text-align: center;
-	color: #83B31E;
-	background-color: #F5F5F5;
-	box-shadow: 0px 5px 8px -2px #eaeaea;
-	font-size: 1em;
-	display: none;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    padding:10px 0px 10px 0px;
+    width: 24em;
+    text-align: center;
+    color: #83B31E;
+    background-color: #F5F5F5;
+    box-shadow: 0px 5px 8px -2px #eaeaea;
+    font-size: 1em;
+    display: none;
 }
 */
 
 
 /*
 div#succes_msg_wifi {
-	border-radius: 5px 5px 5px 5px;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px 5px 5px 5px;
-	border: 1px solid #DCE1E3;
-	padding:10px 0px 10px 0px;
-	width: 24em;
-	text-align: center;
-	color: #83B31E;
-	background-color: #F5F5F5;
-	box-shadow: 0px 5px 8px -2px #eaeaea;
-	font-size: 1em;
-	display: none;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    padding:10px 0px 10px 0px;
+    width: 24em;
+    text-align: center;
+    color: #83B31E;
+    background-color: #F5F5F5;
+    box-shadow: 0px 5px 8px -2px #eaeaea;
+    font-size: 1em;
+    display: none;
 }
 */
 
@@ -541,7 +542,7 @@ select {
 .left-wrapper-config {
     height: 100%;
     min-height: 100%;
-    width: 120px;
+    width: 130px;
     display: block;
     float: left;
     margin-left: 10px;
@@ -555,8 +556,9 @@ select {
 }
 
 div#right-wrapper-config {
-    float: left;
-    width: 838px;
+    /* float: left; */
+    /* width: 838px; */
+    width: 828px;
     /* background:blue; */
     display: inline-block;
 }
@@ -668,23 +670,23 @@ div#right-wrapper-config-right-4 {
 
 /*
 .config-left-div {
-	float:left;
-	width: 628px;
-	background-color: red;
-	
+    float:left;
+    width: 628px;
+    background-color: red;
+    
 }
 
 .config-right-div {
-	float: right;
-	width:210px;
-	background-color: green;
+    float: right;
+    width:210px;
+    background-color: green;
 }
 */
 
 
 /* niet meer in gebruik 1-12-2017
 .margin-1 {
- 	margin-left: 70px;	
+     margin-left: 70px;    
 }
 
 .margin-1 {
@@ -902,6 +904,11 @@ div#right-wrapper-config-right-4 {
 .text-29 {
     color: #6E797C;
     font-size: 0.9em;
+}
+
+.text-30 {
+    color: #e28743;
+    font-size: 1.2em;
 }
 
 
@@ -1136,6 +1143,16 @@ div#right-wrapper-config-right-4 {
     font-family: 'robotoblack';
     margin: 3px 0px 5px 0px;
     padding: 0px 0px 0px 5px;
+}
+
+.select-7 {
+    border-radius: 3px 3px 3px 3px;
+    -moz-border-radius: 3px 3px 3px 3px;
+    -webkit-border-radius: 3px 3px 3px 3px;
+    font-size: 1em;
+    font-family: 'robotoblack';
+    margin: 3px 0px 5px 0px;
+    padding: 0px 5px 0px 5px;
 }
 
 .but-1 {
@@ -1550,6 +1567,11 @@ a:hover {
     padding: 19px 0px 0px 0px;
 }
 
+.pad-40 {
+    padding: 0px 0px 8px 0px;
+}
+
+
 .pos-1 {
     position: relative;
     top: 5px;
@@ -1863,27 +1885,19 @@ a:hover {
 }
 
 
-
-/*
-.pos-43 {
-    position: relative;
-    margin-left: 100px;
-    top: 5px;
-    left: 10px;
-    width: 350px;
-    height: 370px;
-    float: left;
-}
-
 .pos-44 {
-    position: relative;
-    top: 5px;
-    left: 32px;
-    width: 350px;
-    height: 370px;
-    float: left;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 4px;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    background-color: #FFFFFF;
+    height: 22px;
 }
-*/
+
 
 .pos-45 {
     width: 950px;
@@ -2049,6 +2063,18 @@ a:hover {
     width: 58px !important; 
 }
 
+.width-260 {
+    width: 260px !important; 
+}
+
+.width-280 {
+    width: 280px !important; 
+}
+
+.width-290 {
+    width: 290px !important; 
+}
+
 .width-910 {
     width: 910px !important; 
 }
@@ -2056,3 +2082,29 @@ a:hover {
 .bold-font {
     font-weight: bold;
 }
+
+.rTable { 
+    display: table;
+    width: 100%; 
+}
+
+.rTableRow { 
+    display: table-row; 
+}
+
+.rTableHeading { 
+    display: table-header-group; 
+}
+
+.rTableBody { 
+    display: table-row-group; 
+}
+
+.rTableFoot {
+     display: table-footer-group; 
+    }
+
+.rTableCell, .rTableHead { 
+    display: table-cell; 
+}
+

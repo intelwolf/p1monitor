@@ -1,11 +1,11 @@
 <?php
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php'; 
-include '/p1mon/www/util/page_menu.php';
-include '/p1mon/www/util/textlib.php';
-include '/p1mon/www/util/check_display_is_active.php';
-include '/p1mon/www/util/weather_info.php';
-include '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php'; 
+include_once '/p1mon/www/util/page_menu.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/check_display_is_active.php';
+include_once '/p1mon/www/util/weather_info.php';
+include_once '/p1mon/www/util/pageclock.php';
 
 if ( checkDisplayIsActive(22) == false) { return; }
 ?> 
@@ -35,10 +35,11 @@ var CPUtemperature            = 0;
 var soundPlayed               = false;
 var soundIsOn                 = true;
 
-var showHeatingInfo           = <?php if ( config_read(46) == 1 )  { echo "true;"; } else { echo "false;"; } echo"\n";?>
-var showUDPbroadcastInfo      = <?php if ( config_read(55) == 1 )  { echo "true;"; } else { echo "false;"; } echo"\n";?>
-var showWatermeterInfo        = <?php if ( config_read(102) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
-var showProductionPowerS0Info = <?php if ( config_read(129) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
+var showHeatingInfo                  = <?php if ( config_read( 46  ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
+var showUDPbroadcastInfo             = <?php if ( config_read( 55  ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
+var showWatermeterInfo               = <?php if ( config_read( 102 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
+var showProductionPowerS0Info        = <?php if ( config_read( 129 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
+var showProductionPowerSolarEdgeInfo = <?php if ( config_read( 147 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 
 
 function PlaySound() {
@@ -371,6 +372,10 @@ function readJsonApiStatus(){
                 case 109:
                     $('#db23v').text(jsonarr[j][1]);
                     $('#db23t').text(jsonarr[j][2]);
+                    break;
+                case 111:
+                    $('#db24v').text(jsonarr[j][1]);
+                    $('#db24t').text(jsonarr[j][2]);
                     break;  
                 default:
                     break;
@@ -800,6 +805,9 @@ $(function () {
                     <div id="powerProductionS0">
                         <div id="db23t" class="text-9"></div><div id="db23v" class="text-9"></div><br>
                     </div>
+                    <div id="powerProductionSolarEdge">
+                        <div id="db24t" class="text-9"></div><div id="db24v" class="text-9"></div><br>
+                    </div>
                  </div>
                  <br>
                  <div class="frame-2-top">
@@ -955,8 +963,12 @@ if ( showWatermeterInfo  == false ){
     $('#watermeter').hide();
 }
 
-if ( powerProductionS0 == false ){
+if ( showProductionPowerS0Info == false ){
     $('#powerProductionS0').hide();
+}
+
+if ( showProductionPowerSolarEdgeInfo == false ){
+    $('#powerProductionSolarEdge').hide();
 }
 
 </script>

@@ -1,5 +1,5 @@
 <?php 
-include '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/config_read.php';
 ?>
 <!doctype html>
 <html lang="nl">

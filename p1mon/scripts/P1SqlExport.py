@@ -26,28 +26,29 @@ from subprocess import run
 
 prgname = 'P1SqlExport'
 
-config_db             = configDB()
-e_db_history_min      = SqlDb2() 
-e_db_history_uur      = SqlDb3() 
-e_db_history_dag      = SqlDb4() 
-e_db_history_maand    = SqlDb4() 
-e_db_history_jaar     = SqlDb4() 
-e_db_financieel_dag   = financieelDb()
-e_db_financieel_maand = financieelDb()
-e_db_financieel_jaar  = financieelDb()
-weer_db               = currentWeatherDB()
-weer_history_db_uur   = historyWeatherDB()
-weer_history_db_dag   = historyWeatherDB()
-weer_history_db_maand = historyWeatherDB()
-weer_history_db_jaar  = historyWeatherDB()
-temperature_db        = temperatureDB()
+config_db                   = configDB()
+e_db_history_min            = SqlDb2() 
+e_db_history_uur            = SqlDb3() 
+e_db_history_dag            = SqlDb4() 
+e_db_history_maand          = SqlDb4() 
+e_db_history_jaar           = SqlDb4() 
+e_db_financieel_dag         = financieelDb()
+e_db_financieel_maand       = financieelDb()
+e_db_financieel_jaar        = financieelDb()
+weer_db                     = currentWeatherDB()
+weer_history_db_uur         = historyWeatherDB()
+weer_history_db_dag         = historyWeatherDB()
+weer_history_db_maand       = historyWeatherDB()
+weer_history_db_jaar        = historyWeatherDB()
+temperature_db              = temperatureDB()
 #watermeter_db_uur     = WatermeterDB()
 #watermeter_db_dag     = WatermeterDB()
 #watermeter_db_maand   = WatermeterDB()
 #watermeter_db_jaar    = WatermeterDB()
-watermeter_db         = WatermeterDBV2()
-fase_db               = PhaseDB()
-power_production_db   = powerProductionDB()
+watermeter_db               = WatermeterDBV2()
+fase_db                     = PhaseDB()
+power_production_db         = powerProductionDB()
+power_production_solar_db   = powerProductionSolarDB()
 
 #e_db_financieel_dag_voorspel= financieelDb()
 
@@ -296,17 +297,31 @@ def Main(argv):
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
 
+    # open van power production database for the solar data
+    try:
+        power_production_solar_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_SOLAR_TAB, flog )
+    except Exception as e:
+        flog.critical( inspect.stack()[0][3] + ": Database niet te openen." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
+        sys.exit(1)
+    flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
+
+
+
     updateStatusPct(statusfile,3, record_cnt)
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_POWERPRODUCTION )
-    record_cnt = record_cnt + power_production_db.sql2file(  const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
+    record_cnt = record_cnt + power_production_solar_db.sql2file( const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
     updateStatusPct(statusfile, 10, record_cnt)
-    flog.info(inspect.stack()[0][3]+": kWh levering sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": kWh Solar levering sql geëxporteerd.")
+
+    record_cnt = record_cnt + power_production_db.sql2file(  const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
+    updateStatusPct(statusfile, 15, record_cnt)
+    flog.info(inspect.stack()[0][3]+": kWh(S0) levering sql geëxporteerd.")
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_PHASEINFORMATION )
     record_cnt = record_cnt + fase_db.sql2file(  const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode)
     updateStatusPct(statusfile, 20, record_cnt)
-    flog.info(inspect.stack()[0][3]+": fase date sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": fase date sql geëxporteerd.")
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_E_HISTORIE )
     record_cnt = record_cnt + e_db_history_min.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
@@ -318,7 +333,7 @@ def Main(argv):
     record_cnt = record_cnt + e_db_history_maand.sql2file(const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
     updateStatusPct(statusfile, 29, record_cnt)
     record_cnt = record_cnt + e_db_history_jaar.sql2file( const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
-    flog.info(inspect.stack()[0][3]+": historie sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": historie sql geëxporteerd.")
     updateStatusPct(statusfile, 30, record_cnt)
     
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_FINANCIEEL )
@@ -327,17 +342,17 @@ def Main(argv):
     record_cnt = record_cnt + e_db_financieel_maand.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
     updateStatusPct(statusfile, 32, record_cnt)
     record_cnt = record_cnt + e_db_financieel_jaar.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
-    flog.info(inspect.stack()[0][3]+": financieel sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": financieel sql geëxporteerd.")
     updateStatusPct(statusfile, 33, record_cnt) 
     
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_CONFIG )
     record_cnt = record_cnt + config_db.sql2file(const.DIR_EXPORT + const.DB_CONFIG + exportcode)
-    flog.info(inspect.stack()[0][3]+": configuratie sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": configuratie sql geëxporteerd.")
     updateStatusPct(statusfile, 40, record_cnt) 
     
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WEER  )
     record_cnt = record_cnt + weer_db.sql2file(const.DIR_EXPORT + const.DB_WEER + exportcode)
-    flog.info(inspect.stack()[0][3]+": weer sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": weer sql geëxporteerd.")
     updateStatusPct(statusfile, 42 ,record_cnt) 
     
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WEER_HISTORY )
@@ -349,12 +364,12 @@ def Main(argv):
     updateStatusPct(statusfile, 54, record_cnt)
     record_cnt = record_cnt + weer_history_db_jaar.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
     updateStatusPct(statusfile, 56 , record_cnt)
-    flog.info(inspect.stack()[0][3]+": weer historie sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": weer historie sql geëxporteerd.")
     updateStatusPct(statusfile, 58, record_cnt) 
     
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_TEMPERATURE )
     record_cnt = record_cnt + temperature_db.sql2file(const.DIR_EXPORT + const.DB_TEMPERATURE + exportcode )
-    flog.info(inspect.stack()[0][3]+": temperatuur sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": temperatuur sql geëxporteerd.")
     updateStatusPct(statusfile, 60, record_cnt)
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WATERMETERV2 )
@@ -373,7 +388,7 @@ def Main(argv):
     updateStatusPct(statusfile, 73, record_cnt)
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WATERMETER )
     record_cnt = record_cnt + watermeter_db_jaar.sql2file( const.DIR_EXPORT + const.DB_WATERMETER + exportcode )
-    flog.info(inspect.stack()[0][3]+": watermeter sql gexporteerd.")
+    flog.info(inspect.stack()[0][3]+": watermeter sql geëxporteerd.")
     updateStatusPct(statusfile, 74, record_cnt)
     """
 
@@ -522,7 +537,7 @@ def Main(argv):
         os.system( backgroundcommand )
     
     timestop = time.time()  
-    flog.info( inspect.stack()[0][3] + ": Gereed verwerkings tijd is " + f"{timestop - timestart:0.2f} seconden." ) 
+    flog.info( inspect.stack()[0][3] + ": Gereed verwerkingstijd is " + f"{timestop - timestart:0.2f} seconden." ) 
     
 #-------------------------------
 if __name__ == "__main__":

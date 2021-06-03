@@ -1,15 +1,15 @@
  <?php
 session_start(); #must be here for every page using login
-include '/p1mon/www/util/auto_logout.php';
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php';
-include '/p1mon/www/util/menu_control.php';
-include '/p1mon/www/util/p1mon-password.php';
-include '/p1mon/www/util/config_buttons.php';
-include '/p1mon/www/util/config_read.php';
-include '/p1mon/www/util/textlib.php';
-include '/p1mon/www/util/div_err_succes.php';
-include '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/auto_logout.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/menu_control.php';
+include_once '/p1mon/www/util/p1mon-password.php';
+include_once '/p1mon/www/util/config_buttons.php';
+include_once '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/div_err_succes.php';
+include_once '/p1mon/www/util/pageclock.php';
 
 #print_r($_POST);
 loginInit();
@@ -358,7 +358,7 @@ $(function () {
                                                                                         </select>
                                                                                 </div>
                                                                                 <div class="content-wrapper">
-                                                                                        <input class="input-6 color-settings color-input-back" id="i_minutes" name="i_minutes"  type="text" value="<?php echo $cron_pieces[0];?>">
+                                                                                        <input class="input-7 color-settings color-input-back" id="i_minutes" name="i_minutes"  type="text" value="<?php echo $cron_pieces[0];?>">
                                                                                 </div>
                                                                          </div> 
                                                                          
@@ -373,7 +373,7 @@ $(function () {
                                                                                         </select>
                                                                                 </div>
                                                                                 <div class="content-wrapper">
-                                                                                        <input class="input-6 color-settings color-input-back" id="i_hours" name="i_hours" type="text" value="<?php echo $cron_pieces[1];?>">
+                                                                                        <input class="input-7 color-settings color-input-back" id="i_hours" name="i_hours" type="text" value="<?php echo $cron_pieces[1];?>">
                                                                                 </div>
                                                                         </div> 
                                                                 
@@ -388,7 +388,7 @@ $(function () {
                                                                                         </select>
                                                                                 </div>
                                                                                 <div class="content-wrapper">
-                                                                                        <input class="input-6 color-settings color-input-back" id="i_days" name="i_days" type="text" value="<?php echo $cron_pieces[2];?>">
+                                                                                        <input class="input-7 color-settings color-input-back" id="i_days" name="i_days" type="text" value="<?php echo $cron_pieces[2];?>">
                                                                                 </div>
                                                                         </div> 
                                                                         
@@ -403,7 +403,7 @@ $(function () {
                                                                                         </select>
                                                                                 </div>
                                                                                 <div class="content-wrapper">
-                                                                                        <input class="input-6 color-settings color-input-back" id="i_months" name="i_months" type="text" value="<?php echo $cron_pieces[3];?>">
+                                                                                        <input class="input-7 color-settings color-input-back" id="i_months" name="i_months" type="text" value="<?php echo $cron_pieces[3];?>">
                                                                                 </div>
                                                                         </div> 
                                                                         
@@ -418,7 +418,7 @@ $(function () {
                                                                                         </select>
                                                                                 </div>
                                                                                 <div class="content-wrapper">
-                                                                                        <input class="input-6 color-settings color-input-back" id="i_weekdays" name="i_weekdays" type="text" value="<?php echo $cron_pieces[4];?>">
+                                                                                        <input class="input-7 color-settings color-input-back" id="i_weekdays" name="i_weekdays" type="text" value="<?php echo $cron_pieces[4];?>">
                                                                                 </div>
                                                                         </div> 
                                                         </div>
@@ -602,7 +602,7 @@ $(function () {
                                                                 </div>
                                                                 
                                                         </div> 
-                                                        <div class="content-wrapper pos-37">
+                                                        <div class="content-wrapper pos-33">
                                                                         <label  id="dbx_backup_status" class="text-14"></label>
                                                         </div>
                                                         

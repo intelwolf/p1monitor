@@ -1,13 +1,12 @@
 FROM debian:buster-slim
 
-# Add p1mon user
-RUN adduser --gecos "" --disabled-password p1mon && usermod -aG sudo p1mon && adduser www-data p1mon
-
 # Set timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 
 # Install packages
 RUN apt-get update && apt-get upgrade -y && apt-get install -y python3-venv python3-pip nginx-full php-fpm sqlite3 php-sqlite3 python3-cairo python3-apt vim cron sudo logrotate && apt-get clean
+
+RUN adduser --gecos "" --disabled-password p1mon && usermod -aG sudo p1mon && usermod -aG sudo www-data
 
 # Setup sudo without password for p1mon and www-data
 RUN echo >>/etc/sudoers "p1mon ALL=(ALL) NOPASSWD: ALL" && echo >>/etc/sudoers "www-data ALL=(p1mon) NOPASSWD: /p1mon/scripts/*"

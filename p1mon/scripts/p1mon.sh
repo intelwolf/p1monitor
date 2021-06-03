@@ -34,6 +34,7 @@ PRG13="P1MQTT.py"
 PRG14="P1GPIO.py"
 PRG15="P1PowerProductionS0.py"
 PRG16="P1WatermeterV2.py"
+PRG17="P1SolarEdgeReader.py"
 P1FILE="p1msg.txt"
 
 
@@ -201,20 +202,25 @@ stop() {
     # Udp Sender stop
     process_kill $PRG6
 
-    # Watchdog stop
-    process_kill $PRG3
-
-    # DB stop
+     # DB stop
     process_kill $PRG2
 
-    # door de watchdog gestarte processen stoppen na het
-    # stoppen van de watchdog
+    # Watchdog stop
+    process_kill $PRG3
+    
+    #######################################################
+    # door de watchdog gestarte processen stoppen na het  #
+    # stoppen van de watchdog                             #
+    #######################################################
 
     # Powerproduction stop
     process_kill $PRG15 5
 
     # P1WatermeterV2
     process_kill $PRG16 5
+
+    # P1SolarEdge 
+    process_kill $PRG17 5
 
     # MQTT stop
     process_kill $PRG13 5

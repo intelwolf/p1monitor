@@ -2,8 +2,7 @@
 // Set the JSON header
 header("Content-type: text/json");
 
-#include '/p1mon/www/util/config_read.php';
-include '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/p1mon-util.php';
 
 # gebruik ./systemdump.php?dumpid=999
 $OK             = "gereed";

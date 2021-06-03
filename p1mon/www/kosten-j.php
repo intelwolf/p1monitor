@@ -1,13 +1,13 @@
 <?php
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php'; 
-include '/p1mon/www/util/page_menu_header_cost.php';
-include '/p1mon/www/util/page_menu.php';
-include '/p1mon/www/util/js_tooltip_kosten.php';
-include '/p1mon/www/util/check_display_is_active.php';
-include '/p1mon/www/util/weather_info.php';
-include '/p1mon/www/util/pageclock.php';
-include '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php'; 
+include_once '/p1mon/www/util/page_menu_header_cost.php';
+include_once '/p1mon/www/util/page_menu.php';
+include_once '/p1mon/www/util/js_tooltip_kosten.php';
+include_once '/p1mon/www/util/check_display_is_active.php';
+include_once '/p1mon/www/util/weather_info.php';
+include_once '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/fullscreen.php';
 
 if ( checkDisplayIsActive(21) == false) { return; }
 ?>
@@ -375,7 +375,8 @@ function createCostChart() {
                 if ( GExtraData[index][2] !== -1 ) { KWhVerbruikt     = GExtraData[index][2].toFixed(2); }
                 if ( GExtraData[index][3] !== -1 ) { kWhLevering      = GExtraData[index][3].toFixed(2); }
                 if ( GExtraData[index][4] !== -1 ) { GasM3Verbruikt   = GExtraData[index][4].toFixed(3); }
-                if ( GExtraData[index][5] !== -1 ) { WaterM3Verbruikt = GExtraData[index][5].toFixed(3); }
+                //if ( GExtraData[index][5] !== -1 ) { WaterM3Verbruikt = GExtraData[index][5].toFixed(3); }
+                if ( GExtraData[index][5] !== -1 ) { WaterM3Verbruikt = (GExtraData[index][5] / 1000 ).toFixed(3); }
 
                 var pv1=pv2=dv1=dv2=pg1=pg2=dg1=dg2=pt1=pt2=dt1=dt2=gas1=gas2=net1=net2=gasm21=gasm22=verbrkwh1=verbrkwh2=levrkwh1=levrkwh2=water1=water2=water21=water22='';
                 var totVerbruikt = 0;

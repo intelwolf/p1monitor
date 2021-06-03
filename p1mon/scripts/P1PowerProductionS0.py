@@ -49,7 +49,7 @@ def Main(argv):
 
     DiskRestore()
     
-     # open van config database      
+     # open van config database
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
     except Exception as e:
@@ -57,7 +57,7 @@ def Main(argv):
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
 
-    # open van status database      
+    # open van status database
     try:    
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
@@ -65,7 +65,7 @@ def Main(argv):
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
-    # open van power production database      
+    # open van power production database
     try:    
         power_production_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_TAB, flog )
     except Exception as e:

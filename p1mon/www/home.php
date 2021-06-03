@@ -4,7 +4,7 @@
 /**************************************************************************/
 /* redirector die het mogelijk maakt om andere home pagina's te gebruiken */
 /**************************************************************************/
-include '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/config_read.php';
 
 if ( config_read(43) == 1 ) {
    $location = '/custom/p1mon.php';

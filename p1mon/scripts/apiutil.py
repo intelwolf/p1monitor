@@ -5,7 +5,7 @@ import time
 import yaml
 
 # functions 
-def p1_serializer(req, resp, exception):
+def p1_serializer( req, resp, exception):
     representation = None
 
     #print (req)
@@ -20,7 +20,8 @@ def p1_serializer(req, resp, exception):
         else:
             representation = yaml.dump(exception.to_dict(),
                                        encoding=None)
-        resp.body = representation
+        #resp.body = representation
+        resp.text = representation
         resp.content_type = preferred
 
     resp.append_header('Vary', 'Accept')

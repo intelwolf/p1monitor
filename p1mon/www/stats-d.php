@@ -1,12 +1,12 @@
 <?php
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php';  
-include '/p1mon/www/util/page_menu_header.php'; 
-include '/p1mon/www/util/page_menu.php';
-include '/p1mon/www/util/check_display_is_active.php';
-include '/p1mon/www/util/weather_info.php';
-include '/p1mon/www/util/pageclock.php';
-include '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php';  
+include_once '/p1mon/www/util/page_menu_header.php'; 
+include_once '/p1mon/www/util/page_menu.php';
+include_once '/p1mon/www/util/check_display_is_active.php';
+include_once '/p1mon/www/util/weather_info.php';
+include_once '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/fullscreen.php';
 
 if ( checkDisplayIsActive(19) == false) { return; }
 ?>

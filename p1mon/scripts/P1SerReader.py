@@ -91,10 +91,16 @@ DUMMY_GAS_TIME_ELAPSED = 300 # sec. die verstreken moet zijn voor volgend gas re
 
 #Set COM port config
 ser1 = serial.Serial()
-ser1.baudrate = 9600
-ser1.bytesize=serial.SEVENBITS
-ser1.parity=serial.PARITY_EVEN
-ser1.stopbits=serial.STOPBITS_ONE
+#ser1.baudrate = 9600
+#ser1.bytesize=serial.SEVENBITS
+#ser1.parity=serial.PARITY_EVEN
+#ser1.stopbits=serial.STOPBITS_ONE
+# version 1.3.0 changed to te most used settings
+ser1.baudrate = 115200
+ser1.bytesize=8
+ser1.parity="N"
+ser1.stopbits=1
+
 ser1.xonxoff = 0 # changed from version 0.9.2 onwards
 ser1.rtscts = 0 
 ser1.timeout = 1 

@@ -9,5 +9,5 @@
 echo "------------------------------"
 echo "| Alleen voor ontwikkelwerk! |"
 echo "------------------------------"
-/home/p1mon/.local/bin/gunicorn --timeout 900 --bind localhost:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 1 P1Api:app --reload 
+/home/p1mon/.local/bin/gunicorn --timeout 900 --bind localhost:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 1 P1Api:app --reload
 #/home/p1mon/.local/bin/gunicorn --timeout 900 --bind 0.0.0.0:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 1 P1Api:app --reload 

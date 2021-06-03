@@ -2,6 +2,8 @@
 # script om export naar SDHC card naar SDA te maken.
 echo "[*] clean van /var/backups/*.gz"
 rm -f /var/backups/*.gz
+echo "[*] clean van /var/cache/*"
+rm -r /var/cache/*
 # wissen van cache en dergelijke.
 echo "[*] opschonen oude packages"
 # clean is beter dan autoclean.

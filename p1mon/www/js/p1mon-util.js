@@ -1,3 +1,54 @@
+// set the highchart language options.
+function setHighChartLanguageOptions( idx ) {
+    
+    if ( idx == 0 ) {  // Nederlands
+        Highcharts.setOptions({
+            lang: {
+                months: [
+                    'januari', 'februari', 'maart', 'april',
+                    'mei', 'juni', 'juli', 'augustus',
+                    'september', 'oktober', 'november', 'december'
+                ],
+                weekdays: [
+                    'zondag', 'maandag', 'dinsdag', 'woensdag',
+                    'donderdag', 'vrijdag', 'zaterdag'
+                ]
+            }
+        });
+    } else if ( idx == 1 ) { // English
+        
+        Highcharts.setOptions({
+            lang: {
+                months: [
+                    'January', 'February', 'March', 'April',
+                    'May', 'June', 'July', 'August',
+                    'September', 'October', 'November', 'December'
+                ],
+                weekdays: [
+                    'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+                    'Thursday', 'Friday', 'Saturday'
+                ]
+            }
+            });
+
+    } else if ( idx == 2 ) { // French
+
+        Highcharts.setOptions({
+            lang: {
+                months: [
+                    'Janvier', 'Février', 'Mars', 'Avril',
+                    'Mai', 'Juin', 'Juillet', 'Août',
+                    'Septembre', 'Octobre', 'Novembre', 'Décembre'
+                ],
+                weekdays: [
+                    'Dimanche', 'Lundi', 'Mardi', 'Mercredi',
+                    'Jeudi', 'Vendredi', 'Samedi'
+                ]
+            }
+            });
+    }
+
+}
 
 
 // copy to clipboard

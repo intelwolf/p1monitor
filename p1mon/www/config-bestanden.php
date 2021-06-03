@@ -1,15 +1,15 @@
 <?php
 session_start(); #must be here for every page using login
-include '/p1mon/www/util/auto_logout.php';
-include '/p1mon/www/util/page_header.php';
-include '/p1mon/www/util/p1mon-util.php';
-include '/p1mon/www/util/menu_control.php';
-include '/p1mon/www/util/p1mon-password.php';
-include '/p1mon/www/util/config_buttons.php';
-include '/p1mon/www/util/config_read.php';
-include '/p1mon/www/util/textlib.php';
-include '/p1mon/www/util/div_err_succes.php';
-include '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/auto_logout.php';
+include_once '/p1mon/www/util/page_header.php';
+include_once '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/menu_control.php';
+include_once '/p1mon/www/util/p1mon-password.php';
+include_once '/p1mon/www/util/config_buttons.php';
+include_once '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/div_err_succes.php';
+include_once '/p1mon/www/util/pageclock.php';
 
 #print_r($_POST);
 loginInit();
@@ -305,8 +305,8 @@ function setUpCancelBar(text) {
 
 
 $('#db_erase_button').click( function(event) {
-    console.log( event.type )
-    console.log ('db_erase')
+    //console.log( event.type )
+    //console.log ('db_erase')
     action = 'db_erase' 
     setUpCancelBar("Onderbreek database wissen&nbsp;&nbsp;");
     event.preventDefault();    
@@ -315,10 +315,10 @@ $('#db_erase_button').click( function(event) {
 
 
 function progressIndicator() {
-    console.log( progressPct )
+    //console.log( progressPct )
     if ( progressPct >= 100 ) {
         if ( action === 'db_erase' ) {
-            console.log("db_erase do");
+            //console.log("db_erase do");
             document.formvalues.systemaction.value = 'db_erase';
             $('#formvalues').submit();
         }

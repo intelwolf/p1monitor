@@ -1,8 +1,8 @@
 <?php
 session_start(); 
-include '/p1mon/www/util/config_read.php';
-include '/p1mon/www/util/p1mon-util.php';
-include '/p1mon/www/util/p1mon-password.php';
+include_once '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/p1mon-password.php';
 
 #print_r($_post);
 
