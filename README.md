@@ -7,7 +7,10 @@ For more information see https://www.ztatz.nl/p1-monitor/ (Dutch language)
 Best way to start the container is using the included docker-compose file. That way your instance will also automatically start again after a host reboot
 I run the container using the following run command:
 
-    docker-compose up
+    docker-compose up -d
+
+## Docker repository
+A docker image is available from docker hub. An example docker-compose is included mapping external port 81 to the container.
 
 ## Updating
 Follow instructions from the original author on updating to a new version
