@@ -25,24 +25,53 @@ if( $localip == False ){
         }
 }
 
+$sw_off  = strIdx( 193 );
+$sw_on   = strIdx( 192 );
+
 $WIFI_ESSID_FILE  = '/p1mon/mnt/ramdisk/wifi_essid.txt';
 
 $err_cnt = -1;
 if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
 {
-    #echo "setting wifi essid and password<br>";
-    $err_cnt = 0;
+    
+    if ( $err_cnt == -1 ) $err_cnt=0;
     
     $crypto_wifi_pw = encodeString (trim($_POST["wifi_pw"]), 'wifipw');
-    #debugLog('$crypto_wifi_pw='.$crypto_wifi_pw);
-    
-    #echo "crypto password = "+$crypto_wifi_pw+"<br>";
-    
-    if ( updateConfigDb("update config set parameter = '".$_POST["wifi_essid"]."' where ID = 11"))         $err_cnt += 1;
-    if ( updateConfigDb("update config set parameter = '".$crypto_wifi_pw."' where ID = 12"))     $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".$_POST["wifi_essid"]."' where ID = 11")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".$crypto_wifi_pw."' where ID = 12"))      $err_cnt += 1;
     
     #echo "error count = "+$err_cnt+"<br>";
     writeSemaphoreFile('wifi_aanpassen');
+}
+
+if( isset($_POST["FQDN"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '".$_POST["FQDN"]."' where ID = 150")) $err_cnt += 1;
+}
+
+if( isset($_POST["duckDNStoken"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    $crypto_token = encodeString ( trim($_POST["duckDNStoken"]), 'dckdckdns');
+    if ( updateConfigDb("update config set parameter = '".$crypto_token."' where ID = 151")) $err_cnt += 1;
+}
+
+if ( isset($_POST[ "fs_rb_duckdns" ]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST[ "fs_rb_duckdns" ] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 152") ) $err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 152") ) $err_cnt += 1;
+    }
+}
+
+
+if ( isset($_POST[ "fs_rb_duckdns_force" ]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST[ "fs_rb_duckdns_force" ] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 153") ) $err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 153") ) $err_cnt += 1;
+    }
 }
 
 function makeSelector($id) {
@@ -70,7 +99,7 @@ function makeSelector($id) {
 <!doctype html>
 <html lang="nl">
 <head>
-<title>Netwerk configuratie</title>
+<title><?php echo strIdx( 225 );?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -83,6 +112,7 @@ function makeSelector($id) {
 <body>
 <script>
 var initloadtimer;
+
 
 function wifiSelectClick() {
     //console.log('wifi click');
@@ -114,60 +144,33 @@ function readJsonApiStatus(){
         for (var j=0;  j<jsonarr.length; j++){   
              switch(jsonarr[j][0]) {
             case 20:
-                if (jsonarr[j][1].length === 0) {
-                    hideStuff('ne5b');
-                    hideStuff('ne5v');
-                    hideStuff('ne5t');
-                } else {
-                    $('#ne5v').text(jsonarr[j][1]);
-                    $('#ne5t').text(jsonarr[j][2]);
-                }
+                $('#ne5v').text(jsonarr[j][1]);
                 break;
             case 23:
-                if (jsonarr[j][1].length === 0) {
-                    hideStuff('ne4b');
-                    hideStuff('ne4v');
-                    hideStuff('ne4t');
-                } else {
-                    $('#ne4v').text(jsonarr[j][1]);
-                    $('#ne4t').text(jsonarr[j][2]);
-                }
+                $('#ne4v').text(jsonarr[j][1]);
                 break;
             case 24:
-                if (jsonarr[j][1].length === 0) {
-                    hideStuff('ne1b');
-                    hideStuff('ne1v');
-                    hideStuff('ne1t');
+                if ( jsonarr[j][1] == 'ja' ) {
+                    $('#ne1v').html( '<i class="color-ok fas fa-check-circle"></i>' )
                 } else {
-                    $('#ne1v').text(jsonarr[j][1]);
-                    $('#ne1t').text(jsonarr[j][2]);
+                    $('#ne1v').html( '<i class="color-warning fas fa-exclamation-triangle"></i>' )
                 }
                 break;
             case 26:
                 $('#ne2v').text(jsonarr[j][1]);
-                $('#ne2t').text(jsonarr[j][2]);
                 break;
             case 27:
                 $('#ne3v').text(jsonarr[j][1]);
-                $('#ne3t').text(jsonarr[j][2]);
                 break;
             case 28:
-                if (jsonarr[j][1].length === 0) {
-                    hideStuff('ne6b');
-                    hideStuff('ne6v');
-                    hideStuff('ne6t');
-                } else {
-                    $('#ne6v').text(jsonarr[j][1]);
-                    $('#ne6t').text(jsonarr[j][2]);
-                }
+                $('#ne6v').text(jsonarr[j][1]);
                 break;
             case 42:
                 $('#ne8v').text(jsonarr[j][1]);
-                $('#ne8t').text(jsonarr[j][2]);
                 break;
             default:
-                break;            
-            }    
+                break;
+            }
          }
       } catch(err) {
           console.log( err );
@@ -183,9 +186,8 @@ function readJsonApiConfiguration(){
                 switch(jsonarr[j][0]) {
                     case 11:
                         $('#ne7v').text( jsonarr[j][1] );
-                        $('#ne7t').text( jsonarr[j][2] );
                     default:
-                        break;            
+                        break;
             }
         }
       } catch(err) {
@@ -236,12 +238,12 @@ $(function () {
                         <div class="frame-4-bot">
                             <div class="float-left">                
                                 <i class="text-10 pad-7 fa-fw fas fa-wifi"></i>
-                                <label class="text-10">Naam</label>
+                                <label class="text-10">SSID</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fa-fw fas fa-lock"></i>
-                                <label class="text-10">Wachtwoord</label> 
+                                <label class="text-10"><?php echo strIdx(226);?></label> 
                             </div>
-                            <div class="float-left pad-1">    
+                            <div class="float-left pad-1">
                                 <input class="input-7 color-settings color-input-back" id="wifi_essid" name="wifi_essid"  type="text" value="<?php echo config_read(11);?>">
                                 <p class="p-1"></p>
                                 <input class="input-7 color-settings color-input-back" id="wifi_pw" name="wifi_pw"  type="password" value="<?php echo decodeString(12, 'wifipw');?>">
@@ -258,19 +260,160 @@ $(function () {
                             
                         </div>
                         <p></p>
+
                         <div class="frame-4-top">
-                            <span class="text-15">network status</span>
+                            <span class="text-15"><?php echo strIdx( 234 );?></span>
                         </div>
                         <div class="frame-4-bot">
-                            <div id="ne1t" class="text-16"></div><div id="ne1v" class="text-16"></div><div><br id="ne1b"></div>
-                            <div id="ne2t" class="text-16"></div><div id="ne2v" class="text-16"></div><br>
-                            <div id="ne3t" class="text-16"></div><div id="ne3v" class="text-16"></div><br>
-                            <div id="ne4t" class="text-16"></div><div id="ne4v" class="text-16"></div><div><br id="ne4b"></div>
-                            <div id="ne5t" class="text-16"></div><div id="ne5v" class="text-16"></div><div><br id="ne5b"></div>
-                            <div id="ne6t" class="text-16"></div><div id="ne6v" class="text-16"></div><div><br id="ne6b"></div>
-                            <div id="ne7t" class="text-16"></div><div id="ne7v" class="text-16"></div><div><br id="ne7b"></div>
-                            <div id="ne8t" class="text-16"></div><div id="ne8v" class="text-16"></div><div><br id="ne8b"></div>
+                            <div class="rTable">
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        <?php echo strIdx( 227 );?>
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne1v"></div>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        <?php echo strIdx( 228 );?>
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne2v"></div>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        <?php echo strIdx( 229 );?>
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne3v"></div>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        <?php echo strIdx( 230 );?>
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne4v"></div>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        <?php echo strIdx( 231 );?>
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne5v"></div>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        <?php echo strIdx( 232 );?>
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne6v"></div>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        wifi SSID
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne7v"></div>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-16 width-160">
+                                        <?php echo strIdx( 233 );?>
+                                    </div>
+                                    <div class="rTableCell text-16">
+                                        <div id="ne8v"></div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
+
+                        <p></p>
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo strIdx( 235 );?></span>
+                        </div>
+                        <div class="frame-4-bot" title="<?php echo strIdx( 239 );?>">
+                            <div class="rTable">
+                                <div class="rTableRow">
+                                    <div class="rTableCell">
+                                        <i class="pad-7 text-10 fas fa-globe"></i>
+                                    </div>  
+                                    <div class="rTableCell">
+                                        <input class="input-10 color-settings color-input-back" id="FQDN" name="FQDN" type="text" value="<?php echo config_read( 150 );?>">
+                                        <p class="p-1"></p> 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p></p>
+                        <div class="frame-4-top">
+                            <span class="text-15">DuckDNS dynamic DNS</span>
+                        </div>
+                        <div class="frame-4-bot">
+
+                            <div class="rTable">
+                                <div class="rTableRow" title="<?php echo strIdx( 240 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-lock"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10">token</label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-10 color-settings color-input-back" id="duckDNStoken" name="duckDNStoken" type="password" value="<?php echo decodeString(151, 'dckdckdns');?>">
+                                        <p class="p-1"></p> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <div id="duckDNStoken_eye" onclick="toggelPasswordVisibility('duckDNStoken')" class="cursor-pointer">    
+                                            <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rTable">
+                                <div class="rTableRow" title="<?php echo strIdx( 241 );?>">
+                                        <div class="rTableCell width-22">
+                                            <i class="pad-7 text-10 fas fa-toggle-off"></i>
+                                        </div>
+                                        <div class="rTableCell width-290">
+                                            <label class="text-10"><?php echo strIdx( 172 );?></label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <input class="cursor-pointer" id="fs_rb_duckdns_on"  name="fs_rb_duckdns" type="radio" value="1" <?php if ( config_read( 152 ) == 1 ) { echo 'checked'; }?> ><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_duckdns_off" name="fs_rb_duckdns" type="radio" value="0" <?php if ( config_read( 152 ) == 0 ) { echo 'checked'; }?> ><?php echo $sw_off ?>
+                                        </div>
+                                    </div>
+                                    <div class="rTableRow" title="<?php echo strIdx( 242 );?>">
+                                        <div class="rTableCell width-22">
+                                            <i class="pad-7 text-10 fas fa-toggle-off"></i>
+                                        </div>
+                                        <div class="rTableCell width-290">
+                                            <label class="text-10"><?php echo strIdx( 236 );?></label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <input class="cursor-pointer" id="fs_rb_duckdns_force_on"  name="fs_rb_duckdns_force" type="radio" value="1"><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_duckdns_force_off" name="fs_rb_duckdns_force" type="radio" value="0" checked ><?php echo $sw_off ?>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+
                         <!-- placeholder variables for session termination -->
                         <input type="hidden" name="logout" id="logout" value="">
                     </form>
@@ -280,8 +423,12 @@ $(function () {
                     <div class="frame-4-top">
                         <span class="text-15">hulp</span>
                     </div>
-                    <div class="frame-4-bot text-10">    
-                        <?php echo strIdx(3);?>
+                    <div class="frame-4-bot text-10">
+                        <?php echo strIdx( 3);?>
+                        <br><br>
+                        <?php echo strIdx( 237 );?>
+                        <br><br>
+                        <?php echo strIdx( 238 );?>
                     </div>
                 </div>
             </div>    

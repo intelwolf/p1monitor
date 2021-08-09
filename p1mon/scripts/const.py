@@ -28,9 +28,9 @@
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "1.3.0"       # semantische versie nummers.
+P1_VERSIE                       = "1.3.1"       # semantische versie nummers.
 P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
-P1_SERIAL_VERSION               = "20210601"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_SERIAL_VERSION               = "20210618"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
@@ -130,6 +130,7 @@ FILE_ETH0MAC                    ="/p1mon/mnt/ramdisk/eth0mac.txt"
 FILE_DB_WEER_FILENAME           ="/p1mon/mnt/ramdisk/weer.db"
 FILE_MQTT_TOPICS                ="/p1mon/mnt/ramdisk/mqtt_topics.json"
 #FILE_DB_WEER_HISTORIE_FILENAME  ="/p1mon/mnt/ramdisk/weer_historie.db"
+FILE_DUCKDNS_STATUS             = "/p1mon/mnt/ramdisk/duckdns.status"
 FILE_DB_TEMPERATUUR_FILENAME    ="/p1mon/mnt/ramdisk/02_temperatuur.db"
 FILE_SESSION                    ="/p1mon/mnt/ramdisk/session.txt"
 FILE_PREFIX_CUSTOM_UI           ="/p1mon/var/tmp/custom-www-export-"
@@ -154,3 +155,5 @@ FILESHARE_MODE_DEV              ="dev"
 P1MSG_BUF_SIZE                  ="120"
 NOT_SET                         = 999999999999
 
+######################### NO-IP config ##################
+NO_IP_CONFIG_FILE               = '/p1mon/etc/no-ip2.conf'

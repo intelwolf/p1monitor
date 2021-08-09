@@ -2059,8 +2059,16 @@ a:hover {
   color: #13bba4;
 }
 
+.width-22 {
+    width: 22px !important; 
+}
+
 .width-58 {
     width: 58px !important; 
+}
+
+.width-160 {
+    width: 160px !important; 
 }
 
 .width-260 {
@@ -2073,6 +2081,10 @@ a:hover {
 
 .width-290 {
     width: 290px !important; 
+}
+
+.width-310 {
+    width: 310px !important; 
 }
 
 .width-910 {

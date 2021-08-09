@@ -458,6 +458,10 @@ def processImportDataSet( db_tabel_name , db_pointer, zip_file, db_filename, sql
 
         #raise Exception("test-excep")
         data = zip_file.read( db_filename ).decode('utf-8')
+        if data == None:
+            msgToInfoLogAndStatusFile( db_tabel_name + " tabel bevat geen records, niets verwerkt." )
+            return # return and do noting if there is no data
+
         content = data.split('\n')
         content.remove("") # remove empty strings 
 

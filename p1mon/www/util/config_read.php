@@ -6,7 +6,8 @@ function config_read( $id ) {
     // read from database 
     try {
         $data = array();
-        $db = new SQLite3($dbstr,SQLITE3_OPEN_READONLY);
+        $db = new SQLite3( $dbstr, SQLITE3_OPEN_READONLY );
+        $db -> busyTimeout( 300000 );  // fix for database locks, wait 300 sec = 5 min
         $result = $db->query($sqlstr);
         while ( $row = $result->fetchArray() ) {
             return $row[1];

@@ -8,7 +8,7 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
 
-if ( checkDisplayIsActive( 129 ) == false) { return; }
+if ( checkDisplayIsActive( 147 ) == false) { return; }
 ?>
 <!doctype html>
 <html lang="nl">

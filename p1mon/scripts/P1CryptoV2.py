@@ -17,7 +17,7 @@ def Main(argv):
 	parser.add_argument('-e', '--enc',	required=False)
 	parser.add_argument('-d', '--dec',	required=False)
 	parser.add_argument('-s', '--seed',	required=False)
-	parser.add_argument('-t', '--test', 	required=False, action="store_true")	# flag only
+	parser.add_argument('-t', '--test', required=False, action="store_true")	# flag only
 	args = parser.parse_args()
 	enc 		= args.enc       	# encode the input string
 	dec 		= args.dec			# decode the base64 input to a string

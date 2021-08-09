@@ -609,7 +609,7 @@ $arr = array (
     'P1monitor historie dagen opgewekte kWh','P1monitor history of days produced kWh','P1monitor historique des jours produites kWh'
     ),
 /* 148 */ array(
-        'Voor het gebruik van de gegevens is een API key nodig die bij SolarEdge aangevraagd kan worden.  Na het invoeren van de API key wordt alle beschikbare data van één of meerdere sites automatisch geladen. Dit kan wel een paar minuten duren afhankelijk van diverse factoren.<br><br>Als data volledig opnieuw via de API ingelezen moet worden dan kan dat met de herlaad optie. Ook geldt dat dit afhankelijk van het aantal sites en hoeveel data er verwerkt moet worden een paar tot 30 minuten duren. Als deze optie te vaak wordt gebruikt de blokkeer de API wegens de beperking van maximaal 300 API verzoeken per dag.<br><br>De tabel geeft de site ID weer zoals SolarEdge die toewijst. De DB index wordt automatisch door de P1 monitor toegewezen en is voor normaal gebruik niet relevant. Deze is alleen nodig als de data via de P1 monitor API wil inlezen. Start en eind datum geven de tijdsduur waar de API data van heeft.Actief geeft de mogelijkheid voor een bepaalde site ID geen data meer op te halen.  Wissen zal alle data in P1 monitor database voor die site ID wissen.',
+        'Voor het gebruik van de gegevens is een API key nodig die bij SolarEdge aangevraagd kan worden.  Na het invoeren van de API key wordt alle beschikbare data van één of meerdere sites automatisch geladen. Dit kan wel een paar minuten duren afhankelijk van diverse factoren.<br><br>Als data volledig opnieuw via de API ingelezen moet worden dan kan dat met de herlaad optie. Ook geldt dat dit afhankelijk van het aantal sites en hoeveel data er verwerkt moet worden een paar tot 30 minuten duren. Als deze optie te vaak wordt gebruikt dan blokkeert de API wegens de beperking van maximaal 300 API verzoeken per dag.<br><br>De tabel geeft de site ID weer zoals SolarEdge die toewijst. De DB index wordt automatisch door de P1 monitor toegewezen en is voor normaal gebruik niet relevant. Deze is alleen nodig als de data via de P1 monitor API wil inlezen. Start en eind datum geven de tijdsduur waar de API data van heeft. Actief geeft de mogelijkheid voor een bepaalde site ID geen data meer op te halen. Wissen zal alle data in de P1 monitor database voor die site ID wissen.',
         'To use the data, an API key is required, which can be requested from SolarEdge. After entering the API key, all available data from one or more sites is automatically loaded. This can take up to a few minutes depending on various factors.<br><br>If data has to be reread in completely via the API, use the reload option. Depending on the number of sites and how much data has to be processed, this also takes a few to 30 minutes. If this option is used too often, the API may be blocked due to the limitation of a maximum of 300 API requests per day.<br><br>The table lists the site ID as assigned by SolarEdge. The DB index is automatically assigned by the P1 monitor and is not relevant for normal use. This is only necessary if you want to read in the data via the P1 monitor API.tart and end date indicate the length of time the API has data from. Active gives the option of no longer retrieving data for a specific site ID. Delete will delete all data in P1 monitor database for that site ID.',
         'Pour utiliser les données, une clé API est requise, qui peut être demandée à SolarEdge. Après avoir entré la clé API, toutes les données disponibles ds&apos;un ou plusieurs sites sont automatiquement chargées. Cela peut prendre jusqus&apos;à quelques minutes en fonction de divers facteurs.<br><br>Si les données doivent être entièrement lues via ls&apos;API, cela est possible avec ls&apos;option de rechargement. En fonction du nombre de sites et de la quantité de données à traiter, cela prend également de quelques à 30 minutes. Si cette option est utilisée trop souvent, bloquez ls&apos;API en raison de la limitation ds&apos;un maximum de 300 requêtes ds&apos;API par jour.<br><br>Le tableau répertorie ls&apos;ID de site attribué par SolarEdge. Ls&apos;index DB est automatiquement attribué par le moniteur P1 et ns&apos;est pas pertinent pour une utilisation normale. Cela ns&apos;est nécessaire que si vous souhaitez lire les données via ls&apos;API du moniteur P1. Les dates de début et de fin indiquent la durée pendant laquelle ls&apos;API dispose de données. Actif donne la possibilité de ne plus récupérer les données pour un ID de site spécifique. Supprimer supprimera toutes les données de la base de données du moniteur P1 pour cet ID de site.'
         ),
@@ -846,16 +846,92 @@ $arr = array (
     'logging','logging','log'
     ),
 /* 223 */ array(
-    '',
-    '',
-    ''
+    'Alles wissen (fabrieksinstelling)','Clear all (factory setting)','Effacer tout (réglage d&apos;usine)'
     ),
 /* 224 */ array(
+    'Alle configuratie en database gegevens wissen.',
+    'Delete all configuration and database data.',
+    'Effacez toutes les données de configuration et de base de données.'
+    ),
+/* 225 */ array(
+    'Netwerk configuratie','Network configuration','Configuration réseau'
+    ),
+/* 226 */ array(
+    'wachtwoord','password','mot de passe'
+    ),
+/* 227 */ array(
+    'Internet bereikbaar','Internet accessible','Internet accessible'
+    ),
+/* 228 */ array(
+    'Internet IP adres','Internet IP address','Adresse IP Internet'
+    ),
+/* 229 */ array(
+    'Internet DNS naam','Internet DNS name','Nom DNS Internet'
+    ),
+/* 230 */ array(
+    'Internet timestamp','Internet timestamp','Horodatage Internet'
+    ),
+/* 231 */ array(
+    'LAN IP adres','LAN IP address','Adresse IP LAN'
+    ),
+/* 232 */ array(
+    'LAN host naam','LAN host name','Nom d&apos;hôte LAN'
+    ),
+/* 233 */ array(
+    'wifi IP adres','wifi  IP address','Adresse IP wifi'
+    ),
+/* 234 */ array(
+    'netwerk status','network status','état du réseau'
+    ),
+/* 235 */ array(
+    'publieke domein naam (DNS)','public domain name (DNS)','nom de domaine public (DNS)'
+    ),
+/* 236 */ array(
+    'forceer update','force update','forcer la mise'
+    ),
+/* 237 */ array(
+    'De publieke domein naam wordt gebruikt als DNS naam waarmee de P1 monitor gevonden kan worden op het Internet. De koppeling van de naam met het publieke IP adres kan manueel worden gedaan door de aanschaf van een domeinnaam of door gebruik  te maken van diensten zoals DuckDNS.',
+    'The public domain name is used as the DNS name with which the P1 monitor can be found on the Internet. The linking of the name with the public IP address can be done manually by purchasing a domain name or by using  services such as DuckDNS.',
+    'Le nom de domaine public est utilisé comme nom DNS avec lequel le moniteur P1 peut être trouvé sur Internet. La liaison du nom avec l&apos;adresse IP publique peut se faire manuellement en achetant un nom de domaine ou en utilisant les services suivants tels que DuckDNS.'
+    ),
+/* 238 */ array(
+    'DuckDNS is een gratis dienst waarmee je een IP adres dat je van je ISP krijgt kan koppelen aan een domeinnaam. Je moet je aanmelden bij <a href=\'https://www.duckdns.org/\' target=\'_blank\'> www.duckdns.org </a> na het aanmaken van de DNS naam moet het token van de pagina in het veld token worden ingevoerd. Het IP adres wordt 1 maal per zes uur gecontroleerd.',
+    'DuckDNS is a free service that allows you to link an IP address you get from your ISP to a domain name. You must log in to <a href=\'https://www.duckdns.org/\' target=\'_blank\'> www.duckdns.org </a> after creating the DNS name the token must be inserted into the token field. The IP address is checked once every six hours.',
+    'DuckDNS est un service gratuit qui vous permet de lier une adresse IP que vous obtenez d&apos;un FAI à un nom de domaine. Vous devez vous connecter à <a href=\'https://www.duckdns.org/\' target=\'_blank\'> www.duckdns.org </a> après avoir créé le nom DNS auquel le jeton doit appartenir la page dans le champ du jeton. L&apos;adresse IP est vérifiée toutes les six heures.'
+    ),
+/* 239 */ array(
+    'Dit is de domeinnaam waarmee de API via internet te bereiken is.',
+    'This is the domain name with which the API can be reached via the Internet.',
+    'Il s&apos;agit du nom de domaine avec lequel l&apos;API est accessible via Internet.'
+    ),
+/* 240 */ array(
+    'Het DuckDNS authenticatie token, nodig om de DNS naam te koppelen aan het IP publieke IP adres. ',
+    'The DuckDNS authentication token, needed to map the DNS name to the IP public IP address.',
+    'Le jeton d&apos;authentification DuckDNS, nécessaire pour mapper le nom DNS à l&apos;adresse IP publique IP.'
+    ),
+/* 241 */ array(
+    'automatische updates aan of uit.',
+    'automatic updates on or off.',
+    'mises à jour automatiques activées ou désactivées.'
+    ),
+/* 242 */ array(
+    'Eenmalig geforceerd updaten.','Forced one-time update.','Mise à jour unique forcée.'
+    ),
+/* 243 */ array(
     '',
     '',
     ''
     ),
-
+/* 244 */ array(
+    '',
+    '',
+    ''
+    ),
+/* 245 */ array(
+    '',
+    '',
+    ''
+    ),
 
 
 

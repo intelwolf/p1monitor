@@ -16,6 +16,7 @@ import time_slot_lib
 import solaredge_lib
 import solaredge_shared_lib
 import makeLocalTimeString 
+from dateutil.relativedelta import relativedelta
 
 # programme name.
 prgname = 'P1SolarEdgeReader'
@@ -47,9 +48,9 @@ def Main( argv ):
     except Exception as e:
         flog.critical( inspect.stack()[0][3] + ": database niet te openen(1)." + const.FILE_DB_CONFIG + ") melding:" + str(e.args[0]) )
         sys.exit(1)
-    flog.debug( inspect.stack()[0][3]+": database tabel " + const.DB_CONFIG_TAB + " succesvol geopend.")
+    flog.info( inspect.stack()[0][3]+": database tabel " + const.DB_CONFIG_TAB + " succesvol geopend.")
 
-    try:    
+    try:
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
         flog.critical( inspect.stack()[0][3]+": Database niet te openen(2)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]))
@@ -78,8 +79,6 @@ def Main( argv ):
     while True:
         time.sleep(time_out_in_seconds) 
 
-        
-
         try:
             _id, smart_api_calls, _label = config_db.strget( 146, flog )
             if int(smart_api_calls) == 1:
@@ -90,7 +89,7 @@ def Main( argv ):
         except Exception as e:
             flog.warning( inspect.stack()[0][3] + ": slimme API calls configuratie fout -> " + str(e.args[0]) )
 
-
+        """
         tariff_index = int(1)
         try:
             _id, tariff_type, _label = config_db.strget( 143, flog ) 
@@ -98,13 +97,14 @@ def Main( argv ):
             flog.debug(inspect.stack()[0][3]+": hoog/laag berekend tarief is " + str( tariff_index ) )
         except Exception as e:
             flog.warning( inspect.stack()[0][3] + ":  hoog/laag berekend tarief kon niet worden gelezen, tarief hoog wordt gebruikt -> " + str(e.args[0]) ) 
-
+        """
 
         ######################################################
         # only process data in the 15 minute time slots.     #
         ######################################################
         #flog.setLevel( logger.logging.DEBUG )
         if ts_selector.timeslot() == True:
+        #if True:
             
             #flog.setLevel( logger.logging.INFO )
 
@@ -118,6 +118,14 @@ def Main( argv ):
             if len( meta_data ) == 0:
                 flog.warning( inspect.stack()[0][3] + ": geen verwerking. Er zijn geen site(s) geconfigureerd." ) 
                 continue
+
+            tariff_index = int(1)
+            try:
+                _id, tariff_type, _label = config_db.strget( 143, flog ) 
+                tariff_index = int(tariff_type)
+                flog.debug(inspect.stack()[0][3]+": hoog/laag berekend tarief is " + str( tariff_index ) )
+            except Exception as e:
+                flog.warning( inspect.stack()[0][3] + ":  hoog/laag berekend tarief kon niet worden gelezen, tarief hoog wordt gebruikt -> " + str(e.args[0]) ) 
 
             meta_data = set_api_timestamps( meta_data )
             flog.debug( inspect.stack()[0][3] + ": meta data set van actieve sites (timestamp) " + str( meta_data ) )
@@ -135,7 +143,7 @@ def Main( argv ):
             # DEBUG 
             #start_date = "2021-03-13"
             #end_date   = "2021-05-13"
-            # end DBIG
+            # end DEBUG
 
             ######################################################
             # do check to see if parameter(s) or settings have   #
@@ -143,44 +151,45 @@ def Main( argv ):
             ######################################################
             apikey, api = check_and_set_api_key( apikey=apikey, api=api )
 
+            ######################################################
+            # minute processing                                  #
+            ######################################################
+            tic = time.perf_counter()
+            list_of_records = list()
+            max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list 
+            # limit range to dates that exceed the rentention period.
+            # delete_limited_date = ( datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=1096) ).strftime('%Y-%m-%d')
             try:
 
                 list_of_sites   = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
                 date_list       = datetime_delta_lib.create_date_list( start_date, end_date, period = 'm', range=1, repeatdate=True )
-                list_of_records = list()
-                max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list  
+                flog.debug( inspect.stack()[0][3] + ": date_list=" + str( date_list) )
 
-                #print( date_list )
-
-                #######################################################
-                # read in set of time limit multiple set from the API #
-                #######################################################
                 for date_set in date_list:
-                    #print ("#=", date_set[0], date_set[1] )
+
+                    # start_date = "2016-10-25" #DEBUG om range fouten te testen
+                    flog.debug( inspect.stack()[0][3] + ": start date=" + str( date_set[0]) + " stop date=" + str( date_set[1]) )
+
                     data = api.get_energy( 
-                    api_query_list_of_ids,
-                    date_set[0], 
-                    date_set[1], 
-                    time_unit=solaredge_lib.API_MINUTE 
-                    )
+                        api_query_list_of_ids,
+                        date_set[0], 
+                        date_set[1], 
+                        time_unit=solaredge_lib.API_MINUTE #DIFF
+                        )
                     rt_status_db.timestamp( 111, flog )
 
-                    #flog.info( inspect.stack()[0][3] + ": API CALL GESTART DEBUG VERWIJDEREN !" )
-
-                    ###############################################################
-                    # list of records contains the date for a specific site ID    #
-                    ###############################################################
                     for idx in range( data['sitesEnergy']['count'] ):
     
-                        #print ( "siteId[x] = ", data['sitesEnergy']['siteEnergyList'][idx]['siteId'])
-                        #print ( "------------------------------")
+                        #print ( "siteId[x] = ",  data['sitesEnergy']['siteEnergyList'][idx]['siteId'])
+                        list_of_records.clear()
+
                         try:
-                            site_id = data['sitesEnergy']['siteEnergyList'][ idx ]['siteId']
-                            flog.info( inspect.stack()[0][3] + ": gestart met minuut data voor site ID " +\
-                                str( site_id ) + " voor periode " +  str(date_set[0]) + " - "  + str(date_set[1]))
+                            site_id = data['sitesEnergy']['siteEnergyList'][idx]['siteId']
                             db_sql_index_number = solaredge_shared_lib.read_db_index_from_list( site_id, list_of_sites )
-                            data_set = data['sitesEnergy']['siteEnergyList'][ idx ]['energyValues']['values']
-                            #print ( "data_set length() = ", len(data_set) )
+                            flog.info( inspect.stack()[0][3] + ": gestart met minuut data voor site ID " + str( site_id ) +\
+                                 " met DB index " +  str( db_sql_index_number ) + " voor periode " +  str(date_set[0]) + " - "  + str(date_set[1]))
+                            data_set = data['sitesEnergy']['siteEnergyList'][idx ]['energyValues']['values']
+                            #print ( "data_set = ", data_set )
 
                             for i in range( len(data_set) ):
 
@@ -191,10 +200,12 @@ def Main( argv ):
                             
                                 rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
 
-                                rec[0] = data_set[i]['date']                                  # TIMESTAMP
+                                rec[0] = data_set[i]['date'][:16]+":00" # TIMESTAMP
+                                
+                                #flog.info( str(rec) )
                                 
                                 if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
-                                    #flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
+                                    flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
                                     continue
                                 max_timestamp = rec[0] 
 
@@ -212,116 +223,671 @@ def Main( argv ):
                                     rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
                                     rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
 
-                                #flog.debug( inspect.stack()[0][3] + " record added = : " + str( rec ) )
+                                flog.debug( inspect.stack()[0][3] + " record added = : " + str( rec ) )
 
                                 list_of_records.append ( rec.copy() )
 
                         except Exception as e:
                             rt_status_db.timestamp( 112, flog )
-                            flog.warning( inspect.stack()[0][3] + ": probleem met laden data voor API minuut informatie -> " + str(e.args[0]) )
+                            flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor minuut informatie " + str( site_id ) + " -> " + str(e.args[0]) )
 
-                    flog.debug( inspect.stack()[0][3] + " site ID = : " + str( data['sitesEnergy']['siteEnergyList'][idx]['siteId'] ) +\
-                            " verwerkt. " +  str(len(list_of_records)) + " (ruwe) buffer regels" )
+                        ####################################################
+                        # find previous total values from the SQL database #
+                        ####################################################
 
-                ###############################################################
-                # release API object                                          #
-                ###############################################################
-                # api = None 
-                
-                ###############################################################
-                # get meta data voor the current site ID (tmp_meta_data)      #
-                ###############################################################
-                for m_data in get_meta_site_data():
-                    if m_data['ID'] == data['sitesEnergy']['siteEnergyList'][ idx ]['siteId']:
-                        tmp_meta_data = m_data
+                        tmp_total_high_offset = 0
+                        tmp_total_low_offset  = 0
+                        try:
+                            start_date_from_api = str( list_of_records[0][0] ) # the oldest timestamp from the API
+                            db_index_number_tmp = str( db_sql_index_number + 1 ) # MINUTE
+                            
+                            sql_timestamp = "select timestamp, PRODUCTION_KWH_HIGH_TOTAL, PRODUCTION_KWH_LOW_TOTAL from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB +\
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" + db_index_number_tmp +\
+                                 " and timestamp == ( select max(timestamp) from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB + \
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" +\
+                                 db_index_number_tmp + " and timestamp < '" + start_date_from_api + "')"
+                            
+                            #flog.debug( inspect.stack()[0][3] + ": sql = " + sql_timestamp )
+                            record = power_production_solar_db.select_rec( sql_timestamp )
+                            tmp_total_high_offset = float(record[0][1])
+                            tmp_total_low_offset  = float(record[0][2])
+                            flog.debug( inspect.stack()[0][3] + ": tmp_total_high_offset = " + str(tmp_total_high_offset) +\
+                                                                 " tmp_total_low_offset=" + str(tmp_total_low_offset) )
+                        except Exception as e:
+                            flog.info( inspect.stack()[0][3] + ": geen eerder record gevonden voor totaal waarden, 0 wordt gebruikt als waarde." )
+
+                        ##############################################
+                        # determine the totals for the found site ID #
+                        # set the totals of high, low en both        #
+                        ##############################################
+                        solaredge_shared_lib.recalculate_totals( list_of_records,
+                            total_high_offset=tmp_total_high_offset ,
+                            total_low_offset=tmp_total_low_offset, 
+                            flog=flog )
+
+                        # delete records from list that are to old
+                        delete_limited_date = ( datetime.datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=31) ).strftime('%Y-%m-%d')
+
+                        clean_list = list()
+                        for rec in list_of_records:
+                            if rec[0][0:10] < delete_limited_date:
+                                continue
+                            else:
+                                clean_list.append ( rec )
+
+                        list_of_records.clear() # give memory back
+
+                        # make a string of SQL statements
+                        sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog )
+
+                        #print( sql_script )
+                        #power_production_solar_db.excute('delete from powerproduction_solar')
+                        #####################
+
+                        #Bulk processing is about 40% faster then record for record.
+                        try:
+                            power_production_solar_db.executescript( sql_script )
+                        except Exception as e:
+                            flog.warning( inspect.stack()[0][3] + ": bulk update minuten gefaald, record voor record worden verwerkt." + str(e.args[0]) )
+
+                            idx = 0
+                            while idx < len( clean_list ):
+                                sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog , first_idx=idx, last_idx=idx )
+                                power_production_solar_db.executescript( sql_script )
+                                idx += 1
+
+                toc = time.perf_counter()
+                flog.info( inspect.stack()[0][3] + ": " + str( len(clean_list) ) + " minuten records verwerkt in " + f"{toc - tic:0.3f} seconden." )
+            except Exception as e:
+                flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor minuten informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+
+            ######################################################
+            # hour processing                                    #
+            ######################################################
+            tic = time.perf_counter()
+            list_of_records = list()
+            max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list 
+            # limit range to dates that exceed the rentention period.
+            # delete_limited_date = ( datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=1096) ).strftime('%Y-%m-%d')
+            try:
+
+                list_of_sites   = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
+                date_list       = datetime_delta_lib.create_date_list( start_date, end_date, period = 'm', range=1, repeatdate=True )
+                flog.debug( inspect.stack()[0][3] + ": date_list=" + str( date_list) )
+
+                for date_set in date_list:
+
+                    # start_date = "2016-10-25" #DEBUG om range fouten te testen
+                    flog.debug( inspect.stack()[0][3] + ": start date=" + str( date_set[0]) + " stop date=" + str( date_set[1]) )
+
+                    data = api.get_energy( 
+                        api_query_list_of_ids,
+                        date_set[0], 
+                        date_set[1], 
+                        time_unit=solaredge_lib.API_HOUR #DIFF
+                        )
+                    rt_status_db.timestamp( 111, flog )
+
+                    for idx in range( data['sitesEnergy']['count'] ):
+    
+                        #print ( "siteId[x] = ",  data['sitesEnergy']['siteEnergyList'][idx]['siteId'])
+                        list_of_records.clear()
+
+                        try:
+                            site_id = data['sitesEnergy']['siteEnergyList'][idx]['siteId']
+                            db_sql_index_number = solaredge_shared_lib.read_db_index_from_list( site_id, list_of_sites )
+                            flog.info( inspect.stack()[0][3] + ": gestart met uur data voor site ID " + str( site_id ) +\
+                                 " met DB index " +  str( db_sql_index_number ) + " voor periode " +  str(date_set[0]) + " - "  + str(date_set[1]))
+                            data_set = data['sitesEnergy']['siteEnergyList'][idx ]['energyValues']['values']
+                            #print ( "data_set = ", data_set )
+
+                            for i in range( len(data_set) ):
+
+                                kWh_value = data_set[i]['value']
+
+                                if kWh_value == None:
+                                    continue # there is no valid data for this timestamp.
+                            
+                                rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
+
+                                rec[0] = data_set[i]['date'][:13]+":00:00" # TIMESTAMP
+                                
+                                #flog.info( str(rec) )
+                                
+                                if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
+                                    flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
+                                    continue
+                                max_timestamp = rec[0] 
+
+                                rec[1] = db_sql_index_number + 2                              # TIMEPERIOD_ID 
+                                rec[2] = 1                                                    # POWER_SOURCE_ID set to Solar Edge ID, default to 0.
+
+                                #tariff_index = 0
+                                if tariff_index == 0:
+                                    rec[3] = round(  (kWh_value  / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = 0                                 # PRODUCTION_KWH_LOW
+                                else:
+                                    # get the low and high tariff pct's
+                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_hour_percentages( rec[0], tariff_set=tariff_index )
+                                    # multiply by percentage and convert Wh to kWh.
+                                    rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
+
+                                flog.debug( inspect.stack()[0][3] + " record added = : " + str( rec ) )
+
+                                list_of_records.append ( rec.copy() )
+
+                        except Exception as e:
+                            rt_status_db.timestamp( 112, flog )
+                            flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor minuut informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+                        ####################################################
+                        # find previous total values from the SQL database #
+                        ####################################################
+                        tmp_total_high_offset = 0
+                        tmp_total_low_offset  = 0
+                        try:
+                            start_date_from_api = str( list_of_records[0][0] ) # the oldest timestamp from the API
+                            db_index_number_tmp = str( db_sql_index_number + 2 ) # HOUR
+                            
+                            sql_timestamp = "select timestamp, PRODUCTION_KWH_HIGH_TOTAL, PRODUCTION_KWH_LOW_TOTAL from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB +\
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" + db_index_number_tmp +\
+                                 " and timestamp == ( select max(timestamp) from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB + \
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" +\
+                                 db_index_number_tmp + " and timestamp < '" + start_date_from_api + "')"
+                            
+                            #flog.debug( inspect.stack()[0][3] + ": sql = " + sql_timestamp )
+                            record = power_production_solar_db.select_rec( sql_timestamp )
+                            tmp_total_high_offset = float(record[0][1])
+                            tmp_total_low_offset  = float(record[0][2])
+                            flog.debug( inspect.stack()[0][3] + ": tmp_total_high_offset = " + str(tmp_total_high_offset) +\
+                                                                 " tmp_total_low_offset=" + str(tmp_total_low_offset) )
+                        except Exception as e:
+                            flog.info( inspect.stack()[0][3] + ": geen eerder record gevonden voor totaal waarden, 0 wordt gebruikt als waarde." )
+
+                        ##############################################
+                        # determine the totals for the found site ID #
+                        # set the totals of high, low en both        #
+                        ##############################################
+                        solaredge_shared_lib.recalculate_totals( list_of_records,
+                            total_high_offset=tmp_total_high_offset ,
+                            total_low_offset=tmp_total_low_offset, 
+                            flog=flog )
+
+                        # delete records from list that are to old
+                        delete_limited_date = ( datetime.datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=1096) ).strftime('%Y-%m-%d')
+
+                        clean_list = list()
+                        for rec in list_of_records:
+                            if rec[0][0:10] < delete_limited_date:
+                                continue
+                            else:
+                                clean_list.append ( rec )
+
+                        list_of_records.clear() # give memory back
+
+                        # make a string of SQL statements
+                        sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog )
+
+                        #Bulk processing is about 40% faster then record for record.
+                        try:
+                            power_production_solar_db.executescript( sql_script )
+                        except Exception as e:
+                            flog.warning( inspect.stack()[0][3] + ": bulk update uur gefaald, record voor record worden verwerkt." + str(e.args[0]) )
+
+                            idx = 0
+                            while idx < len( clean_list ):
+                                sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog , first_idx=idx, last_idx=idx )
+                                power_production_solar_db.executescript( sql_script )
+                                idx += 1
+
+                toc = time.perf_counter()
+                flog.info( inspect.stack()[0][3] + ": " + str( len(clean_list) ) + " uur records verwerkt in " + f"{toc - tic:0.3f} seconden." )
+            except Exception as e:
+                flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor uur informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+
+            ######################################################
+            # day processing                                     #
+            ######################################################
+            tic = time.perf_counter()
+            list_of_records = list()
+            max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list 
+            # limit range to dates that exceed the rentention period.
+            # delete_limited_date = ( datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=1096) ).strftime('%Y-%m-%d')
+            try:
+
+                list_of_sites   = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
+                date_list       = datetime_delta_lib.create_date_list( start_date, end_date, period = 'y', range=1, repeatdate=True )
+                flog.debug( inspect.stack()[0][3] + ": date_list=" + str( date_list) )
+                for date_set in date_list:
+
+                    # start_date = "2016-10-25" #DEBUG om range fouten te testen
+                    flog.debug( inspect.stack()[0][3] + ": start date=" + str( date_set[0]) + " stop date=" + str( date_set[1]) )
+
+                    data = api.get_energy( 
+                        api_query_list_of_ids,
+                        date_set[0], 
+                        date_set[1], 
+                        time_unit=solaredge_lib.API_DAY #DIFF
+                        )
+                    rt_status_db.timestamp( 111, flog )
+
+                    for idx in range( data['sitesEnergy']['count'] ):
+    
+                        #print ( "siteId[x] = ",  data['sitesEnergy']['siteEnergyList'][idx]['siteId'])
+                        list_of_records.clear()
+
+                        try:
+                            site_id = data['sitesEnergy']['siteEnergyList'][idx]['siteId']
+                            db_sql_index_number = solaredge_shared_lib.read_db_index_from_list( site_id, list_of_sites )
+                            flog.info( inspect.stack()[0][3] + ": gestart met dag data voor site ID " + str( site_id ) +\
+                                 " met DB index " +  str( db_sql_index_number ) + " voor periode " +  str(date_set[0]) + " - "  + str(date_set[1]))
+                            data_set = data['sitesEnergy']['siteEnergyList'][idx ]['energyValues']['values']
+                            #print ( "data_set = ", data_set )
+
+                            for i in range( len(data_set) ):
+
+                                kWh_value = data_set[i]['value']
+
+                                if kWh_value == None:
+                                    continue # there is no valid data for this timestamp.
+                            
+                                rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
+
+                                rec[0] = data_set[i]['date'][:10]+" 00:00:00" # TIMESTAMP
+                                
+                                #flog.info( str(rec) )
+                                
+                                if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
+                                    flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
+                                    continue
+                                max_timestamp = rec[0] 
+
+                                rec[1] = db_sql_index_number + 3                              # TIMEPERIOD_ID 
+                                rec[2] = 1                                                    # POWER_SOURCE_ID set to Solar Edge ID, default to 0.
+
+                                #tariff_index = 0
+                                if tariff_index == 0:
+                                    rec[3] = round(  (kWh_value  / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = 0                                 # PRODUCTION_KWH_LOW
+                                else:
+                                    # get the low and high tariff pct's
+                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_hour_percentages( rec[0], tariff_set=tariff_index )
+                                    # multiply by percentage and convert Wh to kWh.
+                                    rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
+
+                                flog.debug( inspect.stack()[0][3] + " record added = : " + str( rec ) )
+
+                                list_of_records.append ( rec.copy() )
+
+                        except Exception as e:
+                            rt_status_db.timestamp( 112, flog )
+                            flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor dag informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+                        ####################################################
+                        # find previous total values from the SQL database #
+                        ####################################################
+                        tmp_total_high_offset = 0
+                        tmp_total_low_offset  = 0
+                        try:
+                            start_date_from_api = str( list_of_records[0][0] ) # the oldest timestamp from the API
+                            db_index_number_tmp = str( db_sql_index_number + 3 ) # DAY
+                            
+                            sql_timestamp = "select timestamp, PRODUCTION_KWH_HIGH_TOTAL, PRODUCTION_KWH_LOW_TOTAL from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB +\
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" + db_index_number_tmp +\
+                                 " and timestamp == ( select max(timestamp) from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB + \
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" +\
+                                 db_index_number_tmp + " and timestamp < '" + start_date_from_api + "')"
+                            
+                            #flog.debug( inspect.stack()[0][3] + ": sql = " + sql_timestamp )
+                            record = power_production_solar_db.select_rec( sql_timestamp )
+                            tmp_total_high_offset = float(record[0][1])
+                            tmp_total_low_offset  = float(record[0][2])
+                            flog.debug( inspect.stack()[0][3] + ": tmp_total_high_offset = " + str(tmp_total_high_offset) +\
+                                                                 " tmp_total_low_offset=" + str(tmp_total_low_offset) )
+                        except Exception as e:
+                            flog.info( inspect.stack()[0][3] + ": geen eerder record gevonden voor totaal waarden, 0 wordt gebruikt als waarde." )
+
+                        ##############################################
+                        # determine the totals for the found site ID #
+                        # set the totals of high, low en both        #
+                        ##############################################
+                        solaredge_shared_lib.recalculate_totals( list_of_records,
+                            total_high_offset=tmp_total_high_offset ,
+                            total_low_offset=tmp_total_low_offset, 
+                            flog=flog )
+
+                        # delete records from list that are to old
+                        delete_limited_date = ( datetime.datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=1096) ).strftime('%Y-%m-%d')
+
+                        clean_list = list()
+                        for rec in list_of_records:
+                            if rec[0][0:10] < delete_limited_date:
+                                continue
+                            else:
+                                clean_list.append ( rec )
+
+                        list_of_records.clear() # give memory back
+
+                        # make a string of SQL statements
+                        sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog )
+
+                        #Bulk processing is about 40% faster then record for record.
+                        try:
+                            power_production_solar_db.executescript( sql_script )
+                        except Exception as e:
+                            flog.warning( inspect.stack()[0][3] + ": bulk update dag gefaald, record voor record worden verwerkt." + str(e.args[0]) )
+
+                            idx = 0
+                            while idx < len( clean_list ):
+                                sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog , first_idx=idx, last_idx=idx )
+                                power_production_solar_db.executescript( sql_script )
+                                idx += 1
+
+                toc = time.perf_counter()
+                flog.info( inspect.stack()[0][3] + ": " + str( len(clean_list) ) + " dag records verwerkt in " + f"{toc - tic:0.3f} seconden." )
+            except Exception as e:
+                flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor dag informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+
+            ######################################################
+            # month processing                                   #
+            ######################################################
+            tic = time.perf_counter()
+            list_of_records = list()
+            max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list 
+           
+            try:
+
+                list_of_sites   = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
+
+                date_list = []
+                date_set  = []
+                date_set.append ( ( datetime.datetime.now() - relativedelta( months=1 )).strftime('%Y-%m-01') )
+                date_set.append ( end_date[0:7]+"-01" )
+                date_list.append( date_set )
+
+                flog.debug( inspect.stack()[0][3] + ": date_list=" + str( date_list) )
+
+                for date_set in date_list:
+
+                    # start_date = "2016-10-25" #DEBUG om range fouten te testen
+                    flog.debug( inspect.stack()[0][3] + ": start date=" + str( date_set[0]) + " stop date=" + str( date_set[1]) )
+
+                    data = api.get_energy( 
+                        api_query_list_of_ids,
+                        date_set[0], 
+                        date_set[1], 
+                        time_unit=solaredge_lib.API_MONTH #DIFF
+                        )
+                    rt_status_db.timestamp( 111, flog )
+
+                    for idx in range( data['sitesEnergy']['count'] ):
+    
+                        #print ( "siteId[x] = ",  data['sitesEnergy']['siteEnergyList'][idx]['siteId'])
+                        list_of_records.clear()
+
+                        try:
+                            site_id = data['sitesEnergy']['siteEnergyList'][idx]['siteId']
+                            db_sql_index_number = solaredge_shared_lib.read_db_index_from_list( site_id, list_of_sites )
+                            flog.info( inspect.stack()[0][3] + ": gestart met maand data voor site ID " + str( site_id ) +\
+                                 " met DB index " +  str( db_sql_index_number ) + " voor periode " +  str(date_set[0]) + " - "  + str(date_set[1]))
+                            data_set = data['sitesEnergy']['siteEnergyList'][idx ]['energyValues']['values']
+                            #print ( "data_set = ", data_set )
+
+                            for i in range( len(data_set) ):
+
+                                kWh_value = data_set[i]['value']
+
+                                if kWh_value == None:
+                                    continue # there is no valid data for this timestamp.
+                            
+                                rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
+
+                                rec[0] = data_set[i]['date'][:7]+"-01 00:00:00" # TIMESTAMP
+                                
+                                #flog.info( str(rec) )
+                                
+                                if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
+                                    flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
+                                    continue
+                                max_timestamp = rec[0] 
+
+                                rec[1] = db_sql_index_number + 4                              # TIMEPERIOD_ID 
+                                rec[2] = 1                                                    # POWER_SOURCE_ID set to Solar Edge ID, default to 0.
+
+                                if tariff_index == 0:
+                                    rec[3] = round(  ( kWh_value  / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = 0                                 # PRODUCTION_KWH_LOW
+                                else:
+                                    # get the low and high tariff pct's
+                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_hour_percentages( rec[0], tariff_set=tariff_index )
+                                    # multiply by percentage and convert Wh to kWh.
+                                    rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
+
+                                flog.debug( inspect.stack()[0][3] + " record added = : " + str( rec ) )
+
+                                list_of_records.append ( rec.copy() )
+
+                        except Exception as e:
+                            rt_status_db.timestamp( 112, flog )
+                            flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor maand informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+                        ####################################################
+                        # find previous total values from the SQL database #
+                        ####################################################
+                        tmp_total_high_offset = 0
+                        tmp_total_low_offset  = 0
+                        try:
+                            start_date_from_api = str( list_of_records[0][0]   ) # the oldest timestamp from the API
+                            db_index_number_tmp = str( db_sql_index_number + 4 ) # MONTH
+                            
+                            sql_timestamp = "select timestamp, PRODUCTION_KWH_HIGH_TOTAL, PRODUCTION_KWH_LOW_TOTAL from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB +\
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" + db_index_number_tmp +\
+                                 " and timestamp == ( select max(timestamp) from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB + \
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" +\
+                                 db_index_number_tmp + " and timestamp < '" + start_date_from_api + "')"
+                            
+                            #flog.debug( inspect.stack()[0][3] + ": sql = " + sql_timestamp )
+                            record = power_production_solar_db.select_rec( sql_timestamp )
+                            tmp_total_high_offset = float(record[0][1])
+                            tmp_total_low_offset  = float(record[0][2])
+                            flog.debug( inspect.stack()[0][3] + ": tmp_total_high_offset = " + str(tmp_total_high_offset) +\
+                                                                 " tmp_total_low_offset=" + str(tmp_total_low_offset) )
+                        except Exception as e:
+                            flog.info( inspect.stack()[0][3] + ": geen eerder record gevonden voor totaal waarden, 0 wordt gebruikt als waarde." )
+
+                        ##############################################
+                        # determine the totals for the found site ID #
+                        # set the totals of high, low en both        #
+                        ##############################################
+                        solaredge_shared_lib.recalculate_totals( list_of_records,
+                            total_high_offset=tmp_total_high_offset ,
+                            total_low_offset=tmp_total_low_offset, 
+                            flog=flog )
+
+                        # make a string of SQL statements
+                        sql_script = solaredge_shared_lib.generate_sql_text ( list_of_records, flog) 
+
+                        #Bulk processing is about 40% faster then record for record.
+                        try:
+                            power_production_solar_db.executescript( sql_script )
+                        except Exception as e:
+                            flog.warning( inspect.stack()[0][3] + ": bulk update maand gefaald, record voor record worden verwerkt." + str(e.args[0]) )
+
+                            idx = 0
+                            while idx < len( clean_list ):
+                                sql_script = solaredge_shared_lib.generate_sql_text ( list_of_records, flog , first_idx=idx, last_idx=idx )
+                                power_production_solar_db.executescript( sql_script )
+                                idx += 1
+
+                toc = time.perf_counter()
+                flog.info( inspect.stack()[0][3] + ": " + str( len( list_of_records ) ) + " maand records verwerkt in " + f"{toc - tic:0.3f} seconden." )
+            except Exception as e:
+                flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor maand informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+
             
-                #print( tmp_meta_data )
+            ######################################################
+            # year processing                                    #
+            ######################################################
+            tic = time.perf_counter()
+            list_of_records = list()
+            max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list 
+           
+            try:
 
-                ###############################################################
-                # clean the list of records that are already in the database  #
-                # based on the timestamp in the database                      #
-                ###############################################################
-               
-                tmp_list_of_records = []
-                for row in list_of_records:
-                    if row[0] > tmp_meta_data['MAX_DB_TIMESTAMP']:
-                        tmp_list_of_records.append ( row )
+                list_of_sites   = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
 
-                list_of_records.clear()
-                list_of_records = tmp_list_of_records.copy() # keep the var. name the same.
+                date_list = []
+                date_set  = []
+                date_set.append ( ( datetime.datetime.now() - relativedelta( years=1 )).strftime('%Y-01-01') )
+                date_set.append ( end_date[0:4]+"-01-01" )
+                date_list.append( date_set )
 
-                flog.debug( inspect.stack()[0][3] + " site ID = : " + str( data['sitesEnergy']['siteEnergyList'][idx]['siteId'] ) +\
-                    " verwerkt. " +  str(len(list_of_records)) + " daadwerkelijk te verwerken buffer regels." )
+                flog.debug( inspect.stack()[0][3] + ": date_list=" + str( date_list) )
 
+                for date_set in date_list:
 
-                if len( list_of_records) == 0:
-                    flog.info( inspect.stack()[0][3] + ": geen nieuwe data van de API om te verwerken " )
-                    continue # back to loop.
+                    # start_date = "2016-10-25" #DEBUG om range fouten te testen
+                    flog.debug( inspect.stack()[0][3] + ": start date=" + str( date_set[0]) + " stop date=" + str( date_set[1]) )
 
+                    data = api.get_energy( 
+                        api_query_list_of_ids,
+                        date_set[0], 
+                        date_set[1], 
+                        time_unit=solaredge_lib.API_YEAR #DIFF
+                        )
+                    rt_status_db.timestamp( 111, flog )
 
-                #print ( len(tmp_list_of_records)  )
-                ###############################################################
-                # only continue the processing of the data if the buffer is   #
-                # loaded                                                      #
-                ###############################################################
-                if len( list_of_records) != 0: # there is data, so process the rest
+                    for idx in range( data['sitesEnergy']['count'] ):
+    
+                        #print ( "siteId[x] = ",  data['sitesEnergy']['siteEnergyList'][idx]['siteId'])
+                        list_of_records.clear()
 
-                    ##############################################
-                    # determine the totals for the found site ID #
-                    # set the totals of high, low en both        #
-                    ##############################################
-                    solaredge_shared_lib.recalculate_totals( list_of_records,
-                        total_high_offset=tmp_meta_data['MAX_PRODUCTION_KWH_HIGH_TOTAL'] ,
-                        total_low_offset=tmp_meta_data['MAX_PRODUCTION_KWH_LOW_TOTAL'], 
-                        flog=flog )
+                        try:
+                            site_id = data['sitesEnergy']['siteEnergyList'][idx]['siteId']
+                            db_sql_index_number = solaredge_shared_lib.read_db_index_from_list( site_id, list_of_sites )
+                            flog.info( inspect.stack()[0][3] + ": gestart met jaar data voor site ID " + str( site_id ) +\
+                                 " met DB index " +  str( db_sql_index_number ) + " voor periode " +  str(date_set[0]) + " - "  + str(date_set[1]))
+                            data_set = data['sitesEnergy']['siteEnergyList'][idx ]['energyValues']['values']
+                            #print ( "data_set = ", data_set )
 
-                    flog.info( inspect.stack()[0][3] + ": minuut data wordt verwerkt." )
-                    # Bulk processing is about 40% faster then record for record
-                    try:
-                        #raise Exception("TEST")
+                            for i in range( len(data_set) ):
+
+                                kWh_value = data_set[i]['value']
+
+                                if kWh_value == None:
+                                    continue # there is no valid data for this timestamp.
+                            
+                                rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
+
+                                rec[0] = data_set[i]['date'][:4]+"-01-01 00:00:00" # TIMESTAMP
+                                
+                                #flog.info( str(rec) )
+                                
+                                if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
+                                    flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
+                                    continue
+                                max_timestamp = rec[0] 
+
+                                rec[1] = db_sql_index_number + 5                              # TIMEPERIOD_ID 
+                                rec[2] = 1                                                    # POWER_SOURCE_ID set to Solar Edge ID, default to 0.
+
+                                if tariff_index == 0:
+                                    rec[3] = round(  ( kWh_value  / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = 0                                 # PRODUCTION_KWH_LOW
+                                else:
+                                    # get the low and high tariff pct's
+                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_hour_percentages( rec[0], tariff_set=tariff_index )
+                                    # multiply by percentage and convert Wh to kWh.
+                                    rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
+                                    rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
+
+                                flog.debug( inspect.stack()[0][3] + " record added = : " + str( rec ) )
+
+                                list_of_records.append ( rec.copy() )
+
+                        except Exception as e:
+                            rt_status_db.timestamp( 112, flog )
+                            flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor jaar informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+
+                        ####################################################
+                        # find previous total values from the SQL database #
+                        ####################################################
+                        tmp_total_high_offset = 0
+                        tmp_total_low_offset  = 0
+                        try:
+                            start_date_from_api = str( list_of_records[0][0]   ) # the oldest timestamp from the API
+                            db_index_number_tmp = str( db_sql_index_number + 5 ) # YEAR
+                            
+                            sql_timestamp = "select timestamp, PRODUCTION_KWH_HIGH_TOTAL, PRODUCTION_KWH_LOW_TOTAL from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB +\
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" + db_index_number_tmp +\
+                                 " and timestamp == ( select max(timestamp) from " +\
+                                 const.DB_POWERPRODUCTION_SOLAR_TAB + \
+                                 " where power_source_id=1 and TIMEPERIOD_ID=" +\
+                                 db_index_number_tmp + " and timestamp < '" + start_date_from_api + "')"
+                            
+                            #flog.debug( inspect.stack()[0][3] + ": sql = " + sql_timestamp )
+                            record = power_production_solar_db.select_rec( sql_timestamp )
+                            tmp_total_high_offset = float(record[0][1])
+                            tmp_total_low_offset  = float(record[0][2])
+                            flog.debug( inspect.stack()[0][3] + ": tmp_total_high_offset = " + str(tmp_total_high_offset) +\
+                                                                 " tmp_total_low_offset=" + str(tmp_total_low_offset) )
+                        except Exception as e:
+                            flog.info( inspect.stack()[0][3] + ": geen eerder record gevonden voor totaal waarden, 0 wordt gebruikt als waarde." )
+
+                        ##############################################
+                        # determine the totals for the found site ID #
+                        # set the totals of high, low en both        #
+                        ##############################################
+                        solaredge_shared_lib.recalculate_totals( list_of_records,
+                            total_high_offset=tmp_total_high_offset ,
+                            total_low_offset=tmp_total_low_offset, 
+                            flog=flog )
+
                         # make a string of SQL statements
                         sql_script = solaredge_shared_lib.generate_sql_text ( list_of_records, flog )
-                        #print ( "sql_script=", sql_script )
-                        power_production_solar_db.executescript( sql_script )
-                    except Exception as e:
-                        flog.warning( inspect.stack()[0][3] + ": bulk update gefaald, record voor record wordt verwerkt." + str(e.args[0]) )
-                        # use failsave if the bulk fails.
-                        idx = 0
-                        while idx < len( list_of_records ):
-                            sql_script = solaredge_shared_lib.generate_sql_text ( list_of_records, flog , first_idx=idx, last_idx=idx )
+
+                        #Bulk processing is about 40% faster then record for record.
+                        try:
                             power_production_solar_db.executescript( sql_script )
-                            idx += 1
+                        except Exception as e:
+                            flog.warning( inspect.stack()[0][3] + ": bulk update jaar gefaald, record voor record worden verwerkt." + str(e.args[0]) )
 
-                    
-                    flog.info( inspect.stack()[0][3] + ": uur data wordt verwerkt." )
-                    update_db( start_date=tmp_meta_data['MAX_DB_TIMESTAMP'] , end_date=end_date, base_period_id=tmp_meta_data['DB_INDEX'], period='h' )
-                    
-                    flog.info( inspect.stack()[0][3] + ": dag data wordt verwerkt." )
-                    update_db( start_date=tmp_meta_data['MAX_DB_TIMESTAMP'] , end_date=end_date, base_period_id=tmp_meta_data['DB_INDEX'], period='d' )
-                    
-                    flog.info( inspect.stack()[0][3] + ": maand data wordt verwerkt." )
-                    update_db( start_date=tmp_meta_data['MAX_DB_TIMESTAMP'], end_date=end_date, base_period_id=tmp_meta_data['DB_INDEX'], period='m' )
-                    
-                    flog.info( inspect.stack()[0][3] + ": jaar data wordt verwerkt." )
-                    update_db( start_date=tmp_meta_data['MAX_DB_TIMESTAMP'] , end_date=end_date, base_period_id=tmp_meta_data['DB_INDEX'], period='y' )
+                            idx = 0
+                            while idx < len( clean_list ):
+                                sql_script = solaredge_shared_lib.generate_sql_text ( list_of_records, flog , first_idx=idx, last_idx=idx )
+                                power_production_solar_db.executescript( sql_script )
+                                idx += 1
 
-                    # delete min, hour, day records passed the retention time.
-                    flog.info( inspect.stack()[0][3] + ": verouderde data wordt verwijderd." )
-                    list_of_sites = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
-                    solaredge_shared_lib.clean_db_by_renention(db=power_production_solar_db, flog=flog, site_list=list_of_sites )
-                    
-                    flog.info( inspect.stack()[0][3] + ": gereed." )
-
+                toc = time.perf_counter()
+                flog.info( inspect.stack()[0][3] + ": " + str( len( list_of_records ) ) + " jaar records verwerkt in " + f"{toc - tic:0.3f} seconden." )
             except Exception as e:
-                rt_status_db.timestamp( 112, flog )
-                flog.warning( inspect.stack()[0][3] + ": probleem met laden data -> " + str(e.args[0]) )
+                flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor jaar informatie " + str( site_id ) + " -> " + str(e.args[0]) )
+           
+            # delete min, hour, day records passed the retention time.
+            flog.info( inspect.stack()[0][3] + ": verouderde data wordt verwijderd." )
+            list_of_sites = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
+            solaredge_shared_lib.clean_db_by_retention(db=power_production_solar_db, flog=flog, site_list=list_of_sites )
 
         #sys.exit()
 
         if time_out_in_seconds < LOOP_TIMEOUT_IN_SEC: # the timeout is inital set to zero (0) and now set to the normal looptime.
             time_out_in_seconds = LOOP_TIMEOUT_IN_SEC
-        
-
 
 
 ###########################################################################
@@ -335,18 +901,17 @@ def get_site_ids( meta_data ):
 
 
 ###########################################################################
-# get the smalest timestamp from the metadata set or the current          #
-# timestamp if there is no meta data                                      #
+# get the smalest timestamp from the metadata set to yesterday            #
+# if there is no metadata                                                 #
 ###########################################################################
 def get_smalest_timestamp( meta_data ):
-    
-    timestamp = makeLocalTimeString.makeLocalTimeString( mode='short' ) # use current time as possible smallest time
-    
-    for item in meta_data:
-        if item['START_DATE'] < timestamp:
-            timestamp = item['START_DATE']
 
-    return timestamp
+    yesterday = ( datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+
+    for item in meta_data:
+        if item['START_DATE'] < yesterday:
+            timestamp = item['START_DATE']
+    return yesterday
 
 
 ###########################################################################
@@ -538,6 +1103,7 @@ def check_and_set_api_key( apikey="", api=None ):
             apikey = apikey_from_config
             flog.debug( inspect.stack()[0][3] + ": solaredge api key is aangepast/ingesteld (" + apikey + ").")
             try:
+                api = None
                 api = solaredge_lib.Solaredge( apikey , debug=False ) # debug is for the solaredge lib only.
                 rt_status_db.timestamp( 111, flog ) # last time a Solar Edge Api call was made 
             except Exception as e:

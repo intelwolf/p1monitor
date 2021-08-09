@@ -230,6 +230,21 @@ class configDB():
         # Index waarde NL=0, UK=1, FR=2
         self.insert_rec("insert or ignore into " + table + " values ( '148','0'                ,'UI taal selectie 0....n')")
 
+        self.insert_rec("insert or ignore into " + table + " values ( '149','0'                ,'Solar Edge config/DB naar fabrieks instellingen 1/0)')")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '150','721xj.duckdns.org' ,'Public dynamiche DNS naam.')")
+
+        # DuckDNS
+        self.insert_rec("insert or ignore into " + table + " values ( '151','dec1d53b-e35d-4f42-ba89-4d3438ea9a3d','DuckDNS token.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '152','1','DuckDNS is aan(1) of uit(0).')") 
+        self.insert_rec("insert or ignore into " + table + " values ( '153','0','Forceer een DuckDNS update.')") 
+
+        # you need an account on www.noip.com before this can be used
+        #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")
+        #self.insert_rec("insert or ignore into " + table + " values ( '151',''                 ,'no-ip account name')")
+        #self.insert_rec("insert or ignore into " + table + " values ( '152','eth0'             ,'no-ip netwerk device (eth0/wifi).')")
+        #self.insert_rec("insert or ignore into " + table + " values ( '153','30'               ,'no-ip update timeout in seconden.')")
+        #self.insert_rec("insert or ignore into " + table + " values ( '154','0'                ,'no-ip is aan(1) of uit(0).')")
 
         self.close_db()
 

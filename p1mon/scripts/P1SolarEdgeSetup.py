@@ -66,10 +66,11 @@ def Main( argv ):
     parser.add_argument( '-ddb',  '--deletedb',
         required=False,
         action="store_true",
-        #action='append', 
-        #nargs='+',
-        help="Wis alle energie data van de sites die als gewist zijn gemarkeerd." )  
-
+        help="Wis alle energie data van de sites die als gewist zijn gemarkeerd." )
+    parser.add_argument( '-g',  '--genesis',
+        required=False,
+        action="store_true",
+        help="Wis alle data en configuratie (fabrieks instelling)." )
 
     args = parser.parse_args()
 
@@ -93,6 +94,44 @@ def Main( argv ):
         flog.critical(inspect.stack()[0][3]+": Database niet te openen(2)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
+
+    ########################################################
+    # reset all the setting to factory settings and delete #
+    # all the data                                         #
+    ########################################################
+    if args.genesis == True:
+
+        try: # clear the configuration
+            config_db.strset( "" , 140, flog )
+            flog.info( inspect.stack()[0][3] + ": configuratie van sites gewist." )
+        except Exception as e:
+            flog.critical( inspect.stack()[0][3] + ": configuratie van sites kan niet worden gewist -> " + str(e.args[0]) )
+        
+        try: # reset all the option to factory set
+            config_db.strset( ""  , 139, flog ) # API key delete.
+            config_db.strset( "0" , 141, flog ) # processing is not active.
+            config_db.strset( "0" , 142, flog ) # reload data off.
+            config_db.strset( "1" , 143, flog ) # tariff mode.
+            config_db.strset( "0" , 144, flog ) # don't get site info.
+            config_db.strset( "0" , 145, flog ) # solar reset info.
+            config_db.strset( "1" , 146, flog ) # smart update mode.
+            flog.info( inspect.stack()[0][3] + ": fabrieks instellingen herstelt." )
+        except Exception as e:
+            flog.critical( inspect.stack()[0][3] + ": configuratie van sites kan niet worden gewist -> " + str(e.args[0]) )
+
+        # open van power production database for the solar data
+        try:
+            power_production_solar_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_SOLAR_TAB, flog )
+        except Exception as e:
+            flog.critical( inspect.stack()[0][3] + ": Database niet te openen." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
+            sys.exit(1)
+        flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
+
+        solaredge_shared_lib.delete_all_record(db=power_production_solar_db, table=const.DB_POWERPRODUCTION_SOLAR_TAB, flog=flog )
+
+        flog.info( inspect.stack()[0][3] + ": Wissen van database en configuratie afgerond." ) 
+
+        sys.exit( 0 )
 
 
     #######################################################
@@ -295,7 +334,10 @@ def Main( argv ):
                     
                         rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
 
-                        rec[0] = data_set[i]['date']                                  # TIMESTAMP
+                        rec[0] = data_set[i]['date'][:4]+"-01-01 00:00:00" # TIMESTAMP
+                            
+                        #flog.info( str(rec) )
+
                         rec[1] = db_sql_index_number + 5                              # TIMEPERIOD_ID
                         rec[2] = 1                                                    # POWER_SOURCE_ID set to Solar Edge ID, default to 0.
 
@@ -384,11 +426,14 @@ def Main( argv ):
                     
                         rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
 
-                        rec[0] = data_set[i]['date']                                  # TIMESTAMP
+                        rec[0] = data_set[i]['date'][:7]+"-01 00:00:00" # TIMESTAMP
+                            
+                        #flog.info( str(rec) )
+
                         rec[1] = db_sql_index_number + 4                              # TIMEPERIOD_ID
                         rec[2] = 1                                                    # POWER_SOURCE_ID set to Solar Edge ID, default to 0.
 
-                        tariff_index = 2
+                        #tariff_index = 2
                         if tariff_index == 0:
                             rec[3] = round(  (kWh_value  / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
                             rec[4] = 0                                 # PRODUCTION_KWH_LOW
@@ -484,8 +529,12 @@ def Main( argv ):
                         
                             rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
 
-                            rec[0] = data_set[i]['date']                                  # TIMESTAMP
+                            #rec[0] = data_set[i]['date']                                  # TIMESTAMP
                             
+                            rec[0] = data_set[i]['date'][:10]+" 00:00:00" # TIMESTAMP
+                            
+                            #flog.info( str(rec) )
+
                             if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
                                 flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
                                 continue
@@ -583,6 +632,8 @@ def Main( argv ):
                     )
                 rt_status_db.timestamp( 111, flog )
 
+
+
                 for idx in range( data['sitesEnergy']['count'] ):
  
                     #print ( "siteId[x] = ",  data['sitesEnergy']['siteEnergyList'][idx]['siteId'])
@@ -603,8 +654,10 @@ def Main( argv ):
                         
                             rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
 
-                            rec[0] = data_set[i]['date']                                  # TIMESTAMP
+                            rec[0] = data_set[i]['date'][:13]+":00:00" # TIMESTAMP
                             
+                            #flog.info( str(rec) )
+
                             if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
                                 flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
                                 continue
@@ -721,7 +774,9 @@ def Main( argv ):
                         
                             rec = solaredge_shared_lib.POWER_PRODUCTION_SOLAR_INDEX_REC
 
-                            rec[0] = data_set[i]['date']                                  # TIMESTAMP
+                            rec[0] = data_set[i]['date'][:16]+":00" # TIMESTAMP
+                            
+                            #flog.info( str(rec) )
                             
                             if rec[0] <= max_timestamp:                                   # Make sure there is no double value in the list
                                 flog.debug( inspect.stack()[0][3] + " skipped timestamp  " + str( rec[0] ) + " all ready processed.")
@@ -731,7 +786,7 @@ def Main( argv ):
                             rec[1] = db_sql_index_number + 1                              # TIMEPERIOD_ID
                             rec[2] = 1                                                    # POWER_SOURCE_ID set to Solar Edge ID, default to 0.
 
-                            tariff_index = 0
+                            #tariff_index = 0
                             if tariff_index == 0:
                                 rec[3] = round(  (kWh_value  / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
                                 rec[4] = 0                                 # PRODUCTION_KWH_LOW

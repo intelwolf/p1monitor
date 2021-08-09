@@ -26,9 +26,12 @@ if( $localip == False ){
         }
 }
 
-$err_cnt      = -1;
-$err_str      = '';
-$key_seed     = 'solaredgeapikey';
+$sw_off   = strIdx( 193 );
+$sw_on    = strIdx( 192 );
+
+$err_cnt  = -1;
+$err_str  = '';
+$key_seed = 'solaredgeapikey';
 
 // SET API KEY
 if ( isset($_POST["SE_API_key"]) ) { 
@@ -40,11 +43,13 @@ if ( isset($_POST["SE_API_key"]) ) {
         $crypto_api_key = encodeString ( $input, $key_seed );
        
         if ( updateConfigDb("update config set parameter = '".$crypto_api_key."' where ID = 139")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 144")) $err_cnt += 1;
 
-        if ( strlen(trim($_POST["SE_API_key"])) == 0 ) { # to prevent error on a empty input
-        header('Location: '.$_SERVER['PHP_SELF']);
-        die;
-    }
+        // remove on 2021-06-01 so the API key kan be erased.
+        //if ( strlen(trim($_POST["SE_API_key"])) == 0 ) { # to prevent error on a empty input
+        //header('Location: '.$_SERVER['PHP_SELF']);
+        //die;
+        //}
 }
 
 // SAVE THE SITE DATA STRUCTURE, LIKE SITE ID's, ACTIVE, DELETE, etc. 
@@ -96,6 +101,17 @@ if ( isset($_POST[ "tariff" ]) ) {
         if ( updateConfigDb("update config set parameter = '" .$_POST["tariff"]. "' where ID = 143") ) $err_cnt += 1;
     }
 }
+
+
+if ( isset($_POST[ "fs_rb_solaredge_factory" ]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST[ "fs_rb_solaredge_factory" ] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 149") ) $err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 149") ) $err_cnt += 1;
+    }
+}
+
 
 function selectorTariffMode( $mode ) {
     $s0=$s1=$s2=0;
@@ -328,8 +344,8 @@ function setDbAttributeActive( site_id, cell , attr ) {
                                                         <label class="text-10"><?php echo strIdx( 160 );?></label>
                                                     </div>
                                                     <div class="rTableCell">
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_active_on"  name="fs_rb_solaredge_active" type="radio" value="1" <?php if ( config_read( 141 ) == 1 ) { echo 'checked'; }?>>Aan
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_active_off" name="fs_rb_solaredge_active" type="radio" value="0" <?php if ( config_read( 141 ) == 0 ) { echo 'checked'; }?>>Uit
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_active_on"  name="fs_rb_solaredge_active" type="radio" value="1" <?php if ( config_read( 141 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_active_off" name="fs_rb_solaredge_active" type="radio" value="0" <?php if ( config_read( 141 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                                     </div>
                                                 </div>
                                                 <div class="rTableRow" title="<?php echo strIdx( 151 );?>">
@@ -338,8 +354,8 @@ function setDbAttributeActive( site_id, cell , attr ) {
                                                         <label class="text-10"><?php echo strIdx( 161 );?></label>
                                                     </div>
                                                     <div class="rTableCell">
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_smart_api_on"  name="fs_rb_smart_api" type="radio" value="1" <?php if ( config_read( 146 ) == 1 ) { echo 'checked'; }?>>Aan
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_smart_api_off" name="fs_rb_smart_api" type="radio" value="0" <?php if ( config_read( 146 ) == 0 ) { echo 'checked'; }?>>Uit
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_smart_api_on"  name="fs_rb_smart_api" type="radio" value="1" <?php if ( config_read( 146 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_smart_api_off" name="fs_rb_smart_api" type="radio" value="0" <?php if ( config_read( 146 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                                     </div>
                                                 </div>
                                                 <div class="rTableRow" title="<?php echo strIdx( 152 );?>">
@@ -348,8 +364,8 @@ function setDbAttributeActive( site_id, cell , attr ) {
                                                         <label class="text-10"><?php echo strIdx( 162 );?></label>
                                                     </div>
                                                     <div class="rTableCell">
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reload_on"  name="fs_rb_solaredge_reload" type="radio" value="1" >Aan
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reload_off" name="fs_rb_solaredge_reload" type="radio" value="0" checked >Uit
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reload_on"  name="fs_rb_solaredge_reload" type="radio" value="1" ><?php echo $sw_on ?>
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reload_off" name="fs_rb_solaredge_reload" type="radio" value="0" checked ><?php echo $sw_off ?>
                                                     </div>
                                                 </div>
                                                 <div class="rTableRow" title="<?php echo strIdx( 153 );?>">
@@ -358,8 +374,19 @@ function setDbAttributeActive( site_id, cell , attr ) {
                                                         <label class="text-10"><?php echo strIdx( 163 );?></label>
                                                     </div>
                                                     <div class="rTableCell">
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reconfig_on"  name="fs_rb_solaredge_reconfig" type="radio" value="1" >Aan
-                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reconfig_off" name="fs_rb_solaredge_reconfig" type="radio" value="0" checked>Uit
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reconfig_on"  name="fs_rb_solaredge_reconfig" type="radio" value="1" ><?php echo $sw_on ?>
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_reconfig_off" name="fs_rb_solaredge_reconfig" type="radio" value="0" checked><?php echo $sw_off ?>
+                                                    </div>
+                                                </div>
+
+                                                <div class="rTableRow" title="<?php echo strIdx( 224 );?>">
+                                                    <div class="rTableCell">
+                                                        <i class="pad-7 text-10 fas fa-toggle-off"></i>
+                                                        <label class="text-10"><?php echo strIdx( 223 );?></label>
+                                                    </div>
+                                                    <div class="rTableCell">
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_factory_on"  name="fs_rb_solaredge_factory" type="radio" value="1" ><?php echo $sw_on ?>
+                                                        <input class="cursor-pointer" id="fs_rb_solaredge_factory_off" name="fs_rb_solaredge_factory" type="radio" value="0" checked><?php echo $sw_off ?>
                                                     </div>
                                                 </div>
                                                 
@@ -456,8 +483,8 @@ echo <<< "END"
 </script>
 END;
         }
-
-        updateConfigDb("update config set parameter = '1' where ID = 144"); // trigger the Watchdog to do an P1SolarEdgeSetup.py --savesites, this reloads the sites for the API key
+        # nu alleen bij de save van de api key
+        #updateConfigDb("update config set parameter = '1' where ID = 144"); // trigger the Watchdog to do an P1SolarEdgeSetup.py --savesites, this reloads the sites for the API key
         ?>
 <?php echo autoLogout(); ?>
 </body>

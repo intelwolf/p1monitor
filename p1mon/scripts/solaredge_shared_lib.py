@@ -101,10 +101,23 @@ def database_clean_up( db=None, flog=None , db_config=None ):
 
 
 ########################################################
+# delete all record                                   #
+########################################################
+def delete_all_record(db=None, table=const.DB_POWERPRODUCTION_SOLAR_TAB, flog=None ):
+    try:
+        sql_del_str = "delete from " + table  + " where POWER_SOURCE_ID = 1"
+        flog.debug( inspect.stack()[0][3] + ": wissen van alle records. sql=" + sql_del_str ) 
+        db.excute( sql_del_str )
+    except Exception as e:
+        flog.warning (inspect.stack()[0][3]+": wissen van minuten records gefaald: " + str(e) )
+
+
+
+########################################################
 # delete record that are passed the retention time     #
 # and that are active                                  #
 ########################################################
-def clean_db_by_renention( db=None, flog=None,  table=const.DB_POWERPRODUCTION_SOLAR_TAB, site_list=None ):
+def clean_db_by_retention( db=None, flog=None,  table=const.DB_POWERPRODUCTION_SOLAR_TAB, site_list=None ):
     
     timestamp = makeLocalTimeString.makeLocalTimeString()
 
