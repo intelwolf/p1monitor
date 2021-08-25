@@ -5,7 +5,7 @@ For more information see https://www.ztatz.nl/p1-monitor/ (Dutch language)
 
 ## Start the container
 Best way to start the container is using the included docker-compose file. That way your instance will also automatically start again after a host reboot
-I run the container using the following run command:
+Run the container using the following run command:
 
     docker-compose up -d
 
@@ -16,4 +16,4 @@ A docker image is available from docker hub. An example docker-compose is includ
 Follow instructions from the original author on updating to a new version.
 
 ## Migrate
-Copy files from a previous version (1.2.0 or later) in the defined 'alldata' directory in subdirectory 'data'
+Copy files from a previous version (1.2.0 or later) in the defined 'alldata' directory (see included docker-compose file) in subdirectory 'data' (alldata/data)
