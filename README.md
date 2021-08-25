@@ -13,5 +13,7 @@ I run the container using the following run command:
 A docker image is available from docker hub. An example docker-compose is included mapping external port 81 to the container.
 
 ## Updating
-Follow instructions from the original author on updating to a new version
+Follow instructions from the original author on updating to a new version.
 
+## Migrate
+Copy files from a previous version (1.2.0 or later) in the defined 'alldata' directory in subdirectory 'data'
