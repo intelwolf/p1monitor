@@ -12,6 +12,7 @@ cd /p1mon/scripts
 ./p1mon.sh start
 chmod 777 /p1mon/mnt/ramdisk
 chmod 666 /p1mon/mnt/ramdisk/*
+chown -R p1mon:p1mon /p1mon/export /p1mon/var
 
 # On SIGTERM stop services 
 trap 'echo "SIGTERM";touch /var/log/p1monitor/shutdown' SIGTERM
