@@ -37,7 +37,11 @@ server {
 		# First attempt to serve request as file, then fastcgi_cache_lock on; # as directory, then fall back to displaying a 404.
 		try_files $uri $uri/ =404;
 	}
-
+        location /nginx_status {
+ 		stub_status;
+ 		allow 127.0.0.1;	#only allow requests from localhost
+ 		deny all;		#deny all other hosts
+ 	}
 
 	# FastCGI pages to skip
 	#set $skip_cache 0;
