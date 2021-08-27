@@ -1,7 +1,16 @@
 #!/bin/bash
 
+if [ $DISABLECPUTEMP = true ]; then
+   echo "Disable CPU temperature check"
+   sed -i "s/^ *getCpuTemp/#&/" /p1mon/scripts/P1Watchdog.py
+fi
+
+echo "Starting cron"
+service cron start
+
 echo "Starting nginx"
-/usr/sbin/nginx &
+service nginx start
+#/usr/sbin/nginx &
 
 echo "Starting php-fpm"
 mkdir /run/php

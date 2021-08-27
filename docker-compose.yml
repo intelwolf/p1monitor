@@ -16,5 +16,7 @@ services:
     devices:
       - "/dev/ttyS0:/dev/ttyUSB0"
     restart: unless-stopped
+    environment:
+      - DISABLECPUTEMP=true
     expose:
       - "81"
