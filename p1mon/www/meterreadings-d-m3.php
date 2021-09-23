@@ -13,6 +13,7 @@ if ( checkDisplayIsActive(62) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor historie dag meterstanden</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -357,8 +358,8 @@ function DataLoop() {
 
 $(function() {
   toLocalStorage('meterreadings-menu',window.location.pathname);
-  GseriesVisibilty[6] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhGas')); // #PARAMETER
-  GseriesVisibilty[7] = JSON.parse(getLocalStorage('meterreadings-d-consumptionWater')); // #PARAMETER
+  GseriesVisibilty[0] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhGas')); // #PARAMETER
+  GseriesVisibilty[1] = JSON.parse(getLocalStorage('meterreadings-d-consumptionWater')); // #PARAMETER
   Gselected = parseInt(getLocalStorage('select-meterreadings-d-m3-index'),10); // #PARAMETER
 
   Highcharts.setOptions({

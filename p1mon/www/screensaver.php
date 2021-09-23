@@ -4,6 +4,7 @@ include_once '/p1mon/www/util/config_read.php';
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1 monitor screensaver</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">

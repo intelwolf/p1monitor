@@ -72,6 +72,7 @@ if ( isset($_POST["import"]) ) {
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>In en Export</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">

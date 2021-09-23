@@ -197,6 +197,7 @@ function makeSelectorMQTTProctocolVersionSelector($id) {
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>MQTT configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -205,7 +206,7 @@ function makeSelectorMQTTProctocolVersionSelector($id) {
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
-<script src="./js/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
 
 </head>

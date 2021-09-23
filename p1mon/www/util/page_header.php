@@ -2,9 +2,9 @@
 // needs config_read.php!
 
 function page_header() {
-    $xmas = $newversion = '';
-    $day     = intval(date ('j'));
-    $month     = intval(date ('n'));
+    $xmas  = $newversion = '';
+    $day   = intval(date ('j'));
+    $month = intval(date ('n'));
 
     // echo config_read( 134 );
     // 1 means hide the header -> don't generate code.
@@ -28,12 +28,11 @@ echo <<< EOT
 <div class="top-wrapper">
     <div class="content-wrapper">
         <img class="pos-1" alt="ztatz logo" src="./img/p1mon-logo.svg" width="50" height="45">
-        <span class="text-1">P1 monitor</span>
+        <span class="text-1">P1-monitor</span>
         $newversion
         $xmas
     </div>
 </div>
 EOT;
-    
 }
 ?>

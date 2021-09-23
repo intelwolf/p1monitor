@@ -102,6 +102,7 @@ if( isset($_POST["gpio_water"]) ) { //ok
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>Water levering configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -110,7 +111,7 @@ if( isset($_POST["gpio_water"]) ) { //ok
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
-<script src="./js/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
 
 </head>

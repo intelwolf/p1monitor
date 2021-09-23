@@ -56,4 +56,20 @@ def clean_timestamp_str( str_in ):
 def list_filter_to_str( in_value ):
     if type(in_value) is list:
         return str( in_value[0] )
-    return str( in_value)
+    return str( in_value )
+
+####################################
+# tries to santize html so no bad  #
+# scripting will be excuted        #
+####################################
+def santize_html( str_in ):
+
+    html_escape_table = {
+       "&": "&amp;",
+        '"': "&quot;",
+       "'": "&apos;",
+        ">": "&gt;",
+        "<": "&lt;",
+    }
+    return "".join( html_escape_table.get(c,c) for c in str_in )
+

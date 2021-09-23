@@ -20,7 +20,7 @@ from datetime import datetime, timedelta, timezone
 from logger import fileLogger,logging
 from sqldb import configDB, rtStatusDb, WatermeterDB, WatermeterDBV2
 from time import sleep
-from util import fileExist,setFile2user,fileChanged, getUtcTime, mkLocalTimeString
+from util import setFile2user, mkLocalTimeString
 from gpio import gpioDigtalInput
 from random import randrange
 from utiltimestamp import utiltimestamp

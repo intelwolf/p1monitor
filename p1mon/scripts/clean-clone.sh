@@ -176,7 +176,53 @@ delete_from_dir(){
     return 0
 }
 
-# verwerking van de diverse folders
+################ Lets Encrypt ##################
+echo "=> verwijderden van Lets Encrypt configuratie"
+ACTIVE_DIR=$CLONE/etc/letsencrypt/archive
+cd $ACTIVE_DIR
+echo $(pwd)
+rm -rfv ./**
+ACTIVE_DIR=$CLONE/etc/letsencrypt/csr
+cd $ACTIVE_DIR
+echo $(pwd)
+rm -rfv ./**
+ACTIVE_DIR=$CLONE/etc/letsencrypt/keys
+cd $ACTIVE_DIR
+echo $(pwd)
+rm -rfv ./**
+ACTIVE_DIR=$CLONE/etc/letsencrypt/live
+cd $ACTIVE_DIR
+echo $(pwd)
+rm -rfv ./**
+ACTIVE_DIR=$CLONE/etc/letsencrypt/renewal
+cd $ACTIVE_DIR
+echo $(pwd)
+rm -rfv ./**
+ACTIVE_DIR=$CLONE/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory
+cd $ACTIVE_DIR
+echo $(pwd)
+rm -rfv ./**
+
+ACTIVE_DIR=$CLONE/etc/nginx/sites-enabled
+if [ -d "$ACTIVE_DIR" ]; then
+    cd $ACTIVE_DIR
+    PWD=$(pwd)
+    delete_from_dir p1mon_80 p1mon_443
+fi
+
+ACTIVE_DIR=$CLONE/etc/nginx/conf.d
+if [ -d "$ACTIVE_DIR" ]; then
+    cd $ACTIVE_DIR
+    PWD=$(pwd)
+    delete_from_dir api-tokens.conf
+fi
+
+# make default http config file
+echo "=> standaard http configuratie wordt aangemaakt."
+export PYTHONPATH=/home/p1mon/.local/lib/python3.7/site-packages # needed because we run as root
+ACTIVE_DIR=$CLONE/etc/nginx/sites-enabled
+/p1mon/scripts/P1NginxConfig.py --createhttpconfigfile $ACTIVE_DIR/p1mon_80
+
 ACTIVE_DIR=$CLONE/p1mon/data
 if [ -d "$ACTIVE_DIR" ]; then
     cd $ACTIVE_DIR 
@@ -420,10 +466,6 @@ if [ -d "$ACTIVE_DIR" ]; then
     delete_from_dir * .*Store ._*
 fi
 
-TO_DO_FILE=$CLONE/p1mon/scripts/wat_is_er_veranderd_in_deze_versie.txt
-echo "=> verwijderden van TO DO bestand $TO_DO_FILE"
-rm  $TO_DO_FILE
-
 CLOCK_FILE=$CLONE/etc/fake-hwclock.data
 echo "=> verwijderden van realtime klok bestand $CLOCK_FILE"
 rm  $CLOCK_FILE
@@ -435,7 +477,12 @@ rm $CRONTAB_FILE
 WPA_SUPPLICANT_FILE=$CLONE/etc/wpa_supplicant/wpa_supplicant.conf* 
 echo "=> verwijderden van wpa_supplicant bestand $WPA_SUPPLICANT_FILE"
 rm $WPA_SUPPLICANT_FILE
-# deze regel zorgt ervoor dat wpa_supplicant start en een rebbot niet nodig is om wifi in stellen.
+
+API_TOKENS_FILE=$CLONE/etc/nginx/conf.d/api-tokens.conf
+echo "=> verwijderden van API tokens bestand $API_TOKENS_FILE"
+rm $API_TOKENS_FILE
+
+# deze regel zorgt ervoor dat wpa_supplicant start en een reboot niet nodig is om wifi in stellen.
 echo "=> leeg wpa_supplicant bestand wegschrijven "
 cp $P1MON_SCRIPTS/wpa_supplicant.conf.empty $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
 chmod 660 $CLONE/etc/wpa_supplicant/wpa_supplicant.conf

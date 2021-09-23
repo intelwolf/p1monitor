@@ -65,9 +65,7 @@ def Main( argv ):
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
 
-    # DEBUG TODO # LET OP DE TIMEPERIOD ID
-    power_production_solar_db.excute("delete from powerproduction_solar where power_source_id=1 and TIMEPERIOD_ID = 41 and TIMESTAMP > '2010-03-13 14:00:00';")
-
+    # power_production_solar_db.excute("delete from powerproduction_solar where power_source_id=1 and TIMEPERIOD_ID = 41 and TIMESTAMP > '2010-03-13 14:00:00';")
 
     ######################################################
     # Main loop                                          #
@@ -518,7 +516,7 @@ def Main( argv ):
                                     rec[4] = 0                                 # PRODUCTION_KWH_LOW
                                 else:
                                     # get the low and high tariff pct's
-                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_hour_percentages( rec[0], tariff_set=tariff_index )
+                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_day_percentages( rec[0] )
                                     # multiply by percentage and convert Wh to kWh.
                                     rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
                                     rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
@@ -670,7 +668,7 @@ def Main( argv ):
                                     rec[4] = 0                                 # PRODUCTION_KWH_LOW
                                 else:
                                     # get the low and high tariff pct's
-                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_hour_percentages( rec[0], tariff_set=tariff_index )
+                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_month_percentages( rec[0] )
                                     # multiply by percentage and convert Wh to kWh.
                                     rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
                                     rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
@@ -809,9 +807,9 @@ def Main( argv ):
                                 if tariff_index == 0:
                                     rec[3] = round(  ( kWh_value  / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
                                     rec[4] = 0                                 # PRODUCTION_KWH_LOW
-                                else:
+                                else: 
                                     # get the low and high tariff pct's
-                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_hour_percentages( rec[0], tariff_set=tariff_index )
+                                    high_tariff_pct, low_tariff_pct = power_tariff_lib.get_year_percentages( rec[0] )
                                     # multiply by percentage and convert Wh to kWh.
                                     rec[3] = round( ( (kWh_value * high_tariff_pct) / 1000 ), 3 ) # PRODUCTION_KWH_HIGH
                                     rec[4] = round( ( (kWh_value * low_tariff_pct ) / 1000 ), 3 ) # PRODUCTION_KWH_LOW
@@ -1140,5 +1138,4 @@ if __name__ == "__main__":
     
     original_sigint = signal.getsignal(signal.SIGINT)
     signal.signal( signal.SIGINT, saveExit)
-    Main(sys.argv[1:])           
-
+    Main(sys.argv[1:])

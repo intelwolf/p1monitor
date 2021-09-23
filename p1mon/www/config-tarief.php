@@ -65,13 +65,11 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
     if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["vastrecht_water"], 5,99.99999,0) . "' where ID = 103") ) $err_cnt += 1;
 }
 
-
-
-
 ?>
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>Tarieven configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -80,9 +78,10 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
-<script src="./js/jquery.validate.min.js"></script>
-<script src="./js/additional-methods.min.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/additional-methods.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+
 </head>
 
 <body>

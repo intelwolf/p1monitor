@@ -163,6 +163,7 @@ class configDB():
         self.insert_rec("insert or ignore into "+table+" values ( '100',''                     ,'aantal M3 water op de watermeter timestamp.')" )
         self.insert_rec("insert or ignore into "+table+" values ( '101','0'                    ,'reset de watermeter stand,  1 is uitvoeren, 0 is inactief.')" )
         self.insert_rec("insert or ignore into "+table+" values ( '102','0'                    ,'UI watermeter zichtbaar 1/0)')")
+        
         self.insert_rec("insert or ignore into "+table+\
         " values ( '103','" + const.TARIEF_WATER_VASTRECHT_PER_MAAND + "'                      ,'Vastrecht tarief drinkwater per maand in euro.')")
         self.insert_rec("insert or ignore into "+table+\
@@ -225,19 +226,45 @@ class configDB():
         self.insert_rec("insert or ignore into " + table + " values ( '144','0'                ,'SolarEdge lees alle beschikbare sites van een API key in (1/0).')")
         self.insert_rec("insert or ignore into " + table + " values ( '145','0'                ,'SolarEdge reset de configuratie (1/0).')")
         self.insert_rec("insert or ignore into " + table + " values ( '146','1'                ,'SolarEdge API slimme update frequentie. (1/0)')")
-        self.insert_rec("insert or ignore into " + table + " values ( '147','0'                ,'UI Solar Edge kWh productie zichtbaar 1/0)')")
+        self.insert_rec("insert or ignore into " + table + " values ( '147','0'                ,'UI Solar Edge kWh productie zichtbaar (1/0)')")
 
         # Index waarde NL=0, UK=1, FR=2
         self.insert_rec("insert or ignore into " + table + " values ( '148','0'                ,'UI taal selectie 0....n')")
 
         self.insert_rec("insert or ignore into " + table + " values ( '149','0'                ,'Solar Edge config/DB naar fabrieks instellingen 1/0)')")
 
-        self.insert_rec("insert or ignore into " + table + " values ( '150','721xj.duckdns.org' ,'Public dynamiche DNS naam.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'Public dynamiche DNS naam.')")
 
         # DuckDNS
-        self.insert_rec("insert or ignore into " + table + " values ( '151','dec1d53b-e35d-4f42-ba89-4d3438ea9a3d','DuckDNS token.')")
-        self.insert_rec("insert or ignore into " + table + " values ( '152','1','DuckDNS is aan(1) of uit(0).')") 
-        self.insert_rec("insert or ignore into " + table + " values ( '153','0','Forceer een DuckDNS update.')") 
+        self.insert_rec("insert or ignore into " + table + " values ( '151',''                 ,'DuckDNS token.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '152','1'                ,'DuckDNS is aan(1) of uit(0).')") 
+        self.insert_rec("insert or ignore into " + table + " values ( '153','0'                ,'Forceer een DuckDNS update.')") 
+        self.insert_rec("insert or ignore into " + table + " values ( '154','0'                ,'P1 data zo snel als mogelijk verwerken(1 max snelheid).')") 
+
+        self.insert_rec("insert or ignore into " + table + " values ( '155','0'                ,'vermogen schakelaar GPIO geinverteerd normaal(0), geinverteerd(1)')")
+        self.insert_rec("insert or ignore into " + table + " values ( '156','0'                ,'tarief schakelaar GPIO geinverteerd is normaal(0), geinverteerd(1).')")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '157','0'                ,'UI waterverbruik verbergen (1/0)')")
+        self.insert_rec("insert or ignore into " + table + " values ( '158','0'                ,'UI gasverbruik verbergen (1/0)')")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '159',''                 ,'LetsEncrypt email adres')")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '160',''                 ,'P1 API authenticatie tokens.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '161','0'                ,'P1 API authenticatie tokens verwerken (1/0).')")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '162','0'                ,'Internet API vlag processing (1/0).')")
+        self.insert_rec("insert or ignore into " + table + " values ( '163','0'                ,'Internet API is active(1), niet active(0).')") 
+
+        # static IP addresses 
+        self.insert_rec("insert or ignore into " + table + " values ( '164',''                 ,'eth0 static IP adres.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '165',''                 ,'wlan0 static IP adres.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '166',''                 ,'default gateway static IP adres.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '167',''                 ,'domain name server static IP adres.')")
+
+        # values of 168 0=do noting 1 set eth0, 3 set wlan0, 7 set eth0 and wlan0
+        self.insert_rec("insert or ignore into " + table + " values ( '168','0'                ,'vlag voor static IP adressen.')")
+
+        #[{"TOKEN": "34FADE76DFEBDDDD", "TIMESTAMP": "2021-06-26 11:12:13"}, {"TOKEN": "FFEE676DESAAAAAF", "TIMESTAMP": "2022-07-30 22:23:59"}]
 
         # you need an account on www.noip.com before this can be used
         #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")
@@ -665,8 +692,22 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '111','onbekend','Tijdstip laatste verwerkte bericht Solar Edge API:',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '112','onbekend','Tijdstip laatste gefaalde Solar Edge API aanvraag:',0)")
 
+        self.insert_rec("insert or ignore into " + table + " values ( '113','0','Min dagwaarde Kw verbruik',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '114','" + mkLocalTimeString() + "','Min dagwaarde Kw verbruik (timestamp)',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '115','0','Min dagwaarde Kw geleverd',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '116','" + mkLocalTimeString() + "','Min dagwaarde Kw geleverd (timestamp)',0)")
 
-         # fix typo's from version 0.9.15a and up
+        # Lets Encrypt stuff.
+        # status 1=error/not ok, 0=ok/succes, 2=unknow
+        self.insert_rec("insert or ignore into " + table + " values ( '117','2','HTTPS certificaat',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '118','2','HTTPS certificaat vernieuwen certificaat',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '119','2','Webserver configuratie',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '120','onbekend','Tijdstip laatste succesvolle certificaat vernieuwing:',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '121','onbekend','Certificaat geldig tot:',0)")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '122','onbekend','Default gateway/router:',0)")
+
+        # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"
         self.update_rec(sql_update)
         sql_update = "update status set label ='Tijdstip terug levering, laatste schakeling:' where id=84"

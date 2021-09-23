@@ -14,6 +14,7 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor actueel fase</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -31,10 +32,11 @@ if ( checkDisplayIsActive(61) == false) { return; }
 
 <script>
 
-var maxAmperageFromConfig = <?php echo config_read( 123 ) . ";\n"?>
-var maxWattFromConfig     = <?php echo config_read( 124 ) . ";\n"?>
-var graphIdArray =  [ 'L1Watt',    'L1Amperage', 'L1Voltage', 'L2Watt',    'L2Amperage', 'L2Voltage', 'L3Watt',    'L3Amperage', 'L3Voltage' ]
-var buttonIdArray = [ 'L1WButton', 'L1AButton',  'L1VButton', 'L2WButton', 'L2AButton',  'L2VButton', 'L3WButton', 'L3AButton',  'L3VButton' ]
+var maxAmperageFromConfig  = <?php echo config_read( 123 ) . ";\n"?>
+var maxWattFromConfig      = <?php echo config_read( 124 ) . ";\n"?>
+var graphIdArray           =  [ 'L1Watt',    'L1Amperage', 'L1Voltage', 'L2Watt',    'L2Amperage', 'L2Voltage', 'L3Watt',    'L3Amperage', 'L3Voltage' ]
+var buttonIdArray          = [ 'L1WButton', 'L1AButton',  'L1VButton', 'L2WButton', 'L2AButton',  'L2VButton', 'L3WButton', 'L3AButton',  'L3VButton' ]
+var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
 function readJsonApiPhaseInformationFromStatus(){ 
 
@@ -243,8 +245,14 @@ function readJsonApiPhaseInformationFromStatus(){
 }
 
 function DataLoop() {
+    
     readJsonApiPhaseInformationFromStatus();
-    setTimeout('DataLoop()',3000);
+    
+    if ( p1TelegramMaxSpeedIsOn == true ) {
+        setTimeout( 'DataLoop()', 1000 );
+    } else {
+        setTimeout('DataLoop()', 3000);
+    }
 }
 
 $(function () {

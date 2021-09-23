@@ -24,6 +24,9 @@ if( $localip == False ){
         }
 }
 
+$sw_off  = strIdx( 193 );
+$sw_on   = strIdx( 192 );
+
 if( isset($_POST["baudrate_list"]) || isset($_POST["bytesize_list"]) || isset($_POST["parity_list"]) || isset($_POST["stopbit_list "]))
 {
     // convert from user format to machine format if needed.
@@ -69,6 +72,16 @@ if ( isset($_POST["crc"]) ) {
         if ( updateConfigDb("update config set parameter = '0' where ID = 45")) $err_cnt += 1;
     }
 }
+
+if ( isset($_POST["p1_telgram_speed"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["p1_telgram_speed"] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 154")) $err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 154")) $err_cnt += 1;
+    }
+}
+
 
 if( isset($_POST["day_night_mode"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -209,7 +222,8 @@ function makeSelector($id) {
 <!doctype html>
 <html lang="nl">
 <head>
-<title>P1-poort configuratie</title>
+<meta name="robots" content="noindex">
+<title><?php echo strIdx( 244 );?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -247,35 +261,6 @@ function getFormattedDate() {
 
     var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec;
     return str;
-}   
-
-function readJsonApiConfiguration(){ 
-    $.getScript( "./api/v1/configuration", function( data, textStatus, jqxhr ) {
-      try {
-        var jsonarr = JSON.parse(data); 
-        for (var j=0;  j<jsonarr.length; j++){   
-                switch(jsonarr[j][0]) {
-                    case 45:
-                       if ( jsonarr[j][1] == '0') {
-                            hideStuff('serial_ok'); 
-                            showStuff('serial_nok');
-                            if(!soundPlayed) {
-                                soundPlayed = true;
-                                PlaySound();
-                            }
-                        } else {
-                            hideStuff('serial_nok'); 
-                            showStuff('serial_ok');
-                            if(soundPlayed) soundPlayed = false; // reset
-                        }
-                    default:
-                        break;
-            }
-        }
-      } catch(err) {
-          console.log( err );
-      }
-   });
 }
 
 function readJsonApiStatus(){ 
@@ -283,11 +268,38 @@ function readJsonApiStatus(){
         try {
             var jsondata = JSON.parse(data); 
     
-            for (var j=91;  j < jsondata.length; j++){  
-                // console.log( jsondata[j][0] + ' - ' + jsondata[j][1] )
+            for (var j=86;  j < jsondata.length; j++){  
+                //console.log( jsondata[j][0] + ' - ' + jsondata[j][1] )
+
+                if ( jsondata[j][0] == 87 ) {
+                    
+                    const now = new Date()
+                    const utcMilllisecondsSinceEpoch = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+                    const timezoneDelta = (now.getTimezoneOffset() * -60);
+                    const utcSecondsSinceEpoch = Math.round(utcMilllisecondsSinceEpoch / 1000 )
+
+                    //console.log ( "utcSecondsSinceEpoch = " +  utcSecondsSinceEpoch )
+                    //console.log ( "timezoneDelta = "        +  timezoneDelta )
+                    //console.log ( "lastP1record = "         + jsondata[j][1] )
+                    //console.log ( Math.abs( (jsondata[j][1] - timezoneDelta) - utcSecondsSinceEpoch) )
+                    
+                    if ( Math.abs( (jsondata[j][1] - timezoneDelta) - utcSecondsSinceEpoch) > 30 ) {
+                        hideStuff('serial_ok'); 
+                        showStuff('serial_nok');
+                        if(!soundPlayed) {
+                            soundPlayed = true;
+                            PlaySound();
+                        }
+                    } else {
+                        hideStuff('serial_nok'); 
+                        showStuff('serial_ok');
+                        if(soundPlayed) soundPlayed = false; // reset
+                    }
+                }
+
                 if ( jsondata[j][0] == 92 ) {
                     $('#ser_device').text( jsondata[j][1] );
-                    break; // only one item needed
+                    break; // done
                 }
             }
         } catch(err) {
@@ -296,10 +308,8 @@ function readJsonApiStatus(){
     });
 }
 
-
 function LoadData() {
     clearTimeout(initloadtimer);
-    readJsonApiConfiguration();
     readJsonApiStatus();
     initloadtimer = setInterval(function(){LoadData();}, 3000);
 }
@@ -330,109 +340,154 @@ $(function () {
                 <div id="right-wrapper-config-left-2">
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
-                        
+
                         <div class="frame-4-top">
-                            <span class="text-15">seriële instellingen</span>
+                            <span class="text-15"><?php echo strIdx( 245 );?></span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left">
-                                <i class="text-10 pad-7 fas fa-download"></i>
-                                <label class="text-10" >baudrate</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-8 fas fa-download"></i>
-                                <label class="text-10">byte size</label> 
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-9 fas fa-download"></i>
-                                <label class="text-10">parity</label> 
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-8 fas fa-download"></i>
-                                <label class="text-10">stopbits</label> 
-                            </div>
-                            <div class="float-left pad-1">
-                                <select class="select-1 color-select color-input-back cursor-pointer" name="baudrate_list" id="baudrate_list">
-                                    <?php makeSelector(7);?>
-                                </select>
-                                <p class="p-1"></p>
-                        
-                                <select class="select-1 color-select color-input-back cursor-pointer" name="bytesize_list" id="bytesize_list">
-                                    <?php makeSelector(8);?>
-                                </select>
-                                <p class="p-1"></p>
-                                <select class="select-1 color-select color-input-back cursor-pointer" name="parity_list" id="parity_list">
-                                    <?php makeSelector(9);?>
-                                </select>
-                                <p class="p-1"></p>
-                                <select class="select-1 color-select color-input-back cursor-pointer" name="stopbit_list" id="stopbit_list">
-                                    <?php makeSelector(10);?>
-                                </select>
-                            </div>
-                            
+                            <div class="rTable">
+                                    <div class="rTableRow">
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fas fa-download"></i>
+                                        </div>
+                                        <div class="rTableCell width-80">
+                                            <label class="text-10">baudrate</label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <select class="select-3 color-select color-input-back cursor-pointer" name="baudrate_list" id="baudrate_list">
+                                                <?php makeSelector(7);?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="rTableRow"> 
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fas fa-download"></i>
+                                        </div>
+                                        <div class="rTableCell width-80">
+                                            <label class="text-10">byte size</label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <select class="select-3 color-select color-input-back cursor-pointer" name="bytesize_list" id="bytesize_list">
+                                                <?php makeSelector(8);?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="rTableRow">
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fas fa-download"></i>
+                                        </div>
+                                        <div class="rTableCell width-80">
+                                            <label class="text-10">parity</label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <select class="select-3 color-select color-input-back cursor-pointer" name="parity_list" id="parity_list">
+                                                <?php makeSelector(9);?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="rTableRow">
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fas fa-download"></i>
+                                        </div>
+                                        <div class="rTableCell width-80">
+                                            <label class="text-10">stopbits</label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <select class="select-3 color-select color-input-back cursor-pointer" name="stopbit_list" id="stopbit_list">
+                                                <?php makeSelector(10);?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
                         </div>
-                       
+
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">status</span>
+                            <span class="text-15"><?php echo strIdx( 246 );?></span>
                         </div>
-                        <div class="frame-4-bot">
-                        <div class="text-10">Seriële device in gebruik:&nbsp;<span id="ser_device"></span></div>
-                            <br>
-                            <div class="float-left">
-                                <div class="float-left pad-10">
-                                    <i style="display:none" id="serial_ok"  class="color-ok fas fa-3x fa-check-square" title="<?php strIdx(2);?>"></i> 
-                                    <i style="display:none" id="serial_nok" class="color-error fas fa-3x fa-exclamation-triangle" title="<?php strIdx(2);?>"></i> 
-                                </div> 
-                                <div>
-                                    <label style="display:none" id="serial_ok_label" class="float-left text-10" >&nbsp;&nbsp;&nbsp;&nbsp;in orde</label>
-                                    <label style="display:none" id="serial_nok_label" class="float-left text-10" >&nbsp;geen data</label>
+                        <div class="frame-4-bot" title="<?php echo strIdx( 2 );?>">
+                            <div class="rTable">
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-24">
+                                        <i style="display:none" id="serial_ok"  class="color-ok fas fa-1x fa-check-square"></i> 
+                                        <i style="display:none" id="serial_nok" class="color-error fas fa-1x fa-exclamation-triangle"></i> 
+                                    </div>
+                                    <div class="rTableCell text-10">
+                                        <?php echo strIdx( 248 );?>&nbsp;<span id="ser_device"></span>
+                                    </div>
                                 </div>
                             </div>
-                        
-                            <div class="pos-33 float-right text-10">
-                                <?php echo strIdx(2);?>
-                            </div>
-
                         </div>
-                        
+
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">P1 telegram</span>
+                            <span class="text-15"><?php echo strIdx( 247 );?></span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left">
-                                <div class="pad-20">
-                                    <i class="text-10 fas fa-cogs"></i>
-                                    <label class="text-10" >gas code nummer</label>
-                                </div>
-                                
-                                <div class="pad-20">
-                                    <i class="text-10 fas fa-check-double"></i> 
-                                    <label class="text-10" >crc controle aan</label>
-                                </div>
-                                
-                                <div class="pad-20">
-                                    <i class="text-10 fas fa-cogs"></i> 
-                                    <label class="text-10 pad-20">dag/nacht mode</label>
-                                </div>
-                            </div>
-                            
-                            <div class="float-left pad-19">
-                                <select class="select-1 color-select color-input-back cursor-pointer" name="gas_prefix_list" id="gas_prefix_list">
-                                    <?php makeSelector(6);?>
-                                </select>
-                                
-                                <div>
-                                    <input class="cursor-pointer" name="crc" type="radio" value="1" <?php if ( config_read(45) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" name="crc" type="radio" value="0" <?php if ( config_read(45) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                
-                                <select class="select-2 color-select color-input-back cursor-pointer" name="day_night_mode" id="day_night_mode">
-                                    <?php makeSelector(5);?>
-                                </select>
-                            </div>
+                           <div class="rTable">
 
+                                <div class="rTableRow" title="<?php echo strIdx( 27 );?>">
+                                    <div class="rTableCell width-24">
+                                        <i class="text-10 fas fa-cogs"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10"><?php echo strIdx( 249 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <select class="select-1 color-select color-input-back cursor-pointer" name="gas_prefix_list" id="gas_prefix_list">
+                                            <?php makeSelector(6);?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 29 );?>">
+                                    <div class="rTableCell width-24">
+                                        <i class="text-10 fas fa-check-double"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10"><?php echo strIdx( 250 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" name="crc" type="radio" value="1" <?php if ( config_read(45) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="crc" type="radio" value="0" <?php if ( config_read(45) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div>
+
+
+                                <div class="rTableRow" title="<?php echo strIdx( 64 );?>">
+                                    <div class="rTableCell width-24">
+                                        <i class="text-10 fas fa-cogs"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10"><?php echo strIdx( 251 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <select class="select-2 color-select color-input-back cursor-pointer" name="day_night_mode" id="day_night_mode">
+                                            <?php makeSelector(5);?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 243 );?>">
+                                    <div class="rTableCell width-24">
+                                        <i class="text-10 fas fa-tachometer-alt"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10"><?php echo strIdx( 252 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" name="p1_telgram_speed" type="radio" value="1" <?php if ( config_read(154) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="p1_telgram_speed" type="radio" value="0" <?php if ( config_read(154) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
-                        
-
+ 
                         <!-- placeholder variables for session termination -->
                         <input type="hidden" name="logout" id="logout" value="">
                     </form>
@@ -442,7 +497,7 @@ $(function () {
                     <div class="frame-4-top">
                         <span class="text-15">hulp</span>
                     </div>
-                    <div class="frame-4-bot text-10">    
+                    <div class="frame-4-bot text-10">
                         <?php echo strIdx(1);?>
                         <?php echo strIdx(27);?>
                         <br><br>

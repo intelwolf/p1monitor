@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import argparse
+#import argparse
 import apiconst
 import base64
 import const
@@ -345,6 +345,10 @@ def Main(argv):
     flog.info("Start van programma.")
     global mqtt_para, mqtt_client
 
+    # makes link between ramdisk and www/json folder if the link not exits
+    # prevents errors in console.log when MQTT is not active.
+    make_json_topic_link()
+
     # open van config database
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
@@ -403,9 +407,11 @@ def Main(argv):
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
 
-
     # set proces gestart timestamp
     rt_status_db.timestamp( 95, flog )
+
+   
+
 
     checkActiveState()
     setConfigFromDb()
@@ -569,6 +575,23 @@ def Main(argv):
         else:
             runCheck()
             time.sleep( 2 )
+
+
+def make_json_topic_link():
+    target    = "/p1mon/mnt/ramdisk/mqtt_topics.json"
+    link_name = "/p1mon/www/json/mqtt_topics.json"
+
+    if not os.path.isfile( target ):
+        if os.system( "touch " + target ) == 0:
+            flog.info( inspect.stack()[0][3] + ": leeg " + target + " bestand gemaakt." )
+
+    if not os.path.isfile( link_name ):
+        if os.system( "ln -s " + target + " " + link_name ) >0:
+            flog.error( inspect.stack()[0][3] + ": link maken van " + link_name +  " gefaald" )
+        else: 
+            flog.info( inspect.stack()[0][3] + ": link maken van " + link_name + " gelukt." )
+
+
 
 #####################################################################
 # check if the programm is set as active otherwise stop the program #

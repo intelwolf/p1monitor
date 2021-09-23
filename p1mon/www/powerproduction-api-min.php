@@ -14,6 +14,7 @@ if ( checkDisplayIsActive( 147 ) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title><?php echo strIdx(133);?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -67,7 +68,6 @@ function updateOrInsertDataSets( item ) {
     GLowTariffData.push          ( [timestamp, item[5] ] ); // kWh during the period for the low tariff
 }
 
-
 function readJsonApiHistoryPowerMin( cnt , db_index ){ 
 
     $.getScript( "/api/v1/powerproductionsolar/minute/1/" + db_index+ "?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -87,7 +87,6 @@ function readJsonApiHistoryPowerMin( cnt , db_index ){
    });
    
 }
-
 
 function readJsonActiveDbSiteIndices( cnt ) {
 
@@ -118,10 +117,6 @@ function readJsonActiveDbSiteIndices( cnt ) {
       }
     });
 } 
-
-/* preload */
-readJsonActiveDbSiteIndices(  maxrecords )
-//readJsonApiHistoryPowerMin( maxrecords )
 
 // change items with the marker #PARAMETER
 function createKwhChart() {
@@ -395,14 +390,13 @@ function DataLoop() {
     if(currentSeconds <= 9) { currentSeconds = "0" + currentSeconds; }
     secs--;
     document.getElementById("timerText").innerHTML = zeroPad(currentMinutes,2) + ":" + zeroPad(currentSeconds,2);
-    if( secs < 0 ) { 
+    if( secs < 0 ) {
         mins = 1;  
         secs = mins * 60; 
         currentSeconds = 0;
         currentMinutes = 0;
         colorFader("#timerText","#0C7DAD");
         readJsonActiveDbSiteIndices( maxrecords )
-        //readJsonApiHistoryPowerMin( maxrecords )
     }
 
     // make chart only once and when we have data.
@@ -428,12 +422,10 @@ $(function() {
     // get language settings from config database and set HighChart
     setHighChartLanguageOptions( <?php echo languageIndex();?> );
 
+    secs = -1;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
 });
-
-
-
 
 </script>
 </head>

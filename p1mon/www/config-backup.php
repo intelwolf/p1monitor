@@ -245,6 +245,7 @@ function slectorWeekDays() {
 <!doctype html>
 <html lang='NL'>
 <head>
+<meta name="robots" content="noindex">
 <title>Backup configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -253,8 +254,8 @@ function slectorWeekDays() {
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
-<script src="./js/jquery.validate.min.js"></script>
-<script src="./js/additional-methods.min.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/additional-methods.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
 </head>
 <body>

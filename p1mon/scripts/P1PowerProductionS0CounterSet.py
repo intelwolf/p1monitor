@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from logger import fileLogger,logging
 from sqldb import configDB, rtStatusDb, WatermeterDB, powerProductionDB
 from time import sleep
-from util import fileExist,setFile2user,fileChanged, getUtcTime, mkLocalTimeString
+from util import fileExist,setFile2user, getUtcTime, mkLocalTimeString
 from utiltimestamp import utiltimestamp
 from dateutil.relativedelta import *
 from listOfPidByName import listOfPidByName

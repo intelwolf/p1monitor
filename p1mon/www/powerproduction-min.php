@@ -14,6 +14,7 @@ if ( checkDisplayIsActive( 129 ) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor historie minuten opgewekte kWh</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">

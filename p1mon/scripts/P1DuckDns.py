@@ -11,7 +11,6 @@ import sqldb
 import signal
 import sys
 
-
 # programme name.
 prgname = 'P1DuckDns'
 
@@ -126,7 +125,7 @@ if __name__ == "__main__":
     try:
         os.umask( 0o002 )
         flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
-        flog.setLevel( logger.logging.DEBUG )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:
         print ("critical geen logging mogelijke, gestopt.:" + str(e.args[0]))

@@ -119,6 +119,7 @@ if ( isset( $_POST["email_test_button"] ) ) {
 <!doctype html>
 <html lang='NL'>
 <head>
+<meta name="robots" content="noindex">
 <title>Notificatie configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -127,8 +128,9 @@ if ( isset( $_POST["email_test_button"] ) ) {
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
-<script src="./js/jquery.validate.min.js"></script>
-<script src="./js/additional-methods.min.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/additional-methods.min.js"></script>
+
 <script src="./js/p1mon-util.js"></script>
 </head>
 <body>
@@ -347,15 +349,6 @@ function selectorUpdate(selected, toupdate) {
         <?php echo div_err_succes();?>
         
 <script>
-/*
-$('#ftp_test_button').click(function(event) {
-        //console.log("ftp_test_button")
-        document.formvalues.systemaction.value = 'ftp_test_button';
-    $('#formvalues').submit();
-        hideStuff('ftp_test_button');
-        event.preventDefault();
-});
-*/
 
 $(function() {
         $("#formvalues").validate({

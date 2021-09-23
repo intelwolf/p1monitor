@@ -13,6 +13,7 @@ if ( checkDisplayIsActive( 102 ) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor watermeter dag</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">

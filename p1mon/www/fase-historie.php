@@ -14,6 +14,7 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor historie fase</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -31,33 +32,34 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <script>
 const dataIndexOffset           = 50;
 
-var recordsLoaded               = 0;
-var GWattDataL1Consumed         = [];
-var GWattDataL1Produced         = [];
-var GWattDataL2Consumed         = [];
-var GWattDataL2Produced         = [];
-var GWattDataL3Consumed         = [];
-var GWattDataL3Produced         = [];
-var GAmpereL1                   = [];
-var GAmpereL2                   = [];
-var GAmpereL3                   = [];
-var GVoltL1                     = [];
-var GVoltL2                     = [];
-var GVoltL3                     = [];
-var dataOffset                  = dataIndexOffset;
-var dataIndexStart              = 0;
-var dataIndexStop               = dataOffset;
-var jsondata                    = []
-var L1WIsVisible                = 1;
-var L2WIsVisible                = 1;
-var L3WIsVisible                = 1;
-var L1AIsVisible                = 1;
-var L2AIsVisible                = 1;
-var L3AIsVisible                = 1;
-var L1VIsVisible                = 1;
-var L2VIsVisible                = 1;
-var L3VIsVisible                = 1;
-var faseDbIsActive              = <?php if ( config_read( 119 ) == 1 ) { echo "true;"; } else { echo "false"; } ?> 
+var recordsLoaded          = 0;
+var GWattDataL1Consumed    = [];
+var GWattDataL1Produced    = [];
+var GWattDataL2Consumed    = [];
+var GWattDataL2Produced    = [];
+var GWattDataL3Consumed    = [];
+var GWattDataL3Produced    = [];
+var GAmpereL1              = [];
+var GAmpereL2              = [];
+var GAmpereL3              = [];
+var GVoltL1                = [];
+var GVoltL2                = [];
+var GVoltL3                = [];
+var dataOffset             = dataIndexOffset;
+var dataIndexStart         = 0;
+var dataIndexStop          = dataOffset;
+var jsondata               = []
+var L1WIsVisible           = 1;
+var L2WIsVisible           = 1;
+var L3WIsVisible           = 1;
+var L1AIsVisible           = 1;
+var L2AIsVisible           = 1;
+var L3AIsVisible           = 1;
+var L1VIsVisible           = 1;
+var L2VIsVisible           = 1;
+var L3VIsVisible           = 1;
+var faseDbIsActive         = <?php if ( config_read( 119 ) == 1 ) { echo "true;"; } else { echo "false"; } ?>
+var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
 function readJsonApiPhaseInformation(){ 
     $.getScript( "./api/v1/phase", function( data, textStatus, jqxhr ) {
@@ -202,7 +204,13 @@ function updateData() {
 
 function DataLoop() {
     readJsonApiPhaseInformation();
-    setTimeout('DataLoop()', 10000 ); // run every seconds.
+
+    if ( p1TelegramMaxSpeedIsOn == true ) {
+        setTimeout( 'DataLoop()', 1000  );
+    } else {
+        setTimeout( 'DataLoop()', 10000 );
+    }
+
 }
 
 $(function () {

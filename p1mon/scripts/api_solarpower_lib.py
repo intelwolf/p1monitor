@@ -24,7 +24,7 @@ class powerProductionSolarHelp( object ):
             raise falcon.HTTPError( 
                 status=apierror.API_GENERAL_ERROR['status'], 
                 title=apierror.API_GENERAL_ERROR['title'], 
-                description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                description=apierror.API_GENERAL_ERROR['description'] +  apiutil.santize_html( str(_e.args[0]) ), 
                 code=apierror.API_GENERAL_ERROR['code'] 
                 )
         return
@@ -85,7 +85,7 @@ class powerProductionSolar( object ):
             raise falcon.HTTPError( 
                     status=apierror.API_PARAMETER_ERROR['status'], 
                     title=apierror.API_PARAMETER_ERROR['title'], 
-                    description=apierror.API_PARAMETER_ERROR['description'] + " power_source_id must be a number > 0 " + str(_e.args[0]), 
+                    description=apierror.API_PARAMETER_ERROR['description'] + " power_source_id must be a number > 0 " +  apiutil.santize_html( str(_e.args[0]) ), 
                     code=apierror.API_PARAMETER_ERROR['code']
                     )
 
@@ -107,7 +107,7 @@ class powerProductionSolar( object ):
             raise falcon.HTTPError( 
                 status=apierror.API_PARAMETER_ERROR['status'], 
                 title=apierror.API_PARAMETER_ERROR['title'], 
-                description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                description=apierror.API_PARAMETER_ERROR['description'] +  apiutil.santize_html( err_str ),
                 code=apierror.API_PARAMETER_ERROR['code'] 
             )
 
@@ -166,7 +166,7 @@ class powerProductionSolar( object ):
                     raise falcon.HTTPError( 
                         status=apierror.API_PARAMETER_ERROR['status'], 
                         title=apierror.API_PARAMETER_ERROR['title'], 
-                        description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                        description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ),
                         code=apierror.API_PARAMETER_ERROR['code'] 
                     )
 
@@ -196,7 +196,7 @@ class powerProductionSolar( object ):
                     raise falcon.HTTPError( 
                         status=apierror.API_TIMESTAMP_ERROR['status'], 
                         title=apierror.API_TIMESTAMP_ERROR['title'], 
-                        description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                        description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                         code=apierror.API_TIMESTAMP_ERROR['code'] 
                     )
 
@@ -210,7 +210,7 @@ class powerProductionSolar( object ):
                     raise falcon.HTTPError( 
                         status=apierror.API_TIMESTAMP_ERROR['status'], 
                         title=apierror.API_TIMESTAMP_ERROR['title'], 
-                        description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                        description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                         code=apierror.API_TIMESTAMP_ERROR['code'] 
                     )
 
@@ -256,7 +256,7 @@ class powerProductionSolar( object ):
             raise falcon.HTTPError( 
                 status=apierror.API_DB_ERROR['status'], 
                 titel=apierror.API_DB_ERROR['title'], 
-                description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                description=apierror.API_DB_ERROR['description'] +  apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                 code=apierror.API_DB_ERROR['code'] 
                 )
 

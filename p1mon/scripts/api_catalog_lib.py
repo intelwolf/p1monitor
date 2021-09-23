@@ -1,12 +1,11 @@
 import apiconst
 import apierror
+import apiutil
 import const
 import json
 import falcon
 import inspect
-
-#from apiutil import p1_serializer, validate_timestamp, clean_timestamp_str, list_filter_to_str, validate_timestamp_by_length
-from utilnetwork3 import getNicInfo 
+import network_lib
 
 class CatalogHelp( object ):
     
@@ -21,7 +20,7 @@ class CatalogHelp( object ):
             raise falcon.HTTPError( 
                 status=apierror.API_GENERAL_ERROR['status'], 
                 title=apierror.API_GENERAL_ERROR['title'], 
-                description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ), 
                 code=apierror.API_GENERAL_ERROR['code'] 
                 )
 
@@ -39,11 +38,11 @@ class Catalog( object ):
         try:
             # get IP adress
             ipadress = '<IP adres niet gevonden>'
-            result = getNicInfo(nic='eth0')
+            result = network_lib.get_nic_info(nic='eth0')
             if result['result_ok'] == True and result['ip4'] != None: 
                 ipadress = result['ip4']
             else:
-                result = getNicInfo(nic='wlan0')
+                result = network_lib.get_nic_info(nic='wlan0')
                 if result['result_ok'] == True and result['ip4'] != None: 
                     ipadress = result['ip4']
         
@@ -87,7 +86,7 @@ class Catalog( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] +  apiutil.santize_html( str(_e.args[0]) ), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
         return     

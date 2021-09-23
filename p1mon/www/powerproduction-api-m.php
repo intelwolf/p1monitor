@@ -13,6 +13,7 @@ if ( checkDisplayIsActive( 147 ) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title><?php echo strIdx(142);?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -168,9 +169,6 @@ function readJsonActiveDbSiteIndices( cnt ) {
       }
     });
 }
-
-/* preload */
-readJsonActiveDbSiteIndices(  maxrecords )
 
 // change items with the marker #PARAMETER
 function createKwhChart() {
@@ -539,7 +537,7 @@ $(function() {
     // get language settings from config database and set HighChart
     setHighChartLanguageOptions( <?php echo languageIndex();?> );
 
-    secs = 0;
+    secs = -1;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
 });

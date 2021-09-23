@@ -12,6 +12,7 @@ if ( checkDisplayIsActive(22) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor informatie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -40,7 +41,7 @@ var showUDPbroadcastInfo             = <?php if ( config_read( 55  ) == 1 ) { ec
 var showWatermeterInfo               = <?php if ( config_read( 102 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 var showProductionPowerS0Info        = <?php if ( config_read( 129 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 var showProductionPowerSolarEdgeInfo = <?php if ( config_read( 147 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
-
+var p1TelegramMaxSpeedIsOn           = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
 function PlaySound() {
     if ( soundIsOn === true ) {
@@ -713,7 +714,12 @@ function DataLoop() {
     readJsonApiStatus();
     readJsonApiConfiguration();
     readTextMeterTelegram();
-    setTimeout('DataLoop()',2000);
+    if ( p1TelegramMaxSpeedIsOn == true ) {
+        setTimeout( 'DataLoop()', 1000 );
+    } else {
+        setTimeout( 'DataLoop()', 2000 );
+    }
+
 }
 
 $(function () {

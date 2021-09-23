@@ -44,12 +44,15 @@ P1FILE="p1msg.txt"
 cd /p1mon/scripts
 sudo chmod 754 P1*.py*;sudo chown p1mon:p1mon P1*.py
 sudo chmod 754 *.sh;sudo chown p1mon:p1mon *.sh 
+sudo chmod 660 *_lib.py
 
  # make p1monitor log folder (new from june 2019)
 sudo mkdir -p p1monitor $LOG_PATH
 sudo /bin/chown p1mon:p1mon $LOG_PATH $WWW_DOWLOAD_PATH $EXPORT_PATH $RAMDISK
 sudo /bin/chmod 775 $LOG_PATH 
 sudo /bin/chmod 770 $WWW_DOWLOAD_PATH $EXPORT_PATH
+
+# 
 
 # clean log files on any action, also done by the watchdog
 # script clean when gets full. Should never happen ;)

@@ -4,11 +4,11 @@ import const
 import crypto3
 import sys
 import inspect
+import network_lib
 import getopt
 import subprocess
 import argparse
 import util
-import utilnetwork3
 import time
 import os
 
@@ -97,7 +97,7 @@ def Main(argv):
     #try to read from database
     if ( essid == None or key == None ): 
         flog.info(inspect.stack()[0][3]+": Lees essid en wpa key uit database.")
-         # open van config database      
+         # open van config database
         try:    
             config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
         except Exception as e:
@@ -105,7 +105,7 @@ def Main(argv):
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
 
-        # open van status database      
+        # open van status database
         try:    
             rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)     
         except Exception as e:
@@ -123,9 +123,6 @@ def Main(argv):
         flog.debug(inspect.stack()[0][3]+": essid = "+essid+" crypto key = "+crypto_key)
 
         key = base64.standard_b64decode( crypto3.p1Decrypt(crypto_key,'wifipw') )
-
-        
-
 
         flog.debug( inspect.stack()[0][3]+": decrypted key = " + key.decode( 'utf-8' ) )
 
@@ -145,7 +142,7 @@ def Main(argv):
     flog.debug(inspect.stack()[0][3]+": start van ip actief controle.")
     while (sec_count < 180):
     # try for maximum of 3 minutes (sleep is 5)
-         buf = utilnetwork3.getNicInfo('wlan0')
+         buf = network_lib.get_nic_info( 'wlan0' )
          if buf['ip4'] != None:
              flog.info(inspect.stack()[0][3]+": Wifi actief op IP adres "+buf['ip4'])
              rt_status_db.strset(buf['ip4'],42,flog)

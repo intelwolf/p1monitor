@@ -83,10 +83,15 @@ class gpioDigtalInput():
 
 class gpioDigtalOutput():
    
-    def init( self, db_config_id , config_db , flog ):
+    ##################################################################
+    # invertio used to invert the io of the GPIO when set to true    #
+    # the on will be off and visa versa.                             #
+    ##################################################################
+    def init( self, db_config_id , config_db , flog , invert_io=False ):
         self.db_config_id           = db_config_id 
         self.config_db              = config_db
         self.flog                   = flog
+        self.invert_io              = invert_io
         
         # reading from database the pin number
         _id, gpio_pin_value , _label = self.config_db.strget( self.db_config_id , self.flog )
@@ -96,14 +101,27 @@ class gpioDigtalOutput():
 
     def gpioOn( self,  on ):
         self.check_pin_from_db()
+        
+        if self.invert_io == True:
+            on = not on
+
         if on == True:
             if self.gpio_pin.value == 0:
                 self.gpio_pin.on()
-                self.flog.debug( inspect.stack()[0][3] + ": gpioDigtalOutput() pin " + str( self.gpio_pin.pin.number ) + " ingeschakeld.")
+                if self.invert_io == False:
+                    self.flog.info( inspect.stack()[0][3] + ": gpioDigtalOutput() pin " + str( self.gpio_pin.pin.number ) + " ingeschakeld.")
+                else:
+                    self.flog.info( inspect.stack()[0][3] + ": gpioDigtalOutput() pin " + str( self.gpio_pin.pin.number ) + " uitgeschakeld.")
         else:
             if self.gpio_pin.value == 1:
                 self.gpio_pin.off()
-                self.flog.debug( inspect.stack()[0][3] + ": gpioDigtalOutput() pin " + str( self.gpio_pin.pin.number ) + " uitgeschakeld.")
+                if self.invert_io == False:
+                    self.flog.info( inspect.stack()[0][3] + ": gpioDigtalOutput() pin " + str( self.gpio_pin.pin.number ) + " uitgeschakeld.")
+                else:
+                    self.flog.info( inspect.stack()[0][3] + ": gpioDigtalOutput() pin " + str( self.gpio_pin.pin.number ) + " ingeschakeld.") 
+
+    def set_invert_io( self, on=False ):
+            self.invert_io = on
 
     def close(self):
         self.gpio_pin.close()
@@ -117,7 +135,3 @@ class gpioDigtalOutput():
             self.gpio_pin = LED( int(gpio_pin_value) )
             self.flog.info( inspect.stack()[0][3]+ ": GPIO pin aangepast op pin " + str( gpio_pin_value) )
 
-        
-        
-
-        

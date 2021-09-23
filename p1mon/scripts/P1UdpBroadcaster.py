@@ -57,7 +57,6 @@ def Main(argv):
     #program_is_active = isProgramActive()
 
     while True:
-        
        
         if isProgramActive() == False: 
             sleep ( 10 )

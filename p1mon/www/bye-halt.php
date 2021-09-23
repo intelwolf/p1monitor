@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
 <head>
+<meta name="robots" content="noindex">
 <title>P1 monitor</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">

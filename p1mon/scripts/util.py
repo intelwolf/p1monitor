@@ -73,16 +73,17 @@ def fileExist(filename):
     else:
         return False
 
-def fileChanged(src_file,dst_dir):
-# geef secs verschil terug van bestand
+def file_delta_timestamp( src_file, dst_dir ):
+    # geef secs verschil terug van bestanden
     try :
         statinfo_src = os.stat(src_file)
-        _head,tail = os.path.split(src_file)   
+        _head,tail = os.path.split(src_file)
         statinfo_dst = os.stat(dst_dir+"/"+tail)
-        return long(abs(statinfo_src.st_mtime - statinfo_dst.st_mtime))   
+        return int(abs(statinfo_src.st_mtime - statinfo_dst.st_mtime))   
     except Exception as _e:
-        return long(-1)
-    
+        return int(-1)
+
+
 # haal een maand van de timestring af en geef het
 # jaar en maand terug.
 def prevYearMonth(timestr):

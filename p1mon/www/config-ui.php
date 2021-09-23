@@ -26,12 +26,11 @@ if( $localip == False ){
         }
 }
 
-
 $sw_off  = strIdx( 193 );
 $sw_on   = strIdx( 192 );
 $seconds = strIdx( 194 );
 $minutes = strIdx( 120 );
-$hour   =  strIdx( 129 );
+$hour    = strIdx( 129 );
 
 $err_cnt = -1;
 if ( isset($_POST["actueel_e"]) ) { 
@@ -144,6 +143,28 @@ if ( isset($_POST["kWhleveringSolarEdge"]) ) {
     } else {
         #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 147"))$err_cnt += 1;
+    }
+}
+
+if ( isset($_POST["ui_water_hide"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["ui_water_hide"] == '1' ) {
+        #echo "on<br>";
+        if ( updateConfigDb("update config set parameter = '1' where ID = 157"))$err_cnt += 1;
+    } else {
+        #echo "off<br>";
+        if ( updateConfigDb("update config set parameter = '0' where ID = 157"))$err_cnt += 1;
+    }
+}
+
+if ( isset($_POST["ui_gas_hide"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["ui_gas_hide"] == '1' ) {
+        #echo "on<br>";
+        if ( updateConfigDb("update config set parameter = '1' where ID = 158"))$err_cnt += 1;
+    } else {
+        #echo "off<br>";
+        if ( updateConfigDb("update config set parameter = '0' where ID = 158"))$err_cnt += 1;
     }
 }
 
@@ -268,6 +289,10 @@ if ( isset($_POST["verwarming_uit_label"]) ) {
 }
 
 
+
+
+
+
 function makeSelectorSec( $id ) {
 
     global $sw_off;
@@ -325,7 +350,6 @@ function makeUILanguageSelector($id) {
     echo '<option ' . $val_1  . ' value="1"  >English</option>';
     echo '<option ' . $val_2  . ' value="2"  >Français</option>';
 }
-
 
 function makeSelectorHomeSelector($id) {
     $configValue = config_read($id);
@@ -482,6 +506,7 @@ function makeSelectorAmpere( $id ) {
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>UI configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -491,7 +516,7 @@ function makeSelectorAmpere( $id ) {
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
-<script src="./js/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
 </head>
 <body>
 
@@ -715,6 +740,8 @@ function makeSelectorAmpere( $id ) {
                                     <div class="text-10"><?php echo strIdx( 205 );?></div>
                                     <div class="text-10"><?php echo strIdx( 206 );?></div>
                                     <div class="text-10"><?php echo strIdx( 207 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 256 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 257 );?></div>
                                 </div>
                                 <!-- right side -->
                                 <div class="float-right">
@@ -729,6 +756,14 @@ function makeSelectorAmpere( $id ) {
                                     <div>
                                         <input class="cursor-pointer" name="ui_header" type="radio" value="1" <?php if ( config_read(134) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="ui_header" type="radio" value="0" <?php if ( config_read(134) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                    <div>
+                                        <input class="cursor-pointer" name="ui_water_hide" type="radio" value="1" <?php if ( config_read( 157 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="ui_water_hide" type="radio" value="0" <?php if ( config_read( 157 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                    <div>
+                                        <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="1" <?php if ( config_read( 158 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="0" <?php if ( config_read( 158 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
                             </div>

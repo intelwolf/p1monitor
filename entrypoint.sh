@@ -19,9 +19,13 @@ mkdir /run/php
 echo "Starting p1mon"
 cd /p1mon/scripts
 ./p1mon.sh start
+
 chmod 777 /p1mon/mnt/ramdisk
 chmod 666 /p1mon/mnt/ramdisk/*
 chown -R p1mon:p1mon /p1mon/export /p1mon/var
+
+echo "Writing cron"
+/p1mon/scripts/P1Scheduler.py 
 
 # On SIGTERM stop services 
 trap 'echo "SIGTERM";touch /var/log/p1monitor/shutdown' SIGTERM

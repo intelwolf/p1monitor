@@ -157,6 +157,7 @@ def restore():
         # after the succesfull erease the extention is remove
 
         try:
+
             # process WIFI config data
             flog.info( "Wifi data verwerken." ) 
             for name in glob.glob( const.DIR_UPGRADE_ASSIST_USB_MOUNT + const.DIR_UPGRADE_ASSIST_WIFI + "/*.p1ua" ):
@@ -262,9 +263,21 @@ def restore():
         #print( _cp.stderr )
         #print( _cp.returncode )
         time.sleep( 2 )
+
+        ############################################################################
+        # make a (possible empty) api tokens file. this is needed if the p1mon_443 #
+        # file exist nginx fails if the token file is missing. This also makes     #
+        # sure that nginx is reloaded or restarted if it is not running            #
+        ############################################################################
+        if os.system('sudo -u p1mon /p1mon/scripts/P1NginxConfig.py --apitokens' ) > 0:
+            msg = "API tokens update gefaald."
+            flog.error( inspect.stack()[0][3] + ": " + msg )
+
         flog.info( "file system sync uitvoeren." )
         if os.system('sudo sync' ) > 0:
                 flog.warning(inspect.stack()[0][3]+" file system sync gefaald.")
+
+
         flog.info( "Data herstelt vanaf de USB drive. Er wordt een reboot uitgevoerd." )
         time.sleep( 5 )
         subprocess.run( ['sudo', '/sbin/reboot' ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )

@@ -13,6 +13,7 @@ if ( checkDisplayIsActive(18) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor actueel levering</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -36,13 +37,15 @@ var secs            = 10;
 
 var GdailyKWh       = 0;
 var GData10sec      = [];
-var currentWattageMaxValue = <?php echo config_read(23); ?>;
-var currentKWhMaxValue = <?php echo config_read(56); ?>;
-var currentWattageMinValue = 0;
+
+var currentWattageMaxValue      = <?php echo config_read(23); ?>;
+var currentKWhMaxValue          = <?php echo config_read(56); ?>;
+var currentWattageMinValue      = 0;
 var aninmateCurrentWattageTimer = 0;
+var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
 function readJsonApiSmartMeter(){ 
-    $.getScript( "./api/v1/smartmeter?limit=1440", function( data, textStatus, jqxhr ) {
+    $.getScript( "./api/v1/smartmeter?limit=720", function( data, textStatus, jqxhr ) {
       try {
         var jsondata = JSON.parse(data); 
         var item;
@@ -415,7 +418,12 @@ function creatCurrentUseChart() {
     });
 }
         
-function DataLoop10Sec() {
+function DataLoop() {
+
+    if ( p1TelegramMaxSpeedIsOn == true ) {
+        secs = -1
+    }
+
     secs--;
     if( secs < 0 ) { 
         secs = 10; 
@@ -423,8 +431,10 @@ function DataLoop10Sec() {
         readJsonApiFinancial();
         readJsonApiHistoryDay();
     }
-    setTimeout('DataLoop10Sec()',1000);
-    document.getElementById("timerText").innerHTML = "00:" + zeroPad(secs,2);
+
+    setTimeout('DataLoop()',1000);
+    document.getElementById("timerText").innerHTML = "00:" + zeroPad( secs, 2 );
+
 }
 
 $(function () {
@@ -440,7 +450,7 @@ $(function () {
     $('#dailycost').removeClass('display-none');
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
-    DataLoop10Sec(); 
+    DataLoop(); 
 });
      
         
@@ -491,7 +501,7 @@ $(function () {
                 </div>
                 <div class="pos-25">
                     <div class="frame-3-top">
-                        <span class="text-3">laatste vier uur levering</span>
+                        <span class="text-3">laatste levering</span>
                     </div>
                     <div class="frame-2-bot">
                         <div id="vermogenMeterGrafiekVerbruik" class="pos-26"></div>
@@ -500,6 +510,15 @@ $(function () {
 
             </div>
         </div>
+
+        <script>
+            if ( p1TelegramMaxSpeedIsOn == true ){ 
+                $('#timerText').hide();
+            } else {
+                $('#timerText').show();
+            }
+        </script>
+
     </body>
 
     </html>

@@ -6,13 +6,13 @@ import shutil
 import os
 import sys
 import time
+import util
 
 from sqldb import  rtStatusDb,configDB,SqlDb1,SqlDb2,SqlDb3,SqlDb4,financieelDb,WatermeterDBV2
 from logger import fileLogger,logging
-from util import fileExist, setFile2user, daysPerMonth,isMod, fileChanged, mkLocalTimeString, getUtcTime
+from util import setFile2user, daysPerMonth,isMod, mkLocalTimeString, getUtcTime
 from datetime import datetime, timedelta
-#from gpiozero import LED
-from gpio import gpioDigtalOutput
+#from gpio import gpioDigtalOutput
 from datetime import date
 
 prgname = 'P1Db'
@@ -49,15 +49,6 @@ ACT_GELVR_KW_270        = 0.0
 VERBR_GAS_2421          = 0.0
 timestamp               = 'x'
 timestamp_min_one       = ''
-#powerswitcher_active    = False
-#powerswitcher_last_action_utc_timestamp = 0
-#powerswitcher_forced_on = 0 
-
-#tarifwitcher_forced_on  = False
-#tarifwitcher_is_active  = False
-
-#gpioPowerSwitcher       = gpioDigtalOutput()
-#gpioTarifSwitcher       = gpioDigtalOutput()
 
 def Main():
     global timestamp
@@ -721,8 +712,8 @@ def saveExit(signum, frame):
 
 def backupFile(filename):
     try:
-        file_sec_delta = fileChanged(filename ,const.DIR_FILEDISK)
-        if file_sec_delta > 0 or file_sec_delta== -1:     
+        file_sec_delta = util.file_delta_timestamp(filename ,const.DIR_FILEDISK)
+        if file_sec_delta > 0 or file_sec_delta== -1:
             shutil.copy2(filename, const.DIR_FILEDISK)
             flog.info(inspect.stack()[0][3]+": "+filename+" naar "+const.DIR_FILEDISK+" gekopieerd.")
     except Exception as e:

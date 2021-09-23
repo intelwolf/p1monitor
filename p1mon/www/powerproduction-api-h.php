@@ -14,6 +14,7 @@ if ( checkDisplayIsActive( 147 ) == false) { return; }
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title><?php echo strIdx(134);?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -62,7 +63,6 @@ var min_temp_color    = '#0088FF';
 var high_tariff_color = '#98D023';
 var low_tariff_color  = '#7FAD1D';
 
-
 // Weather 
 function readJsonApiWeatherHistoryHour( cnt ){
     $.getScript( "/api/v1/weather/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -88,7 +88,6 @@ function readJsonApiWeatherHistoryHour( cnt ){
       }
    });
 }
-
 
 // check if the record for epoch time exists
 // if not add else add the values high and low to
@@ -172,9 +171,6 @@ function readJsonActiveDbSiteIndices( cnt ) {
       }
     });
 }
-
-/* preload */
-readJsonActiveDbSiteIndices(  maxrecords )
 
 // change items with the marker #PARAMETER
 function createKwhChart() {
@@ -507,7 +503,7 @@ function updateData() {
 }
 
 function DataLoop() {
-    currentMinutes = Math.floor(secs / 60);
+    currentMinutes = Math.floor( secs / 60);
     currentSeconds = secs % 60;
     if(currentSeconds <= 9) { currentSeconds = "0" + currentSeconds; }
     secs--;
@@ -525,7 +521,7 @@ function DataLoop() {
       hideStuff('loading-data');
       createKwhChart();
     }
-    setTimeout('DataLoop()',1000);
+    setTimeout( 'DataLoop()', 1000 );
 }
 
 $(function() {
@@ -544,7 +540,7 @@ $(function() {
     // get language settings from config database and set HighChart
     setHighChartLanguageOptions( <?php echo languageIndex();?> );
 
-    secs = 0;
+    secs = -1;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
 });

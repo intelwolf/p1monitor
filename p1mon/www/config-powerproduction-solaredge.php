@@ -137,6 +137,7 @@ function selectorTariffMode( $mode ) {
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>Solar Edge API configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -223,10 +224,10 @@ $(function () {
         placeholder:"geen site id's gevonden.",
         clipboard:true,
         columns:[
-            {title:site_id,    field:"ID", sorter:"number", width:104 },
-            {title:db_index,   field:"DB_INDEX",    width:98 },
-            {title:start_date, field:"START_DATE",  width:107, sorter:"string" },
-            {title:end_date,  field:"END_DATE",    width:107, sorter:"string" },
+            {title:site_id,    field:"ID",         width:104, sorter:"number",},
+            {title:db_index,   field:"DB_INDEX",   width:98 },
+            {title:start_date, field:"START_DATE", width:107, sorter:"string" },
+            {title:end_date,   field:"END_DATE",   width:107, sorter:"string" },
             {title:active,   
                 field:"SITE_ACTIVE", 
                 width:79,

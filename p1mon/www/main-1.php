@@ -11,6 +11,7 @@ include_once '/p1mon/www/util/fullscreen.php';
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>P1monitor Home</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -41,8 +42,12 @@ var faseVerbrTitle = 'fase<br>verdeling'
 var consumptionPowerPhase   = [ [0],[0],[0] ];
 var productionPowerPhase    = [ [0],[0],[0] ];
 var watermeterRecords       = 1
-var showWatermeterInfo      = <?php if ( config_read( 102 ) == 1 ) { echo "true;"; } else { echo "false"; } ?> 
-var phaseCategories          = [ 'L1', 'L2', 'L3' ]
+
+var phaseCategories         = [ 'L1', 'L2', 'L3' ]
+var p1TelegramMaxSpeedIsOn  = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+var hideWaterUi             = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+var hideGaSUi               = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+
 
 function readJsonApiWaterHistoryDay( cnt ){ 
     $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -145,26 +150,27 @@ function readJsonApiStatus(){
     
     $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
       try {
-        //var verbruikTotaal =  0;
-        //var geleverdTotaal =  0;
+
         var jsondata = JSON.parse(data); 
-        
+        var lowProductionKw = peakConsumptionKw = lowProductionKw = peakProductionKw = 0
+        var peakConsumptionKwTimestamp = lowkProductionKwTimestamp = lowProductionTimestamp = peakProductionKwTimestamp = "??:??:??"
+
         for (var j=0;  j < jsondata.length; j++){  
             // console.log( jsondata[j][0] + ' - ' + jsondata[j][1] )
             if ( jsondata[j][0] == 1 ) {
-                $('#maxkWPiekVerbruikWaarde').text( padXX( jsondata[j][1], 2, 2 ) + " kW" );
+                var peakConsumptionKw = padXX( jsondata[j][1], 2, 2 )
                 continue;
             }
             if ( jsondata[j][0] == 2 ) {
-                $('#maxkWPiekVerbruikDatum').text( jsondata[j][1] );
+                var peakConsumptionKwTimestamp = jsondata[j][1].substring( 11 );
                 continue;
             }
             if ( jsondata[j][0] == 3 ) {
-                $('#maxkWPiekGeleverdWaarde').text( padXX( jsondata[j][1], 2, 2 ) + " kW" );
+                var peakProductionKw = padXX( jsondata[j][1], 2, 2 )
                 continue;
             }
             if ( jsondata[j][0] == 4 ) {
-                $('#maxkWPiekGeleverdDatum').text( jsondata[j][1] );
+                var peakProductionKwTimestamp = jsondata[j][1].substring( 11 );
                 continue;
             }
             
@@ -188,12 +194,7 @@ function readJsonApiStatus(){
                 //geleverdTotaal = geleverdTotaal +  parseFloat( jsondata[j][1] );
                 continue;
             }
-            /*
-            if ( jsondata[j][0] == 44 ) { 
-                $('#verbruikGasDag').text( padXX( jsondata[j][1] ,5, 3) );
-                continue;
-            }
-            */
+            
             if ( jsondata[j][0] == 74 ) { 
                 consumptionPowerPhase[0] = parseFloat( jsondata[j][1] )
                 continue;
@@ -218,14 +219,29 @@ function readJsonApiStatus(){
                 productionPowerPhase[2] = parseFloat( jsondata[j][1] )
                 continue;
             }
+            if ( jsondata[j][0] == 113 ) {
+                var lowConsumptionKw = padXX( jsondata[j][1], 2, 2 )
+                continue;
+            }
+            if ( jsondata[j][0] == 114 ) {
+                var lowConsumptionKwTimestamp = jsondata[j][1].substring( 11 );
+                continue;
+            }
+            if ( jsondata[j][0] == 115 ) {
+                var lowProductionKw = padXX( jsondata[j][1], 2, 2 )
+                continue;
+            }
+            if ( jsondata[j][0] == 116 ) {
+                var lowProductionTimestamp = jsondata[j][1].substring( 11 );
+                continue;
+            }
+
          }
 
-         //productionPowerPhase[0]  = productionPowerPhase[1]  = productionPowerPhase[2] = 1
-         //consumptionPowerPhase[0] = consumptionPowerPhase[1] = consumptionPowerPhase[2] = 0
-
-         // sum the High and Low values
-         //$('#verbruikDalEnPiekKW').text( padXX( verbruikTotaal ,5, 3 ) +" kWh");
-         //$('#geleverdDalEnPiekKW').text( padXX( geleverdTotaal ,5, 3 ) +" kWh");
+        $('#peakKWConsumption').text(" " + peakConsumptionKw + " kW " + peakConsumptionKwTimestamp );
+        $('#lowKWConsumption').text(" " + lowConsumptionKw + " kW " + lowConsumptionKwTimestamp );
+        $('#peakKWProduction').text(" " + peakProductionKw + " kW " + peakProductionKwTimestamp );
+        $('#lowKWProduction').text(" " + lowProductionKw + " kW " + lowProductionTimestamp );
 
         //console.log( "consumptionPowerPhase="+consumptionPowerPhase )
         // check if there is phase information for consumption
@@ -714,18 +730,23 @@ function createChartGeleverdGrafiek() {
     });
 }
 
-function DataLoop10Sec() {
+function DataLoop() {
+
+    if ( p1TelegramMaxSpeedIsOn == true ) {
+        secs = -1
+    }
+
     secs--;
     if( secs < 0 ) { 
-        secs = 10; 
- 
-        readJsonApiSmartMeter()
-        readJsonApiStatus()
-        readJsonApiFinancial()
-        readJsonApiHistoryDay()
-        readJsonApiWaterHistoryDay( watermeterRecords )
+        secs = 10;
+        readJsonApiSmartMeter();
+        readJsonApiStatus();
+        readJsonApiHistoryDay();
+        readJsonApiFinancial();
+        readJsonApiWaterHistoryDay( watermeterRecords );
     }
-    setTimeout('DataLoop10Sec()',1000);
+
+    setTimeout( 'DataLoop()', 1000 );
     document.getElementById("timerText").innerHTML = "00:" + zeroPad(secs,2);
 }
 
@@ -794,9 +815,9 @@ $(function () {
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     // initial load
     secs = 0
-    DataLoop10Sec();
+    DataLoop();
     // set dynamic titles
-    
+
 });
 
 </script>
@@ -841,7 +862,6 @@ $(function () {
                     <span id="verbruikPiek" class="text-4"></span><br>
                     </div>
 
-
                     <div id="meterstand_dal_verbruik_totaal" title="fout niet gezet.">
                     <span class="fa-layers fa-fw text-4">
                         <i class="fas fa-euro-sign" data-fa-transform="left-4"></i>
@@ -850,14 +870,13 @@ $(function () {
                     <span id="verbruikDal" class="text-4 "></span>
                     </div>
 
-                    <div title="<?php echo strIdx(38);?>">
+                    <div id="gasDiv" title="<?php echo strIdx(38);?>">
                         <i class="pad-18 text-4 fab fa-gripfire">&nbsp;</i>&nbsp;<span id="verbruikDGas" class="text-4 pad-6"></span><span class="text-4"> m<sup>3</sup></span>
                     </div>
                     
-                    <div id="watermeter" title="<?php echo strIdx( 73 );?>">
+                    <div id="watermeterDiv" title="<?php echo strIdx( 73 );?>">
                         <i class="pad-18 text-4 fas fa-tint">&nbsp;</i>&nbsp;<span id="verbruikWater" class="text-4 pad-6">00000.000</span><span class="text-4"> m<sup>3</sup></span>
                     </div>
-                    
 
                 </div>
                 <div class="pad-14"></div>
@@ -877,12 +896,16 @@ $(function () {
                         <i class="fas fa-euro-sign" data-fa-transform="left-4"></i>
                         <i class="fas fa-long-arrow-alt-down" data-fa-transform="right-4 shrink-1"></i>
                       </span>
-                    <span id="verbruikDalKW" class="text-4"></span><br></div>
-                    <div title="<?php echo strIdx( 39 );?>">
-                    <i class="pad-6 text-4 far fa-clock">&nbsp;</i>&nbsp;<span id="maxkWPiekVerbruikDatum" class="text-4"></span>&nbsp;</div>
-                    <div title="<?php echo strIdx( 40 );?>">
-                    <span><i class="pad-6 text-4 fas fa-arrow-circle-up">&nbsp;</i>&nbsp;</span><span id="maxkWPiekVerbruikWaarde" class="text-4"></span></div>
                     
+                    <span id="verbruikDalKW" class="text-4"></span><br></div>
+
+                    <div title="<?php echo strIdx( 39 );?>">
+                        <span><i class="pad-6 text-4 fas fa-arrow-circle-up">&nbsp;</i></span><span id="peakKWConsumption" class="text-4"></span>
+                    </div>
+                    <div title="<?php echo strIdx( 253 );?>">
+                        <span><i class="pad-6 text-4 fas fa-arrow-circle-down">&nbsp;</i></span><span id="lowKWConsumption" class="text-4"></span>
+                    </div>
+
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
@@ -891,8 +914,12 @@ $(function () {
                 <div class="frame-2-bot"> 
                     <div title="<?php echo strIdx( 41 );?>">
                         <i class="pad-6 text-4 fa fa-bolt"></i>&nbsp;<span id="verbruikDalEnPiekKW" class="text-4 pad-6"></span><br>
-                        <i class="text-4 fab fa-gripfire"></i>&nbsp;<span id="verbruikGasDag" class="text-4"></span><span class="text-4"> m<sup>3</sup></span><br>
-                        <i class="text-4 fas fa-tint"></i>&nbsp;<span id="verbruikWaterDag" class="text-4">000000000</span><span class="text-4"> Liter</span><br>
+                        <div id="verbruikGasDagDiv">
+                            <i class="text-4 fab fa-gripfire"></i>&nbsp;<span id="verbruikGasDag" class="text-4"></span><span class="text-4"> m<sup>3</sup></span><br>
+                        </div>      
+                        <div id="verbruikWaterDagDiv">
+                            <i class="text-4 fas fa-tint"></i>&nbsp;<span id="verbruikWaterDag" class="text-4">000000000</span><span class="text-4"> Liter</span><br>
+                        </div>
                     </div>
                     <div title="<?php echo strIdx( 42 );?>">
                         <i class="text-4 fas fa-euro-sign"></i>&nbsp;<span id="verbruikKosten" class="text-4 pad-6"></span>
@@ -963,12 +990,13 @@ $(function () {
                         <span id="geleverdDalKW" class="text-4"></span><br>
                     </div>
 
-                    <div title="<?php echo strIdx( 43 );?>">
-                        <i class="pad-6 text-4 far fa-clock">&nbsp;</i>&nbsp;<span id="maxkWPiekGeleverdDatum" class="text-4"></span>&nbsp;
+                    <div title="<?php echo strIdx( 254 );?>">
+                        <span><i class="pad-6 text-4 fas fa-arrow-circle-up">&nbsp;</i></span><span id="peakKWProduction" class="text-4">x</span>
                     </div>
-                    <div title="<?php echo strIdx( 44 );?>">
-                        <i class="pad-6 text-4 fas fa-arrow-circle-up">&nbsp;</i>&nbsp;<span id="maxkWPiekGeleverdWaarde" class="text-4"></span>
+                    <div title="<?php echo strIdx( 255 );?>">
+                        <span><i class="pad-6 text-4 fas fa-arrow-circle-down">&nbsp;</i></span><span id="lowKWProduction" class="text-4">x</span>
                     </div>
+
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
@@ -989,18 +1017,36 @@ $(function () {
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="actVermogenMeterGrafiekGeleverd" class="pos-4"></div>
-                </div>        
+                </div>
             </div>
-        </div>    
+        </div>
         <!-- <div class="pos-46x" id="actVermogenFaseLevering"></div> -->
     </div>
 </div>
 <script>
-if ( showWatermeterInfo  == false ){
-    $('#watermeter').hide();
+
+if ( hideWaterUi == true ){
+    $('#verbruikWaterDagDiv').hide();
+    $('#watermeterDiv').hide();
 } else {
-    $('#watermeter').show();
+    $('#verbruikWaterDagDiv').show();
+    $('#watermeterDiv').show();
 }
+
+if ( hideGaSUi == true ){
+    $('#gasDiv').hide();
+    $('#verbruikGasDagDiv').hide();
+} else {
+    $('#gasDiv').show();
+    $('#verbruikGasDagDiv').show();
+}
+
+if ( p1TelegramMaxSpeedIsOn == true ){ 
+    $('#timerText').hide();
+} else {
+    $('#timerText').show();
+}
+
 </script>
 </body>
 </html>

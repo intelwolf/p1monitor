@@ -166,6 +166,7 @@ function getJsonGetWeatherData() {
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title>Weer configuratie</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -285,12 +286,12 @@ $(function () {
                                                                 <i class="text-10 pad-39 fas fa-globe "></i>
                                                                 <label class="text-10">stad ID</label> 
                                                         </div>
-                                                        <div class="float-left pad-1">    
-                                                                <input class="input-10 color-settings color-input-back" id="api_key" name="API_key" type="password" value="<?php echo decodeString(13, 'weatherapikey');?>">
-                                                                <p class="p-1"></p>   
-                                                                <input class="input-10 color-settings color-input-back" name="stad" type="text" value="<?php echo config_read(14); ?>">
+                                                        <div class="float-left pad-1">
+                                                                <input class="input-6 color-settings color-input-back" id="api_key" name="API_key" type="password" value="<?php echo decodeString(13, 'weatherapikey');?>">
                                                                 <p class="p-1"></p>
-                                                                <input class="input-10 color-settings color-input-back" name="stad_id" type="text" value="" placeholder="gebruik de stad id als alternatief">
+                                                                <input class="input-6 color-settings color-input-back" name="stad" type="text" value="<?php echo config_read(14); ?>">
+                                                                <p class="p-1"></p>
+                                                                <input class="input-6 color-settings color-input-back" name="stad_id" type="text" value="" placeholder="gebruik de stad id als alternatief">
                                                                 <p class="p-1"></p>
                                                         </div>
                                                         <div id="api_passwd" onclick="toggelPasswordVisibility('api_key')" class="float-left pad-1 cursor-pointer">        

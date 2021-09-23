@@ -7,7 +7,6 @@ import json
 import falcon
 import inspect
 import numbers
-#import sqldb
 import sys
 import os
 import api_solarpower_lib
@@ -262,7 +261,7 @@ class PowerProductionS0( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return
@@ -319,7 +318,7 @@ class PowerProductionS0( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html ( err_str ), 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
 
@@ -349,7 +348,7 @@ class PowerProductionS0( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value)) ,
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -363,7 +362,7 @@ class PowerProductionS0( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -404,8 +403,8 @@ class PowerProductionS0( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                   titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    titel=apierror.API_DB_ERROR['title'], 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
 
@@ -495,7 +494,7 @@ class IndoorTemperature( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -559,7 +558,7 @@ class IndoorTemperature( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ), 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -597,7 +596,7 @@ class IndoorTemperature( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -610,7 +609,7 @@ class IndoorTemperature( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -653,7 +652,7 @@ class IndoorTemperature( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                    titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -735,7 +734,6 @@ class CurrentWeather( object ):
             
             flog.debug ( str(__name__) + " help data selected.")
             try:
-                
                 resp.text = ( json.dumps( apiconst.HELP_ROUTE_WEATHER_CURRENT_JSON, sort_keys=True , indent=2 ) )
             except Exception as _e:
                 flog.error ( str(__class__.__name__) + ":" + inspect.stack()[0][3] + ": help request on " + \
@@ -743,7 +741,7 @@ class CurrentWeather( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -785,7 +783,7 @@ class CurrentWeather( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ), 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -846,7 +844,7 @@ class CurrentWeather( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                    titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -949,7 +947,7 @@ class WeatherHistoryHourDayMonthYear( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0] ) ), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1004,14 +1002,14 @@ class WeatherHistoryHourDayMonthYear( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ), 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
-                if key == apiconst.API_PARAMETER_SORT:    
+                if key == apiconst.API_PARAMETER_SORT:
                     if value.lower() == 'asc':
                         v_sort = "ASC" 
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query sort naar asc gezet." )
-                if key == apiconst.API_PARAMETER_JSON_TYPE:     
+                if key == apiconst.API_PARAMETER_JSON_TYPE:
                     if value.lower() == 'object':
                         v_json_mode = 'object'
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query json naar object type gezet." )
@@ -1072,7 +1070,7 @@ class WeatherHistoryHourDayMonthYear( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                    titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1150,7 +1148,7 @@ class PowerGasHistoryDayMonthYear( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1203,7 +1201,7 @@ class PowerGasHistoryDayMonthYear( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ), 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1229,7 +1227,7 @@ class PowerGasHistoryDayMonthYear( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1242,7 +1240,7 @@ class PowerGasHistoryDayMonthYear( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1275,7 +1273,6 @@ class PowerGasHistoryDayMonthYear( object ):
                    
                     resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                   
                     resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
@@ -1283,7 +1280,7 @@ class PowerGasHistoryDayMonthYear( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                    titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr)) ,
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1361,11 +1358,10 @@ class PowerGasHistoryHour( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
-            return     
-            
+            return
 
         if req.path == apiconst.ROUTE_POWER_GAS_HOUR:
             sqlstr_base_regular = self.sqlstr_base_regular + 'e_history_uur '
@@ -1405,7 +1401,7 @@ class PowerGasHistoryHour( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ),
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1431,7 +1427,7 @@ class PowerGasHistoryHour( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value)),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1444,7 +1440,7 @@ class PowerGasHistoryHour( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1486,7 +1482,7 @@ class PowerGasHistoryHour( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                    titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1565,7 +1561,7 @@ class PowerGasHistoryMin( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1611,7 +1607,7 @@ class PowerGasHistoryMin( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ),
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1637,7 +1633,7 @@ class PowerGasHistoryMin( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1650,7 +1646,7 @@ class PowerGasHistoryMin( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1693,7 +1689,7 @@ class PowerGasHistoryMin( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                     titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] +  apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1807,7 +1803,7 @@ class Financial( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ),
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -1843,7 +1839,7 @@ class Financial( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -1856,7 +1852,7 @@ class Financial( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -1887,7 +1883,6 @@ class Financial( object ):
                     
                     resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
-                    
                     resp.text = json.dumps( records, ensure_ascii=False )
                 
                 #print ( records )
@@ -1895,7 +1890,7 @@ class Financial( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                     titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -1947,7 +1942,7 @@ class Status( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] +  apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -1963,7 +1958,7 @@ class Status( object ):
                     raise falcon.HTTPError( 
                         status=apierror.API_PARAMETER_ERROR['status'], 
                         title=apierror.API_PARAMETER_ERROR['title'], 
-                        description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                        description=apierror.API_PARAMETER_ERROR['description'] +  apiutil.santize_html( err_str ),
                         code=apierror.API_PARAMETER_ERROR['code'] 
                     )
     
@@ -1998,7 +1993,6 @@ class Status( object ):
                       
                     json_obj_data.append( new_dict )
 
-                
                 resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
             else:
                 
@@ -2009,7 +2003,7 @@ class Status( object ):
             raise falcon.HTTPError( 
                 status=apierror.API_DB_ERROR['status'], 
                 titel=apierror.API_DB_ERROR['title'], 
-                description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                 code=apierror.API_DB_ERROR['code'] 
                 )
                
@@ -2057,7 +2051,7 @@ class Config( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ), 
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -2073,7 +2067,7 @@ class Config( object ):
                     raise falcon.HTTPError( 
                         status=apierror.API_PARAMETER_ERROR['status'], 
                         title=apierror.API_PARAMETER_ERROR['title'], 
-                        description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                        description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ),
                         code=apierror.API_PARAMETER_ERROR['code'] 
                     )
     
@@ -2117,7 +2111,7 @@ class Config( object ):
             raise falcon.HTTPError( 
                 status=apierror.API_DB_ERROR['status'], 
                 titel=apierror.API_DB_ERROR['title'], 
-                description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                 code=apierror.API_DB_ERROR['code'] 
                 )
                
@@ -2191,7 +2185,7 @@ class SmartMeter( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -2229,7 +2223,7 @@ class SmartMeter( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ),
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -2288,7 +2282,7 @@ class SmartMeter( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                     titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -2351,7 +2345,7 @@ class Watermeter( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return 
@@ -2407,7 +2401,7 @@ class Watermeter( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'], 
                             title=apierror.API_PARAMETER_ERROR['title'], 
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str, 
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ), 
                             code=apierror.API_PARAMETER_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_SORT:    
@@ -2434,7 +2428,7 @@ class Watermeter( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
                 if key == apiconst.API_PARAMETER_RANGETIMESTAMP:
@@ -2448,7 +2442,7 @@ class Watermeter( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_TIMESTAMP_ERROR['status'], 
                             title=apierror.API_TIMESTAMP_ERROR['title'], 
-                            description=apierror.API_TIMESTAMP_ERROR['description'] + str(value),
+                            description=apierror.API_TIMESTAMP_ERROR['description'] + apiutil.santize_html( str(value) ),
                             code=apierror.API_TIMESTAMP_ERROR['code'] 
                         )
 
@@ -2486,7 +2480,7 @@ class Watermeter( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                    titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                
@@ -2575,7 +2569,7 @@ class Phase( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_GENERAL_ERROR['status'], 
                     title=apierror.API_GENERAL_ERROR['title'], 
-                    description=apierror.API_GENERAL_ERROR['description'] + str(_e.args[0]), 
+                    description=apierror.API_GENERAL_ERROR['description'] + apiutil.santize_html( str(_e.args[0]) ),
                     code=apierror.API_GENERAL_ERROR['code'] 
                     )
             return     
@@ -2612,7 +2606,7 @@ class Phase( object ):
                         raise falcon.HTTPError( 
                             status=apierror.API_PARAMETER_ERROR['status'],
                             title=apierror.API_PARAMETER_ERROR['title'],
-                            description=apierror.API_PARAMETER_ERROR['description'] + err_str,
+                            description=apierror.API_PARAMETER_ERROR['description'] + apiutil.santize_html( err_str ),
                             code=apierror.API_PARAMETER_ERROR['code']
                         )
                 if key == apiconst.API_PARAMETER_SORT:
@@ -2673,7 +2667,7 @@ class Phase( object ):
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
                    titel=apierror.API_DB_ERROR['title'], 
-                    description=apierror.API_DB_ERROR['description'] + str(_e.args[0] + " query used: " + sqlstr), 
+                    description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
                

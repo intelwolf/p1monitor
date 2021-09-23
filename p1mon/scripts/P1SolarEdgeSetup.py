@@ -19,22 +19,12 @@ import signal
 import sys
 import time
 
-#from datetime import datetime, timedelta
-#from datetime_delta_lib import create_date_list
-#from json_lib import json_extract
-#from logger import fileLogger,logging
-#from makeLocalTimeString import makeLocalTimeString
-
 # programme name.
 prgname = 'P1SolarEdgeSetup'
 
 config_db                   = sqldb.configDB()
 rt_status_db                = sqldb.rtStatusDb()
 power_production_solar_db   = sqldb.powerProductionSolarDB()
-
-#TODO   
-# updates van sitelist via de Py script dat periodiek loopt. niet van de config pagina/
-
 
 def Main( argv ): 
 

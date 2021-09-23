@@ -30,7 +30,57 @@ $sw_on   = strIdx( 192 );
 
 $WIFI_ESSID_FILE  = '/p1mon/mnt/ramdisk/wifi_essid.txt';
 
+$ethO_previous_ip   = config_read( 164 );
+$wlan0_previous_ip  = config_read( 165 );
+$router_previous_ip = config_read( 166 );
+$dns_previous_ip    = config_read( 167 );
+
+#echo $ethO_previous_ip."<br>";
+#echo $wlan0_previous_ip."<br>";
+#echo $router_previous_ip."<br>";
+#echo $dns_previous_ip."<br>";
+
 $err_cnt = -1;
+$watchdog_flag = intval( config_read( 168 ) );
+
+if( isset($_POST["ip_eth0"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["ip_eth0"] != $ethO_previous_ip ) {
+        if ( updateConfigDb("update config set parameter = '".$_POST["ip_eth0"]."' where ID = 164")) $err_cnt += 1;
+        $watchdog_flag = $watchdog_flag | 1;
+        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+    }
+}
+
+if( isset($_POST["ip_wlan0"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["ip_wlan0"] != $wlan0_previous_ip ) {
+        if ( updateConfigDb("update config set parameter = '".$_POST["ip_wlan0"]."' where ID = 165")) $err_cnt += 1;
+        $watchdog_flag = $watchdog_flag | 2;
+        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+    }
+}
+
+if( isset($_POST["ip_router"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["ip_router"] != $router_previous_ip ) {
+        if ( updateConfigDb("update config set parameter = '".$_POST["ip_router"]."' where ID = 166")) $err_cnt += 1;
+        $watchdog_flag = $watchdog_flag | 4;
+        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+    }
+}
+
+if( isset($_POST["ip_dns"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["ip_dns"] != $dns_previous_ip ) {
+        if ( updateConfigDb("update config set parameter = '".$_POST["ip_dns"]."' where ID = 167")) $err_cnt += 1;
+        $watchdog_flag = $watchdog_flag | 8;
+        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+    }
+}
+
+#echo $watchdog_flag."<br>";
+
 if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
 {
     
@@ -74,6 +124,7 @@ if ( isset($_POST[ "fs_rb_duckdns_force" ]) ) {
     }
 }
 
+
 function makeSelector($id) {
     
     global $WIFI_ESSID_FILE;
@@ -99,6 +150,7 @@ function makeSelector($id) {
 <!doctype html>
 <html lang="nl">
 <head>
+<meta name="robots" content="noindex">
 <title><?php echo strIdx( 225 );?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -108,6 +160,9 @@ function makeSelector($id) {
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/additional-methods.min.js"></script>
+
 </head>
 <body>
 <script>
@@ -167,6 +222,10 @@ function readJsonApiStatus(){
                 break;
             case 42:
                 $('#ne8v').text(jsonarr[j][1]);
+                break;
+            case 122:
+                document.getElementById("ip_router").placeholder = jsonarr[j][1]
+                document.getElementById("ip_dns").placeholder    = jsonarr[j][1]
                 break;
             default:
                 break;
@@ -414,6 +473,68 @@ $(function () {
                             </div>
                         </div>
 
+                        <p></p>
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo strIdx( 281 );?></span>
+                        </div>
+                        <div class="frame-4-bot">
+
+                            <div class="rTable">
+
+                                <div class="rTableRow" title="<?php echo strIdx( 273 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-network-wired"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10 pad-1"><?php echo strIdx( 277 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-3 color-settings color-input-back" id="ip_eth0" name="ip_eth0" type="text" value="<?php echo config_read( 164 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 274 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-wifi"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10 pad-1"><?php echo strIdx( 278 );?></label> 
+                                    </div>
+                                    <div class="rTableCell"> 
+                                        <input class="input-3 color-settings color-input-back" id="ip_wlan0" name="ip_wlan0" type="text" value="<?php echo config_read( 165 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 275 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-project-diagram"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10 pad-1"><?php echo strIdx( 279 );?></label> 
+                                    </div>
+                                    <div class="rTableCell"> 
+                                        <input class="input-3 color-settings color-input-back" id="ip_router" name="ip_router" type="text" value="<?php echo config_read( 166 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 276 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-globe"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10 pad-1"><?php echo strIdx( 280 );?></label>
+                                    </div>
+                                    <div class="rTableCell"> 
+                                        <input class="input-3 color-settings color-input-back" id="ip_dns" name="ip_dns" type="text" value="<?php echo config_read( 167 );?>">
+                                    </div>
+                                </div>
+
+                            </div>
+                            
+                            <p></p>
+
+                        </div>
+
                         <!-- placeholder variables for session termination -->
                         <input type="hidden" name="logout" id="logout" value="">
                     </form>
@@ -429,9 +550,19 @@ $(function () {
                         <?php echo strIdx( 237 );?>
                         <br><br>
                         <?php echo strIdx( 238 );?>
+                        <br><br>
+                        <?php echo strIdx( 282 );?>
+                        <br>
+                        <span class="text-10">
+                            <a href="https://www.ztatz.nl/p1-monitor-internet-api/#static_ip" target="_blank">
+                                <i class="pad-7 color-menu fas fa-globe"></i>
+                                <?php echo strIdx( 283 );?>
+                            </a>
+                        </span>
+                        <br><br>
                     </div>
                 </div>
-            </div>    
+            </div>
             <!-- end inner block right part of screen -->
             </div>
       
@@ -442,6 +573,54 @@ $(function () {
             <?php makeSelector(11);?>
         </select>
     </div>
+
+<script>
+
+jQuery.validator.addMethod( "ztatz_NotEqualTo", function( value, element) {
+    eth0  = document.getElementById ( 'ip_eth0' ).value.trim();
+    wlan0 =  document.getElementById( 'ip_wlan0' ).value.trim();
+    if ( eth0.length == 0 || wlan0.length == 0 ) { 
+        return true;
+    }
+    if ( eth0 == wlan0 ) {
+        return false;
+    }
+    return true;
+}, '');
+
+$(function() {
+    $("#formvalues").validate({
+        rules: {
+            'ip_eth0': {
+                ipv4: true,
+                ztatz_NotEqualTo: true
+            },
+            'ip_wlan0': {
+                ipv4: true,
+                ztatz_NotEqualTo: true
+            },
+            'ip_router': {
+                ipv4: true
+            },
+            'ip_dns': {
+                ipv4: true
+            },
+        
+        },
+        invalidHandler: function(e, validator) { 
+            var errors = validator.numberOfInvalids();
+            //console.log ( errors );
+        },
+        errorPlacement: function(error, element) {
+            $(this).addClass('error');
+            //console.log ( 'errorPlacement' );
+            return false;  // will suppress error messages 
+        }
+    }); 
+});
+</script>
+
+
     <?php echo autoLogout(); ?>
 </body>
 </html>

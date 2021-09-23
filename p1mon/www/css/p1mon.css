@@ -1031,7 +1031,7 @@ div#right-wrapper-config-right-4 {
 }
 
 .input-12 {
-    width: 30px;
+    width: 25px;
     border-radius: 3px 3px 3px 3px;
     -moz-border-radius: 3px 3px 3px 3px;
     -webkit-border-radius: 3px 3px 3px 3px;
@@ -1072,6 +1072,15 @@ div#right-wrapper-config-right-4 {
     border: 1px solid #DCE1E3;
 }
 
+
+.input-16 {
+    width: 300px;
+    border-radius: 3px 3px 3px 3px;
+    -moz-border-radius: 3px 3px 3px 3px;
+    -webkit-border-radius: 3px 3px 3px 3px;
+    font-size: 1em;
+    font-family: 'robotoblack';
+}
 
 *:focus {
     outline: 0 !important;
@@ -2063,8 +2072,16 @@ a:hover {
     width: 22px !important; 
 }
 
+.width-24 {
+    width: 24px !important; 
+}
+
 .width-58 {
     width: 58px !important; 
+}
+
+.width-80 {
+    width: 80px !important; 
 }
 
 .width-160 {
@@ -2085,6 +2102,10 @@ a:hover {
 
 .width-310 {
     width: 310px !important; 
+}
+
+.width-430 {
+    width: 430px !important; 
 }
 
 .width-910 {

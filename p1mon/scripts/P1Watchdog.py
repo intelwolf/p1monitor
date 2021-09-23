@@ -3,6 +3,7 @@ import const
 import cpuinfo
 import glob
 import inspect
+import network_lib
 import sys
 import hashlib
 import json
@@ -22,7 +23,6 @@ import util
 import urllib.request
 import semaphore3
 import signal
-import utilnetwork3
 import systemid
 import crypto3
 import base64
@@ -61,6 +61,9 @@ def DiskRestore():
 def MainProg():
 
     flog.info("Start van programma.")
+
+    checkVarLogFolder() #clean the /var/log folder when the space is more then 80%
+
     DiskRestore()
    
     # open van status database
@@ -110,7 +113,6 @@ def MainProg():
     rt_status_db.strset(cpu_info['CPU-model'],51,flog)
     rt_status_db.strset(cpu_info['Hardware'],52,flog)
     rt_status_db.strset(cpu_info['Revision'],53,flog)
-    #rt_status_db.strset(cpu_info['Serial'],54,flog) 
     rt_status_db.strset(cpu_info['Pi-model'],55,flog)
 
     # writeSemaphoreFile('debugdump' + '999',flog) # for debug only
@@ -122,7 +124,9 @@ def MainProg():
     #rt_status_db.strset( '', 110, flog )
 
     checkForNewP1Version()
-    getCpuTemperature() 
+    getCpuTemperature()
+    DuckDNS()
+    getDefaultGateway()
   
     ## Internet IP adres
     rt_status_db.strset(getPublicIpAddress(),26,flog)
@@ -190,7 +194,7 @@ def MainProg():
                 if cmd == 'wifi_aanpassen.p1mon':
                     flog.info(inspect.stack()[0][3]+" Wifi aanpassingen.")
                     #writeLanMacToDisk()
-                    if os.system('sudo /p1mon/scripts/P1SetWifi.py') > 0: #TODO nog nodig?
+                    if os.system('sudo /p1mon/scripts/P1SetWifi.py') > 0: #TODO nog nodig? doen network lib. nog uitzoeken.
                         flog.error(inspect.stack()[0][3]+" Wifi aanpassen gefaald.")
                 if cmd == 'upgrade_assist.p1mon':
                     flog.info(inspect.stack()[0][3]+" Upgrade assist save van data gestart")
@@ -257,13 +261,16 @@ def MainProg():
             P1SolarFactoryReset()
             #flog.setLevel( logging.INFO )
             DuckDNS()
-
+            P1NginxSetApiTokens()
+            P1NginxConfigApi()
+            P1NetworkConfig()
 
         # elke 60 sec acties
         if cnt%30 == 0:
-            wlan_info = utilnetwork3.getNicInfo('wlan0')
-            lan_info = utilnetwork3.getNicInfo('eth0')
-           
+            wlan_info = network_lib.get_nic_info( 'wlan0' )
+            lan_info  = network_lib.get_nic_info( 'eth0' )
+            getDefaultGateway()
+
             #get WLAN SSID
             getWlanSSID()
             ## get lan IP en Wifi adres
@@ -314,12 +321,195 @@ def MainProg():
                 rt_status_db.strset("nee",24,flog)
                 flog.error(inspect.stack()[0][3]+": geen Internet verbinding.")  
 
-
-
         cnt+=1
         if cnt > 1800:
             cnt=1
         time.sleep(2) #DO NOT CHANGE!
+
+
+
+def getDefaultGateway():
+    try:
+        result_list = network_lib.get_default_gateway()
+        for rec in result_list:
+            if rec['ip4'] == None:
+                rec['ip4'] = 'onbekend'
+        rt_status_db.strset( rec['ip4'], 122, flog )
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+
+
+########################################################
+# config static Ip address when flags are set          #
+########################################################
+def P1NetworkConfig():
+    try:
+        prg_name = "P1NetworkConfig.py" 
+       
+        _id, needs_to_run_status, _label = config_db.strget( 168, flog )
+
+        pid_list, _process_list = listOfPidByName( prg_name )
+        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+        if int( needs_to_run_status ) > 0 and len( pid_list) == 0: # start process
+
+            _id, eth0_ip, _label  = config_db.strget( 164, flog )
+            _id, wlan0_ip, _label = config_db.strget( 165, flog )
+            _id, router_ip, _label = config_db.strget( 166, flog )
+            _id, dns_ip, _label = config_db.strget( 167, flog )
+
+            # etho ip changed 
+            if ( int(needs_to_run_status) & 1 ) == 1: #wlan0 has changed
+                if len(eth0_ip) == 0:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removestaticip eth0 gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --removestaticip eth0 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --removestaticip eth0." )
+                else:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip eth0 gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip eth0 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip eth0." )
+                config_db.strset( int(needs_to_run_status)-1, 168, flog ) # reset bit
+
+            # wlan ip changed 
+            if ( int(needs_to_run_status) & 2 ) == 2: #wlan0 has changed
+                if len(wlan0_ip) == 0:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removestaticip wlan0 gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --removestaticip wlan0 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --removestaticip wlan0." )
+                else:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip wlan0 gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip wlan0 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip wlan0." )
+                config_db.strset( int(needs_to_run_status)-2, 168, flog ) # reset bit
+
+            # DNS or gatway is changed.
+            if ( int(needs_to_run_status) & 4 ) == 4 or ( int(needs_to_run_status) & 8 ) == 8: #router or gateway has changed has changed
+                if len( wlan0_ip ) > 0:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip wlan0 gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip wlan0 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip wlan0." )
+
+                if len( eth0_ip ) > 0:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip eth0 gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip eth0 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip eth0." )
+
+                config_db.strset( int(needs_to_run_status)-12, 168, flog ) # reset bit
+
+
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset(0, 149, flog) # fail save to stop
+
+
+########################################################
+# start set or reset the NGINX config file and install #
+# or deinstall the Lets Encrypt certifcates            #
+########################################################
+def P1NginxConfigApi():
+    #flog.setLevel( logging.DEBUG )
+    try:
+        prg_name = "P1NginxConfig.py" 
+
+        _id, needs_to_run_status, _label = config_db.strget( 162, flog )
+        flog.debug( inspect.stack()[0][3] + ": uitvoeren flag is " + str(needs_to_run_status) )
+        if int( needs_to_run_status ) == 0:
+            #flog.setLevel( logging.INFO )
+            return # no need to run 
+
+        config_db.strset( 0, 162, flog ) # reset the flag to prevent an endless loop.
+
+        # reset flags to unkown.
+        rt_status_db.strset( 2, 117, flog )
+        rt_status_db.strset( 2, 118, flog )
+        rt_status_db.strset( 2, 119, flog )
+
+        _id, api_is_active, _label = config_db.strget( 163, flog )
+        if int( api_is_active ) == 1 : # start process
+
+            config_db.strset( 1, 161, flog ) # set needs to run status
+            P1NginxSetApiTokens() # important tokens must exist, otherwise the nginx will fail
+            
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --activatecert gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --activatecert 2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --activatecert gefaald." )
+                rt_status_db.strset( 1, 117, flog )
+            else:
+                rt_status_db.strset( 0, 117, flog )
+
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --autorenewon gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --autorenewon  2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --autorenewon gefaald." )
+                rt_status_db.strset( 1, 118, flog )
+            else:
+                rt_status_db.strset( 0, 118, flog )
+
+            # wait 20 sec because Lets Encrypt takes more time or is still busy.
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --https gestart." )
+            if os.system('sleep 20; /p1mon/scripts/' + prg_name + ' --https 2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --https gefaald." )
+                rt_status_db.strset( 1, 119, flog )
+            else:
+                rt_status_db.strset( 0, 119, flog )
+
+        else:
+
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --autorenewoff gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --autorenewoff 2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --autorenewoff  gefaald." )
+                rt_status_db.strset( 1, 118, flog )
+            else:
+                rt_status_db.strset( 0, 118, flog )
+
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --http gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --http  2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --http gefaald." )
+                rt_status_db.strset( 1, 119, flog )
+            else:
+                rt_status_db.strset( 0, 119, flog )
+            
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --deactivatecert gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --deactivatecert  2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --deactivatecert gefaald." )
+                rt_status_db.strset( 1, 117, flog )
+            else:
+                rt_status_db.strset( 0, 117, flog )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset(0, 149, flog) # fail save to stop
+    
+    #flog.setLevel( logging.INFO )
+
+
+########################################################
+# start the process to generate or updated API tokens  #
+########################################################
+def P1NginxSetApiTokens():
+    #flog.setLevel( logging.DEBUG )
+    try:
+        prg_name = "P1NginxConfig.py" 
+       
+        _id, needs_to_run_status, _label = config_db.strget( 161, flog )
+
+        pid_list, _process_list = listOfPidByName( prg_name )
+        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+        if int( needs_to_run_status ) == 1 and len( pid_list) == 0: # start process
+
+            config_db.strset(0, 161, flog)
+
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --apitokens gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --apitokens 2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --apitokens gefaald." )
+            
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset(0, 149, flog) # fail save to stop
+    
+    #flog.setLevel( logging.INFO )
+
 
 
 # processing #####################
@@ -537,9 +727,9 @@ def P1SolarFactoryReset():
 
             config_db.strset(0, 149, flog)
 
-            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --genesis gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --genesis 2>&1 >/dev/null &') > 0:
-                flog.error( inspect.stack()[0][3] + prg_name + " --genesis gefaald." )
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --http gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --http 2>&1 >/dev/null &') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --http gefaald." )
             
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
@@ -791,7 +981,9 @@ def checkForP1Data():
         # do nothing if timestamp is not correct.
         return
    
-    if delta_time > 30 and p1_no_data_notification == False: # we missed at least 3 telegrams.
+    time_out = 30 # number of seconds before notification.
+
+    if delta_time >= time_out and p1_no_data_notification == False:
         subject_str = ' -subject "' + subject + ' (slimme meter data niet ontvangen)."'
         messagetext = ' -msgtext "Data uit de slimme meter komt niet meer binnen. Laatste slimme meter telegram ' + str(delta_time)+' seconden geleden ontvangen."'
         messagehtml = ' -msghtml "<p>Data uit de slimme meter komt niet meer binnen.</p><p>Laatste slimme meter telegram <b>' + str(delta_time)+'</b> seconden geleden ontvangen.</p>"'
@@ -801,7 +993,7 @@ def checkForP1Data():
             p1_no_data_notification = True
             flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen.")
 
-    if delta_time < 30 and p1_no_data_notification == True:
+    if delta_time < time_out and p1_no_data_notification == True:
             p1_no_data_notification = False
             subject_str = ' -subject "' + subject + ' (slimme meter data ontvangen.)."'
             messagetext = ' -msgtext "Data uit de slimme meter komt binnen. Laatste slimme meter telegram ' + str(delta_time)+' seconden geleden ontvangen."'
@@ -813,7 +1005,7 @@ def checkForP1Data():
     #print ( delta_time )
 
 def checkVarLogFolder():
-    if os.system( '/p1mon/scripts/logspacecleaner.sh >/dev/null 2>&1' ) > 0:
+    if os.system( 'sudo /p1mon/scripts/logspacecleaner.sh >/dev/null 2>&1' ) > 0:
         flog.error(inspect.stack()[0][3]+" logspacecleaner.sh gefaald.")
 
 def getCpuTemperature(): #P3 ok
@@ -990,7 +1182,7 @@ def getPublicIpAddress(): #P3 ok
         return str(response.read().decode('utf-8'))
 
     except Exception:
-        return "onbekend"   
+        return "onbekend"
 
 def getPythonVersion(): #P3 ok
     try :

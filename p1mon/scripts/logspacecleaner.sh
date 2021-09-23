@@ -15,7 +15,10 @@ if [ $PCT_IN_USE_FOR_FOLDER -gt $MAX_PCT_IN_USE ]
      then
         echo "[*] Folder $LOG_PATH is te vol, oudste files worden verwijderd." 
         echo "[*] Momenteel is de $LOG_PATH voor $PCT_IN_USE_FOR_FOLDER% vol."
-        eval $RM_OLDEST_FILE 
+        # force log rotate on nginx. # DOS protection.
+        echo "[*] NGINX reload."
+        systemctl reload nginx 
+        eval $RM_OLDEST_FILE
         echo "[*] Na het wissen is $LOG_PATH voor $PCT_IN_USE_FOR_FOLDER% vol."
      else
         echo "[*] Folder $LOG_PATH heeft voldoende ruimte, momenteel voor $PCT_IN_USE_FOR_FOLDER% vol."

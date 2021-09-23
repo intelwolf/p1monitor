@@ -1,21 +1,16 @@
 #!/usr/bin/python3
 import argparse
-import sys
-#import glob
-#import zlib
 import const
 import inspect
 import signal
 import zipfile
 import fnmatch
 import datetime
-#import getopt
 import json
 import os
 import pwd
-#import shutil
 import subprocess
-#import semaphore3
+import sys
 import systemid
 import time
 import crypto3
@@ -23,10 +18,7 @@ import crypto3
 from sqldb import configDB, SqlDb2, financieelDb, currentWeatherDB, historyWeatherDB, temperatureDB, WatermeterDB, PhaseDB, powerProductionDB, WatermeterDBV2, powerProductionSolarDB
 from logger import fileLogger,logging
 from datetime import datetime, timedelta
-#from semaphore3 import writeSemaphoreFile
 from util import setFile2user
-#from os import umask
-#from shutil import
 from listOfPidByName import listOfPidByName
 
 prgname = 'P1SqlImport'
@@ -135,7 +127,6 @@ def Main(argv):
 
     openDatabases()
  
-
     try:
         zf = zipfile.ZipFile( importfile )
         _head,tail = os.path.split( importfile ) 
@@ -184,6 +175,7 @@ def Main(argv):
                 msgToInfoLogAndStatusFile( "aantal te importeren records " + str(statusdata['records_total']) + "." )
                 msgToInfoLogAndStatusFile( "import bestand creatie datum " + str(json_data['timestamp']) + "." )
                 break
+
     except Exception as e:
         msg = "manifest bestand is niet correct in ZIP file. -> " + str(e)
         writeLineToStatusFile( msg )
@@ -317,6 +309,13 @@ def Main(argv):
     else:
         msgToInfoLogAndStatusFile( 'CRON aanpassingen gereed.' )
 
+    msgToInfoLogAndStatusFile( 'Internet API wordt aangepast.' )
+    _id, api_is_active, _label = config_db.strget( 163, flog ) 
+    if int( api_is_active ) == 1:        # the Internet API is active process the changes, make https config and get certificates.
+        config_db.strset( 1, 162, flog ) # set the flag so the watchdog processes the changes
+        msgToInfoLogAndStatusFile( 'Internet API aanpassingen worden doorgevoerd, duur maximaal 60 sec.' )
+        time.sleep(10)
+
     #make sure that all is copied to disk
     msgToInfoLogAndStatusFile( "Databases worden van RAM naar het SDHC kaartje geschreven." )
     os.system( "/p1mon/scripts/P1DbCopy.py --allcopy2disk --forcecopy" )
@@ -331,6 +330,9 @@ def Main(argv):
         msg = "verwijderen van import bestand " + importfile + " gefaald."
         writeLineToStatusFile( msg )
         flog.error( inspect.stack()[0][3] + ": " + msg )
+
+    msgToInfoLogAndStatusFile( 'Vaste IP adressen worden aangepast als deze actief zijn.' )
+    config_db.strset( 3, 168, flog ) # set the flag so the watchdog processes the changes
 
     timestop = time.time()
     m, s = divmod( timestop - timestart , 60) # make minutes and seconds from total secs count
