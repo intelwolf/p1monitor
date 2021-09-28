@@ -59,7 +59,7 @@ var L1VIsVisible           = 1;
 var L2VIsVisible           = 1;
 var L3VIsVisible           = 1;
 var faseDbIsActive         = <?php if ( config_read( 119 ) == 1 ) { echo "true;"; } else { echo "false"; } ?>
-var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
+var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
 function readJsonApiPhaseInformation(){ 
     $.getScript( "./api/v1/phase", function( data, textStatus, jqxhr ) {

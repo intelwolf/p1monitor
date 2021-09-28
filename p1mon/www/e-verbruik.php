@@ -42,7 +42,7 @@ var currentWattageMaxValue      = <?php echo config_read(24); ?>;
 var currentKWhMaxValue          = <?php echo config_read(57); ?>;
 var currentWattageMinValue      = 0
 var aninmateCurrentWattageTimer = 0;
-var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
+var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
 function readJsonApiSmartMeter(){ 
     $.getScript( "./api/v1/smartmeter?limit=720", function( data, textStatus, jqxhr ) {

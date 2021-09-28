@@ -3,7 +3,7 @@ services:
 
   p1monitor:
     hostname: p1mon
-    image: mclaassen/p1mon
+    image: mclaassen/p1mon:new
     ports:
       - 81:80
     volumes:
