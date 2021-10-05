@@ -41,7 +41,7 @@ var showUDPbroadcastInfo             = <?php if ( config_read( 55  ) == 1 ) { ec
 var showWatermeterInfo               = <?php if ( config_read( 102 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 var showProductionPowerS0Info        = <?php if ( config_read( 129 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 var showProductionPowerSolarEdgeInfo = <?php if ( config_read( 147 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
-var p1TelegramMaxSpeedIsOn           = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
+var p1TelegramMaxSpeedIsOn           = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
 function PlaySound() {
     if ( soundIsOn === true ) {

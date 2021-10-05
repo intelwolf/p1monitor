@@ -3,7 +3,8 @@ services:
 
   p1monitor:
     hostname: p1mon
-    image: mclaassen/p1mon:new
+    image: mclaassen/p1mon:1.4.0
+    #image: localtest
     ports:
       - 81:80
     volumes:
@@ -18,5 +19,6 @@ services:
     restart: unless-stopped
     environment:
       - DISABLECPUTEMP=true
+            #- PROXYPATH=marcel
     expose:
       - "81"

@@ -47,8 +47,8 @@ var watermeterRecords           = 1
 
 var phaseCategories             = [ 'L1', 'L2', 'L3' ]
 var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?> 
-var hideWaterUi             = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
-var hideGaSUi               = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+var hideWaterUi                 = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+var hideGaSUi                   = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 
 function readJsonApiWaterHistoryDay( cnt ){ 
     $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -774,7 +774,7 @@ $(function () {
     <div class="mid-content">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">elektrisch & water verbruik</span>
+            <span class="text-2">elektrisch verbruik</span>
         </div>
         <div class="frame-2b-bot"> 
             <div class="pos-2" id="actVermogenMeterVerbruik"></div>    

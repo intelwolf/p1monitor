@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-# from 01-08-2018 all new development will be done with Pyhton 3.x
-import argparse
-import base64
 import const
 import dropbox
+import dropbox_lib
 import inspect
 import signal
 import systemid
@@ -21,12 +19,12 @@ from sqldb import configDB,rtStatusDb
 from util import *
 from time import sleep
 
-prgname = 'P1DropBoxDeamon'
+prgname         = 'P1DropBoxDeamon'
 config_db       = configDB()
 rt_status_db    = rtStatusDb()
 
-files_backup = [] 
-files_data   = [] 
+files_backup   = [] 
+files_data     = [] 
 
 systemid = systemid.getSystemId()
 
@@ -66,8 +64,16 @@ def Main(argv):
          createCheckFolder(folder)
     
     # open DropBox session / access
-    dbx = AuthenticateDropBox()
-    loop_timeout = 3
+   
+    dbx = dropbox_lib.authenticate_dbx(flog=flog, config_db=config_db, rt_status_db=rt_status_db )
+    #print( dbx.users_get_current_account() )
+    #print( dbx.check_and_refresh_access_token() )
+    #dbx.close()
+    #print( dbx.users_get_current_account() )
+    #dropbox_lib.connection_is_valid( dbx=dbx, flog=flog )
+    #sys.exit()
+
+    loop_timeout = 2
 
     while True:
 
@@ -100,7 +106,9 @@ def Main(argv):
 
         if file_count > 0: #something to do.
             flog.debug(inspect.stack()[0][3]+": " + str(file_count) + " bestand(en) gevonden om te verwerken.")
-            dbx = AuthenticateDropBox()
+            if dropbox_lib.connection_is_valid( dbx=dbx, flog=flog ) == False:
+                #dbx = AuthenticateDropBox()
+                dbx = dropbox_lib.authenticate_dbx(flog=flog, config_db=config_db, rt_status_db=rt_status_db )
 
         if dbx == None: 
             flog.error(inspect.stack()[0][3]+": Dropbox authenticatie gefaald en gestopt.")
@@ -144,7 +152,9 @@ def Main(argv):
                 flog.info(inspect.stack()[0][3]+": backup bestand "+ from_file + " gekopierd.")
             else:
                 rt_status_db.strset('Dropbox copy gefaald.',62,flog)
-                dbx = AuthenticateDropBox() 
+                if dropbox_lib.connection_is_valid( dbx=dbx, flog=flog ) == False:
+                    dbx = dropbox_lib.authenticate_dbx(flog=flog, config_db=config_db, rt_status_db=rt_status_db )
+                    #dbx = AuthenticateDropBox() 
 
             # remove files that are beyond the max count of backup files.
             listing = listDbxFolder( dbx, const.DBX_DIR_BACKUP ) 
@@ -192,8 +202,10 @@ def Main(argv):
                 rt_status_db.strset('data gekopieerd.',64,flog)
                 flog.debug(inspect.stack()[0][3]+": data bestand "+ from_file + " gekopierd.")
             else:
-                rt_status_db.strset('data copy gefaald.',64,flog)
-                dbx = AuthenticateDropBox() 
+                rt_status_db.strset('data copy gefaald.',64,flog )
+                if dropbox_lib.connection_is_valid( dbx=dbx, flog=flog ) == False:
+                    dbx = dropbox_lib.authenticate_dbx(flog=flog, config_db=config_db, rt_status_db=rt_status_db )
+                    #dbx = AuthenticateDropBox() 
 
         ###############################
         # scan for data request files #
@@ -336,27 +348,6 @@ def isDropBoxFolders(dbx, folder):
             flog.info(inspect.stack()[0][3]+": dropbox folder "+folder+" gemaakt.")
         except Exception as _e:
             flog.critical(inspect.stack()[0][3]+": folder "+folder+" niet te maken")
-
-
-def AuthenticateDropBox():
-    #TO DO crypto token uit config lezen. 
-    flog.debug(inspect.stack()[0][3]+": authenticatie met dropbox start.")
-    _id,access_token_crypted ,_label = config_db.strget(47,flog)
-
-    flog.debug(inspect.stack()[0][3]+": access_token(encrypted) = "+ access_token_crypted)
-    access_token = base64.standard_b64decode(crypto3.p1Decrypt( access_token_crypted, 'dbxkey' ))
-    flog.debug(inspect.stack()[0][3]+": decrypted key = " + str(access_token))
-
-    try:
-        dbx = dropbox.Dropbox( access_token.decode('utf-8') )
-        dbx.users_get_current_account()
-        rt_status_db.timestamp(59,flog) # dropbox succes timestamp
-        flog.debug(inspect.stack()[0][3]+": authenticatie met dropbox succesvol.")
-    except Exception as e:
-        rt_status_db.strset('authenticatie gefaald',62,flog)
-        flog.critical(inspect.stack()[0][3]+": authenticatie gefaald melding:"+str(e.args[0]))
-        dbx = None
-    return dbx
 
 
 def saveExit( signum, frame ):   

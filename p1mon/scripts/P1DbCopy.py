@@ -173,9 +173,6 @@ def makeBackupFileSet( filePath ):
         #print ( "# 5 = ", e )
 
 
-
-
-
 ##############################################
 # make a complete path to disk from ram path #
 ##############################################

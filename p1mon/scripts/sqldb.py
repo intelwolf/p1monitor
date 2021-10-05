@@ -261,8 +261,12 @@ class configDB():
         self.insert_rec("insert or ignore into " + table + " values ( '166',''                 ,'default gateway static IP adres.')")
         self.insert_rec("insert or ignore into " + table + " values ( '167',''                 ,'domain name server static IP adres.')")
 
-        # values of 168 0=do noting 1 set eth0, 3 set wlan0, 7 set eth0 and wlan0
-        self.insert_rec("insert or ignore into " + table + " values ( '168','0'                ,'vlag voor static IP adressen.')")
+        # values of 168 0=do noting 1=eth0, wlan0=2, default gateway=4, DNS=8
+        self.insert_rec("insert or ignore into " + table + " values ( '168','0'                ,'vlag voor static IP adressen, default gateway en DNS.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '169','0'                ,'vlag voor het aanvragen van een Dropbox authenticatie token.')")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '170',''                 ,'Dropbox refresh token')")
+
 
         #[{"TOKEN": "34FADE76DFEBDDDD", "TIMESTAMP": "2021-06-26 11:12:13"}, {"TOKEN": "FFEE676DESAAAAAF", "TIMESTAMP": "2022-07-30 22:23:59"}]
 

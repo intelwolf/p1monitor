@@ -102,7 +102,7 @@ def Main(argv):
             # process json
             try:
               
-                print ( data )
+                #print ( data )
                 
                 jsondata = json.loads( data[0].decode('utf-8') )
 

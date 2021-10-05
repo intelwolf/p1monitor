@@ -1059,9 +1059,16 @@ $arr = array (
     'extra informatie','additional information','informations supplémentaires'
     ),
 /* 284 */ array(
+    'laat de QR code zien voor het instellen van de API in de app.',
+    'show the QR code for setting the API in the app.',
+    'afficher le code QR pour configurer l&apos;API dans l&apos;app.'
+    ),
+/* 285 */ array(
+    'klik om te sluiten','click to close','cliquez pour fermer'
+    ),
+/* 286 */ array(
     '','',''
     ),
-
 
 
 

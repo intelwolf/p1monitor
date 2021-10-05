@@ -35,6 +35,7 @@ PRG14="P1GPIO.py"
 PRG15="P1PowerProductionS0.py"
 PRG16="P1WatermeterV2.py"
 PRG17="P1SolarEdgeReader.py"
+PRG18="P1NetworkConfig.py"
 P1FILE="p1msg.txt"
 
 
@@ -52,13 +53,17 @@ sudo /bin/chown p1mon:p1mon $LOG_PATH $WWW_DOWLOAD_PATH $EXPORT_PATH $RAMDISK
 sudo /bin/chmod 775 $LOG_PATH 
 sudo /bin/chmod 770 $WWW_DOWLOAD_PATH $EXPORT_PATH
 
-# 
 
 # clean log files on any action, also done by the watchdog
 # script clean when gets full. Should never happen ;)
 sudo $PRG_PATH$PRG11
 
 start() {
+
+    # make sure we have an valid /etc/dhcpcd.conf file
+    $PRG_PATH$PRG18 --defaultdhcpconfig
+    echo "2 seconden wachttijd"
+    sleep 2
 
     # disable power save van de wifi.
     echo "Wifi power save wordt uitgezet."

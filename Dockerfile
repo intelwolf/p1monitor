@@ -4,7 +4,7 @@ FROM debian:buster-slim
 RUN ln -fs /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 
 # Install packages
-RUN apt-get update && apt-get upgrade -y && apt-get install -y python3-venv python3-pip nginx-full php-fpm sqlite3 php-sqlite3 python3-cairo python3-apt vim cron sudo logrotate curl iputils-ping libffi-dev && apt-get remove -y python3-xdg && apt-get clean
+RUN apt-get update && apt-get upgrade -y && apt-get install -y python3-venv python3-pip nginx-full php-fpm sqlite3 php-sqlite3 python3-cairo python3-apt vim cron sudo logrotate curl iputils-ping iproute2 libffi-dev && apt-get remove -y python3-xdg && apt-get clean
 
 # Removed vulnerable pyxdg package (moved to above)
 # RUN apt-get remove -y python3-xdg
@@ -25,10 +25,6 @@ COPY addons/ /
 
 # Init file
 COPY entrypoint.sh /
-
-RUN sed -i "s/sudo nice --adjustment=-15 sudo -i -u p1mon //" /p1mon/scripts/p1mon.sh
-# Create symlink to mimic local gunicorn
-RUN mkdir -p /home/p1mon/.local/bin && ln -s /usr/local/bin/gunicorn /home/p1mon/.local/bin/gunicorn
 
 HEALTHCHECK CMD curl -f http://127.0.0.1/nginx_status/ || exit 1
 

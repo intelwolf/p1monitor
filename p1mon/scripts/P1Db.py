@@ -727,7 +727,7 @@ def backupData():
     flog.debug(inspect.stack()[0][3]+": Gereed")
 
 def DiskRestore():
-    os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")        
+    os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
 
 def updateDbYear():
     timestamp_jaar = timestamp[0:4]+"-01-01 00:00:00"

@@ -194,6 +194,21 @@ div#system_dump {
 }
 
 
+div#qrcode {
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    padding: 10px 10px 10px 10px;
+    width: 250px;
+    text-align: center;
+    color: #6E797C;
+    background-color: #F5F5F5;
+    box-shadow: 0px 5px 8px -2px #eaeaea;
+    font-size: 1em;
+    display: none;
+}
+
 /*
 div#succes_msg_samba {
     border-radius: 5px 5px 5px 5px;
@@ -380,6 +395,19 @@ select {
     background-color: #ffffff;
     height: 36px;
     width: 36px;
+  }
+
+.button-3 {
+    display: inline-block;
+    cursor: pointer;
+    margin: 3px 5px 0px 0px;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    background-color: #F5F5F5;
+    height: 36px;
+    /* width: 36px; */
   }
 
 .close_button {

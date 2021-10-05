@@ -86,7 +86,9 @@ json_basic  = {
     apiconst.JSON_API_SYSTM_ID          : const.SYSTEM_ID_DEFAULT,# system ID that is hardware specfic and unique
     apiconst.JSON_API_RM_TMPRTR_IN      : '',               # room temperature input
     apiconst.JSON_API_RM_TMPRTR_OUT     : '',               # room temperature output
-    apiconst.JSON_API_WM_CNSMPTN_LTR_M3 : ''                # consumption of water in M3.
+    apiconst.JSON_API_WM_CNSMPTN_LTR_M3 : '',               # consumption of water in M3.
+    apiconst.JSON_API_VALID_DATA        : 'TRUE',           # used to flag the data good/complete enough to process, also used as a alive beacon and set to FALSE
+    apiconst.JSON_API_FQDN              : ''                # Fully Qualified Domain Name for the remote inet access to the API
 }
 
 #############################################

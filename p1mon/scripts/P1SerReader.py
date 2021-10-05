@@ -199,7 +199,10 @@ def main_prod():
     # read crc check settings from config
     p1_port_shared_lib.get_P1_crc( status=p1_status ,configdb=config_db, flog=flog )
 
-    
+    # set intial FQDN
+    p1_port_shared_lib.fqdn_from_config( verbose=True, configdb=config_db, data_set=json_data, flog=flog )
+
+  
     day_values.init( dbstatus=rt_status_db, dbserial=e_db_serial, flog=flog )
 
     while True:
@@ -346,7 +349,11 @@ def main_prod():
 
                 time.sleep( 0.1 )
                 serCheckCnt = serCheckCnt + 1
-                if serCheckCnt > 300: #check updates every 300 seconds.
+                if serCheckCnt > 300: #check updates every 30 seconds.
+                    
+                    # perodic check and change of fqdn.
+                    # set intial FQDN
+                    p1_port_shared_lib.fqdn_from_config( verbose=False, configdb=config_db, data_set=json_data, flog=flog )
 
                     p1_port_shared_lib.backup_data_to_disk_by_timestamp( statusdb=rt_status_db, flog=flog )
 

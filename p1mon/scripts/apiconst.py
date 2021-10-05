@@ -159,6 +159,8 @@ JSON_API_PRDCTN_KWH_H       = 'PRODUCTION_KWH_HIGH'                  # productio
 JSON_API_TRFCD              = 'TARIFCODE'                            # peak or low period.
 JSON_API_CNSMPTN_KW         = 'CONSUMPTION_KW'                       # the consumption in kilo Watt at this moment.
 JSON_API_PRDCTN_KW          = 'PRODUCTION_KW'                        # the production in kilo Watt at this moment.
+JSON_API_VALID_DATA         = 'VALID_DATA'                           # used to flag the data good/complete enough to process.
+JSON_API_FQDN               = 'API_FQDN'                             # Fully Qualified Domain Name for the remote inet access to the API
 
 JSON_API_CNSMPTN_DLT_KWH    = 'CONSUMPTION_DELTA_KWH'                # the consumption in kilo Watt hour during this period
 JSON_API_PRDCTN_DLT_KWH     = 'PRODUCTION_DELTA_KWH'                 # the production in kilo Watt hour during this period.
@@ -246,6 +248,7 @@ JSON_API_PROD_KWH_TOTAL_H   = 'PRODUCTION_KWH_HIGH_TOTAL'            # total kWh
 JSON_API_PROD_KWH_TOTAL_L   = 'PRODUCTION_KWH_LOW_TOTAL'             # total kWh during the period for the low tariff.
 JSON_API_PROD_KWH_TOTAL     = 'PRODUCTION_KWH_TOTAL'                 # total kWh during the period for the low and high tariff.
 JSON_API_PROD_W_PSEUDO      = 'PRODUCTION_PSEUDO_W'                  # total Watt calculated during the period, this is an simulated/approximated value.
+
 
 
 #JSON field explained.

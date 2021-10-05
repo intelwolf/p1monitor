@@ -34,18 +34,24 @@ if ( isset($_POST["samba"]) ) {
     if ( $_POST["samba"] == 'dev' ) { writeSemaphoreFile('samba_dev');  }
 }
 
-if ( isset($_POST["dboxauth"]) ) { 
+if ( isset($_POST["dboxauth"]) ) {
+
+    
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( strlen(trim($_POST["dboxauth"])) > 32 ) { /* normale 44 chars long */
+        $clean_dbox_auth = trim( $_POST["dboxauth"] );
+        // p1monExec needed !!!
+        $command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token ' . $clean_dbox_auth . '"';
+        
+        #echo "command = " . $command . "<br>";
+        exec( $command ,$arr_execoutput, $exec_ret_value );
 
-        $command = '/p1mon/scripts/p1monExec -p "/p1mon/scripts/P1DropBoxAuth.py -t "'.$_POST["dboxauth"]; 
-        exec($command ,$arr_execoutput, $exec_ret_value );
-        #print_r("dropbox code =".$arr_execoutput[0]."<br>");
+        #print_r( "dropbox token return= ". $arr_execoutput[0]. "<br>" );
 
-        if ( ERROR != $arr_execoutput[0] ) {
+        if ( 'ERROR' != $arr_execoutput[0] ) {
             $crypto_key = encodeString ($arr_execoutput[0], 'dbxkey');
             #print ($crypto_key.",<br>");
-            if ( updateConfigDb("update config set parameter = '".$crypto_key."' where ID = 47")) $err_cnt += 1;
+            # if ( updateConfigDb("update config set parameter = '".$crypto_key."' where ID = 47")) $err_cnt += 1;
         } else {
             $err_cnt += 1;
         }
@@ -202,16 +208,16 @@ $(function () {
                             <span class="text-15">DropBox API configuratie</span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <label class="text-10">1: DropBox authenticatie code opvragen.</label>
                                 <a href="./dropbox-redirect.php" target="_blank"><span><i class="color-menu fab fa-dropbox fa-2x" data-fa-transform="down-5 right-5"></i></span></a>
                             </div>
                             
-                            <div class="float-left pad-14">                
+                            <div class="float-left pad-14">
                                 <label class="text-10">2: Knip en plak de code van Dropbox hier en sla deze op.</label><input class="input-9 color-settings color-input-back" id="dboxauth"  name="dboxauth" type="text">
                             </div>
                             
-                            <div class="float-left pad-22">                
+                            <div class="float-left pad-22">
                                 <label class="text-10">Laatste succesvolle authenticatie: </label><label id='dbx_timestamp' class="text-10">yyyy-mm-dd hh:mm:ss</label>
                             </div>
                         </div>

@@ -83,9 +83,9 @@ if( isset($_POST["ip_dns"]) ) {
 
 if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
 {
-    
+
     if ( $err_cnt == -1 ) $err_cnt=0;
-    
+
     $crypto_wifi_pw = encodeString (trim($_POST["wifi_pw"]), 'wifipw');
     if ( updateConfigDb("update config set parameter = '".$_POST["wifi_essid"]."' where ID = 11")) $err_cnt += 1;
     if ( updateConfigDb("update config set parameter = '".$crypto_wifi_pw."' where ID = 12"))      $err_cnt += 1;

@@ -264,6 +264,7 @@ def MainProg():
             P1NginxSetApiTokens()
             P1NginxConfigApi()
             P1NetworkConfig()
+            DropboxAuthenticationRequest()
 
         # elke 60 sec acties
         if cnt%30 == 0:
@@ -326,11 +327,11 @@ def MainProg():
             cnt=1
         time.sleep(2) #DO NOT CHANGE!
 
-
-
 def getDefaultGateway():
     try:
         result_list = network_lib.get_default_gateway()
+        if result_list == []:
+            raise ValueError('Geen default gateway data beschikbaar.')
         for rec in result_list:
             if rec['ip4'] == None:
                 rec['ip4'] = 'onbekend'
@@ -338,28 +339,36 @@ def getDefaultGateway():
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
-
 ########################################################
 # config static Ip address when flags are set          #
 ########################################################
 def P1NetworkConfig():
     try:
+
         prg_name = "P1NetworkConfig.py" 
        
         _id, needs_to_run_status, _label = config_db.strget( 168, flog )
+        
+        # fail save flag test so only the first 4 bits are set/used
+        needs_to_run_status = ( int(needs_to_run_status) & 15 )
 
         pid_list, _process_list = listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int( needs_to_run_status ) > 0 and len( pid_list) == 0: # start process
 
-            _id, eth0_ip, _label  = config_db.strget( 164, flog )
-            _id, wlan0_ip, _label = config_db.strget( 165, flog )
-            _id, router_ip, _label = config_db.strget( 166, flog )
-            _id, dns_ip, _label = config_db.strget( 167, flog )
+             # DEBUG TODO
+            _id, needs_to_run_status, _label = config_db.strget( 168, flog )
+            print ("# before=", needs_to_run_status )
+
+            # when an dhcp deamon reload is needed do only once
+            # and not for every options that need it. 
+            do_dhcp_deamon_reload = False
 
             # etho ip changed 
-            if ( int(needs_to_run_status) & 1 ) == 1: #wlan0 has changed
+            if ( int(needs_to_run_status) & 1 ) == 1: #eth0 has changed
+                config_db.strset( int(needs_to_run_status) & 14, 168, flog ) # reset bit
+                _id, eth0_ip, _label   = config_db.strget( 164, flog )
                 if len(eth0_ip) == 0:
                     flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removestaticip eth0 gestart." )
                     if os.system('/p1mon/scripts/' + prg_name + ' --removestaticip eth0 2>&1') > 0:
@@ -368,10 +377,14 @@ def P1NetworkConfig():
                     flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip eth0 gestart." )
                     if os.system('/p1mon/scripts/' + prg_name + ' --staticip eth0 2>&1') > 0:
                         flog.error( inspect.stack()[0][3] + prg_name + " --staticip eth0." )
-                config_db.strset( int(needs_to_run_status)-1, 168, flog ) # reset bit
+
+                if os.system('/p1mon/scripts/' + prg_name + ' --devicereload eth0 2>&1') > 0:
+                    flog.error( inspect.stack()[0][3] + prg_name + " eth0 devicereload." )
 
             # wlan ip changed 
             if ( int(needs_to_run_status) & 2 ) == 2: #wlan0 has changed
+                config_db.strset( int(needs_to_run_status) & 13, 168, flog ) # reset bit
+                _id, wlan0_ip, _label  = config_db.strget( 165, flog )
                 if len(wlan0_ip) == 0:
                     flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removestaticip wlan0 gestart." )
                     if os.system('/p1mon/scripts/' + prg_name + ' --removestaticip wlan0 2>&1') > 0:
@@ -380,23 +393,49 @@ def P1NetworkConfig():
                     flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip wlan0 gestart." )
                     if os.system('/p1mon/scripts/' + prg_name + ' --staticip wlan0 2>&1') > 0:
                         flog.error( inspect.stack()[0][3] + prg_name + " --staticip wlan0." )
-                config_db.strset( int(needs_to_run_status)-2, 168, flog ) # reset bit
 
-            # DNS or gatway is changed.
-            if ( int(needs_to_run_status) & 4 ) == 4 or ( int(needs_to_run_status) & 8 ) == 8: #router or gateway has changed has changed
-                if len( wlan0_ip ) > 0:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip wlan0 gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip wlan0 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip wlan0." )
+                if os.system('/p1mon/scripts/' + prg_name + ' --devicereload wlan0 2>&1') > 0:
+                    flog.error( inspect.stack()[0][3] + prg_name + "  wlan0 device reload." )
+                
+                do_dhcp_deamon_reload = True
 
-                if len( eth0_ip ) > 0:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip eth0 gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip eth0 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip eth0." )
+            # router/gateway has changed
+            if ( int(needs_to_run_status) & 4 ) == 4: 
+                config_db.strset( int(needs_to_run_status) & 11, 168, flog ) # reset bit
+                _id, router_ip, _label = config_db.strget( 166, flog )
+                if len( router_ip ) == 0:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removedefaultgateway gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --removedefaultgateway 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --removedefaultgateway." )
+                else:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --defaultgateway gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --defaultgateway 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --defaultgateway." )
 
-                config_db.strset( int(needs_to_run_status)-12, 168, flog ) # reset bit
+                do_dhcp_deamon_reload = True
 
+            # DNS has changed
+            if ( int(needs_to_run_status) & 8 ) == 8: 
+                config_db.strset( int(needs_to_run_status) & 7, 168, flog ) # reset bit
+                _id, dns_ip, _label    = config_db.strget( 167, flog )
+                if len( dns_ip ) == 0:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removednsserver gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --removednsserver 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --removednsserver." )
+                else:
+                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --dnsserver gestart." )
+                    if os.system('/p1mon/scripts/' + prg_name + ' --dnsserver 2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " --dnsserver." )
 
+                do_dhcp_deamon_reload = True
+
+            # DEBUG TODO
+            _id, needs_to_run_status, _label = config_db.strget( 168, flog )
+            print ( "# after=",needs_to_run_status )
+
+            if do_dhcp_deamon_reload == True:
+                if os.system('/p1mon/scripts/' + prg_name + ' --reloaddhcp  2>&1') > 0:
+                        flog.error( inspect.stack()[0][3] + prg_name + " reloaddhcp" )
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
@@ -510,8 +549,6 @@ def P1NginxSetApiTokens():
     
     #flog.setLevel( logging.INFO )
 
-
-
 # processing #####################
 # 1: check if there is a export file to import with the extention zip.pu1a
 # 2: rename the file to see if we have full access 
@@ -540,8 +577,7 @@ def checkAutoImport():
                 flog.error( inspect.stack()[0][3] + ": bestandnaam aanpassen van " + str( import_filename_zip_pu1a ) + " gefaald." )
         else:
             flog.debug( inspect.stack()[0][3] + ": geen import bestand gevonden-> " + str( import_filename_zip_pu1a ) )
-        
-        
+
         #check if we have data in the database
         if auto_import_is_active == False and os.path.isfile( import_filename_zip ) == True:
             flog.debug( inspect.stack()[0][3] + ": check if we have data in the database" )
@@ -638,6 +674,25 @@ def checkP1SqlImportRun():
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
     #flog.setLevel( logging.INFO )
+
+########################################################
+# make an url text file so an php can redirect         #
+########################################################
+def DropboxAuthenticationRequest():
+    try:
+        prg_name = 'P1DropBoxAuth.py'
+
+        _id, run_status, _label = config_db.strget( 169, flog )
+
+        if int( run_status ) == 1: # start process
+            config_db.strset(0, 169, flog) 
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --url 2>&1 >/dev/null &') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " gefaald." )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset(0, 169, flog) # fail save to stop
 
 ########################################################
 # Update de DuckDNS entry for the FQDN and your public #

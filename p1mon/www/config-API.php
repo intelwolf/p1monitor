@@ -80,6 +80,7 @@ if ( isset($_POST[ "fs_inet_api_active" ]) ) {
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/tabulator-dist/js/tabulator.min.js"></script>
+<script src="./js/qrious-link/qrious.min.js"></script>
 
 </head>
 <body>
@@ -91,6 +92,7 @@ var erease     = '<?php echo strIdx( 173 );?>';
 var token      = 'API token';
 var timestamp  = 'Timestamp';
 var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
+
 
     function readJsonStatus(){ 
         $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
@@ -164,79 +166,127 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
 
     $(function () {
 
-    // ###################################
-    // create random seed                #
-    // ###################################
-    seed = parseInt( sec_id.replace(/-/g,'').substr( 0,6 ), 16);
+        centerPosition('#qrcode');
 
-    // ####################################################
-    // Build Tabulator list for API authentication tokens #
-    // ####################################################
-    api_token_table = new Tabulator("#api-token-table", {
-        maxHeight:"100%",
-        layout:"fitColumns",
-        tooltips:true,
-        tooltipGenerationMode:"hover",
-        placeholder:"API tokens, gebruik plus om toe te voegen.",
-        clipboard:true,
-        columns:[
-            {title:token,     field:"TOKEN",     sorter:"string",  width:220},
-            {title:timestamp, field:"TIMESTAMP", sorter:"string",  width:180 },
-            {title: erease,
-                field:"DELETE",
-                tooltip: "<?php echo strIdx( 258 );?>" ,
-                formatter:"tickCross",
-                formatterParams:{
-                    crossElement:"<i class='far fas fa-trash-alt color-menu'></i>",
+        // ###################################
+        // create random seed                #
+        // ###################################
+        seed = parseInt( sec_id.replace(/-/g,'').substr( 0,6 ), 16);
+
+        // ####################################################
+        // Build Tabulator list for API authentication tokens #
+        // ####################################################
+        api_token_table = new Tabulator("#api-token-table", {
+            maxHeight:"100%",
+            layout:"fitColumns",
+            tooltips:true,
+            tooltipGenerationMode:"hover",
+            placeholder:"API tokens, gebruik plus om toe te voegen.",
+            clipboard:true,
+            columns:[
+                {title:token,     field:"TOKEN",     sorter:"string",  width:210},
+                {title:timestamp, field:"TIMESTAMP", sorter:"string",  width:178 },
+                {title: erease,
+                    field:"DELETE",
+                    tooltip: "<?php echo strIdx( 258 );?>" ,
+                    formatter:"tickCross",
+                    formatterParams:{
+                        crossElement:"<i class='far fas fa-trash-alt color-menu'></i>",
+                    },
+                    hozAlign: "center",
+                    width:90,
+                    cellClick:function(e, cell) { 
+                        deleteRow( cell )
+                    },
+                    headerSort:false 
                 },
-                hozAlign: "center",
-                width:110,
-                cellClick:function(e, cell) { 
-                    deleteRow( cell )
-                } 
-            },
-        ],
-        resizableColumns:false,
-        initialSort:[
-            { column:"TIMESTAMP", dir:"desc"}, 
-        ]
-    });
+                {title: "QR",
+                    field:"QRCODE",
+                    tooltip: "<?php echo strIdx( 284 );?>",
+                    formatter:"tickCross",
+                    formatterParams:{
+                        crossElement:"<i class='far fas fa-qrcode color-menu'></i>",  
+                    },
+                    hozAlign: "center",
+                    width:50,
+                    cellClick:function(e, cell) { 
+                        showQRcode( cell );
+                    },
+                    headerSort:false 
+                },
+            ],
+            resizableColumns:false,
+            initialSort:[
+                { column:"TIMESTAMP", dir:"desc"}, 
+            ]
+        });
 
 
-    document.getElementById("add_token_button").addEventListener("click", function(){
-        
-        event.preventDefault();
+        document.getElementById("add_token_button").addEventListener("click", function(){
+            
+            event.preventDefault();
 
-        api_token_table.updateOrAddData([ {TOKEN: getRandomHex( 20, seed ), TIMESTAMP:getTimestamp() }] );
-        document.formvalues.tokenupdate.value = JSON.stringify( api_token_table.getData() );
-        api_token_table.setSort("TIMESTAMP", "desc");
+            api_token_table.updateOrAddData([ {TOKEN: getRandomHex( 20, seed ), TIMESTAMP:getTimestamp() }] );
+            document.formvalues.tokenupdate.value = JSON.stringify( api_token_table.getData() );
+            api_token_table.setSort("TIMESTAMP", "desc");
 
-        if ( api_token_table.getDataCount() > 25 ) {
-            alert('<?php echo strIdx( 264 );?>');
+            if ( api_token_table.getDataCount() > 25 ) {
+                alert('<?php echo strIdx( 264 );?>');
+            }
+        });
+
+        readJsonApiList();
+        LoadData();
+        api_token_table.replaceData( api_keys_data )
+
+        FQDN = '<?php echo config_read( 150 );?>';
+        if ( FQDN.length < 3 ) {
+            FQDN = '<?php echo strIdx( 269 );?>'
+            document.getElementById( "FQDN" ).innerHTML = '<span style = "color: red">' + FQDN + '</span>';
+        } else {
+            document.getElementById( "FQDN" ).innerHTML = FQDN;
         }
+
+    // end of init
     });
 
-    readJsonApiList();
-    LoadData();
-    api_token_table.replaceData( api_keys_data )
-
-    FQDN = '<?php echo config_read( 150 );?>';
-    if ( FQDN.length < 3 ) {
-        FQDN = '<?php echo strIdx( 269 );?>'
-        document.getElementById( "FQDN" ).innerHTML = '<span style = "color: red">' + FQDN + '</span>';
-    } else {
-        document.getElementById( "FQDN" ).innerHTML = FQDN;
-    }
-
-    });
 
     function deleteRow( cell ) {
         api_token_table.deleteRow( cell.getRow() )
         document.formvalues.tokenupdate.value = JSON.stringify( api_token_table.getData() );
     }
 
-</script>
+    function showQRcode( cell ) {
+    
+        var qr_data = ' { "apiurl": "' + FQDN + 
+                      '","apitoken": "' + cell.getRow().getData().TOKEN + 
+                      '","requesttimestamp": ' + Math.floor(Date.now() / 1000) + 
+                      ',"version": 1'  +
+                      ' }'
+        //console.log( qr_data )
+        
+        var qr  = new QRious({
+            element: document.getElementById('qr'),
+            level: 'M',
+            background: getStyleRuleValue('.color-back','color'),
+            backgroundAlpha: 0.5,
+            foreground: getStyleRuleValue('.color-select','color'),
+            foregroundAlpha: 1,
+            value: qr_data,
+            size: 200,
+        });
 
+        document.getElementById('qrurl').innerHTML = FQDN;
+        document.getElementById('qrtoken').innerHTML = cell.getRow().getData().TOKEN;
+        showStuff('qrcode');
+        document.getElementById('qrcode').onclick = function(){
+            hideStuff('qrcode');
+        };
+
+    }
+
+
+</script>
         <?php page_header();?>
 
         <div class="top-wrapper-2">
@@ -407,5 +457,12 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
     </div>    
     <?php echo div_err_succes();?>
     <?php echo autoLogout(); ?>
+    
+    <div id='qrcode' title="<?php echo strIdx( 285 );?>" class="cursor-pointer" >
+        <canvas id="qr"></canvas>
+        <div><span>api url:&nbsp;</span><span id=qrurl></span></div>
+        <div><span>token:&nbsp;</span><span id="qrtoken"></span></div>
+    </div>
+
 </body>
 </html>

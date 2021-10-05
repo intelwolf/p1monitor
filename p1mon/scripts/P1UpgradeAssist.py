@@ -270,7 +270,11 @@ def restore():
         # sure that nginx is reloaded or restarted if it is not running            #
         ############################################################################
         if os.system('sudo -u p1mon /p1mon/scripts/P1NginxConfig.py --apitokens' ) > 0:
-            msg = "API tokens update gefaald."
+            msg = "Nginx API tokens update gefaald."
+            flog.error( inspect.stack()[0][3] + ": " + msg )
+
+        if os.system('sudo -u p1mon /p1mon/scripts/P1NginxConfig.py --gateway' ) > 0:
+            msg = "Nginx gateway update gefaald."
             flog.error( inspect.stack()[0][3] + ": " + msg )
 
         flog.info( "file system sync uitvoeren." )

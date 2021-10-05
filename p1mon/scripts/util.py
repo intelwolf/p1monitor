@@ -38,7 +38,6 @@ def restart_program():
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
-
 def cleanDigitStr(str_in):
     str_out = re.sub(r'[^-.0-9]', '', str_in)
     #print ('cleanDigitStr = ' + str_out + " str in = " + str_in + " len(str_out)=" + str( len(str_out) ) )
@@ -57,7 +56,7 @@ def name2uid(name):
 def name2gid(group):
     return grp.getgrnam(group).gr_gid
 
-def setFile2user(filename, username):
+def setFile2user( filename, username):
     try :
         os.chmod(filename, stat.S_IREAD|stat.S_IWRITE|stat.S_IRGRP|stat.S_IWGRP|stat.S_IROTH)
         fd = os.open(filename, os.O_RDONLY)
