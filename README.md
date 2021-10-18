@@ -16,7 +16,7 @@ A docker image is available from docker hub at https://hub.docker.com/r/mclaasse
 Shut down the container using 'docker-compose down' and use 'docker-compose pull' to update to the latest image version. Start the container as mentioned above
 
 ## Migrate
-Copy files from a previous version (1.2.0 or later) in the defined 'alldata' directory (see included docker-compose file) in subdirectory 'data' (alldata/data)
+Copy files from a previous version (1.2.0 or later on docker) in the defined 'alldata' directory (see included docker-compose file) in subdirectory 'data' (alldata/data). The import function is also fully functional to migrate from Raspberry Pi to docker
 
 ## Forum
 A forum for all questions on P1 Monitor is available at https://forum.p1mon.nl
