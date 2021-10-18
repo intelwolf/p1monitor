@@ -17,3 +17,6 @@ Shut down the container using 'docker-compose down' and use 'docker-compose pull
 
 ## Migrate
 Copy files from a previous version (1.2.0 or later) in the defined 'alldata' directory (see included docker-compose file) in subdirectory 'data' (alldata/data)
+
+## Forum
+A forum for all questions on P1 Monitor is available at https://forum.p1mon.nl
