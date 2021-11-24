@@ -3,7 +3,7 @@ services:
 
   p1monitor:
     hostname: p1mon
-    image: mclaassen/p1mon:1.4.0
+    image: mclaassen/p1mon:rolling
     #image: localtest
     ports:
       - 81:80

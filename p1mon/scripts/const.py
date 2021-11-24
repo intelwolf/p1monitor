@@ -31,7 +31,7 @@
 # elke release aanpassen                  #
 ###########################################
 P1_VERSIE                       = "1.4.1"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
+P1_PATCH_LEVEL                  = "b"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
 P1_SERIAL_VERSION               = "20211002"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 
