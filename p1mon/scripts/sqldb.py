@@ -111,6 +111,7 @@ class configDB():
         # let op deze moet standaard op 1 staan om te voorkomen dat een gebruiker standaard bij gebruik van een inet
         # adres niet bij de config kan komen.
         self.insert_rec("insert or ignore into "+table+" values ( '60','1'                     ,'RFC1918 filtering aan/uit (1/0).')")
+
         self.insert_rec("insert or ignore into "+table+" values ( '61','1'                     ,'drie fasen informatie in ui aan/uit (1/0).')")
         self.insert_rec("insert or ignore into "+table+" values ( '62','1'                     ,'UI meterstanden historie(1/0)')")
         
@@ -267,6 +268,9 @@ class configDB():
 
         self.insert_rec("insert or ignore into " + table + " values ( '170',''                 ,'Dropbox refresh token')")
 
+        self.insert_rec("insert or ignore into " + table + " values ( '171','0'                ,'UpgradeAide run in save modus (1 is run).')")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '172',''                ,'Bestandsnaam van de DB om naar Excel te exporteren. (normaal leeg)')")
 
         #[{"TOKEN": "34FADE76DFEBDDDD", "TIMESTAMP": "2021-06-26 11:12:13"}, {"TOKEN": "FFEE676DESAAAAAF", "TIMESTAMP": "2022-07-30 22:23:59"}]
 
@@ -710,6 +714,10 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '121','onbekend','Certificaat geldig tot:',0)")
 
         self.insert_rec("insert or ignore into " + table + " values ( '122','onbekend','Default gateway/router:',0)")
+        
+        # 123: when 0 no data, or time that data is seen is expired. 
+        self.insert_rec("insert or ignore into " + table + " values ( '123','0','P1 data is actief(timeout)',0)")
+
 
         # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"

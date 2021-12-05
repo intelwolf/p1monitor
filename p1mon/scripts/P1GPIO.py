@@ -275,7 +275,7 @@ def tarifSwitcher():
 
         #check on tarif mode. 
         _id, tarif_mode_activ, _label, _security  = rt_status_db.strget( 85, flog )
-        _id, tarif_mode_set,    _label = config_db.strget( 91, flog )
+        _id, tarif_mode_set,   _label = config_db.strget( 91, flog )
         if tarif_mode_activ.upper() != tarif_mode_set.upper():
             flog.debug( inspect.stack()[0][3] + ": huidige tarief " + tarif_mode_activ.upper() + " komt NIET overeen met ingestelde schakel tarief " + str(tarif_mode_set).upper() )
             gpioTarifSwitcher.gpioOn( False ) # make sure we switch off the load when not active.

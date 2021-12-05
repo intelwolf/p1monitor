@@ -25,14 +25,15 @@
 # Versie 1.3.0 Tweede powerproduction voor solar toegevoegd.
 # Versie 1.4.0 Internet API toegevoegd en 1 sec verwerking.
 # Versie 1.4.1 DNS en Letsencrypt uitbreidingen. QR code voor API's toegevoegd.
+# Versie 1.5.0 P1UpdateAide en Excel export toegevoegd.
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "1.4.1"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "b"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
-P1_SERIAL_VERSION               = "20211002"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "1.5.0"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
+P1_SERIAL_VERSION               = "20211203"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
@@ -107,6 +108,9 @@ DIR_UPGRADE_ASSIST              ="/p1monitor"
 DIR_UPGRADE_ASSIST_DATA         =DIR_UPGRADE_ASSIST +"/data"
 DIR_UPGRADE_ASSIST_WIFI         =DIR_UPGRADE_ASSIST +"/wifi"
 DIR_UPGRADE_ASSIST_USB_MOUNT    ='/p1mon/mnt/usb'
+DIR_USB_ROOT                    ="/p1monitor"
+DIR_UPGRADE_AIDE                ='/aide'
+DIR_USB_MOUNT                   ='/p1mon/mnt/usb'
 #DIR_TMP                         ="/p1mon/var/tmp/"
 DIR_DOWNLOAD                    ="/p1mon/www/download/"
 DIR_WWW_CUSTOM                  ="/p1mon/www/custom"
@@ -141,6 +145,7 @@ FILE_SESSION                    ="/p1mon/mnt/ramdisk/session.txt"
 FILE_PREFIX_CUSTOM_UI           ="/p1mon/var/tmp/custom-www-export-"
 FILE_EXPORT_MANIFEST            ="/p1mon/var/tmp/manifest.json"
 FILE_UPGRADE_ASSIST_STATUS      ="/p1mon/mnt/ramdisk/upgrade-assist.status"
+FILE_UPGRADE_AIDE_STATUS        ="/p1mon/mnt/ramdisk/upgrade-aide.status"
 FILE_POWERPRODUCTION_CNT_STATUS ="/p1mon/mnt/ramdisk/powerproduction-counter-reset.status"
 FILE_WATERMETER_CNT_STATUS      ="/p1mon/mnt/ramdisk/watermeter-counter-reset.status"
 FILE_SQL_IMPORT_STATUS          ="/p1mon/mnt/ramdisk/sqlimport.status"

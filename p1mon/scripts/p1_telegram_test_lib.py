@@ -158,6 +158,9 @@ class p1_telegram():
                 l1_a = ((act_verbr_kw_l1 + act_gelvr_kw_l1) * 1000) / l1_v
                 l2_a = ((act_verbr_kw_l2 + act_gelvr_kw_l2) * 1000) / l2_v
                 l3_a = ((act_verbr_kw_l3 + act_gelvr_kw_l3) * 1000) / l3_v
+
+                #l1_a = 0 # test for App Bug.
+
                 line_1 = ''.join( filter(lambda x: x in string.printable, '1-0:31.7.0(' + '{0:03.0f}'.format( l1_a ) + '*A)\r\n'))
                 serialbuffer.append( line_1 )
                 line_1 = ''.join( filter(lambda x: x in string.printable, '1-0:51.7.0(' + '{0:03.0f}'.format( l2_a ) + '*A)\r\n'))

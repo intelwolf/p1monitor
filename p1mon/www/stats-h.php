@@ -43,9 +43,14 @@ var GgelvrData      = [];
 var GnettoData      = [];
 var Granges         = [];
 var Gaverages       = [];
-var maxrecords      = 744;
 
-function readJsonApiHistoryHour( cnt ){ 
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 26034, 744 ]
+var maxrecords      = maxDataCount[1];
+
+
+function readJsonApiHistoryHour( cnt ){
     $.getScript( "/api/v1/powergas/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
         try {
         var jsondata = JSON.parse(data); 
@@ -97,12 +102,13 @@ function readJsonApiWeatherHistoryHour( cnt ){
 
 
 /* preload */
-readJsonApiHistoryHour( maxrecords );
+//readJsonApiHistoryHour( maxrecords );
 
 // change items with the marker #PARAMETER
 function createKwhChart() {
     Highcharts.stockChart('KwhChart', {
         chart: {
+
             style: {
                 fontFamily: 'robotomedium'
             },
@@ -161,7 +167,29 @@ function createKwhChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
+
                 {
+                    text: "-",
+                    events: {
+                        click: function () {
+
+                            maxDataIsOn = !maxDataIsOn;
+                            setHCButtonText( $('#KwhChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+
+                            if ( maxDataIsOn == true ) {
+                                maxrecords = maxDataCount[0]
+                            } else {
+                                maxrecords = maxDataCount[1]
+                            }
+
+                            readJsonApiHistoryHour( maxrecords );
+                            toLocalStorage('stat-h-max-data-on',maxDataIsOn );  // #PARAMETER
+                            return false
+                        }
+                    }
+                },
+
+                { 
                     type: 'hour',
                     count: 12,
                     text: GselectText[0]
@@ -176,14 +204,14 @@ function createKwhChart() {
                 }, {
                     type: 'day',
                     count: 5,
-                    text: GselectText[3]
+                    text: GselectText[3],
                 }],
                 buttonTheme: { 
                     r: 3,
                     fill: '#F5F5F5',
                     stroke: '#DCE1E3',
                     'stroke-width': 1,
-                    width: 65,
+                    width: 60,
                     style: {
                         color: '#6E797C',
                         fontWeight: 'normal'
@@ -429,8 +457,14 @@ function createKwhChart() {
                     color: '#10D0E7'        
                 }
             }        
-  });
+    });
+
+    // can only set text when chart is made.
+    setHCButtonText( $('#KwhChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+
 }
+
+
 
 function updateData() {
     //console.log("updateData()");
@@ -457,13 +491,14 @@ function DataLoop() {
         currentMinutes = 0;
         colorFader("#timerText","#0C7DAD");
         readJsonApiHistoryHour( maxrecords );
+        
     }
     // make chart only once and when we have data.
     if (recordsLoaded !== 0 &&  $('#KwhChart').highcharts() == null) {
       hideStuff('loading-data');
       createKwhChart();
     }
-    setTimeout('DataLoop()',1000);
+    setTimeout('DataLoop()', 1000 );
 }
 
 $(function() {
@@ -473,6 +508,16 @@ $(function() {
     GseriesVisibilty[1] =JSON.parse(getLocalStorage('stat-h-gelvr-visible'));  // #PARAMETER
     GseriesVisibilty[2] =JSON.parse(getLocalStorage('stat-h-netto-visible'));  // #PARAMETER
     GseriesVisibilty[3] =JSON.parse(getLocalStorage('stat-h-temp-visible'));   // #PARAMETER
+    maxDataIsOn = JSON.parse(getLocalStorage('stat-h-max-data-on'));           // #PARAMETER
+    //console.log( "maxDataIsON(1)=" + maxDataIsOn )
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
+    }
+
     Highcharts.setOptions({
     global: {
         useUTC: false

@@ -25,8 +25,8 @@ if( $localip == False ){
         }
 }
 
-$sw_off  = strIdx( 193 );
-$sw_on   = strIdx( 192 );
+$sw_off    = strIdx( 193 );
+$sw_on     = strIdx( 192 );
 
 $WIFI_ESSID_FILE  = '/p1mon/mnt/ramdisk/wifi_essid.txt';
 
@@ -167,7 +167,7 @@ function makeSelector($id) {
 <body>
 <script>
 var initloadtimer;
-
+var suggestie_text = "<?php echo strIdx( 286 );?>";
 
 function wifiSelectClick() {
     //console.log('wifi click');
@@ -224,8 +224,8 @@ function readJsonApiStatus(){
                 $('#ne8v').text(jsonarr[j][1]);
                 break;
             case 122:
-                document.getElementById("ip_router").placeholder = jsonarr[j][1]
-                document.getElementById("ip_dns").placeholder    = jsonarr[j][1]
+                document.getElementById("ip_router").placeholder = suggestie_text + " " + jsonarr[j][1]
+                document.getElementById("ip_dns").placeholder    = suggestie_text + " " + jsonarr[j][1]
                 break;
             default:
                 break;
@@ -489,7 +489,7 @@ $(function () {
                                         <label class="text-10 pad-1"><?php echo strIdx( 277 );?></label> 
                                     </div>
                                     <div class="rTableCell">
-                                        <input class="input-3 color-settings color-input-back" id="ip_eth0" name="ip_eth0" type="text" value="<?php echo config_read( 164 );?>">
+                                        <input class="input-14 color-settings color-input-back" id="ip_eth0" name="ip_eth0" type="text" value="<?php echo config_read( 164 );?>">
                                     </div>
                                 </div>
 
@@ -501,7 +501,7 @@ $(function () {
                                         <label class="text-10 pad-1"><?php echo strIdx( 278 );?></label> 
                                     </div>
                                     <div class="rTableCell"> 
-                                        <input class="input-3 color-settings color-input-back" id="ip_wlan0" name="ip_wlan0" type="text" value="<?php echo config_read( 165 );?>">
+                                        <input class="input-14 color-settings color-input-back" id="ip_wlan0" name="ip_wlan0" type="text" value="<?php echo config_read( 165 );?>">
                                     </div>
                                 </div>
 
@@ -513,7 +513,7 @@ $(function () {
                                         <label class="text-10 pad-1"><?php echo strIdx( 279 );?></label> 
                                     </div>
                                     <div class="rTableCell"> 
-                                        <input class="input-3 color-settings color-input-back" id="ip_router" name="ip_router" type="text" value="<?php echo config_read( 166 );?>">
+                                        <input class="input-14 color-settings color-input-back" id="ip_router" name="ip_router" type="text" value="<?php echo config_read( 166 );?>">
                                     </div>
                                 </div>
 
@@ -525,7 +525,7 @@ $(function () {
                                         <label class="text-10 pad-1"><?php echo strIdx( 280 );?></label>
                                     </div>
                                     <div class="rTableCell"> 
-                                        <input class="input-3 color-settings color-input-back" id="ip_dns" name="ip_dns" type="text" value="<?php echo config_read( 167 );?>">
+                                        <input class="input-14 color-settings color-input-back" id="ip_dns" name="ip_dns" type="text" value="<?php echo config_read( 167 );?>">
                                     </div>
                                 </div>
 

@@ -3,15 +3,14 @@ import const
 import cpuinfo
 import glob
 import inspect
+import filesystem_lib
 import network_lib
-import sys
 import hashlib
 import json
 import time
 import subprocess
 import urllib
 import psutil
-import string
 import random
 import platform
 import socket
@@ -19,10 +18,12 @@ import os
 import random
 import struct
 import shutil
+import string
 import util
 import urllib.request
 import semaphore3
 import signal
+import sys
 import systemid
 import crypto3
 import base64
@@ -239,7 +240,7 @@ def MainProg():
             ## CPU temperatuur
             getCpuTemperature()
             ## controle of er nog P1 data binnen komt.
-            checkForP1Data()
+            check_for_p1port_data()
             ## Watermeter reset.
             checkWatermeterCounterSetRun()
             ## check if there is an autoimport file
@@ -265,6 +266,8 @@ def MainProg():
             P1NginxConfigApi()
             P1NetworkConfig()
             DropboxAuthenticationRequest()
+            check_upgrade_aide_save_run()
+            export_db_to_excel_run()
 
         # elke 60 sec acties
         if cnt%30 == 0:
@@ -638,6 +641,78 @@ def checkAutoImport():
         flog.error(inspect.stack()[0][3]+" Onverwachte fout: " + str( e ) )
     
     #flog.setLevel( logging.INFO )
+
+
+#########################################################
+# start the process to export a DB to an Excel workbook #
+#########################################################
+def export_db_to_excel_run():
+    try:
+        prg_name = "P1DbToXlsx.py" 
+       
+        _id, db_file_to_export, _label = config_db.strget( 172, flog )
+        if len(db_file_to_export) > 0:
+            needs_to_run_status = 1
+        else:
+            needs_to_run_status = 0
+
+        pid_list, _process_list = listOfPidByName( prg_name )
+        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+        if int( needs_to_run_status ) == 1 and len( pid_list) == 0: # start process
+
+            config_db.strset( '', 172, flog )
+
+            excel_filepath  = const.DIR_DOWNLOAD + db_file_to_export + ".xlsx"
+            database        = const.DIR_RAMDISK  + db_file_to_export
+
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestart." )
+
+            cmd = const.DIR_SCRIPTS + prg_name + ' --datebase ' + database + ' --output ' + excel_filepath
+            # print ( cmd )
+            proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+            stdout, stderr  = proc.communicate()
+            returncode = int( proc.wait( timeout=60 ) )
+            
+            if returncode != 0:
+                flog.error( inspect.stack()[0][3] + ": cmd: " + str( cmd ) + "stdout: " +  str( stdout.decode('utf-8').replace('\n', ' ') ))
+
+            # remove the file after one hour / 3600 seconds.
+            # in principle a fail save.
+            filesystem_lib.rm_with_delay( filepath=excel_filepath , timeout=3600 )
+
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestopt." )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset( '', 172, flog) # fail save to stop
+
+
+
+##############################################
+# run the P1UpgradeAide program in save mode #
+##############################################
+def check_upgrade_aide_save_run():
+    try:
+        prg_name = "P1UpgradeAide.py" 
+       
+        _id, needs_to_run_status, _label = config_db.strget( 171, flog )
+
+        pid_list, _process_list = listOfPidByName( prg_name )
+        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+        if int( needs_to_run_status ) == 1 and len( pid_list) == 0: # start process
+
+            config_db.strset( 0, 171, flog )
+
+            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --save gestart." )
+            if os.system('/p1mon/scripts/' + prg_name + ' --save 2>&1') > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --save gefaald." )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset( 0, 171, flog) # fail save to stop
+
 
 ########################################################
 # checks if the Sql database script must run or must   #
@@ -1013,10 +1088,29 @@ def checkWatermeterCounterSetRun():
             rt_status_db.strset( 'proces gefaald (watchdog)', 107, flog )
             flog.error(inspect.stack()[0][3]+" Watermeterstand reset is gefaald.")
 
-def checkForP1Data():
+def check_for_p1port_data():
     global p1_no_data_notification
+    time_out = 30 # number of seconds before notification/ detection.
+
     try:
-        # to do check if enabled #TODO
+        _id, utc_str, _description, _index = rt_status_db.strget( 87, flog )
+        delta_time = abs( getUtcTime() - int( utc_str ) )
+
+        if delta_time >= time_out:
+            rt_status_db.strset( 0 ,123 ,flog) # no data
+            flog.debug( inspect.stack()[0][3]+ ": P1 data timeout, data is niet actief." )
+        else:
+            rt_status_db.strset( 1 ,123 ,flog) # data seen witin the timeframe
+            flog.debug( inspect.stack()[0][3]+ ": P1 data is actief." )
+
+    except Exception as e:
+        flog.warning( inspect.stack()[0][3] + " P1 data check -> " + str(e) )
+        # do nothing if timestamp is not correct.
+        return
+
+    flog.debug( inspect.stack()[0][3]+ ": delta_time = " + str(delta_time) + " getUtcTime()=" + str(getUtcTime())  + " utc_str " + str( int( utc_str )) )
+
+    try:
         _id, on, _label = config_db.strget( 73, flog )
         if int(on) != 1:
             flog.debug(inspect.stack()[0][3]+": email voor controle op P1 data staat uit, geen actie.")  
@@ -1029,15 +1123,6 @@ def checkForP1Data():
     if len( subject) < 1:
         subject =  const.DEFAULT_EMAIL_NOTIFICATION
 
-    try:
-        _id, utc_str, _description, _index = rt_status_db.strget( 87, flog )
-        delta_time = abs( getUtcTime() - int( utc_str ) )
-    except:
-        # do nothing if timestamp is not correct.
-        return
-   
-    time_out = 30 # number of seconds before notification.
-
     if delta_time >= time_out and p1_no_data_notification == False:
         subject_str = ' -subject "' + subject + ' (slimme meter data niet ontvangen)."'
         messagetext = ' -msgtext "Data uit de slimme meter komt niet meer binnen. Laatste slimme meter telegram ' + str(delta_time)+' seconden geleden ontvangen."'
@@ -1046,16 +1131,16 @@ def checkForP1Data():
             flog.error(inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald.")
         else:
             p1_no_data_notification = True
-            flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen.")
+            flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen in de afgelopen " + str(delta_time) + " seconden." )
 
     if delta_time < time_out and p1_no_data_notification == True:
             p1_no_data_notification = False
             subject_str = ' -subject "' + subject + ' (slimme meter data ontvangen.)."'
             messagetext = ' -msgtext "Data uit de slimme meter komt binnen. Laatste slimme meter telegram ' + str(delta_time)+' seconden geleden ontvangen."'
-            messagehtml = ' -msghtml "<p>Data uit de slimme meter komt weer binnen.</p><p>Laatste slimme meter telegram <b>' + str(delta_time)+'</b> seconden geleden ontvangen.</p>"'
+            messagehtml = ' -msghtml "<p>Data uit de slimme meter komt weer binnen.</p><p>Laatste slimme meter telegram <b>' + str(delta_time) +'</b> seconden geleden ontvangen.</p>"'
             if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
                 flog.error(inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald.")
-            flog.info(inspect.stack()[0][3]+" P1 data komt binnen, email verstuurd.")
+            flog.info(inspect.stack()[0][3]+" P1 data komt weer binnen, email verstuurd.")
     
     #print ( delta_time )
 

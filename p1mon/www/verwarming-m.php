@@ -45,7 +45,13 @@ var mins            = 1;
 var secs            = mins * 60;
 var currentSeconds  = 0;
 var currentMinutes  = 0;
-var maxrecords      = 121; // number of records to read
+//var maxrecords      = 121; // number of records to read
+
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 36000, 366 ]
+var maxrecords      = maxDataCount[1];
+
 var ui_in_label     = "<?php echo config_read( 121 ); ?>"; 
 var ui_uit_label    = "<?php echo config_read( 122 ); ?>";
 
@@ -267,27 +273,48 @@ function createChart() {
        buttonSpacing: 5, 
        selected : Gselected,
        buttons: [
-                {
-                    type: 'month',
-                    count: 6,
-                    text: GselectText[0]
-                },{
-                    type: 'year',
-                    count: 1,
-                    text: GselectText[1]
-                },{
-                    type: 'year',
-                    count: 2,
-                    text: GselectText[2]
-                }, {
-                    type: 'year',
-                    count: 5,
-                    text: GselectText[3]
-                }, {
-                    type: 'year',
-                    count: 10,
-                    text: GselectText[4]
+
+        {
+            text: "-",
+            events: {
+                click: function () {
+                    
+                    maxDataIsOn = !maxDataIsOn;
+                    setHCButtonText( $('#tempChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+                    
+                    if ( maxDataIsOn == true ) {
+                        maxrecords = maxDataCount[0]
+                    } else {
+                        maxrecords = maxDataCount[1]
+                    }
+                    readJsonIndoorTemperatureMonth( maxrecords );
+                    toLocalStorage('verwarming-m-max-data-on',maxDataIsOn );  // #PARAMETER
+                    return false
                 }
+            }
+        },
+
+            {
+                type: 'month',
+                count: 6,
+                text: GselectText[0]
+            },{
+                type: 'year',
+                count: 1,
+                text: GselectText[1]
+            },{
+                type: 'year',
+                count: 2,
+                text: GselectText[2]
+            }, {
+                type: 'year',
+                count: 5,
+                text: GselectText[3]
+            }, {
+                type: 'year',
+                count: 10,
+                text: GselectText[4]
+            }
        ],
        buttonTheme: { 
         r: 3,
@@ -429,6 +456,8 @@ function createChart() {
       }  
     },
   });
+  // can only set text when chart is made.
+  setHCButtonText( $('#tempChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
 function updateData() {
@@ -472,6 +501,17 @@ $(function() {
     GseriesVisibilty[2] = JSON.parse(getLocalStorage('verwarming-m-uit-visible'));
     GseriesVisibilty[3] = JSON.parse(getLocalStorage('verwarming-m-uit-gem-visible'));
     Gselected = parseInt(getLocalStorage('verwarming-m-select-temperatuur-index'),10);
+
+    maxDataIsOn = JSON.parse(getLocalStorage('verwarming-m-max-data-on'));              // #PARAMETER
+    //console.log( "maxDataIsON(1)=" + maxDataIsOn )
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
+    }
+
     Highcharts.setOptions({
         global: {
         useUTC: false

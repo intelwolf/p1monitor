@@ -34,7 +34,7 @@ function encodeString ($input, $seed) {
         return $arr_execoutput_enc[0];
 }
 
-function decodeString($config_id, $seed) {
+function decodeString( $config_id, $seed ) {
     $decoded_string = '';
     $command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed."'";
     $arr_execoutput_dec = []; // make sure old stuff is cleared.
@@ -56,7 +56,7 @@ function decodeStringNoBase64($config_id, $seed) {
 
 
 //maak een string schoon van speciale chars
-function clean($string) {
+function clean( $string ) {
    $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
    return preg_replace('/[^A-Za-z0-9\-.]/', '', $string); // Removes special chars.
 }
@@ -79,7 +79,7 @@ function cronSafeCharacters($str_in) {
     $regex = "/[^0-9,\/\-\*]+/";
     if (preg_match($regex, $str_in)) { 
         //echo $str_in;
-        return False; 
+        return False;
     }
     return True;
 }
@@ -100,16 +100,16 @@ function updateConfigDb($sql){
         $db = new SQLite3($dbstr,SQLITE3_OPEN_READWRITE);
         $db -> busyTimeout(300000);  // fix for database locks, wait 300 sec = 5 min
           $db->exec($sql);
-          if ($db->lastErrorCode() > 0) $r = 1;    
+          if ($db->lastErrorCode() > 0) $r = 1;
           $db->close();
       } catch (Exception $e) {
         $r=1;
     }
-    return $r;     
+    return $r;
 }
 
 // lees de config database uit om de fileshare status te lezen
-// op basis van uit,data of dev word niets of checked terug gegeven.
+// op basis van uit,data of dev wordt niets of checked terug gegeven.
 function readFileShareStatus($cmpstr){
     $sqlstr = "select id,parameter from config where id=6";
     $dbstr = '/p1mon/mnt/ramdisk/config.db'; 
@@ -204,7 +204,7 @@ function checkFloat($in, $decimals, $maxval, $abs) {
 // indien zomertijd voeg dan een uur in sec toe.
 function TimeDSTAdjustTicks()
 {
-    date_default_timezone_set('Europe/Amsterdam');            
+    date_default_timezone_set('Europe/Amsterdam');
     if(date('I')) {return 3600;}
     else return 0; // we are in winter time
 }
@@ -213,7 +213,7 @@ function TimeDSTAdjustTicks()
 // uren en strip de datum
 function TimeDSTAdjust($t)
 {
-    date_default_timezone_set('Europe/Amsterdam');    
+    date_default_timezone_set('Europe/Amsterdam');
     $s=split(' ',$t);
     // get rid off date
     if (count($s) > 1) { $v = $s[1];}

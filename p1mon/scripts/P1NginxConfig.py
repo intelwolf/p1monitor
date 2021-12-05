@@ -4,11 +4,13 @@ import base64
 import const
 import crontab
 import crypto3
+import filesystem_lib
 import glob
 import inspect
 import json
 import listOfPidByName
 import logger
+import nginx_lib
 import os
 import pwd
 import pathvalidate.argparse
@@ -23,10 +25,11 @@ import util
 import network_lib
 import makeLocalTimeString
 
-P80FILE         = const.DIR_NGINX_BASE + '/sites-enabled/p1mon_80'
-P443FILE        = const.DIR_NGINX_BASE + '/sites-enabled/p1mon_443'
-APIKEYFILE      = const.DIR_NGINX_BASE + '/conf.d/api-tokens.conf'
-DIVMAPSFILE      = const.DIR_NGINX_BASE + '/conf.d/divmaps.conf'
+# defines moved to nginx_lib.py 2021-10-30 post version 1.4.1
+#nginx_lib.P80FILE         = const.DIR_NGINX_BASE + '/sites-enabled/p1mon_80'
+#nginx_lib.P443FILE        = const.DIR_NGINX_BASE + '/sites-enabled/p1mon_443'
+#nginx_lib.APIKEYFILE      = const.DIR_NGINX_BASE + '/conf.d/api-tokens.conf'
+#nginx_lib.DIVMAPSFILE     = const.DIR_NGINX_BASE + '/conf.d/divmaps.conf'
 LETSENCRYPY_TAG = 'LetsEncrypt'
 NGINX_TMP_EXT   = '_nginx.tmp'
 
@@ -494,7 +497,7 @@ def Main( argv ):
         #print( buffer )
         flog.debug( inspect.stack()[0][3] + ": api tokens:\n" + str( buffer ) )
 
-        if write_buffer( buffer=buffer, file=APIKEYFILE, flog=flog ) == False:
+        if write_buffer( buffer=buffer, file=nginx_lib.APIKEYFILE, flog=flog ) == False:
             sys.exit(1) # things went wrong.
 
         if check_nginx_configuration( flog=flog ) == False:
@@ -557,7 +560,7 @@ def make_nginx_conf():
 
     flog.debug( inspect.stack()[0][3] + ": gateway:\n" + str( buffer ) )
 
-    if write_buffer( buffer=buffer, file=DIVMAPSFILE, flog=flog ) == False:
+    if write_buffer( buffer=buffer, file=nginx_lib.DIVMAPSFILE, flog=flog ) == False:
         sys.exit(1) # things went wrong.
 
 
@@ -619,13 +622,13 @@ def set_default_p80_config():
     flog.debug( inspect.stack()[0][3] + ": port 80 config:\n" + str( buffer ) )
 
     #print( buffer )
-    if write_buffer( buffer=buffer, file=P80FILE, flog=flog ) == False:
+    if write_buffer( buffer=buffer, file=nginx_lib.P80FILE, flog=flog ) == False:
         sys.exit(1) # things went wrong.
 
     ##################################################################
     # remove https file if exists, not needed in default http mode   #
     ##################################################################
-    cmd = '/usr/bin/sudo rm -f ' + P443FILE
+    cmd = '/usr/bin/sudo rm -f ' + nginx_lib.P443FILE
     os.system( cmd ) # may fail silent.
 
     if check_nginx_configuration( flog=flog ) == False:
@@ -706,7 +709,7 @@ def set_nginx_https_config():
 
     flog.debug( inspect.stack()[0][3] + ": port 80 config:\n" + str( buffer ) )
 
-    if write_buffer( buffer=buffer, file=P80FILE, flog=flog ) == False:
+    if write_buffer( buffer=buffer, file=nginx_lib.P80FILE, flog=flog ) == False:
         flog.critical( inspect.stack()[0][3] + ": poort 80 bestand fout " )
         sys.exit(1) # things went wrong.
 
@@ -718,7 +721,7 @@ def set_nginx_https_config():
 
     flog.debug( inspect.stack()[0][3] + ": port 443 config:\n" + str( buffer ) )
 
-    if write_buffer( buffer=buffer, file=P443FILE, flog=flog ) == False:
+    if write_buffer( buffer=buffer, file=nginx_lib.P443FILE, flog=flog ) == False:
         flog.critical( inspect.stack()[0][3] + ": poort 443 bestand fout " )
         sys.exit(1) # things went wrong.
 
@@ -834,8 +837,10 @@ def write_buffer( buffer=None, file=None, flog=None ) -> bool:
     
     return True
 
+# TODO gebruik filesystem_lib.py functie
+# let op gebruik Excepties en geen status return.
 ################################################################
-# move a file to the destonation and set the rights to 644 and #
+# move a file to the destination and set the rights to 644 and #
 # ownership to root:root                                       #
 # true is ok, false is fatal error                             #
 ################################################################
@@ -890,7 +895,13 @@ def saveExit(signum, frame):
 if __name__ == "__main__":
     try:
         os.umask( 0o002 )
-        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
+        filepath = const.DIR_FILELOG + prgname + ".log"
+        try:
+            filesystem_lib.set_file_permissions( filepath=filepath, permissions='664' )
+            filesystem_lib.set_file_owners( filepath=filepath, owner_group='p1mon:p1mon' )
+        except:
+            pass # don nothing as when this fails, it still could work
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname) 
         flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:

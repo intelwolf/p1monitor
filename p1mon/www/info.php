@@ -98,21 +98,7 @@ function readJsonApiStatus(){
     $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
       try {
         var jsonarr = JSON.parse(data); 
-        
-        if ( jsonarr[45][1] == '0') {
-                hideStuff('serial_ok'); 
-                showStuff('serial_nok');
-                if(!soundPlayed) {
-                    soundPlayed = true;
-                    PlaySound();
-                    console.log("playing")
-                }
-            } else {
-                hideStuff('serial_nok'); 
-                showStuff('serial_ok');
-                if(soundPlayed) soundPlayed = false; // reset
-            }
-                   
+
         for (var j=0;  j<jsonarr.length; j++){   
                 switch(jsonarr[j][0]) {
                     case 5:
@@ -377,7 +363,22 @@ function readJsonApiStatus(){
                 case 111:
                     $('#db24v').text(jsonarr[j][1]);
                     $('#db24t').text(jsonarr[j][2]);
-                    break;  
+                    break;
+                case 123:
+                    if ( jsonarr[j][1] == '0') {
+                            hideStuff('serial_ok'); 
+                            showStuff('serial_nok');
+                            if( !soundPlayed ) {
+                                soundPlayed = true;
+                                PlaySound();
+                            }
+                        } else {
+                            hideStuff('serial_nok'); 
+                            showStuff('serial_ok');
+                            if( soundPlayed ) soundPlayed = false; // reset
+                        }
+                    break;
+                
                 default:
                     break;
             }

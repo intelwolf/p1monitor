@@ -43,8 +43,12 @@ var mins            = 1;
 var secs            = mins * 60;
 var currentSeconds  = 0;
 var currentMinutes  = 0;
-var maxrecords      = 366; // number of records to read 
+//var maxrecords      = 366; // number of records to read 
 
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 36000, 366 ]
+var maxrecords      = maxDataCount[1];
 
 
 function readJsonApiHistoryDay( cnt ){ 
@@ -282,36 +286,57 @@ function createGasChart() {
       borderWidth: 1
     },
     rangeSelector: { // #PARAMETER
-      inputEnabled: false,
-       buttonSpacing: 5, 
-       selected : Gselected,
-       buttons: [{
-        type: 'day',
-        count: 7,
-        text: GselectText[0]
-       },{
-         type: 'day',
-         count: 14,
-         text: GselectText[1]
-       },{
-        type: 'month',
-        count: 1,
-        text: GselectText[2]
-       }, {
-        type: 'month',
-        count: 2,
-        text: GselectText[3]
-       }],
-       buttonTheme: { 
-        r: 3,
-        fill: '#F5F5F5',
-        stroke: '#DCE1E3',
-        'stroke-width': 1,
-        width: 65,
-        style: {
-          color: '#6E797C',
-          fontWeight: 'normal'
-        },
+        inputEnabled: false,
+        buttonSpacing: 5, 
+        selected : Gselected,
+        buttons: [
+            {
+                text: "-",
+                events: {
+                    click: function () {
+                        
+                        maxDataIsOn = !maxDataIsOn;
+                        setHCButtonText( $('#GasChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+                        
+                        if ( maxDataIsOn == true ) {
+                            maxrecords = maxDataCount[0]
+                        } else {
+                            maxrecords = maxDataCount[1]
+                        }
+                        
+                        readJsonApiHistoryDay( maxrecords );
+                        toLocalStorage('stat-d-gas-max-data-on',maxDataIsOn );  // #PARAMETER
+                        return false
+                    }
+                }
+            },
+            {
+            type: 'day',
+            count: 7,
+            text: GselectText[0]
+        },{
+            type: 'day',
+            count: 14,
+            text: GselectText[1]
+        },{
+            type: 'month',
+            count: 1,
+            text: GselectText[2]
+        }, {
+            type: 'month',
+            count: 2,
+            text: GselectText[3]
+        }],
+        buttonTheme: { 
+            r: 3,
+            fill: '#F5F5F5',
+            stroke: '#DCE1E3',
+            'stroke-width': 1,
+            width: 65,
+            style: {
+            color: '#6E797C',
+            fontWeight: 'normal'
+            },
         states: {
           hover: {
             fill: '#F5F5F5',
@@ -414,7 +439,8 @@ function createGasChart() {
       }
     },
   });
-  
+   // can only set text when chart is made.
+   setHCButtonText( $('#GasChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
 function updateData() {
@@ -428,20 +454,6 @@ function updateData() {
         chart.series[0].setData( GverbrData );
         chart.series[1].setData( Gaverages );
         chart.series[2].setData( Granges );
-        
-
-      /*
-      chart.series[0].update({
-       data: GverbrData,
-      });
-      chart.series[1].update({
-        data: Gaverages,
-      });
-      chart.series[2].update({
-       data: Granges,
-      });
-      chart.redraw();
-      */ 
 
     }
 }
@@ -466,19 +478,30 @@ function DataLoop() {
 
 
 $(function() {
-  toLocalStorage('stats-menu-gas',window.location.pathname);
-  GseriesVisibilty[0] = JSON.parse(getLocalStorage('stat-d-gas-visible'));  // #PARAMETER
-  GseriesVisibilty[1] = JSON.parse(getLocalStorage('stat-d-gas-temp-visible')); // #PARAMETER
-  Gselected = parseInt(getLocalStorage('stat-d-select-gas-index'),10); // #PARAMETER
-  Highcharts.setOptions({
-   global: {
-    useUTC: false
+    toLocalStorage('stats-menu-gas',window.location.pathname);
+    GseriesVisibilty[0] = JSON.parse(getLocalStorage('stat-d-gas-visible'));      // #PARAMETER
+    GseriesVisibilty[1] = JSON.parse(getLocalStorage('stat-d-gas-temp-visible')); // #PARAMETER
+    Gselected = parseInt(getLocalStorage('stat-d-select-gas-index'),10);          // #PARAMETER
+
+    maxDataIsOn = JSON.parse(getLocalStorage('stat-d-gas-max-data-on'));           // #PARAMETER
+    //console.log( "maxDataIsON(1)=" + maxDataIsOn )
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
     }
-  });
-  screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
-  createGasChart();
-  secs = 0;
-  DataLoop();
+
+    Highcharts.setOptions({
+    global: {
+        useUTC: false
+        }
+    });
+    screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
+    createGasChart();
+    secs = 0;
+    DataLoop();
 });
 
 </script>

@@ -76,299 +76,301 @@ function readJsonIndoorTemperature( cnt ){
         $("#tempChartOut").highcharts().series[0].points[0].update( GhistoryIn[GhistoryIn.length-1][2], true, true, true);
         $("#tempChartIn").highcharts().redraw();
 
+        var deltatemp = Math.abs( GhistoryIn[GhistoryIn.length-1][1] - GhistoryIn[GhistoryIn.length-1][2] ).toFixed(1);
+        //console.log( deltatemp )
+        $('#deltatemp').text( deltatemp );
+
       } catch(err) {}
    });
 }
 
 function createChartIn() {
 
-$('#tempChartIn').highcharts({
-  exporting: { enabled: false },
-  tooltip: { enabled: false },
-  lang: {
-    noData: "Geen gegevens beschikbaar."
-  },
-  noData: {
-    style: { 
-    fontFamily: 'robotomedium',   
-      fontWeight: 'bold',     
-        fontSize: '25px',
-        color: '#10D0E7'        
-    }
-  },
-  title: {
-  text: null
-  },
-  chart: {
-    style: {
-      fontFamily: 'robotomedium'
-    },
-    backgroundColor: '#ffffff',
-    borderWidth: 0,
-      type: 'gauge',
-      plotBorderWidth: 0,
-      plotBackgroundImage: null,
-      width: 450,
-      height: 390,
-      spacingTop: 50,
-  },
-  pane: [{
-      startAngle: -120,
-      endAngle: 120,
-      size: 360,
-      
-      background: [{
-            backgroundColor: '#F5F5F5',
-            borderWidth: 2,
-            outerRadius: '78%',
-            
-        }],
-  }, {
-      startAngle: -120,
-      endAngle: 120,
-      background: null,
-      center: ['75%', '60%'],
-      //size: 380,
-      background: [{
-            backgroundColor: '#F5F5F5',
-            borderWidth: 2,
-            outerRadius: '78%'
-        }],
-  }],                        
-  yAxis: [{
-      min: -30,
-      max: 60,
-
-      minorTickPosition: 'inside',
-      minorTickLength: 30,
-      minorTickColor: '#F5F5F5',
-
-      tickPosition: 'inside',
-      tickLength: 35,
-      tickColor: '#F5F5F5',
-      tickInterval: 10,
-
-      labels: {
-          rotation: 'auto',
-          distance: 10,
-          format: '{value}°C',
-          style: {
-            color: '#6E797C',
-            fontSize:'15px'
-          }
-      },
-        
-      plotBands: [{
-          innerRadius: '80%',
-          outerRadius: '100%',
-          from: -30,
-          to: 60,
-          color: {
-            linearGradient:  { x1: 0, x2: 0, y1: 0, y2: 1 },
-            stops: [
-              [0.4, '#55BF3B'], // green
-              [0.5, '#DDDF0D'], // yellow
-              [0.99, '#DF5353'] // red
-            ]
-          }
-        } 
-       ],    
-
-      pane: 0,
-      title: {
-          text: '<span style="font-size:20px">' + ui_in_label + '<br></span>',
-          y: 130,
-          x: 0
-      }
-    }
-  
-    ],
-    plotOptions: {
-      gauge: {
-        pivot: {
-          radius: 8,
-          borderWidth: 1,
-          backgroundColor: '#384042',
-          borderColor: '#F5F5F5'        
+    $('#tempChartIn').highcharts({
+        exporting: { enabled: false },
+        tooltip: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
         },
-        dataLabels: {
-          format: '{point.y:.1f}°C',
-          borderColor: '#384042',
-          padding: 5,
-          borderRadius: 5,
-          verticalAlign: 'center',
-          y: 45,
-          x: 0,
-          style: {
+        noData: {
+            style: { 
+            fontFamily: 'robotomedium',
             fontWeight: 'bold',
-            fontSize: '40px',
-            color: "#6e797c"                        
+                fontSize: '25px',
+                color: '#10D0E7'
             }
         },
-        dial: {
-          radius: '78%',
-          backgroundColor: '#384042',
-          borderWidth: 1,
-          baseWidth: 15,
-          topWidth: 1,
-          baseLength: '1%', // of radius
-          rearLength: '1%'
+        title: {
+        text: null
         },
-      }
-    },
-    series: [{
-      data: [10],
-      yAxis: 0
-    }]
-  }
-);
+        chart: {
+            style: {
+            fontFamily: 'robotomedium'
+            },
+            backgroundColor: '#ffffff',
+            borderWidth: 0,
+                type: 'gauge',
+                plotBorderWidth: 0,
+                plotBackgroundImage: null,
+                width: 450,
+                height: 390,
+                spacingTop: 50
+        },
+        pane: [{
+            startAngle: -120,
+            endAngle: 120,
+            size: 360,
+            
+            background: [{
+                    backgroundColor: '#F5F5F5',
+                    borderWidth: 2,
+                    outerRadius: '78%',
+                    
+                }],
+        }, {
+            startAngle: -120,
+            endAngle: 120,
+            background: null,
+            center: ['75%', '60%'],
+            //size: 380,
+            background: [{
+                    backgroundColor: '#F5F5F5',
+                    borderWidth: 2,
+                    outerRadius: '78%'
+                }],
+        }],
+        yAxis: [{
+            min: -30,
+            //max: 60,
+            max: 90,
+
+            minorTickPosition: 'inside',
+            minorTickLength: 30,
+            minorTickColor: '#F5F5F5',
+
+            tickPosition: 'inside',
+            tickLength: 35,
+            tickColor: '#F5F5F5',
+            tickInterval: 10,
+
+            labels: {
+                rotation: 'auto',
+                distance: 10,
+                format: '{value}°C',
+                style: {
+                    color: '#6E797C',
+                    fontSize:'15px'
+                }
+            },
+            
+            plotBands: [{
+                innerRadius: '80%',
+                outerRadius: '100%',
+                from: -30,
+                to: 90,
+                color: {
+                    linearGradient:  { x1: 0, x2: 0, y1: 0, y2: 1 },
+                    stops: [
+                    [0.4, '#55BF3B'], // green
+                    [0.5, '#DDDF0D'], // yellow
+                    [0.99, '#DF5353'] // red
+                    ]
+                }
+                } 
+            ],    
+
+            pane: 0,
+            title: {
+                text: '<span style="font-size:20px">' + ui_in_label + '<br></span>',
+                y: 130,
+                x: 0
+            }
+        }
+    
+        ],
+        plotOptions: {
+        gauge: {
+            pivot: {
+            radius: 8,
+            borderWidth: 1,
+            backgroundColor: '#384042',
+            borderColor: '#F5F5F5'        
+            },
+            dataLabels: {
+            format: '{point.y:.1f}°C',
+            borderColor: '#384042',
+            padding: 5,
+            borderRadius: 5,
+            verticalAlign: 'center',
+            y: 45,
+            x: 0,
+            style: {
+                fontWeight: 'bold',
+                fontSize: '40px',
+                color: "#6e797c"                        
+                }
+            },
+            dial: {
+            radius: '78%',
+            backgroundColor: '#384042',
+            borderWidth: 1,
+            baseWidth: 15,
+            topWidth: 1,
+            baseLength: '1%', // of radius
+            rearLength: '1%'
+            },
+        }
+        },
+        series: [{
+        data: [10],
+        yAxis: 0
+        }]
+    });
 }
 
 function createChartOut() {
 
-$('#tempChartOut').highcharts({
-  exporting: { enabled: false },
-  tooltip: { enabled: false },
-  lang: {
-    noData: "Geen gegevens beschikbaar."
-  },
-  noData: {
-    style: { 
-    fontFamily: 'robotomedium',   
-      fontWeight: 'bold',     
-        fontSize: '25px',
-        color: '#10D0E7'        
-    }
-  },
-  title: {
-  text: null
-  },
-  chart: {
-    style: {
-      fontFamily: 'robotomedium'
+    $('#tempChartOut').highcharts({
+        exporting: { enabled: false },
+        tooltip: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
+        },
+        noData: {
+            style: { 
+                fontFamily: 'robotomedium',
+                fontWeight: 'bold',
+                    fontSize: '25px',
+                    color: '#10D0E7'
+            }
+        },
+    title: {
+        text: null
     },
-    backgroundColor: '#ffffff',
-    borderWidth: 0,
-      type: 'gauge',
-      plotBorderWidth: 0,
-      plotBackgroundImage: null,
-      width: 450,
-      height: 390,
-      spacingTop: 50,
-  },
-  pane: [{
-      startAngle: -120,
-      endAngle: 120,
-      //background: null,
-      //center: ['25%', '60%'],
-      //size: 380,
-      size: 360,
-      
-      background: [{
+    chart: {
+        style: {
+        fontFamily: 'robotomedium'
+        },
+        backgroundColor: '#ffffff',
+        borderWidth: 0,
+        type: 'gauge',
+        plotBorderWidth: 0,
+        plotBackgroundImage: null,
+        width: 450,
+        height: 390,
+        spacingTop: 50
+    },
+    pane: [{
+        startAngle: -120,
+        endAngle: 120,
+        //background: null,
+        //center: ['25%', '60%'],
+        //size: 380,
+        size: 360,
+
+        background: [{
             backgroundColor: '#F5F5F5',
             borderWidth: 2,
             outerRadius: '78%',
-            
         }],
-  }, {
-      startAngle: -120,
-      endAngle: 120,
-      background: null,
-      center: ['75%', '60%'],
-      //size: 380,
-      background: [{
+    }, {
+        startAngle: -120,
+        endAngle: 120,
+        background: null,
+        center: ['75%', '60%'],
+        //size: 380,
+        background: [{
             backgroundColor: '#F5F5F5',
             borderWidth: 2,
             outerRadius: '78%'
         }],
-  }],                        
-  yAxis: [{
-      min: -30,
-      max: 60,
+    }],
+    yAxis: [{
+        min: -30,
+        max: 90,
 
-      minorTickPosition: 'inside',
-      minorTickLength: 30,
-      minorTickColor: '#F5F5F5',
+        minorTickPosition: 'inside',
+        minorTickLength: 30,
+        minorTickColor: '#F5F5F5',
 
-      tickPosition: 'inside',
-      tickLength: 35,
-      tickColor: '#F5F5F5',
-      tickInterval: 10,
+        tickPosition: 'inside',
+        tickLength: 35,
+        tickColor: '#F5F5F5',
+        tickInterval: 10,
 
-      labels: {
-          rotation: 'auto',
-          distance: 10,
-          format: '{value}°C',
-          style: {
-            color: '#6E797C',
-            fontSize:'15px'
-          }
-      },
-        
-      plotBands: [{
-          innerRadius: '80%',
-          outerRadius: '100%',
-          from: -30,
-          to: 60,
-          color: {
-            linearGradient:  { x1: 0, x2: 0, y1: 0, y2: 1 },
-            stops: [
-              [0.4, '#55BF3B'], // green
-              [0.5, '#DDDF0D'], // yellow
-              [0.99, '#DF5353'] // red
-            ]
-          }
-        } 
-       ],    
-
-      pane: 0,
-      title: {
+        labels: {
+            rotation: 'auto',
+            distance: 10,
+            format: '{value}°C',
+            style: {
+                color: '#6E797C',
+                fontSize:'15px'
+            }
+        },
+        plotBands: [{
+            innerRadius: '80%',
+            outerRadius: '100%',
+            from: -30,
+            to: 90,
+            color: {
+                linearGradient:  { x1: 0, x2: 0, y1: 0, y2: 1 },
+                stops: [
+                    [0.4, '#55BF3B'], // green
+                    [0.5, '#DDDF0D'], // yellow
+                    [0.99, '#DF5353'] // red
+                ]
+            }
+            }
+        ],
+        pane: 0,
+        title: {
           text: '<span style="font-size:20px">' + ui_uit_label + '<br></span>',
           y: 130,
           x: 0
-      }
-    }
-  
-    ],
-    plotOptions: {
-      gauge: {
-        pivot: {
-          radius: 8,
-          borderWidth: 1,
-          backgroundColor: '#384042',
-          borderColor: '#F5F5F5'
+        }
+        }
+        ],
+        plotOptions: {
+            gauge: {
+                pivot: {
+                    radius: 8,
+                    borderWidth: 1,
+                    backgroundColor: '#384042',
+                    borderColor: '#F5F5F5'
+                },
+                dataLabels: {
+                    format: '{point.y:.1f}°C',
+                    borderColor: '#384042',
+                    padding: 5,
+                    borderRadius: 5,
+                    verticalAlign: 'center',
+                    y: 45,
+                    x: 0,
+                    style: {
+                        fontWeight: 'bold',
+                        fontSize: '40px',
+                        color: "#6e797c"
+                    }
+                },
+            dial: {
+                radius: '78%',
+                backgroundColor: '#384042',
+                borderWidth: 1,
+                baseWidth: 15,
+                topWidth: 1,
+                baseLength: '1%', // of radius
+                rearLength: '1%'
+            },
+        }
         },
-        dataLabels: {
-          format: '{point.y:.1f}°C',
-          borderColor: '#384042',
-          padding: 5,
-          borderRadius: 5,
-          verticalAlign: 'center',
-          y: 45,
-          x: 0,
-          style: {
-            fontWeight: 'bold',
-            fontSize: '40px',
-            color: "#6e797c"
-            }
-        },
-        dial: {
-          radius: '78%',
-          backgroundColor: '#384042',
-          borderWidth: 1,
-          baseWidth: 15,
-          topWidth: 1,
-          baseLength: '1%', // of radius
-          rearLength: '1%'
-        },
-      }
-    },
-    series: [{
-      data: [10],
-      yAxis: 0
-    }]
-  }
-);
+        series: [{
+        data: [10],
+        yAxis: 0
+        }]
+    });
+
+   
+
 }
 
 function createChartGrafiek() {    
@@ -450,6 +452,8 @@ function createChartGrafiek() {
 function DataLoop() {
     //readJsonData(maxrecords);
     readJsonIndoorTemperature( maxrecords )
+
+
     setTimeout('DataLoop()',5000);
 }
 
@@ -464,6 +468,7 @@ $(function() {
     createChartIn();
     createChartOut();
     createChartGrafiek();
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
 });
@@ -505,6 +510,10 @@ $(function() {
               <div id="tempChartOut" ></div>
             </div>
           </div>
+
+          <div class="center text-31">
+              <span>verschiltemperatuur&nbsp;</span><span id='deltatemp'>-</span><span>°C</span>
+         </div>
 
           <div class="pad-3" style="float:left;">
                 <div class="frame-3-top">

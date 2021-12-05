@@ -268,22 +268,12 @@ function readJsonApiStatus(){
         try {
             var jsondata = JSON.parse(data); 
     
-            for (var j=86;  j < jsondata.length; j++){  
-                //console.log( jsondata[j][0] + ' - ' + jsondata[j][1] )
+            for (var j=91;  j < jsondata.length; j++){  
+                //console.log(" x="+ jsondata[j][0] + ' - ' + jsondata[j][1] )
 
-                if ( jsondata[j][0] == 87 ) {
-                    
-                    const now = new Date()
-                    const utcMilllisecondsSinceEpoch = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
-                    const timezoneDelta = (now.getTimezoneOffset() * -60);
-                    const utcSecondsSinceEpoch = Math.round(utcMilllisecondsSinceEpoch / 1000 )
+                if ( jsondata[j][0] == 123 ) {
 
-                    //console.log ( "utcSecondsSinceEpoch = " +  utcSecondsSinceEpoch )
-                    //console.log ( "timezoneDelta = "        +  timezoneDelta )
-                    //console.log ( "lastP1record = "         + jsondata[j][1] )
-                    //console.log ( Math.abs( (jsondata[j][1] - timezoneDelta) - utcSecondsSinceEpoch) )
-                    
-                    if ( Math.abs( (jsondata[j][1] - timezoneDelta) - utcSecondsSinceEpoch) > 30 ) {
+                    if ( jsondata[j][1] == '0' ) {
                         hideStuff('serial_ok'); 
                         showStuff('serial_nok');
                         if(!soundPlayed) {
@@ -299,7 +289,6 @@ function readJsonApiStatus(){
 
                 if ( jsondata[j][0] == 92 ) {
                     $('#ser_device').text( jsondata[j][1] );
-                    break; // done
                 }
             }
         } catch(err) {

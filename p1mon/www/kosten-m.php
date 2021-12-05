@@ -47,8 +47,13 @@ var mins            = 1;
 var secs            = mins * 60;
 var currentSeconds  = 0;
 var currentMinutes  = 0;
-var maxrecords      = 120;
+//var maxrecords      = 120;
 var costLimit       = 0;
+
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 36000, 366 ]
+var maxrecords      = maxDataCount[1];
 
 function readJsonApiConfig( id ){ 
     $.getScript( "/api/v1/configuration/" + id, function( data, textStatus, jqxhr ) {
@@ -223,6 +228,28 @@ function createCostChart() {
             buttonSpacing: 5, 
             selected : Gselected,
             buttons: [
+
+            {
+                text: "-",
+                events: {
+                    click: function () {
+                        
+                        maxDataIsOn = !maxDataIsOn;
+                        setHCButtonText( $('#CostChartVerbr').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+                        if ( maxDataIsOn == true ) {
+                            maxrecords = maxDataCount[0]
+                        } else {
+                            maxrecords = maxDataCount[1]
+                        }
+                        readJsonApiFinancial( maxrecords );
+                        toLocalStorage('cost-m-max-data-on',maxDataIsOn );  // #PARAMETER
+                        return false
+
+                    }
+                }
+            },
+
+
             {
                 type: 'month',  // #PARAMETER
                 count: 6,
@@ -613,6 +640,9 @@ function createCostChart() {
                 }
             }
   });
+
+  // can only set text when chart is made.
+  setHCButtonText( $('#CostChartVerbr').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
   
 function updateData() {
@@ -684,6 +714,16 @@ $(function() {
     GseriesVisibilty[5] =JSON.parse(getLocalStorage('cost-m-gelvr-water-visible')); // #PARAMETER
     GseriesVisibilty[6] =JSON.parse(getLocalStorage('cost-m-max-cost-visible'));    // #PARAMETER
     GseriesVisibilty[7] =JSON.parse(getLocalStorage('cost-m-netto-cost-visible'));  // #PARAMETER
+
+    maxDataIsOn = JSON.parse(getLocalStorage('cost-m-max-data-on'));                // #PARAMETER
+   
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
+    }
+
     Highcharts.setOptions({
     global: {
         useUTC: false

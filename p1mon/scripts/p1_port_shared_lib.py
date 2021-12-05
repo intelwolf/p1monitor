@@ -1,5 +1,5 @@
 ####################################################################
-# shard lib for processing the p1 port telegram                    #
+# shared lib for processing the p1 port telegram                   #
 # this lib is used for functions that can be reused by serial      #
 # or network devices that can deliver the P1 telegram data         #
 ####################################################################
@@ -439,7 +439,10 @@ def max_kWh_day_value(data_set=None, dbstatus=None, dbserial=None, flog=None ):
 def insert_db_serial_record( data_set=None, status=None ,dbstatus=None, dbserial=None, flog=None ):
 
     try:
+
+        # Bug fix from between 1.3.0 and 1.4.1
         dbstatus.strset( str( data_set['tarief_code'] ), 85, flog )
+
         timestr = util.mkLocalTimeString()
         #timestr_min=timestr[0:16]+":00"
 

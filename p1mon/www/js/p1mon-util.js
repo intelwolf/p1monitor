@@ -1,4 +1,30 @@
 
+
+// check if the url/file exists
+function doesFileExistOnWebServer( urlToFile ) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', urlToFile, false);
+    xhr.send();
+     
+    if ( xhr.status == "404" ) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+
+// set HighChart Button text
+function setHCButtonText( HCbutton, textarray , boolval ){
+    if ( boolval == true ) {
+        HCbutton.attr({ text: textarray[0] }); 
+    } else {
+        HCbutton.attr({ text: textarray[1]});
+    }
+}
+
+
 // read CSS selector and style from loaded pages
 function getStyleRuleValue( selector, style ) {
     for (var i = 0; i < document.styleSheets.length; i++) {

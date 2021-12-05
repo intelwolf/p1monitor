@@ -43,7 +43,10 @@ var GnettoData      = [];
 var Granges         = [];
 var Gaverages       = [];
 
-var maxrecords      = 360; // number of records to read 
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 36000, 360 ]
+var maxrecords      = maxDataCount[1];
 
 function readJsonApiHistoryMonth( cnt ){ 
     $.getScript( "/api/v1/powergas/month?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -97,7 +100,7 @@ function readJsonApiWeatherHistoryMonth( cnt ){
 
 
 /* preload */
-readJsonApiHistoryMonth( maxrecords );
+//readJsonApiHistoryMonth( maxrecords );
 
 // change items with the marker #PARAMETER
 function createKwhChart() {
@@ -159,6 +162,28 @@ function createKwhChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
+
+                {
+                    text: "-",
+                    events: {
+                        click: function () {
+
+                            maxDataIsOn = !maxDataIsOn;
+                            setHCButtonText( $('#KwhChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+
+                            if ( maxDataIsOn == true ) {
+                                maxrecords = maxDataCount[0]
+                            } else {
+                                maxrecords = maxDataCount[1]
+                            }
+
+                            readJsonApiHistoryMonth( maxrecords );
+                            toLocalStorage('stat-m-max-data-on',maxDataIsOn );  // #PARAMETER
+                            return false
+                        }
+                    }
+                },
+
                 {
                     type: 'month',
                     count: 6,
@@ -431,6 +456,9 @@ function createKwhChart() {
                 }
             }        
   });
+
+   // can only set text when chart is made.
+   setHCButtonText( $('#KwhChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
 function updateData() {
@@ -476,6 +504,16 @@ $(function() {
     GseriesVisibilty[1] =JSON.parse(getLocalStorage('stat-m-gelvr-visible'));  // #PARAMETER
     GseriesVisibilty[2] =JSON.parse(getLocalStorage('stat-m-netto-visible'));  // #PARAMETER
     GseriesVisibilty[3] =JSON.parse(getLocalStorage('stat-m-temp-visible'));   // #PARAMETER
+    maxDataIsOn = JSON.parse(getLocalStorage('stat-m-max-data-on'));           // #PARAMETER
+    //console.log( "maxDataIsON(1)=" + maxDataIsOn )
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
+    }
+
     Highcharts.setOptions({
     global: {
         useUTC: false

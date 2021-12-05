@@ -323,8 +323,8 @@ $(function() {
             'e_vastrecht': {
                 required: true,
                 number: true,
-                max: 99.99999,
-                min: -99.99999
+                max: 999.99999,
+                min: -999.99999
             } ,
             'verbr_gas': {
                 required: true,
@@ -335,8 +335,8 @@ $(function() {
             'vastrecht_gas': {
                 required: true,
                 number: true,
-                max: 99.99999,
-                min: -99.99999
+                max: 999.99999,
+                min: -999.99999
             },
             'verbr_water': {
                 required: true,
@@ -347,8 +347,8 @@ $(function() {
             'vastrecht_water': {
                 required: true,
                 number: true,
-                max: 99.99999,
-                min: -99.99999
+                max: 999.99999,
+                min: -999.99999
             },
             'max_cost': {
                 required: true,

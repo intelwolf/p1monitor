@@ -176,9 +176,44 @@ $arr = array (
     '"Prédiction activée dans l&apos;interface utilisateur" tente de faire une prédiction dans les cas où les données n&apos;ont pas encore été mesurées. Cette estimation n&apos;est pas une valeur absolue et est d&apos;une fiabilité limitée.'
 ),
 /* 037 */   array(
-    'De upgrade assistent helpt bij het migreren/upgrade naar een nieuwere versie. Om de upgrade assistent te kunnen gebruiken heb je een USB-stick nodig die met FAT of FAT32 is geformatteerd. NFTS , exFat of andere filesystems worden niet ondersteund. In principe kan elke USB-drive worden gebruikt tussen de 1Gb en 32 Gb. De daadwerkelijke ruimte die nodig is zeer beperkt en minder dan 100Mb. Bij het activeren van de Upgrade assistent wordt gezocht naar een geschikte USB-stick in een van de USB-poorten en de database en andere configuratie data gekopieerd naar de USB-stick. Bij de volgende keer dat de P1-monitor wordt gestart wordt de data van de USB-stick naar het SDHC-kaartje gekopieerd. Dit is een eenmalig actie waarbij de data van de USB-stick wordt verwijderd. Het is belangrijk te begrijpen dat het activeren van de Upgrade assistent waarbij de USB-stick in de Raspberry Rpi blijft de database overschreven wordt met de (oude) data van de USB-stick. De USB-stick is na een upgrade leeg en bevat geen data meer.  De upgrade wordt in twee fasen gedaan. In de eerste fase worden de basis configuratie gegeven overgezet en Rpi herstart. Na de herstart wordt op de achtergrond een import uitgevoerd die afhankelijk van de hoeveelheid data wel tot een 20 minuten in beslag kan nemen.<br><br><span style="color:red">Bij een upgrade mag de Pi dan ook de eerste 20 minuten niet herstart worden.</span><br><br>Mocht je USB-stick willen wissen dan kun je de folder p1monitor wissen.<br><br><span style="color:red">Het wordt aanbevolen een export te doen van de data als noodmaatregel, mocht er een probleem optreden met de upgrade assistent.</span><br><br>',
-    'The upgrade assistant helps you migrate / upgrade to a newer version. To use the upgrade assistant you need a USB stick formatted with FAT or FAT32. NFTS, exFat or other filesystems are not supported. In principle, any USB drive can be used between 1Gb and 32Gb. The actual space required is very limited and less than 100Mb. When activating the Upgrade Assistant, a suitable USB stick is searched for in one of the USB ports and the database and other configuration data is copied to the USB stick. The next time the P1-monitor is started, the data will be copied from the USB stick to the SDHC card. This is a one-time action where the data is removed from the USB stick. It is important to understand that activating the Upgrade Assistant where the USB stick remains in the Raspberry Pi will overwrite the database with the (old) data from the USB stick. The USB stick is empty after an upgrade and no longer contains any data. The upgrade is done in two stages. In the first phase, the basic configuration data are transferred and the Rpi restarted. After the restart, an import is performed in the background, which, depending on the amount of data, can take up to 20 minutes. <br> <br> <span style = "color: red"> When upgrading, the Rpi may not be rebooted in the first 20 minutes </span> <br> <br> If you want to delete the USB stick data, you can delete the folder p1monitor.<br><br> <span style = "color: red"> The it is recommended to export the data as an emergency measure, should there be a problem with the upgrade assistant.</span><br><br>',
-    'L&apos;assistant de mise à niveau vous aide à migrer / mettre à niveau vers une version plus récente. Pour utiliser l&apos;assistant de mise à niveau, vous avez besoin d&apos;une clé USB formatée avec FAT ou FAT32. Les systèmes de fichiers NFTS, exFat ou autres ne sont pas pris en charge. En principe, n&apos;importe quelle clé USB peut être utilisée entre 1 Go et 32 ​​Go. L&apos;espace réel requis est très limité et inférieur à 100 Mo. Lors de l&apos;activation de l&apos;assistant de mise à niveau, une clé USB appropriée est recherchée dans l&apos;un des ports USB et la base de données et les autres données de configuration sont copiées sur la clé USB. Au prochain démarrage du moniteur P1, les données seront copiées de la clé USB vers la carte SDHC. Il s&apos;agit d&apos;une action ponctuelle où les données sont supprimées de la clé USB. Il est important de comprendre que l&apos;activation de l&apos;assistant de mise à niveau où la clé USB reste dans le Raspberry Pi écrasera la base de données avec les (anciennes) données de la clé USB. La clé USB est vide après une mise à jour et ne contient plus de données. La mise à niveau se fait en deux étapes. Dans la première phase, les données de configuration de base sont transférées et le Rpi redémarré. Après le redémarrage, une importation est effectuée en arrière-plan, ce qui, selon la quantité de données, peut prendre jusqu&apos;à 20 minutes.<br><br><span style = "color: red"> Lors de la mise à niveau, le Rpi peut ne pas être redémarré dans les 20 premières minutes </span> <br> <br> Si vous souhaitez supprimer les données de la clé USB, vous pouvez supprimer le dossier p1monitor.<br><br><span style = "color: red"> Il est recommandé d&apos;exporter les données comme mesure d&apos;urgence, en cas de problème avec l&apos;assistant de mise à jour. </span><br><br>'
+    'De Upgrade Aide helpt bij het migreren/upgrade naar een nieuwere versie van de software. Om de upgrade assistent te kunnen gebruiken heb je een USB-stick nodig die met FAT, FAT32, exFat of NTFS is geformatteerd. FAT32 wordt aanbevolen voor de beste resultaten.<br>
+    Bij het activeren van de Upgrade Aide wordt gezocht naar een geschikte USB-stick in een van de USB-poorten. Bij een gevonden geschikte USB-stick wordt de database en andere configuratie data gekopieerd naar de USB-stick.<br><br>
+    Volg de volgende stappen:<br><br>
+    1: Zet de nieuwe software versie op een tweede SDHC kaartje.<br>
+    2: Start de Upgrade Aide met een USB stick in de Rpi.<br>
+    3: Doen een shutdown van de Rpi via het P1-monitor menu.<br>
+    4: Haal de 5V voeding van de Rpi.<br>
+    5: Plaats het tweede kaartje in de Rpi.<br>
+    6: Plaats de 5V voeding in de Rpi.<br>
+    7: Wacht een paar minuten, de Rpi zal een keer rebooten om om het SDHC kaartje naar de maximale ruimte te vergroten.<br><br>
+    Als je geen tweede SDHC kaartje hebt dan kun je starten met stap 2 en daarna de nieuwe versie op het SDHC kaartje te zetten. Als de nieuwe versie op het kaartje staat. Dan kun je deze in de Rpi plaatsen en bij stap 5 verder gaan.<br><br>
+    <span style = "color: red">Het wordt aanbevolen een export te doen van de data als noodmaatregel, mocht er een probleem optreden met de upgrade Aide.</span>',
+    'The Upgrade Aide helps to migrate/upgrade to a newer version of the software. To use the upgrade assistant you need a USB stick that is formatted with FAT, FAT32, exFat or NTFS. FAT32 is recommended for best results.<br>
+    When activating the Upgrade Aide, a suitable USB stick is searched for in one of the USB ports. When a suitable USB stick is found, the database and other configuration data is copied to the USB stick.<br><br>
+    Follow the following steps:<br><br>
+    1: Put the new software version on a second SDHC card.<br>
+    2: Start the Upgrade Aide with a USB stick in the Rpi.<br>
+    3: Shutdown the Rpi via the P1 monitor menu.<br>
+    4: Remove the 5V power supply from the Rpi.<br>
+    5: Place the second card in the Rpi.<br>
+    6: Insert the 5V power supply into the Rpi.<br>
+    7: Wait a few minutes, the Rpi will reboot once to enlarge the SDHC card to the maximum space.<br><br>
+    If you don&apos;t have a second SDHC card, you can start with step 2 and then put the new version on the SDHC card. If the new version is on the card. Then you can place it in the Rpi and continue with step 5.<br><br>
+    <span style = "color: red">It is recommended to do an export of the data as an emergency measure, should a problem occur with the upgrade Aide.</span>
+    ',
+    'L&apos;aide à la mise à niveau aide à migrer/mettre à niveau vers une version plus récente du logiciel. Pour utiliser l&apos;assistant de mise à niveau, vous avez besoin d&apos;une clé USB formatée en FAT, FAT32, exFat ou NTFS. FAT32 est recommandé pour de meilleurs résultats.<br>
+    Lors de l&apos;activation de l&apos;aide à la mise à niveau, une clé USB appropriée est recherchée dans l&apos;un des ports USB. Lorsqu&apos;une clé USB appropriée est trouvée, la base de données et les autres données de configuration sont copiées sur la clé USB.<br><br>
+    Suivez les étapes suivantes :<br><br>
+    1 : Mettez la nouvelle version du logiciel sur une deuxième carte SDHC.<br>
+    2: Démarrez l&apos;aide à la mise à niveau avec une clé USB dans le Rpi.<br>
+    3: Arrêtez le Rpi via le menu du moniteur P1.<br>
+    4: Retirez l&apos;alimentation 5V du Rpi.<br>
+    5 : Placez la deuxième carte dans le Rpi.<br>
+    6 : Insérez l&apos;alimentation 5V dans le Rpi.<br>
+    7 : Attendez quelques minutes, le Rpi redémarrera une fois pour agrandir la carte SDHC au maximum.<br><br>
+    Si vous n&apos;avez pas de deuxième carte SDHC, vous pouvez commencer par l&apos;étape 2, puis mettre la nouvelle version sur la carte SDHC. Si la nouvelle version est sur la carte. Ensuite, vous pouvez le placer dans le Rpi et passer à l&apos;étape 5.<br><br>
+    <span style = "color: red">Il est recommandé de faire une exportation des données en tant que mesure d&apos;urgence, en cas de problème avec l&apos;Aide de mise à niveau.</span>
+    '
     ),
 /* 038 */   array(
     'De gasmeter stand.','the gas meter reading.','la lecture du compteur de gaz.'
@@ -1067,11 +1102,47 @@ $arr = array (
     'klik om te sluiten','click to close','cliquez pour fermer'
     ),
 /* 286 */ array(
+    'suggestie','suggestion','proposition'
+    ),
+/* 287 */ array(
+    'exporteer database','export database','exporter la base de donn.'
+    ),
+/* 288 */ array(
+    'importeer database','import database','importer la base de donn.'
+    ),
+/* 289 */ array(
+    'Excel export','Excel export','Exporter vers Excel'
+    ),
+/* 290 */ array(
+    'Datebase bestanden','Database files','Fichiers de base de données'
+    ),
+/* 291 */ array(
+    'Klik op onderstaande database bestand om een export naar Excel te starten. Het generen van een Excel bestand duurt enkele seconden of een paar minuten afhankelijk van de aantal tabellen en records in de database.<br><br>De download start automatisch.',
+    'Click on the database file below to start an export to Excel. Generating an Excel file takes a few seconds or a few minutes depending on the number of tables and records in the database.<br><br>The download starts automatically.',
+    'Cliquez sur le fichier de base de données ci-dessous pour lancer une exportation vers Excel. La génération d&apos;un fichier Excel prend quelques secondes ou quelques minutes selon le nombre de tables et d&apos;enregistrements dans la base de données.<br><br>Le téléchargement démarre automatiquement.'
+    ),
+/* 292 */ array(
+    'SQL gegevens exporteren','Export SQL data','Exporter des données SQL'
+    ),
+/* 293 */ array(
+    'Als de download niet start klik dan hier',
+    'If the download does not start click here',
+    'Si le téléchargement ne démarre pas, cliquez ici'
+    ),
+/* 294 */ array(
+    'importstatus','import status','état de l&apos;importation'
+    ),
+/* 295 */ array(
+    'Even geduld aub.','Please wait.','S&aposil vous plaît, attendez.'
+    ),
+/* 296 */ array(
     '','',''
     ),
-
-
-
+/* 297 */ array(
+    '','',''
+    ),
+    
+    
 
 );
 

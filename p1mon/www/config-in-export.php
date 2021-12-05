@@ -24,48 +24,50 @@ if( $localip == False ){
         }
 }
 
+$err_cnt = -1;
+
 #print_r($_POST);
 $showStatusOutput = 0;
-if ( isset($_POST["upgrade_button"]) ) { 
+if ( isset($_POST["aide_button"]) ) { 
     # remove status file
-    unlink('/p1mon/mnt/ramdisk/upgrade-assist.status');
-    writeSemaphoreFile('upgrade_assist');
+    unlink('/p1mon/mnt/ramdisk/upgrade-aide.status');
+    if ( updateConfigDb("update config set parameter = '1' where ID = 171")) $err_cnt += 1;
     $showStatusOutput = 1;
 }
 
 if ( isset($_POST["import"]) ) { 
     
-            if ( strlen($_POST["import"]) > 1 ) { // we have a file, now check it
-                
-                    #echo ("$showStatusOutput=".$showStatusOutput);
+    if ( strlen($_POST["import"]) > 1 ) { // we have a file, now check it
+        
+            #echo ("$showStatusOutput=".$showStatusOutput);
 
-                    #remove old status file 
-                    unlink('/p1mon/mnt/ramdisk/sqlimport.status');
+            #remove old status file 
+            unlink('/p1mon/mnt/ramdisk/sqlimport.status');
 
-                    $file_tmp = '/p1mon/var/tmp/'.$_POST["import"];
-                    $info = pathinfo($file_tmp);
-                    $file_name = basename($file_tmp,'.'.$info['extension']);
+            $file_tmp = '/p1mon/var/tmp/'.$_POST["import"];
+            $info = pathinfo($file_tmp);
+            $file_name = basename($file_tmp,'.'.$info['extension']);
 
-                    #error_log("P1 DEBUG (in en export) ".$file_name , 0);
-                    #echo($file_name);
+            #error_log("P1 DEBUG (in en export) ".$file_name , 0);
+            #echo($file_name);
 
-                    $date = date_create();
-                    $random_number_str =  date_timestamp_get($date) . strval(mt_rand (100,999));
-                    $sqlImportFilename = '/p1mon/var/tmp/import-' . $random_number_str . ".zip";
-                    #echo $sqlImportFilename;
-                    
-                    # shows the dialog
-                    setcookie("sqlImportIsActive", basename($sqlImportFilename), time()+1200); //20 min 
+            $date = date_create();
+            $random_number_str =  date_timestamp_get($date) . strval(mt_rand (100,999));
+            $sqlImportFilename = '/p1mon/var/tmp/import-' . $random_number_str . ".zip";
+            #echo $sqlImportFilename;
+            
+            # shows the dialog
+            setcookie("sqlImportIsActive", basename($sqlImportFilename), time()+1200); //20 min 
 
-                    rename( $file_tmp, $sqlImportFilename );
-                    chmod( $sqlImportFilename, 0770 );
-                    chgrp( $sqlImportFilename,'p1mon' );
-                    rmdir( '/p1mon/var/tmp/'.trim($_POST["importdir"]) );
+            rename( $file_tmp, $sqlImportFilename );
+            chmod( $sqlImportFilename, 0770 );
+            chgrp( $sqlImportFilename,'p1mon' );
+            rmdir( '/p1mon/var/tmp/'.trim($_POST["importdir"]) );
 
-                    updateConfigDb("update config set parameter = '". $sqlImportFilename . "' where ID = 138");
-                    updateConfigDb("update config set parameter = '" . $random_number_str . "' where ID = 137");
+            updateConfigDb("update config set parameter = '". $sqlImportFilename . "' where ID = 138");
+            updateConfigDb("update config set parameter = '" . $random_number_str . "' where ID = 137");
 
-            }
+    }
 }
 
 ?>
@@ -124,7 +126,7 @@ if ( isset($_POST["import"]) ) {
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
                         <div class="frame-4-top">
-                            <span class="text-15">export database data</span>
+                            <span class="text-15"><?php echo strIdx( 287 );?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left pos-32">
@@ -138,7 +140,7 @@ if ( isset($_POST["import"]) ) {
                         </div>
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">importeer database data</span>
+                            <span class="text-15"><?php echo strIdx( 288 );?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left pos-32">
@@ -148,22 +150,39 @@ if ( isset($_POST["import"]) ) {
                             </div>    
                         </div>
                         <p></p>
+
                         <div class="frame-4-top">
-                            <span class="text-15">Upgrade assistent</span>
+                            <span class="text-15">Upgrade Aide</span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left pos-32">
                                 <div class="float-left margin-3">
-                                    <button class="input-2 but-1 cursor-pointer" id="upgrade_button" name="upgrade_button" value="start">
-                                        <i class="color-menu fas fa-3x fa-arrow-alt-circle-up"></i>
-                                        <span class="color-menu text-7">Upgrade</span>
+                                    <button class="input-2 but-1 cursor-pointer" id="aide_button" name="aide_button" value="start">
+                                        <i class="color-menu fas fa-3x fa-upload"></i>
+                                        <span class="color-menu text-7">USB</span>
                                     </button>    
                                 </div>
                             </div>    
                         </div>
                         <p></p>
 
-                    <!-- end pay load area -->    
+
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo strIdx( 289 );?></span>
+                        </div>
+                        <div class="frame-4-bot">
+                            <div class="float-left pos-32">
+                                <div class="float-left margin-3">
+                                    <button class="input-2 but-1 cursor-pointer" id="excel_button" name="excel_button" onclick="showExcelList()" value="start">
+                                        <i class="color-menu fas fa-3x fa-file-excel"></i>
+                                        <span class="color-menu text-7">Excel</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p></p>
+
+                    <!-- end pay load area -->
                     <!-- placeholder variables for session termination -->
                     <input type="hidden" name="logout" id="logout" value="">
                     <input type="hidden" name="export" id="export" value="">
@@ -186,44 +205,73 @@ if ( isset($_POST["import"]) ) {
             </div>    
             <!-- end inner block right part of screen -->
     </div>
+
+
+
+<div id="export_excel_window" class='width-600 display_none' >
+
+    <div class='close_button' id="export_excel_window_close">
+        <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
+    </div>
+
+    <div class="frame-4-top">
+        <span class="text-15"><?php echo strIdx( 290 );?></span>
+    </div>
+    <div class="frame-4-bot">
+
+        <div>
+            <div class='left-wrapper-2 text-10'>
+                <?php echo strIdx( 291 );?>
+                <br><br>
+            </div>
+            <div class='pad-8'>
+                <span id='excel_busy' class='color-busy'>
+                    <i class="fas fa-spinner fa-pulse fa-2x"></i>
+                </span>
+            </div>
+        </div>
     
+
+        <div class='pad-12'>
+            <div id="db_list">
+                <!-- dynamically filled -->
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="export_sql_msg">
     <div class='close_button' id="export_sql_msg_close">
         <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
     </div>
-    <i class="fas fa-fw fa-1x fa-upload">&nbsp;&nbsp;</i>SQL gegevens exporteren&nbsp;
+    <i class="fas fa-fw fa-1x fa-upload">&nbsp;&nbsp;</i><?php echo strIdx( 292 );?>&nbsp;
     <i id="sql_export_spinner" class="fas fa-spinner fa-1x fa-fw"></i>
     <br><div id="sql_export_pct" >0%</div>
-    <div id="sql_export_dl_link" ><br><a id='sql_export_dl_href' href="">Als de download niet start klik dan hier</a></div>
-</div>    
+    <div id="sql_export_dl_link" ><br><a id='sql_export_dl_href' href=""><?php echo strIdx( 293 );?></a></div>
+</div>
 
 <div id="import_sql_message"> <!-- new  version 1.2.0 -->
      <div class='close_button' id="import_sql_msg_close">
         <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
     </div>
-    <span class="text-15">import status</span>
+    <span class="text-15"><?php echo strIdx( 293 );?></span>
     <div id="scroll_window" class="text-29" >
-        Even geduld aub.
+        <?php echo strIdx( 295 );?>
     </div>
 </div> 
 
-
-<div id="upgrade_status" class="pos-45" style="display: none" >
-    <div class='close_button-2' id="assist_logging_close">
-        <i class="color-select fas fa-times-circle" data-fa-transform="grow-6" aria-hidden="true"></i>
+<div id="aide_status">
+    <div class='close_button-2' id="aide_logging_close">
+        <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
     </div>
-    <div class="frame-4-top">
-        <span class="text-15">Upgrade logging</span>
-            </div>
-                <div class="frame-4-bot">
-                    <div id="upgrade_assist_logging" class="text-9">
+    <span class="text-15">Upgrade Aide logging</span>
+        <div id="scroll_window_2" class="text-29">
+            <?php echo strIdx( 295 );?>
+        </div>
+    </div>
 
-                    </div>
-                </div>
-</div>
 
-<script>    
+<script>
 var sqlImportFilename = '';
 var sqlExportChecking = false;
 var initloadtimer;
@@ -233,8 +281,14 @@ sqlImportIsActive=getCookie("sqlImportIsActive");
 $(function() {
     centerPosition('#import_sql_message');
     centerPosition('#export_sql_msg');
-    centerPosition('#upgrade_status');
+    centerPosition('#aide_status');
+    centerPosition('#export_excel_window');
     hideStuff('sql_export_dl_link');
+    hideStuff('excel_busy');
+
+    // read only once
+    readDbNamesJson();
+
     LoadData(); 
     if (sqlImportIsActive !== undefined) {
         showStuff('import_sql_message');
@@ -243,7 +297,7 @@ $(function() {
 
 $('#sqlexport_button').click(function(event) {
     hideStuff('sql_export_dl_link');
-    event.preventDefault();    
+    event.preventDefault();
     exportID = Date.now()+'.'+randomIntFromInterval(100,999);
     startSqlExport(exportID,'STARTEXPORT')
 });
@@ -258,15 +312,33 @@ $('#import_sql_msg_close').click(function() {
    document.cookie = "sqlImportIsActive=''; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }); 
 
-$('#assist_logging_close').click(function() {    
-   hideStuff('upgrade_status');
+$('#aide_logging_close').click(function() {    
+   hideStuff('aide_status');
 }); 
+
+$('#export_excel_window_close').click(function() {
+   hideStuff('export_excel_window');
+   toLocalStorage('excel-current_filename', '' ); // stop download if the are running.
+   hideStuff('excel_busy');
+});
+
+function onFileOnClick( filename ) {
+    showStuff('excel_busy');
+    setExcelDbFile( filename );
+    toLocalStorage('excel-current_filename', filename );
+}
+
+function showExcelList() {
+    event.preventDefault();
+    showStuff('export_excel_window');
+}
+
 
 function LoadData() {
     
     clearTimeout(initloadtimer);
     
-    readCounterResetLogging();
+    readAideLogging();
 
     if (sqlExportChecking === true)
         startSqlExport(exportID,'GETSTATUS'); 
@@ -275,7 +347,21 @@ function LoadData() {
         readSqlImportStatusLogging();
     }
 
-    initloadtimer = setInterval(function(){LoadData();}, 1000);
+    var datebase_name = getLocalStorage('excel-current_filename');
+    if ( datebase_name != null ) {
+        if ( datebase_name.length > 2 ) {
+            var dl_link = './download/' + datebase_name +'.xlsx';
+
+            if  ( doesFileExistOnWebServer( dl_link) == true ) {
+                toLocalStorage('excel-current_filename', '' );  // delete to to only download once
+                autoDownLoad( dl_link );
+                hideStuff('excel_busy');
+                hideStuff('export_excel_window');
+            }
+        }
+    }
+
+    initloadtimer = setInterval(function(){LoadData();}, 2000);
 
 } 
 
@@ -285,14 +371,21 @@ function getCookie(name) {
   if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
-function autoDownLoad(filename){
+function autoDownLoad( filename ){
     var x=new XMLHttpRequest();
     var dl_filename = filename.split('/').pop();
     x.open("GET", filename, true);
     x.responseType = 'blob';
     x.onload=function(e){download(x.response, dl_filename, "application/zip" ); }
     x.send();
-} 
+}
+
+function setExcelDbFile( filename ) {
+
+    $.getJSON( "./json/excel-file.php?filename=" + filename, function( d ) {
+        //console.log( 'filename=' + filename );
+    });
+}
 
 function startSqlExport(exp_id, command){ 
     $.getJSON( "./sqlexport.php?exportid=" + exp_id + '&command=' + command, function( d ) {
@@ -329,14 +422,13 @@ function startSqlExport(exp_id, command){
             //setTimeout(function(){hideStuff('export_sql_msg');},2000);
         }
         
-     } catch(err) {    
+     } catch(err) {
          console.log("startSqlExport error."+err);
         //return null;
-     }       
+     }
 
     });
 }
-
 
 function readSqlImportStatusLogging(){ 
     $.get( "/txt/txt-sql-import-status.php", function( response, status, xhr ) {
@@ -348,8 +440,9 @@ function readSqlImportStatusLogging(){
         if ( response.length > 0 ) {
             //console.log("update =" + response.length )
             $('#scroll_window').html( response );
+
             // keep scroll window scrolled down.
-            $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
+             $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
         } else {
             $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
         }
@@ -357,19 +450,40 @@ function readSqlImportStatusLogging(){
     });
 }
 
-function readCounterResetLogging(){ 
+function readAideLogging(){ 
 
-   $.get( "/txt/txt-upgrade-status.php", function( response, status, xhr ) {
+   $.get( "/txt/txt-aide-status.php", function( response, status, xhr ) {
         if ( status == "error" ) {
-            $("#upgrade_assist_logging").html('Upgrade data niet beschikbaar.');
+            $("#scroll_window_2").html('Upgrade data niet beschikbaar.');
         }
         if ( response.length > 0 ) {
-            $('#upgrade_assist_logging').html( response );
+            $('#scroll_window_2').html( response );
+            
+            // keep scroll window scrolled down.
+            $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
         } else {
-            $('#upgrade_assist_logging').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+            $('#scroll_window_2').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
         }
     }); 
 }
+
+function readDbNamesJson(){ 
+        $.getScript( "./json/sqlite-db-files.php", function( data, textStatus, jqxhr ) {
+        try {
+            htmlString = "<ol type='1' onclick='onFileOnClick'>";
+
+            var jsondata = JSON.parse( data );
+            for (var j=0;  j<jsondata.length; j++ ){
+                htmlString = htmlString + "<li class='text-6 menu-hover' onclick='onFileOnClick( \"" + jsondata[j]+ "\" )'>" + jsondata[j] + "</li>";
+            }
+
+            htmlString = htmlString + "</ol>";
+            $('#db_list').append( htmlString );
+          } catch(err) {}
+       });
+    }
+
+
 </script>
 
 <script>
@@ -416,7 +530,7 @@ function readCounterResetLogging(){
 <?php 
 
 if ( $showStatusOutput == 1 ) {
- echo "<script>showStuff('upgrade_status');</script>";
+ echo "<script>showStuff('aide_status');</script>";
 }
 
 echo autoLogout(); 

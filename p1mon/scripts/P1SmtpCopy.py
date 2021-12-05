@@ -176,38 +176,44 @@ def Main(argv):
     
     if args.attachment != None:
         #print ( args.attachment )
-        for a in  args.attachment:
+        for a in args.attachment:
             smtp_para['attachments'].append( a )
 
     flog.debug(inspect.stack()[0][3]+": parameters na CLI parsing:" + str( smtp_para ) )
  
+    #check if at least one reciever is given.
+    cnt_valid_senders = 0
+    for x in [ smtp_para['to'], smtp_para['cc'], smtp_para['bcc'] ]:
+        if len(x) >0:
+            cnt_valid_senders += 1
+
+    if cnt_valid_senders == 0:
+        flog.critical (inspect.stack()[0][3] + ": geen TO,CC of BCC ontvangers opgegeven.")
+        sys.exit( 1 )
+
     # 1 Start an SMTP connection that is secured from the beginning using SMTP_SSL().
     # 2 Start an unsecured SMTP connection that can then be encrypted using .starttls()
     # 3 Fallback to unsecure plaintext email.
     
     if sendSmtpMail('ssl') == False:
+        flog.info(inspect.stack()[0][3] + ": SSL/TSL verbinding is niet gelukt.")
         if sendSmtpMail('starttls') == False:
-            if sendSmtpMail('plaintext') == False:   
-                flog.error("Versturen van mail is mislukt gestopt.")
+            flog.info(inspect.stack()[0][3] + ": STARTTLS verbinding is niet gelukt.")
+            if sendSmtpMail('plaintext') == False:
+                flog.error("plaintext is mislukt gestopt.")
                 sys.exit(1)
-    
 
     #print ( sendSmtpMail('plaintext') )
     #print ( sendSmtpMail( 'starttls' ) )
     #print (  sendSmtpMail('ssl') )
 
-    flog.info("Programma is succesvol gestopt.")
+    flog.info(inspect.stack()[0][3] + ": Programma is succesvol gestopt.")
     rt_status_db.timestamp( 82, flog )
     sys.exit(0) # all is well.
 
 
 def sendMessage( server ):
     flog.debug(inspect.stack()[0][3]+": sending message to mail user: " + smtp_para['mailuser'] )
-    
-    #DEBUG
-    #toaddr  = [ 'wil.weterings@gmail.com', 'info@ztatz.nl' ]
-    #cc      = [ 'wil.reclame@gmail.com',  'weterings@schiphol.nl' ]
-    #bcc     = [ 'p1monztatz@gmail.com' ]
 
     message = MIMEMultipart("alternative")
 
@@ -229,11 +235,12 @@ def sendMessage( server ):
     # Add HTML/plain-text parts to MIMEMultipart message
     # The email client will try to render the last part first
     if len( smtp_para['messagetext'] ) > 0:
-        message.attach(part1)
+       message.attach( part1 )
     if len( smtp_para['messagehtml'] ) > 0:
-        message.attach(part2)
+       message.attach( part2 )
 
     try:
+
         # adding attachments when available. 
         for file_and_path in smtp_para['attachments']:
             flog.debug(inspect.stack()[0][3]+": processing attachment:" + str( file_and_path ) )
@@ -254,14 +261,16 @@ def sendMessage( server ):
 
             # Add attachment to message and convert message to string
             message.attach( part )
-        
+      
+
         # go ahead send the thing
         #server.sendmail( smtp_para['mailuser'], smtp_para['mailuser'], message.as_string() )
         server.sendmail( smtp_para['mailuser'], ( smtp_para['to'] + smtp_para['cc'] + smtp_para['bcc'] ) , message.as_string() )
+
         server.quit()
 
     except Exception as e:
-        flog.error(inspect.stack()[0][3]+": attachments error " + str ( e ) )
+        flog.error(inspect.stack()[0][3]+": error " + str ( e ) )
         raise Exception('attachments error')
 
 # return True on Succes and False on error.
@@ -325,7 +334,7 @@ if __name__ == "__main__":
     try:
         logfile = const.DIR_FILELOG + prgname + ".log" 
         setFile2user( logfile,'p1mon' )
-        flog = fileLogger( logfile,prgname )    
+        flog = fileLogger( logfile,prgname )
         #### aanpassen bij productie
         flog.setLevel( logging.INFO )
         flog.consoleOutputOn( True )

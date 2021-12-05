@@ -3,6 +3,10 @@ import string
 
 #CPU info
 
+# name covention change
+def get_cpu_info():
+    return getCpuInfo()
+
 def getCpuInfo():
     result = {
     "CPU-cores":'', 

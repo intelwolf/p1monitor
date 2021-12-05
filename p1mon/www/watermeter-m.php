@@ -41,7 +41,11 @@ var GseriesVisibilty= [true];
 var GverbrData      = [];
 var GgelvrData      = [];
 var GnettoData      = [];
-var maxrecords      = 360;
+
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 36000, 366 ]
+var maxrecords      = maxDataCount[1];
 
 function readJsonApiHistoryMonth( cnt ){ 
     $.getScript( "/api/v2/watermeter/month?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -62,7 +66,7 @@ function readJsonApiHistoryMonth( cnt ){
 }
 
 /* preload */
-readJsonApiHistoryMonth( maxrecords );
+//readJsonApiHistoryMonth( maxrecords );
 
 // change items with the marker #PARAMETER
 function createWaterUsageChart() {
@@ -116,6 +120,29 @@ function createWaterUsageChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
+
+                {
+                    text: "-",
+                    events: {
+                        click: function () {
+
+                            maxDataIsOn = !maxDataIsOn;
+                            setHCButtonText( $('#WaterUsageChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+
+                            if ( maxDataIsOn == true ) {
+                                maxrecords = maxDataCount[0]
+                            } else {
+                                maxrecords = maxDataCount[1]
+                            }
+
+                            readJsonApiHistoryMonth( maxrecords );
+                            toLocalStorage('watermeter-m-max-data-on',maxDataIsOn );  // #PARAMETER
+                            return false
+                        }
+                    }
+                },
+
+
                 {
                     type: 'month',   // #PARAMETER
                     count: 6,        // #PARAMETER
@@ -282,6 +309,8 @@ function createWaterUsageChart() {
                 }
             }        
   });
+  // can only set text when chart is made.
+  setHCButtonText( $('#WaterUsageChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
 function updateData() {
@@ -289,13 +318,6 @@ function updateData() {
     var chart = $('#WaterUsageChart').highcharts();
     if( typeof(chart) !== 'undefined') {
         chart.series[0].setData( GverbrData );
-        /*
-        chart.series[0].update({
-        pointStart: GverbrData[0][0],
-        data: GverbrData
-        }, false);
-        chart.redraw();
-        */
     }
 }
 
@@ -325,6 +347,15 @@ $(function() {
     toLocalStorage('watermeter-menu',window.location.pathname);
     Gselected = parseInt( getLocalStorage('watermeter-m-select-index'), 10 );
     GseriesVisibilty[0] =JSON.parse( getLocalStorage('watermeter-m-verbr-visible') );  // #PARAMETER
+    maxDataIsOn = JSON.parse(getLocalStorage('watermeter-m-max-data-on'));            // #PARAMETER
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
+    }
+
     Highcharts.setOptions({
     global: {
         useUTC: false

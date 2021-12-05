@@ -36,13 +36,15 @@ PRG15="P1PowerProductionS0.py"
 PRG16="P1WatermeterV2.py"
 PRG17="P1SolarEdgeReader.py"
 PRG18="P1NetworkConfig.py"
+PRG19="P1UpgradeAide.py"
 P1FILE="p1msg.txt"
 
 
 ## reset rechten wegens dev werk en kopie acties.
 #sudo /bin/chmod 775  $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE  &>/dev/null
 #sudo /bin/chown p1mon:p1mon $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE &>/dev/null
-cd /p1mon/scripts
+#cd /p1mon/scripts
+cd $PRG_PATH
 sudo chmod 754 P1*.py*;sudo chown p1mon:p1mon P1*.py
 sudo chmod 754 *.sh;sudo chown p1mon:p1mon *.sh 
 sudo chmod 660 *_lib.py
@@ -53,12 +55,20 @@ sudo /bin/chown p1mon:p1mon $LOG_PATH $WWW_DOWLOAD_PATH $EXPORT_PATH $RAMDISK
 sudo /bin/chmod 775 $LOG_PATH 
 sudo /bin/chmod 770 $WWW_DOWLOAD_PATH $EXPORT_PATH
 
+cd $LOG_PATH
+sudo /bin/chown p1mon:p1mon *.log
+sudo /bin/chmod 664 *.log
 
 # clean log files on any action, also done by the watchdog
 # script clean when gets full. Should never happen ;)
 sudo $PRG_PATH$PRG11
 
 start() {
+
+    # Upgrade Aide check if there is data on an USB drive
+    # restore and enlarge the SDHC when there is data on
+    # the drive.
+    $PRG_PATH$PRG19 --restore --reboot
 
     # make sure we have an valid /etc/dhcpcd.conf file
     $PRG_PATH$PRG18 --defaultdhcpconfig
@@ -125,6 +135,7 @@ start() {
     echo "$PRG8 gestart."
 
     # API start
+    cd $PRG_PATH
     $PRG9_PATH$PRG9$PRG9_PARAMETERS 2>&1 >/dev/null &
     echo "$PRG9_ALIAS gestart."
 

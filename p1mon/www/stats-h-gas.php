@@ -42,8 +42,12 @@ var mins            = 1;
 var secs            = mins * 60;
 var currentSeconds  = 0;
 var currentMinutes  = 0;
-var maxrecords      = 768; // number of records to read 
+//var maxrecords      = 768; // number of records to read 
 
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 26034, 744 ]
+var maxrecords      = maxDataCount[1];
 
 function readJsonApiHistoryHour( cnt ){ 
     $.getScript( "/api/v1/powergas/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -111,187 +115,209 @@ function readJsonApiWeatherHistoryHour( cnt ){
 
 // change items with the marker #PARAMETER
 function createGasChart() {
-  Highcharts.stockChart('GasChart', {
-  exporting: { enabled: false },
-  lang: {
-    noData: "Geen gegevens beschikbaar."
-  },
-  noData: {
-    style: { 
-      fontFamily: 'robotomedium',   
-        fontWeight: 'bold',     
-          fontSize: '25px',
-          color: '#10D0E7'        
-   }
-  },
-  chart: {
-    style: {
-      fontFamily: 'robotomedium'
-    },
-    backgroundColor: '#ffffff',
-    borderWidth: 0
-  },   
-  title: {
-   text: null
-  },
-  navigator: {
-    xAxis: {
-      //min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
-      //minTickInterval:       24 * 3600000,  
-      //maxRange:         30 * 24 * 3600000,
-      type: 'datetime',
-      dateTimeLabelFormats: {
-        day: '%a.<br>%d %B<br/>%Y',
-        month: '%B<br/>%Y',
-        year: '%Y'
-      }  
-    },  
-    enabled: true,
-    outlineColor: '#384042',
-    outlineWidth: 1,
-    handles: {
-      backgroundColor: '#384042',
-      borderColor: '#6E797C'
-    },
-    series:[ 
-      {
-        color: '#507ABF'
-      }, 
-      {
-        color: '#384042'
-      }
-    ]
-  },   
-  xAxis: {
-   type: 'datetime', 
-    /*
-    minTickInterval:        3600000, 
-    range:           60   * 3600000,
-    minRange:        12   * 3600000,
-    maxRange:        31 * 24 * 3600000,
-    */
-    minTickInterval:           3600000, 
-    minRange:        1      * 3600000,
-    maxRange:        5 * 24 * 3600000,
-    dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
-            },
-    lineColor: '#6E797C',
-    lineWidth: 1, 
-    events: {
-     setExtremes: function(e) {      
-       if(typeof(e.rangeSelectorButton)!== 'undefined') {
-         for (var j = 0;  j < GselectText.length; j++){    
-           if ( GselectText[j] == e.rangeSelectorButton.text ) {
-             toLocalStorage('stat-h-select-gas-index',j); // #PARAMETER
-             break;
-           }
-         }
-       }
-     }
-    },   
-  },
-  
-  yAxis: [
-  { // gas axis
-     tickAmount: 7,
-     offset: 50,
-     labels: {
-       useHTML: true,
-       format: '{value} m<sup>3</sup>',
-         style: {
-           color: '#507ABF'
-         },
-       }
-    },
-    { // temp axis
-    tickAmount: 7,
-    opposite: false,
-    gridLineDashStyle: 'longdash',
-    gridLineColor: '#6E797C',
-    gridLineWidth: 1,
-    labels: {
-      format: '{value}°C',
-        style: {
-          color: '#384042'
+    Highcharts.stockChart('GasChart', {
+        exporting: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
+        },
+        noData: {
+            style: { 
+            fontFamily: 'robotomedium',   
+                fontWeight: 'bold',     
+                fontSize: '25px',
+                color: '#10D0E7'        
         }
-     },
-     title: {
-       text: null, 
-     },
-  }],
-    tooltip: {
-      useHTML: true,
-      style: {
-        padding: 3,
-        color: '#6E797C'
-      },
-      formatter: function() {
-        
-        var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M-%H:59', this.x) +'</b>';
-        var d = this.points;
-        
-        // find timestamp and add data points
-        for (var i=0,  tot=GverbrData.length; i < tot; i++) {
-            if ( GverbrData[i][0] == d[0].key ) { //found time and dataset
-                var var_verbruikt_gas   = GverbrData[i][1];
-                var var_min_temp        = Granges[i][1];
-                var var_max_temp        = Granges[i][2];
-                var var_avg_temp        = Gaverages[i][1]
-                /*
-                console.log ( GverbrData[i][1] )
-                console.log ( Granges[i][1]    )
-                console.log ( Granges[i][2]    )
-                console.log ( Gaverages[i][1]  )
-                */
-                break; 
+    },
+    chart: {
+        style: {
+        fontFamily: 'robotomedium'
+        },
+        backgroundColor: '#ffffff',
+        borderWidth: 0
+    },   
+    title: {
+    text: null
+    },
+    navigator: {
+        xAxis: {
+        //min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
+        //minTickInterval:       24 * 3600000,  
+        //maxRange:         30 * 24 * 3600000,
+        type: 'datetime',
+        dateTimeLabelFormats: {
+            day: '%a.<br>%d %B<br/>%Y',
+            month: '%B<br/>%Y',
+            year: '%Y'
+        }
+        },
+        enabled: true,
+        outlineColor: '#384042',
+        outlineWidth: 1,
+        handles: {
+        backgroundColor: '#384042',
+        borderColor: '#6E797C'
+        },
+        series:[ 
+            {
+                color: '#507ABF'
+            }, 
+            {
+                color: '#384042'
+            }
+        ]
+    },   
+    xAxis: {
+        type: 'datetime', 
+        /*
+        minTickInterval:        3600000, 
+        range:           60   * 3600000,
+        minRange:        12   * 3600000,
+        maxRange:        31 * 24 * 3600000,
+        */
+        minTickInterval:           3600000, 
+        minRange:        1      * 3600000,
+        maxRange:        5 * 24 * 3600000,
+        dateTimeLabelFormats: {
+                    day: '%a.<br>%d %B<br/>%Y',
+                    hour: '%a.<br>%H:%M'
+                },
+        lineColor: '#6E797C',
+        lineWidth: 1, 
+        events: {
+        setExtremes: function(e) {
+        if(typeof(e.rangeSelectorButton)!== 'undefined') {
+            for (var j = 0;  j < GselectText.length; j++){    
+                if ( GselectText[j] == e.rangeSelectorButton.text ) {
+                    toLocalStorage('stat-h-select-gas-index',j); // #PARAMETER
+                    break;
+                }
             }
         }
+        }
+    },   
+  },
+  yAxis: [
+    { // gas axis
+        tickAmount: 7,
+        offset: 50,
+        labels: {
+        useHTML: true,
+        format: '{value} m<sup>3</sup>',
+            style: {
+            color: '#507ABF'
+            },
+        }
+        },
+        { // temp axis
+            tickAmount: 7,
+            opposite: false,
+            gridLineDashStyle: 'longdash',
+            gridLineColor: '#6E797C',
+            gridLineWidth: 1,
+            labels: {
+                format: '{value}°C',
+                    style: {
+                    color: '#384042'
+                    }
+                },
+            title: {
+                text: null, 
+            },
+        }],
+        tooltip: {
+            useHTML: true,
+            style: {
+                padding: 3,
+                color: '#6E797C'
+        },
+        formatter: function() {
         
-        var verbruikt_gas="verborgen";
-        if ( $('#GasChart').highcharts().series[0].visible === true ){ // Gas
-            verbruikt_gas = var_verbruikt_gas.toFixed(3)+" m<sup>3</sup>";
-        }
-        s += '<br/><span style="color: #507ABF">gas verbruikt: </span>'+verbruikt_gas;
-         
-        var max_temp = 'verborgen';
-        var avg_temp = 'verborgen';
-        var min_temp = 'verborgen';
+            var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M-%H:59', this.x) +'</b>';
+            var d = this.points;
+            
+            // find timestamp and add data points
+            for (var i=0,  tot=GverbrData.length; i < tot; i++) {
+                if ( GverbrData[i][0] == d[0].key ) { //found time and dataset
+                    var var_verbruikt_gas   = GverbrData[i][1];
+                    var var_min_temp        = Granges[i][1];
+                    var var_max_temp        = Granges[i][2];
+                    var var_avg_temp        = Gaverages[i][1]
+                    /*
+                    console.log ( GverbrData[i][1] )
+                    console.log ( Granges[i][1]    )
+                    console.log ( Granges[i][2]    )
+                    console.log ( Gaverages[i][1]  )
+                    */
+                    break; 
+                }
+            }
+        
+            var verbruikt_gas="verborgen";
+            if ( $('#GasChart').highcharts().series[0].visible === true ){ // Gas
+                verbruikt_gas = var_verbruikt_gas.toFixed(3)+" m<sup>3</sup>";
+            }
+            s += '<br/><span style="color: #507ABF">gas verbruikt: </span>'+verbruikt_gas;
+            
+            var max_temp = 'verborgen';
+            var avg_temp = 'verborgen';
+            var min_temp = 'verborgen';
 
-        if ( $('#GasChart').highcharts().series[1].visible === true && $('#GasChart').highcharts().series[0].visible === true ){
-            try {
-                avg_temp = var_avg_temp.toFixed(1)+" °C";
-                max_temp = var_max_temp.toFixed(1)+" °C";
-                min_temp = var_min_temp.toFixed(1)+" °C";
-            } catch(err) {} // suppress console error
-        }
+            if ( $('#GasChart').highcharts().series[1].visible === true && $('#GasChart').highcharts().series[0].visible === true ){
+                try {
+                    avg_temp = var_avg_temp.toFixed(1)+" °C";
+                    max_temp = var_max_temp.toFixed(1)+" °C";
+                    min_temp = var_min_temp.toFixed(1)+" °C";
+                } catch(err) {} // suppress console error
+            }
 
-        if ( $('#GasChart').highcharts().series[1].visible === true && $('#GasChart').highcharts().series[0].visible === false ){
-            try {
-                avg_temp = var_avg_temp.toFixed(1)+" °C";
-                max_temp = var_max_temp.toFixed(1)+" °C";
-                min_temp = var_min_temp.toFixed(1)+" °C";
-            } catch(err) {} // suppress console error
-        }
+            if ( $('#GasChart').highcharts().series[1].visible === true && $('#GasChart').highcharts().series[0].visible === false ){
+                try {
+                    avg_temp = var_avg_temp.toFixed(1)+" °C";
+                    max_temp = var_max_temp.toFixed(1)+" °C";
+                    min_temp = var_min_temp.toFixed(1)+" °C";
+                } catch(err) {} // suppress console error
+            }
 
-        var max_temp_color = '#FF0000';
-        var min_temp_color = '#0088FF';
-        s += '<br/><span style="color: '+max_temp_color+'">maximum temperatuur: </span>'+max_temp;
-        s += '<br/><span style="color: #384042">gemiddelde temperatuur: </span>'+avg_temp;
-        s += '<br/><span style="color: '+min_temp_color+'">minimum temperatuur: </span>'   +min_temp;
-        return s;
-      },
-      backgroundColor: '#F5F5F5',
-      borderColor: '#DCE1E3',
-      crosshairs: [true, true],
-      borderWidth: 1
+            var max_temp_color = '#FF0000';
+            var min_temp_color = '#0088FF';
+            s += '<br/><span style="color: '+max_temp_color+'">maximum temperatuur: </span>'+max_temp;
+            s += '<br/><span style="color: #384042">gemiddelde temperatuur: </span>'+avg_temp;
+            s += '<br/><span style="color: '+min_temp_color+'">minimum temperatuur: </span>'   +min_temp;
+            return s;
+    },
+    backgroundColor: '#F5F5F5',
+    borderColor: '#DCE1E3',
+    crosshairs: [true, true],
+    borderWidth: 1
     },
     rangeSelector: {
       inputEnabled: false,
        buttonSpacing: 5, 
        selected : Gselected,
-       buttons: [{
+       buttons: [
+
+        {
+            text: "-",
+            events: {
+                click: function () {
+                    
+                    maxDataIsOn = !maxDataIsOn;
+                    setHCButtonText( $('#GasChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+
+                    if ( maxDataIsOn == true ) {
+                        maxrecords = maxDataCount[0]
+                    } else {
+                        maxrecords = maxDataCount[1]
+                    }
+
+                    readJsonApiHistoryHour( maxrecords );
+                    toLocalStorage('stat-h-gas-max-data-on',maxDataIsOn );  // #PARAMETER
+                    return false
+                }
+            }
+        },
+
+       {
         type: 'hour',
         count: 12,
         text: GselectText[0]
@@ -420,7 +446,8 @@ function createGasChart() {
       }
     },
   });
-  
+  // can only set text when chart is made.
+  setHCButtonText( $('#GasChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
 function updateData() {
@@ -454,19 +481,30 @@ function DataLoop() {
 }
 
 $(function() {
-  toLocalStorage('stats-menu-gas',window.location.pathname);
-  GseriesVisibilty[0] = JSON.parse(getLocalStorage('stat-h-gas-visible'));
-  GseriesVisibilty[1] = JSON.parse(getLocalStorage('stat-h-gas-temp-visible'));
-  Gselected = parseInt(getLocalStorage('stat-h-select-gas-index'),10);
-  Highcharts.setOptions({
-   global: {
-    useUTC: false
+    toLocalStorage('stats-menu-gas',window.location.pathname);
+    GseriesVisibilty[0] = JSON.parse(getLocalStorage('stat-h-gas-visible'));
+    GseriesVisibilty[1] = JSON.parse(getLocalStorage('stat-h-gas-temp-visible'));
+    Gselected = parseInt(getLocalStorage('stat-h-select-gas-index'),10);
+
+    maxDataIsOn = JSON.parse(getLocalStorage('stat-h-gas-max-data-on'));           // #PARAMETER
+    //console.log( "maxDataIsON(1)=" + maxDataIsOn )
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
     }
-  });
-  screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
-  createGasChart();
-  secs = 0;
-  DataLoop();
+
+    Highcharts.setOptions({
+    global: {
+        useUTC: false
+        }
+    });
+    screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
+    createGasChart();
+    secs = 0;
+    DataLoop();
 });
 
 </script>

@@ -136,12 +136,14 @@ if ( isset( $_POST["email_test_button"] ) ) {
 <body>
 <script>
 
+/* removed in version higer than 1.4.1
 function selectorUpdate(selected, toupdate) {
-        //console.log(selected)
+        console.log(selected)
         var v = $(selected+" option:selected" ).val()
         $(toupdate).val(v);
         $("#formvalues").validate().element(toupdate);
 }
+*/
 
 </script>
 
@@ -155,217 +157,230 @@ function selectorUpdate(selected, toupdate) {
                          <?php config_buttons(0);?>
         </div> <!-- end top wrapper-2 -->
                 
-                <div class="mid-section">
-                        <div class="left-wrapper-config"> <!-- left block -->
-                                <?php menu_control(12);?>
-                        </div>
-                        
-                        <div id="right-wrapper-config"> <!-- right block -->
-                        <!-- inner block right part of screen -->
-                                <div id="right-wrapper-config-left">
-                                        <!-- start of content -->
-                                        <form name="formvalues" id="formvalues" method="POST">
-                                                
-                                                <div class="frame-4-top">
-                                                        <span class="text-15">email gegevens</span>
-                                                </div>
-                                                <div class="frame-4-bot">
-                                                        <div class="float-left pad-17">
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(50);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">account</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_account" name="i_email_account" type="text" value="<?php echo config_read(63);?>">
-                                                                </div>
-                                                        </div> 
-                                                
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(51);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">wachtwoord</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_pword" name="i_email_pword" type="password" value="<?php echo decodeString(64, 'mailpw');?>">
-                                                                </div>
-                                                                <div class="content-wrapper pad-1 cursor-pointer" id="api_passwd" onclick="toggelPasswordVisibility('i_email_pword')" >        
-                                                                        <span><i class="color-menu pad-7 fas fa-eye"></i></span>
-                                                                </div>
-                                                        </div> 
-                                                
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(52);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">mailserver adres</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_mail_server" name="i_mail_server" type="text" value="<?php echo config_read(65);?>">
-                                                                </div>
-                                                        </div> 
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(53);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">TCP poort SSL/TLS</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_ssl_port" name="i_email_ssl_port" type="text" value="<?php echo config_read(66);?>">
-                                                                </div>
-                                                        </div> 
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(54);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">TCP poort STARTTLS</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_starttls_port" name="i_email_starttls_port" type="text" value="<?php echo config_read(67);?>">
-                                                                </div>
-                                                        </div> 
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(55);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">TCP poort standaard</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_normal_port" name="i_email_normal_port" type="text" value="<?php echo config_read(68);?>">
-                                                                </div>
-                                                        </div> 
-                            
-                            <div class="content-wrapper pos-36" title="<?php echo strIdx(56);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">onderwerp</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_subject" name="i_email_subject" type="text" value="<?php echo config_read(69);?>">
-                                                                </div>
-                                                        </div> 
-                            
-                            <div class="content-wrapper pos-36" title="<?php echo strIdx(57);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">ontvangers (to)</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_to" name="i_email_to" type="text" value="<?php echo config_read(70);?>">
-                                                                </div>
-                                                        </div> 
+            <div class="mid-section">
+                <div class="left-wrapper-config"> <!-- left block -->
+                        <?php menu_control(12);?>
+                </div>
+                
+                <div id="right-wrapper-config"> <!-- right block -->
+                <!-- inner block right part of screen -->
+                    <div id="right-wrapper-config-left">
+                    <!-- start of content -->
+                    <form name="formvalues" id="formvalues" method="POST">
 
-                            <div class="content-wrapper pos-36" title="<?php echo strIdx(58);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">ontvangers (cc)</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_cc" name="i_email_cc" type="text" value="<?php echo config_read(74);?>">
-                                                                </div>
-                                                        </div> 
-
-                            <div class="content-wrapper pos-36" title="<?php echo strIdx(59);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">ontvangers (bcc)</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_bcc" name="i_email_bcc" type="text" value="<?php echo config_read(75);?>">
-                                                                </div>
-                                                        </div> 
-
-                            <div class="content-wrapper pos-36" title="<?php echo strIdx(60);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">FROM alias</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_from" name="i_email_from" type="text" value="<?php echo config_read(71);?>">
-                                                                </div>
-                                                        </div> 
-
-                            <div class="content-wrapper pos-36" title="<?php echo strIdx(61);?>"> 
-                                                                <div class="pad-24 content-wrapper">
-                                                                        <label class="text-14">timeout in seconden</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-11 color-settings color-input-back" id="i_email_timeout" name="i_email_timeout" type="text" value="<?php echo config_read(72);?>">
-                                                                </div>
-                            </div> 
-                            <br>
-                            <br>
-                            <div class="pad-1 content-wrapper float-left" title="<?php echo strIdx( 74 );?>">
-                                                                <button class="input-2 but-1 cursor-pointer" id="email_test_button" name="email_test_button" type="submit">
-                                                                        <i class="color-menu fa-3x far fa-play-circle"></i><br>
-                                                                        <span class="color-menu text-7">test</span>
-                                                                </button>
-                                                        </div>
-
-
-                                                        </div>
-                                                        </div>
-                            
-                            <p></p>
-                        
                         <div class="frame-4-top">
-                                                        <span class="text-15">P1 poort</span>
-                                                </div>
-                                                <div class="frame-4-bot">
-                                                        <div class='pad-12'>
-                            <div> 
-                                                                <!-- left side -->
-                                                                <div class="float-left" title="<?php echo strIdx(63);?>">
-                                                                        <div class="text-10">Notificatie bij het wegvallen van de P1 data.&nbsp;
-                                </div>
-                                                                </div>
-                                <!-- right side -->
-                                                                <div class="float-right">
-                                                                        <div>
-                                                                            <input class="cursor-pointer" id="fs_rb_aan_p1_data_on" name="fs_rb_aan_p1_data" type="radio" value="1" <?php if ( config_read(73) == 1 ) { echo 'checked'; }?>>Aan
-                                                                            <input class="cursor-pointer" id="fs_rb_aan_p1_data_off" name="fs_rb_aan_p1_data" type="radio" value="0" <?php if ( config_read(73) == 0 ) { echo 'checked'; }?>>Uit
-                                                                        </div>
-                                                                        <p></p>
-                                                                </div>
-                                                        </div>
-
-                                                        </div>
-                                                </div>
-                        <p></p>
-
-
-
-                                                <!-- placeholder variables for session termination -->
-                                                <input type="hidden" name="logout" id="logout" value="">
-                                                <input type="hidden" name="systemaction" id="systemaction" value="">
-                                        </form>
-                                </div>
-                                
-                                <div id="right-wrapper-config-right">
-                                        <div class="frame-4-top">
-                                                <span class="text-15">hulp</span>
-                                        </div>
-                                        <div class="frame-4-bot text-10">        
-                                                <?php echo strIdx(62);?>
-                                        </div>
-                                </div>
-                                
+                            <span class="text-15">email gegevens</span>
                         </div>
+                        <div class="frame-4-bot">
+                            <div class="float-left pad-17">
+                            
+                            <div class="content-wrapper pos-36" title="<?php echo strIdx(50);?>"> 
+                                <div class="pad-24 content-wrapper">
+                                    <label class="text-14">account</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <input class="input-11 color-settings color-input-back" id="i_email_account" name="i_email_account" type="text" value="<?php echo config_read(63);?>">
+                                </div>
+                            </div> 
                                         
-                <!-- </div> -->
-                                
-                        
-                        <!-- end inner block right part of screen -->
-        </div>        
+                            <div class="content-wrapper pos-36" title="<?php echo strIdx(51);?>"> 
+                                    <div class="pad-24 content-wrapper">
+                                            <label class="text-14">wachtwoord</label> 
+                                    </div>
+                                    <div class="content-wrapper">
+                                            <input class="input-11 color-settings color-input-back" id="i_email_pword" name="i_email_pword" type="password" value="<?php echo decodeString(64, 'mailpw');?>">
+                                    </div>
+                                    <div class="content-wrapper pad-1 cursor-pointer" id="api_passwd" onclick="toggelPasswordVisibility('i_email_pword')" >        
+                                            <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                                    </div>
+                            </div> 
+
+                            <div class="content-wrapper pos-36" title="<?php echo strIdx(52);?>"> 
+                                    <div class="pad-24 content-wrapper">
+                                            <label class="text-14">mailserver adres</label> 
+                                    </div>
+                                    <div class="content-wrapper">
+                                            <input class="input-11 color-settings color-input-back" id="i_mail_server" name="i_mail_server" type="text" value="<?php echo config_read(65);?>">
+                                    </div>
+                            </div> 
+
+                            <div class="content-wrapper pos-36" title="<?php echo strIdx(53);?>"> 
+                                    <div class="pad-24 content-wrapper">
+                                            <label class="text-14">TCP poort SSL/TLS</label> 
+                                    </div>
+                                    <div class="content-wrapper">
+                                            <input class="input-11 color-settings color-input-back" id="i_email_ssl_port" name="i_email_ssl_port" type="text" value="<?php echo config_read(66);?>">
+                                    </div>
+                            </div> 
+
+                            <div class="content-wrapper pos-36" title="<?php echo strIdx(54);?>"> 
+                                    <div class="pad-24 content-wrapper">
+                                            <label class="text-14">TCP poort STARTTLS</label> 
+                                    </div>
+                                    <div class="content-wrapper">
+                                            <input class="input-11 color-settings color-input-back" id="i_email_starttls_port" name="i_email_starttls_port" type="text" value="<?php echo config_read(67);?>">
+                                    </div>
+                            </div>
+
+                            <div class="content-wrapper pos-36" title="<?php echo strIdx(55);?>"> 
+                                    <div class="pad-24 content-wrapper">
+                                            <label class="text-14">TCP poort standaard</label> 
+                                    </div>
+                                    <div class="content-wrapper">
+                                            <input class="input-11 color-settings color-input-back" id="i_email_normal_port" name="i_email_normal_port" type="text" value="<?php echo config_read(68);?>">
+                                    </div>
+                            </div>
+                    
+                    <div class="content-wrapper pos-36" title="<?php echo strIdx(56);?>"> 
+                        <div class="pad-24 content-wrapper">
+                            <label class="text-14">onderwerp</label> 
+                        </div>
+                        <div class="content-wrapper">
+                            <input class="input-11 color-settings color-input-back" id="i_email_subject" name="i_email_subject" type="text" value="<?php echo config_read(69);?>">
+                        </div>
+                    </div> 
+                    
+                    <div class="content-wrapper pos-36" title="<?php echo strIdx(57);?>"> 
+                        <div class="pad-24 content-wrapper">
+                            <label class="text-14">ontvangers (to)</label> 
+                        </div>
+                        <div class="content-wrapper">
+                            <input class="input-11 color-settings color-input-back" id="i_email_to" name="i_email_to" type="text" value="<?php echo config_read(70);?>">
+                        </div>
+                    </div> 
+
+                    <div class="content-wrapper pos-36" title="<?php echo strIdx(58);?>"> 
+                        <div class="pad-24 content-wrapper">
+                            <label class="text-14">ontvangers (cc)</label> 
+                        </div>
+                        <div class="content-wrapper">
+                            <input class="input-11 color-settings color-input-back" id="i_email_cc" name="i_email_cc" type="text" value="<?php echo config_read(74);?>">
+                        </div>
+                    </div> 
+
+                    <div class="content-wrapper pos-36" title="<?php echo strIdx(59);?>"> 
+                        <div class="pad-24 content-wrapper">
+                            <label class="text-14">ontvangers (bcc)</label> 
+                        </div>
+                        <div class="content-wrapper">
+                            <input class="input-11 color-settings color-input-back" id="i_email_bcc" name="i_email_bcc" type="text" value="<?php echo config_read(75);?>">
+                        </div>
+                    </div> 
+
+                    <div class="content-wrapper pos-36" title="<?php echo strIdx(60);?>"> 
+                        <div class="pad-24 content-wrapper">
+                                <label class="text-14">FROM alias</label> 
+                        </div>
+                        <div class="content-wrapper">
+                                <input class="input-11 color-settings color-input-back" id="i_email_from" name="i_email_from" type="text" value="<?php echo config_read(71);?>">
+                        </div>
+                    </div> 
+
+                    <div class="content-wrapper pos-36" title="<?php echo strIdx(61);?>"> 
+                        <div class="pad-24 content-wrapper">
+                            <label class="text-14">timeout in seconden</label> 
+                        </div>
+                        <div class="content-wrapper">
+                            <input class="input-11 color-settings color-input-back" id="i_email_timeout" name="i_email_timeout" type="text" value="<?php echo config_read(72);?>">
+                        </div>
+                    </div> 
+                    <br>
+                    <br>
+
+                    <div class="pad-1 content-wrapper float-left" title="<?php echo strIdx( 74 );?>">
+                        <button class="input-2 but-1 cursor-pointer" id="email_test_button" name="email_test_button" type="submit">
+                            <i class="color-menu fa-3x far fa-play-circle"></i><br>
+                            <span class="color-menu text-7">test</span>
+                        </button>
+                    </div>
+
+                    </div>
+                    </div>
+
+                    <p></p>
+                
+                <div class="frame-4-top">
+                    <span class="text-15">P1 poort</span>
+                </div>
+                <div class="frame-4-bot">
+                    <div class='pad-12'>
+                        <div> 
+                            <!-- left side -->
+                            <div class="float-left" title="<?php echo strIdx(63);?>">
+                                <div class="text-10">Notificatie bij het wegvallen van de P1 data.&nbsp;
+                                </div>
+                        </div>
+                        <!-- right side -->
+                        <div class="float-right">
+                            <div>
+                                <input class="cursor-pointer" id="fs_rb_aan_p1_data_on" name="fs_rb_aan_p1_data" type="radio" value="1" <?php if ( config_read(73) == 1 ) { echo 'checked'; }?>>Aan
+                                <input class="cursor-pointer" id="fs_rb_aan_p1_data_off" name="fs_rb_aan_p1_data" type="radio" value="0" <?php if ( config_read(73) == 0 ) { echo 'checked'; }?>>Uit
+                            </div>
+                            <p></p>
+                        </div>
+                </div>
+
+            </div>
+        </div>
+        <p></p>
+
+
+        <!-- placeholder variables for session termination -->
+        <input type="hidden" name="logout" id="logout" value="">
+        <input type="hidden" name="systemaction" id="systemaction" value="">
+        </form>
+    </div>
+
+        <div id="right-wrapper-config-right">
+                <div class="frame-4-top">
+                        <span class="text-15">hulp</span>
+                </div>
+                <div class="frame-4-bot text-10">
+                        <?php echo strIdx(62);?>
+                </div>
+        </div>
+    </div>
+
+        </div>
         <?php echo div_err_succes();?>
-        
+
 <script>
+
+
+jQuery.validator.addMethod( "check_any_to_cc_bcc", function(value, element) {
+    
+    //console.log("Log" +  value, element );
+
+    var to  = document.getElementById ("i_email_to"  ).value.trim().length;
+    var cc  = document.getElementById ("i_email_cc"  ).value.trim().length;
+    var bcc = document.getElementById ("i_email_bcc" ).value.trim().length;
+    
+    total_len = to + cc + bcc;
+
+    if ( total_len > 0 ) {
+        return true;
+    } else {
+        return false;
+    }
+
+}, '');
 
 $(function() {
         $("#formvalues").validate({
-                rules: {
-                        'i_email_timeout': {
+            rules: {
+            'i_email_timeout': {
                 required: true,
                 number: true,
                 max: 300,
                 min: 1
             },
-                        'i_email_ssl_port': {
+            'i_email_ssl_port': {
                 required: true,
                 number: true,
                 max: 65535,
                 min: 1
             },
-                        'i_email_starttls_port': {
+            'i_email_starttls_port': {
                 required: true,
                 number: true,
                 max: 65535,
@@ -376,7 +391,22 @@ $(function() {
                 number: true,
                 max: 65535,
                 min: 1
-            }         
+            },
+            'i_email_to':{
+                required: false,
+                email: true,
+                check_any_to_cc_bcc: true
+            },
+            'i_email_cc':{
+                required: false,
+                email: true,
+                check_any_to_cc_bcc: true
+            },
+            'i_email_bcc':{
+                required: false,
+                email: true,
+                check_any_to_cc_bcc: true
+            },
         },
         errorPlacement: function(error, element) {
             return false;  // will suppress error messages    

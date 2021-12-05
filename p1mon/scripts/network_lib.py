@@ -266,7 +266,6 @@ def reload_dhcp_deamon(flog=None ):
         flog.error( inspect.stack()[0][3] + ": reload DHCP deamon fout " +  str(e.args) )
         return False
 
-
 def regenerate_resolv_config( flog=None ):
 
     flog.info( inspect.stack()[0][3] + ":  resolv.conf regeneren. ")
@@ -290,13 +289,13 @@ def regenerate_resolv_config( flog=None ):
     
     reload_dhcp_deamon( flog=flog )
 
-    # if resolv.cong does not exist recover from backup 
+    # if resolv.conf does not exist recover from backup 
     if not os.path.isfile( RESOLVCONFIG ):
         flog.warning( inspect.stack()[0][3] + ": resolv.conf is niet aangemaakt, recovery met vorige bestand." )
         move_file_for_root_user( source=RESOLVCONFIG + FILE_BACKUP_EXT, destination=RESOLVCONFIG, flog=flog )
         return False
 
-    # we leave the backuo file as debug data and manual recovery.
+    # we leave the backup file as debug data and manual recovery.
 
     return True
 

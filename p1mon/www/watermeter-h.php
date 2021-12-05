@@ -36,13 +36,17 @@ var secs            = mins * 60;
 var currentSeconds  = 0;
 var currentMinutes  = 0;
 var Gselected       = 0;
-//var GselectText     = ["12 uur","1 dag","1 week","1 maand"] // #PARAMETER
 var GselectText     = ["12 uur","1 dag","3 dagen","5 dagen"] // #PARAMETER
 var GseriesVisibilty= [true];
 var GverbrData      = [];
 var GgelvrData      = [];
 var GnettoData      = [];
-var maxrecords      = 744;
+
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 26034, 744 ]
+var maxrecords      = maxDataCount[1];
+
 
 function readJsonApiHistoryHour( cnt ){ 
     $.getScript( "/api/v2/watermeter/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -63,7 +67,7 @@ function readJsonApiHistoryHour( cnt ){
 }
 
 /* preload */
-readJsonApiHistoryHour( maxrecords );
+//readJsonApiHistoryHour( maxrecords );
 
 // change items with the marker #PARAMETER
 function createWaterUsageChart() {
@@ -118,6 +122,28 @@ function createWaterUsageChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
+
+                {
+                    text: "-",
+                    events: {
+                        click: function () {
+                            
+                            maxDataIsOn = !maxDataIsOn;
+                            setHCButtonText( $('#WaterUsageChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+
+                            if ( maxDataIsOn == true ) {
+                                maxrecords = maxDataCount[0]
+                            } else {
+                                maxrecords = maxDataCount[1]
+                            }
+
+                            readJsonApiHistoryHour( maxrecords );
+                            toLocalStorage('watermeter-h-max-data-on',maxDataIsOn );  // #PARAMETER
+                            return false
+                        }
+                    }
+                },
+
                 {
                     type: 'hour',
                     count: 12,
@@ -281,13 +307,15 @@ function createWaterUsageChart() {
             },
             noData: {
                 style: { 
-                    fontFamily: 'robotomedium',   
-                    fontWeight: 'bold',     
+                    fontFamily: 'robotomedium',
+                    fontWeight: 'bold',
                     fontSize: '25px',
-                    color: '#10D0E7'        
+                    color: '#10D0E7'
                 }
-            }        
+            }
   });
+  // can only set text when chart is made.
+  setHCButtonText( $('#WaterUsageChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
 function updateData() {
@@ -332,6 +360,16 @@ $(function() {
     toLocalStorage('watermeter-menu',window.location.pathname);
     Gselected = parseInt( getLocalStorage('watermeter-h-select-index'), 10 );
     GseriesVisibilty[0] =JSON.parse( getLocalStorage('watermeter-h-verbr-visible') );  // #PARAMETER
+    maxDataIsOn = JSON.parse(getLocalStorage('watermeter-h-max-data-on'));            // #PARAMETER
+    //console.log( "maxDataIsON(1)=" + maxDataIsOn )
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
+    }
+
     Highcharts.setOptions({
     global: {
         useUTC: false

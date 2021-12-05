@@ -56,14 +56,17 @@ var GLowTariffData   = [];
 var GTotalData       = [];
 var Granges          = [];
 var Gaverages        = [];
-var maxrecords       = 366; //PARAMETER
+
+var maxDataIsOn     = false
+var maxDataText     = ['MAX. data','MIN. data']
+var maxDataCount    = [ 36000, 366 ]
+var maxrecords      = maxDataCount[1];
 
 var max_temp_color    = '#FF0000';
 var avg_temp_color    = '#384042';
 var min_temp_color    = '#0088FF';
 var high_tariff_color = '#98D023';
 var low_tariff_color  = '#7FAD1D';
-
 
 // Weather 
 function readJsonApiWeatherHistoryDay( cnt ){ 
@@ -250,6 +253,29 @@ function createKwhChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
+
+                {
+                    text: "-",
+                    events: {
+                        click: function () {
+                            
+                            maxDataIsOn = !maxDataIsOn;
+                            setHCButtonText( $('#KwhChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
+                            
+                            if ( maxDataIsOn == true ) {
+                                maxrecords = maxDataCount[0]
+                            } else {
+                                maxrecords = maxDataCount[1]
+                            }
+                            //console.log( "maxrecords=" + maxrecords )
+                            //readJsonApiHistoryPowerHour( maxrecords );
+                            readJsonActiveDbSiteIndices(  maxrecords );
+                            toLocalStorage('powerprod-api-d-max-data-on', maxDataIsOn );  // #PARAMETER
+                            return false
+                        }
+                    }
+                },
+
                 {
                     type: 'day',   // #PARAMETER
                     count: 7,      // #PARAMETER
@@ -501,6 +527,8 @@ function createKwhChart() {
                 }
             }        
   });
+  // can only set text when chart is made.
+  setHCButtonText( $('#KwhChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
 function updateData() {
@@ -544,6 +572,17 @@ $(function() {
     GseriesVisibilty[1] =JSON.parse(getLocalStorage('powerprod-api-d-low-tariff-visible'));  // #PARAMETER
     GseriesVisibilty[2] =JSON.parse(getLocalStorage('powerprod-api-d-netto-visible'));  // #PARAMETER
     GseriesVisibilty[3] =JSON.parse(getLocalStorage('powerprod-api-d-temp-visible'));   // #PARAMETER
+
+    maxDataIsOn = JSON.parse(getLocalStorage('powerprod-api-d-max-data-on'));                // #PARAMETER
+    //console.log( "maxDataIsON(1)=" + maxDataIsOn )
+
+    if ( (maxDataIsOn == null) || (maxDataIsOn == false) ) {
+        maxDataIsOn = false;
+        maxrecords = maxDataCount[1]
+    } else {
+        maxrecords = maxDataCount[0]
+    }
+
     Highcharts.setOptions({
     global: {
         useUTC: false

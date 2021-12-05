@@ -43,7 +43,7 @@ QUEUE_CMD_START  = "START"
 
 def Main(argv): 
     global timestamp 
-
+    
     my_pid = os.getpid()
     flog.info("Start van programma met process id " + str(my_pid) )
 
