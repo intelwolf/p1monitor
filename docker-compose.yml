@@ -3,7 +3,8 @@ services:
 
   p1monitor:
     hostname: p1mon
-    image: mclaassen/p1mon
+    #image: mclaassen/p1mon:rolling
+    image: mclaassen/p1mon:1.5.0a
     ports:
       - 81:80
     volumes:
@@ -13,11 +14,12 @@ services:
     tmpfs:
       - /run
       - /tmp
-    devices:
-      - "/dev/ttyS0:/dev/ttyUSB0"
+        #devices:
+            #- "/dev/ttyS0:/dev/ttyUSB0"
     restart: unless-stopped
     environment:
       - DISABLECPUTEMP=true
-            #- PROXYPATH=marcel
+      - SOCAT_CONF="pty,link=/dev/ttyUSB1,rawer,group-late=dialout,mode=660 tcp:192.168.1.200:23,retry=forever,interval=30"
+      #- PROXYPATH=marcel
     expose:
       - "81"

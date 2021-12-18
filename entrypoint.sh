@@ -18,11 +18,14 @@ if [ ! -f /var/tmp/.firstrun ]; then
 		sudo sed -i 's/"\/api/".\/api/' /p1mon/www/util/*.php
 		sudo sed -i "s|PROXY_PATH_REPLACE|${PROXYPATH}|" /etc/nginx/sites-enabled/default
 	fi
+	if [[ ! -z $SOCAT_CONF ]]; then
+		sudo echo "OPTIONS=$SOCAT_CONF" > /etc/default/socat
+		echo '* * * * * /p1mon/scripts/socat_check.sh >> /var/log/socat.log' | sudo crontab - 
+	fi
         sudo chown -R p1mon:p1mon /p1mon/mnt
         chmod g+w /p1mon/mnt/ramdisk /p1mon/data
 	touch /var/tmp/.firstrun
 fi
-
 
 echo "Starting cron"
 sudo service cron start
@@ -33,6 +36,10 @@ sudo service nginx start
 echo "Starting php-fpm"
 sudo mkdir /run/php
 sudo /usr/sbin/php-fpm7.3 --fpm-config /etc/php/7.3/fpm/php-fpm.conf
+
+if [[ ! -z $SOCAT_CONF ]]; then
+	sudo service socat start
+fi
 
 echo "Starting p1mon"
 cd /p1mon/scripts
