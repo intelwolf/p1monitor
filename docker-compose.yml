@@ -14,12 +14,13 @@ services:
     tmpfs:
       - /run
       - /tmp
-        #devices:
-            #- "/dev/ttyS0:/dev/ttyUSB0"
+    devices:
+      - "/dev/ttyS0:/dev/ttyUSB0"
     restart: unless-stopped
-    environment:
-      - DISABLECPUTEMP=true
-      - SOCAT_CONF="pty,link=/dev/ttyUSB1,rawer,group-late=dialout,mode=660 tcp:192.168.1.200:23,retry=forever,interval=30"
+    #environment:
+      # Use environment variables as needed. Check https://marcel.duketown.com/p1-monitor-docker-versie/ for more information
+      #- DISABLECPUTEMP=true
+      #- SOCAT_CONF="pty,link=/dev/ttyUSB1,rawer,group-late=dialout,mode=660 tcp:192.168.1.200:23,retry=forever,interval=30"
       #- PROXYPATH=marcel
     expose:
       - "81"
