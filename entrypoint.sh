@@ -4,9 +4,10 @@ if [ ! -f /var/tmp/.firstrun ]; then
 	echo Modifying scripts..
 	sudo sed -i "s/^ *network_lib.regenerate/#&/" /p1mon/scripts/P1NetworkConfig.py
 	sed -i "s/nice --adjustment=-15 sudo -i -u p1mon //" /p1mon/scripts/p1mon.sh
+	# sed -i "s/\$PRG_PATH\$PRG14/sudo &/" /p1mon/scripts/p1mon.sh
 	# mimic local gunicorn
 	mkdir -p /home/p1mon/.local/bin && ln -s /usr/local/bin/gunicorn /home/p1mon/.local/bin/gunicorn
-	if [[ $DISABLECPUTEMP = true ]]; then 
+	if [[ ! -f /sys/class/thermal/thermal_zone0/temp ]]; then 
 		echo "Disable CPU temperature check"
 	       	sudo sed -i "s/^ *getCpuTemp/#&/" /p1mon/scripts/P1Watchdog.py 
 	fi
@@ -23,7 +24,7 @@ if [ ! -f /var/tmp/.firstrun ]; then
 		echo '* * * * * /p1mon/scripts/socat_check.sh >> /var/log/socat.log' | sudo crontab - 
 	fi
         sudo chown -R p1mon:p1mon /p1mon/mnt
-        chmod g+w /p1mon/mnt/ramdisk /p1mon/data
+        sudo chmod g+w /p1mon/mnt/ramdisk /p1mon/data
 	touch /var/tmp/.firstrun
 fi
 
@@ -44,6 +45,9 @@ fi
 echo "Starting p1mon"
 cd /p1mon/scripts
 ./p1mon.sh start
+
+echo "Setting ramdisk rights"
+sudo chown p1mon:p1mon /p1mon/mnt/ramdisk/*db
 
 echo "Writing cron"
 /p1mon/scripts/P1Scheduler.py 

@@ -33,7 +33,7 @@ server {
 
 	server_name _;
 
-        location ^~ /PROXY_PATH_REPLACE {
+        location ^~ /PROXY_PATH_REPLACE/ {
                 rewrite ^/PROXY_PATH_REPLACE(.*)$ $1 last;
         }
 
