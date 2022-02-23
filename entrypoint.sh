@@ -23,7 +23,7 @@ if [ ! -f /var/tmp/.firstrun ]; then
 		sudo echo "OPTIONS=$SOCAT_CONF" > /etc/default/socat
 		echo '* * * * * /p1mon/scripts/socat_check.sh >> /var/log/socat.log' | sudo crontab - 
 	fi
-        sudo chown -R p1mon:p1mon /p1mon/mnt
+        sudo chown -R p1mon:p1mon /p1mon/mnt /p1mon/data
         sudo chmod g+w /p1mon/mnt/ramdisk /p1mon/data
 	touch /var/tmp/.firstrun
 fi
