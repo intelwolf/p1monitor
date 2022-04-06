@@ -249,7 +249,7 @@ function createKwhChart() {
                     if(typeof(e.rangeSelectorButton)!== 'undefined') {
                         for (var j = 0;  j < GselectText.length; j++){    
                             if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                                toLocalStorage('powerprod-h-select-index',j); // PARAMETER
+                                toLocalStorage('powerprod-h-select-index',j+1); // PARAMETER
                                 break;
                             }
                         }

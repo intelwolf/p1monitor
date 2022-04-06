@@ -40,10 +40,19 @@ if ( isset($_POST["dboxauth"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( strlen(trim($_POST["dboxauth"])) > 32 ) { /* normale 44 chars long */
         $clean_dbox_auth = trim( $_POST["dboxauth"] );
-        // p1monExec needed !!!
-        $command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token ' . $clean_dbox_auth . '"';
         
-        #echo "command = " . $command . "<br>";
+        // p1monExec needed !!!
+        //$command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token ' . $clean_dbox_auth . '"';
+
+        // magic to handle tokens that start with a hypen, thank you Dropbox :)
+        if ( substr( $clean_dbox_auth , 0, 1 ) === "-" ) {
+            $clean_dbox_auth_changed = substr( $clean_dbox_auth , 1, strlen( $clean_dbox_auth  ) );
+            $command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --addhyphen --token ' . $clean_dbox_auth_changed . '"';
+        } else {
+            $command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token  ' . $clean_dbox_auth  . '"';
+        }
+
+        //echo "command = " . $command . "<br>";
         exec( $command ,$arr_execoutput, $exec_ret_value );
 
         #print_r( "dropbox token return= ". $arr_execoutput[0]. "<br>" );

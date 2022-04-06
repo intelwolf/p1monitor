@@ -57,7 +57,7 @@ def Main(argv):
     ser1.timeout    = 1
     ser1.port       = args.serialdevice
     
-    print( "Waarschuwing, gebruik dit programma niet tegelijke met P1SerReader.py" )
+    print( "Waarschuwing, gebruik dit programma niet tegelijk met P1SerReader.py" )
     print( "serial device: "    + str( ser1.port ) )
     print( "baudrate : "        + str( ser1.baudrate ) )
     print( "bytesize : "        + str( ser1.bytesize ) )

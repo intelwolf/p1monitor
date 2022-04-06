@@ -293,17 +293,17 @@ function createCostChart() {
             },
             xAxis: {
                 events: {
-                    setExtremes: function(e) {      
+                    setExtremes: function(e) {
                         if(typeof(e.rangeSelectorButton)!== 'undefined') {
                             for (var j = 0;  j < GselectText.length; j++){    
                                 if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                                    toLocalStorage('kosten-d-select-index',j); // PARAMETER
+                                    toLocalStorage('kosten-d-select-index',j+1); // PARAMETER
                                     break;
                                 }
                             }
                         }
                     }
-                },   
+                },
                 minTickInterval: 1 * 24 * 3600000, 
                 range:          31 * 24 * 3600000,
                 minRange:       7  * 24 * 3600000,

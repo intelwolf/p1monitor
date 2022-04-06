@@ -26,14 +26,15 @@
 # Versie 1.4.0 Internet API toegevoegd en 1 sec verwerking.
 # Versie 1.4.1 DNS en Letsencrypt uitbreidingen. QR code voor API's toegevoegd.
 # Versie 1.5.0 P1UpdateAide en Excel export toegevoegd.
+# Versie 1.6.0 Bug fixes.
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "1.5.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "d"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
-P1_SERIAL_VERSION               = "20211203"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "1.6.0"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
+P1_SERIAL_VERSION               = "20220326"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"

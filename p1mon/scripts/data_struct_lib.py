@@ -31,7 +31,8 @@ p1_status_record = {
     'day_night_mode'            : 0,             # day/night country flag 0 is NL, 1 is Belgium.
     'last_crc_check_timestamp'  : 0,             # timestamp of last crc check.
     'crc_error_cnt'             : 0,             # number of crc error's until last reset.
-    'dbx_utc_ok_timestamp'      : 0              # laatse keer dat een dbx message was send succesfull.
+    'dbx_utc_ok_timestamp'      : 0,              # laatste keer dat een dbx message was send succesfull.
+    'p1_time_delta'             : 0              # verschil in seconden tussen de P1 timestamp en de systeemtijd. 
 }
 
 ##########################################################

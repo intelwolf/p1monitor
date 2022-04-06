@@ -179,7 +179,7 @@ function createGasChart() {
        if(typeof(e.rangeSelectorButton)!== 'undefined') {
          for (var j = 0;  j < GselectText.length; j++){    
            if ( GselectText[j] == e.rangeSelectorButton.text ) {
-             toLocalStorage('stat-d-select-gas-index',j); // #PARAMETER
+             toLocalStorage('stat-d-select-gas-index',j+1); // #PARAMETER
              break;
            }
          }

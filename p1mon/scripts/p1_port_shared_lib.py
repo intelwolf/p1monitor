@@ -155,6 +155,21 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
                 content = buf[1].split('*')
                 phase_db_rec['L3_A'] = util.cleanDigitStr(content[0])
 
+            elif buf[0] == '0-0:1.0.0': 
+                #print ( buf[1] )
+                content = buf[1].split(')')
+                #print ( content )
+                timestamp = util.cleanDigitStr(content[0])
+                #print ( timestamp )
+                #timestamp = timestamp + "10"
+                try: # check if this is a valid date.
+                    p1_time = datetime.datetime.strptime( timestamp, "%y%m%d%H%M%S" ).timestamp()
+                    #print ( abs(int(time.time() - p1_time)) )
+                    status['p1_time_delta'] = str( abs(int(time.time() - p1_time)) )
+                    #print ("#1",status['p1_time_delta'] )
+                except ValueError:
+                    flog.warning( inspect.stack()[0][3] + " Timestamp van P1 bericht is niet correct (yymmddhhmmss) -> " + str(timestamp) )
+
             if tarief_code == '0002':
                 tarief_code = 'P'
 

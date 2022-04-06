@@ -8,6 +8,11 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 
 if ( checkDisplayIsActive(22) == false) { return; }
+
+$sw_off  = strIdx( 193 );
+$sw_on   = strIdx( 192 );
+
+
 ?> 
 <!doctype html>
 <html lang="nl">
@@ -378,7 +383,30 @@ function readJsonApiStatus(){
                             if( soundPlayed ) soundPlayed = false; // reset
                         }
                     break;
-                
+                case 124:
+                    //console.log( jsonarr[j] )
+                    ntpArr = JSON.parse(jsonarr[j][1]); 
+
+                    if ( ntpArr['ntp'] ) {
+                        $('#ntp1').text( "<?php echo $sw_on ?>" );
+                    } else {
+                        $('#ntp1').text( "<?php echo $sw_off ?>" );
+                    }
+
+                    if ( ntpArr['ntp_synchronized'] ) {
+                        $('#ntp2').text( "<?php echo $sw_on ?>" );
+                    } else {
+                        $('#ntp2').text( "<?php echo $sw_off ?>" );
+                    }
+
+                    $('#ntp3').text(ntpArr['ntp_last_timestamp']);
+                    $('#ntp5').text(ntpArr['ntp_server_name']);
+                    $('#ntp6').text(ntpArr['ntp_server_ip']);
+                    $('#ntp7').text(ntpArr['timezone']);
+                    break;
+                case 125:
+                    $('#sm1v').text(jsonarr[j][1]);
+                    break;
                 default:
                     break;
             }
@@ -418,7 +446,6 @@ function getFormattedDate() {
 
     return str;
 }
-
 
 function createChartCpuTemperature() {    
     $('#cputemp').highcharts({
@@ -638,7 +665,7 @@ function createChartRamdiskLoad() {
 });
 }
 
-function createChartRamLoad() {    
+function createChartRamLoad() {
     $('#ramload').highcharts({
 
     chart: {
@@ -684,7 +711,7 @@ function createChartRamLoad() {
         labels: {
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             },
             y: 16
         }
@@ -835,7 +862,7 @@ $(function () {
                  <br>
                      <div class="frame-2-top">
                     <span class="text-2">systeem</span>
-                    <div title="<?php strIdx( 98 );?>" class="pos-43">
+                    <div title="<?php echo strIdx( 98 );?>" class="pos-43">
                         <button onclick="copyClipboard('systeem')" class="input-4 pos-31 cursor-pointer">
                             <i class="color-menu fas fa-clipboard"></i>&nbsp;<span class="color-menu">clipboard</span>
                         </button>
@@ -852,6 +879,12 @@ $(function () {
                     <div id="sy6t" class="text-9"></div><div id="sy6v" class="text-9"></div><br>
                     <div id="sy7t" class="text-9"></div><div id="sy7v" class="text-9"></div><br>
                     <div id="sy9t" class="text-9"></div><div id="sy9v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 297 );?>:</div><div id="ntp1" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 298 );?>:</div><div id="ntp2" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 299 );?>:</div><div id="ntp3" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 300 );?>:</div><div id="ntp5" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 301 );?>:</div><div id="ntp6" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 302 );?>:</div><div id="ntp7" class="text-9"></div><br>
                  </div>
                  <br>
                  <div class="frame-2-top">
@@ -873,15 +906,17 @@ $(function () {
                  <br>
                  <div class="frame-2-top">
                     <span class="text-2">slimme meter</span>
-                    <div title="<?php strIdx( 98 );?>" class="pos-43">
+                    <div title="<?php echo strIdx( 98 );?>" class="pos-43">
                         <button onclick="copyClipboard('slimmemeter')" class="input-4 pos-31 cursor-pointer">
                             <i class="color-menu fas fa-clipboard"></i>&nbsp;<span class="color-menu">clipboard</span>
                         </button>
                    </div>
                 </div>
-                  <div class="frame-2-bot">        
-                     <div id="slimmemeter" class="text-9">
-                     <br>
+                  <div class="frame-2-bot">
+                        <div title='<?php echo strIdx( 304 );?>' class="text-9"><?php echo strIdx( 303 );?>:</div><div id="sm1v" class="text-9"></div><br>
+                        <hr class="margin-7">
+                        <div id="slimmemeter" class="text-9">
+                        <br>
                     </div>
                  </div>
                  
@@ -894,7 +929,7 @@ $(function () {
                     <span class="text-2">P1 poort status</span>
                 </div>
                   <div class="frame-2-bot">
-                      <div class="pad-11" id="p1status" title="<?php strIdx(2);?>">
+                      <div class="pad-11" id="p1status" title="<?php echo strIdx(2);?>">
                         
                         <div style="display:none" id="serial_ok" >
                             <label  class="float-left text-11" >&nbsp;&nbsp;&nbsp;in orde&nbsp;</label>

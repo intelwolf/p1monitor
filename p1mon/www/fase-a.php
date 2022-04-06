@@ -87,7 +87,7 @@ function readJsonApiPhaseInformationFromStatus(){
             }
             if ( jsondata[j][0] == 100 ) {
                 L1A = jsondata[j][1];
-                //L1A = 5
+                //L1A = 0
                 continue;
             }
             if ( jsondata[j][0] == 101 ) {
@@ -190,17 +190,22 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L1Watt').highcharts().series[0].points[0].update( parseInt( L1Wconsumption ), true, true, true );
             $('#L1Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
 
+            L1Caculated = L1Wconsumption / L1V  
         } else {
             $('#L1Watt').highcharts().series[0].data[0].color = '#98D023';
             $('#L1Watt').highcharts().yAxis[0].setTitle({text: "levering"});
             $('#L1Watt').highcharts().series[0].points[0].update( parseInt( L1Wproduction ), true, true, true );
             $('#L1Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
+            L1Caculated = L1Wproduction / L1V 
         }
         // L1 Amperage
         $('#L1Amperage').highcharts().series[0].points[0].update( parseInt( L1A ), true, true, true );
         // L1 Voltage
         $('#L1Voltage').highcharts().series[0].points[0].update( parseFloat( L1V ), true, true, true );
-    
+        if ( isNaN(L1Caculated) ==  false ) {
+            $("#L1Calc").text( L1Caculated.toFixed(2) + " A" )
+        }
+        
         // consumption and production adaption.
         // L2 Watt
         if ( L2Wconsumption > L2Wproduction ) {
@@ -208,17 +213,23 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L2Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
             $('#L2Watt').highcharts().series[0].points[0].update( parseInt( L2Wconsumption ), true, true, true );
             $('#L2Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
+            L2Caculated = L2Wconsumption / L2V
         } else {
             $('#L2Watt').highcharts().series[0].data[0].color = '#98D023';
             $('#L2Watt').highcharts().yAxis[0].setTitle({text: "levering"});
             $('#L2Watt').highcharts().series[0].points[0].update( parseInt( L2Wproduction ), true, true, true );
             $('#L2Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
+            L2Caculated = L2Wproduction / L2V 
         }
         // L2 Amperage
         $('#L2Amperage').highcharts().series[0].points[0].update( parseInt( L2A ), true, true, true );
         // L2 Voltage
         $('#L2Voltage').highcharts().series[0].points[0].update( parseFloat( L2V ), true, true, true );
-    
+        if ( isNaN(L2Caculated) ==  false ) {
+            $("#L2Calc").text( L2Caculated.toFixed(2) + " A" )
+        }
+       
+
         // consumption and production adaption.
         // L3 Watt
         if ( L3Wconsumption > L3Wproduction ) {
@@ -226,18 +237,22 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L3Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
             $('#L3Watt').highcharts().series[0].points[0].update( parseInt( L3Wconsumption ), true, true, true );
             $('#L3Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
+            L3Caculated = L3Wconsumption / L3V
         } else {
             $('#L3Watt').highcharts().series[0].data[0].color = '#98D023';
             $('#L3Watt').highcharts().yAxis[0].setTitle({text: "levering"});
             $('#L3Watt').highcharts().series[0].points[0].update( parseInt( L3Wproduction ), true, true, true );
             $('#L3Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
+            L3Caculated = L3Wproduction / L3V 
         }
         // L3 Amperage
         $('#L3Amperage').highcharts().series[0].points[0].update( parseInt( L3A ), true, true, true );
         // L3 Voltage
-        $('#L3Voltage').highcharts().series[0].points[0].update( parseFloat(  L3V ), true, true, true );
-        
-
+        $('#L3Voltage').highcharts().series[0].points[0].update( parseFloat( L3V ), true, true, true );
+        if ( isNaN(L3Caculated) ==  false ) {
+            $("#L3Calc").text( L3Caculated.toFixed(2) + " A" )
+        }
+       
       } catch(err) {
           console.log( err );
       }
@@ -267,6 +282,28 @@ $(function () {
 
 }); 
 
+
+function toggelCalculatedAmpValues() {
+    
+    if ( document.getElementById('L1Amperage').offsetParent === null ) {
+        hideStuff( "L1AmperageCalc" );
+    } else {
+        showStuff( "L1AmperageCalc" );
+    }
+    if ( document.getElementById('L2Amperage').offsetParent === null ) {
+        hideStuff( "L2AmperageCalc" );
+    } else {
+        showStuff( "L2AmperageCalc" );
+    }
+    if ( document.getElementById('L3Amperage').offsetParent === null ) {
+        hideStuff( "L3AmperageCalc" );
+    } else {
+        showStuff( "L3AmperageCalc" );
+    }
+    
+}
+
+
 function toggleButtonAndGraphView( graph, button ) {
     //console.log (  graph, button );
     button = '#' + button  // jquery id fix
@@ -281,9 +318,12 @@ function toggleButtonAndGraphView( graph, button ) {
         toLocalStorage( 'phase-a-' + graph , true );
     }
 
+    toggelCalculatedAmpValues();
+
 }
 
-function readGraphVisiabilityFromBrowserMemory(){
+
+function readGraphVisibilityFromBrowserMemory(){
     
     for ( var j=0;  j < graphIdArray.length; j++ ){ 
 
@@ -296,9 +336,8 @@ function readGraphVisiabilityFromBrowserMemory(){
             hideStuff( graphIdArray[ j ] );
             $( '#' + buttonIdArray[ j ] ).removeClass( 'color-menu' ); 
         }
-
     }
-
+    toggelCalculatedAmpValues();
 }
 
 </script>
@@ -337,8 +376,9 @@ function readGraphVisiabilityFromBrowserMemory(){
                         </div>
                    </div>
                     <div class="frame-5-bot"> 
-                        <div id="L1Watt"     class="pad-38"></div>
-                        <div id="L1Amperage" class="pad-38"></div>
+                        <div id="L1Watt" class="pad-38"></div>
+                        <div id="L1Amperage"></div>
+                        <div id="L1AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L1Calc">0 A</span></div>
                         <div id="L1Voltage"></div>
                     </div>
                 </div>
@@ -353,8 +393,9 @@ function readGraphVisiabilityFromBrowserMemory(){
                         </div>
                     </div>
                     <div class="frame-5-bot"> 
-                        <div id="L2Watt"     class="pad-38"></div>
-                        <div id="L2Amperage" class="pad-38"></div>
+                        <div id="L2Watt" class="pad-38"></div>
+                        <div id="L2Amperage"></div>
+                        <div id="L2AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L2Calc">0 A</span></div>
                         <div id="L2Voltage"></div>
                     </div>
                 </div>  
@@ -369,8 +410,9 @@ function readGraphVisiabilityFromBrowserMemory(){
                         </div>
                     </div>
                     <div class="frame-5-bot"> 
-                        <div id="L3Watt"     class="pad-38"></div>
-                        <div id="L3Amperage" class="pad-38"></div>
+                        <div id="L3Watt" class="pad-38"></div>
+                        <div id="L3Amperage"></div>
+                        <div id="L3AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L3Calc">0 A</span></div>
                         <div id="L3Voltage"></div>
                     </div>
                 </div>  
@@ -379,10 +421,7 @@ function readGraphVisiabilityFromBrowserMemory(){
         </div>
 <script>
 
-
-    
-
-    readGraphVisiabilityFromBrowserMemory();
+    readGraphVisibilityFromBrowserMemory();
 
     var gaugeOptions = {
         chart: {
@@ -464,6 +503,12 @@ function readGraphVisiabilityFromBrowserMemory(){
                     '<span style="font-size:25px">{point.y} A</span><br/>' +
                     '</div>',
             },
+            /*
+            dataLabels: {
+                enabled: false
+            }
+            */
+            
         }],
         title: null,
         pane: {
@@ -715,7 +760,7 @@ function readGraphVisiabilityFromBrowserMemory(){
     {
     }));
 
-
+    
     L1AmperageChart.renderer.text('0',35, 150)
         .css({
             fontWeight: 'bold',
@@ -732,6 +777,8 @@ function readGraphVisiabilityFromBrowserMemory(){
         })
         .add();
 
+  
+
     L3AmperageChart.renderer.text('0',35, 150)
         .css({
             fontWeight: 'bold',
@@ -740,7 +787,7 @@ function readGraphVisiabilityFromBrowserMemory(){
         })
         .add();
 
-    L1AmperageChart.renderer.text( maxAmperageFromConfig, 225, 150 )
+    L1AmperageChart.renderer.text( maxAmperageFromConfig, 225, 145 )
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -748,7 +795,7 @@ function readGraphVisiabilityFromBrowserMemory(){
         })
         .add();
     
-    L2AmperageChart.renderer.text( maxAmperageFromConfig, 225, 150 )
+    L2AmperageChart.renderer.text( maxAmperageFromConfig, 225, 145 )
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -756,7 +803,7 @@ function readGraphVisiabilityFromBrowserMemory(){
         })
         .add();
     
-    L3AmperageChart.renderer.text( maxAmperageFromConfig, 225, 150)
+    L3AmperageChart.renderer.text( maxAmperageFromConfig, 225, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',

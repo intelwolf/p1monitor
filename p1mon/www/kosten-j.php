@@ -269,11 +269,11 @@ function createCostChart() {
             },
             xAxis: {
                 events: {
-                    setExtremes: function(e) {      
+                    setExtremes: function(e) {
                         if(typeof(e.rangeSelectorButton)!== 'undefined') {
                             for (var j = 0;  j < GselectText.length; j++){    
                                 if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                                    toLocalStorage('kosten-j-select-index',j); // PARAMETER
+                                    toLocalStorage('kosten-j-select-index',j+1); // PARAMETER
                                     break;
                                 }
                             }

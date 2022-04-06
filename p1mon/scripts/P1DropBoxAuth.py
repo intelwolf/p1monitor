@@ -30,9 +30,10 @@ def Main(argv):
     parser = argparse.ArgumentParser( add_help=False ) # suppress default UK help text
     parser = argparse.ArgumentParser( description = "-t <token> ,-u (geef authenticatie url) of -d wis tijdelijke bestand." )
 
-    parser.add_argument('-t','--token',      required=False )
-    parser.add_argument('-u','--url',        required=False, action='store_true' )
-    parser.add_argument('-d','--deletefile', required=False, action='store_true' )
+    parser.add_argument('-t', '--token',      required=False )
+    parser.add_argument('-u', '--url',        required=False, action='store_true' )
+    parser.add_argument('-d', '--deletefile', required=False, action='store_true' )
+    parser.add_argument('-a', '--addhyphen',  required=False, action='store_true' )
 
     args = parser.parse_args()
   
@@ -40,11 +41,19 @@ def Main(argv):
 
     auth_flow = dropbox_lib.AUTHFLOW
 
+    ###################################################
+    # this is a fix if the token starts with a hyphen #
+    ###################################################
+    if args.addhyphen == True and args.token != None:
+        args.token = "-" + args.token
+
     if args.token != None:
         flog.debug ( inspect.stack()[0][3]+": token gestart." )
         try:
 
-        # open van config database
+            flog.debug ( inspect.stack()[0][3]+": cli token is = " + str( args.token ) )
+
+            # open van config database
             try:
                 config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
             except Exception as e:
@@ -105,7 +114,7 @@ if __name__ == "__main__":
         logfile = const.DIR_FILELOG + prgname + ".log"
         flog = logger.fileLogger( logfile, prgname )
         #### aanpassen bij productie
-        flog.setLevel( logger.logging.DEBUG )
+        flog.setLevel( logger.logging.INFO )
         # never set this on
         flog.consoleOutputOn( False )
     except Exception as e:

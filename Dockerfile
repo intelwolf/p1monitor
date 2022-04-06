@@ -12,6 +12,7 @@ RUN addgroup -gid 997 gpio && adduser --disabled-password --gecos "P1Mon" p1mon 
 RUN echo >>/etc/sudoers "p1mon ALL=(ALL) NOPASSWD: ALL" && echo >>/etc/sudoers "www-data ALL=(p1mon) NOPASSWD: /p1mon/scripts/*"
 
 # Install Python packages required
+#RUN pip3 install falcon
 RUN pip3 install pythoncrc gunicorn bcrypt certifi cffi chardet colorzero dropbox falcon future gpiozero idna iso8601 paho-mqtt psutil pycparser pyserial python-crontab python-dateutil pytz PyYAML requests RPi.GPIO setuptools spidev urllib3
 # --no-cache-dir
 

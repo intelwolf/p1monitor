@@ -333,7 +333,7 @@ def Main( argv ):
         try:
             cmd = '/usr/bin/sudo certbot renew'
             proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            stdout, stderr  = proc.communicate( timeout=10 )
+            stdout, stderr  = proc.communicate( timeout=60 )
             exit_code       = int( proc.wait() )
             if exit_code == 0: # last succesfull try to renew the certificate.
                 rt_status_db.strset( makeLocalTimeString.makeLocalTimeString(), 120, flog )
@@ -343,6 +343,7 @@ def Main( argv ):
             sys.exit( 1 )
 
         flog.info( inspect.stack()[0][3] + ": antwoord van LetsEncrypt: "  + str( stdout.decode('utf-8').replace('\n', ' ') ) )
+        nginx_restart()  # needed to read in a new recieved cert after an true renew. 
         sys.exit( 0 )
 
     #################################################
@@ -437,7 +438,7 @@ def Main( argv ):
             try:
                 cmd = '/usr/bin/sudo certbot delete -n --cert-name ' + fqdn
                 proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                stdout, stderr  = proc.communicate( timeout=15 )
+                stdout, stderr  = proc.communicate( timeout=60)
             except Exception as e:
                 flog.warning( inspect.stack()[0][3] + ": verwijderen van het certificaat voor " + fqdn + "gefaald " + str(e.args) )
 

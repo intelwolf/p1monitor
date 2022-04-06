@@ -320,21 +320,21 @@ function createKwhChart() {
                         }
                     }
                 }
-                }  
+                }
             },
             xAxis: {
             events: {
-                setExtremes: function(e) {      
+                setExtremes: function(e) {
                     if(typeof(e.rangeSelectorButton)!== 'undefined') {
                         for (var j = 0;  j < GselectText.length; j++){    
                             if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                                toLocalStorage('powerprod-api-d-select-index',j); // PARAMETER
+                                toLocalStorage('powerprod-api-d-select-index',j+1); // PARAMETER
                                 break;
                             }
                         }
                     }
                 }
-            },   
+            },
             minTickInterval: 1 * 24 * 3600000, // PARAMETER
             range:          31 * 24 * 3600000, // PARAMETER
             minRange:       7  * 24 * 3600000, // PARAMETER

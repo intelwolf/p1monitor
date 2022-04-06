@@ -181,7 +181,7 @@ $arr = array (
     Volg de volgende stappen:<br><br>
     1: Zet de nieuwe software versie op een tweede SDHC kaartje.<br>
     2: Start de Upgrade Aide met een USB stick in de Rpi.<br>
-    3: Doen een shutdown van de Rpi via het P1-monitor menu.<br>
+    3: Doe een shutdown van de Rpi via het P1-monitor menu.<br>
     4: Haal de 5V voeding van de Rpi.<br>
     5: Plaats het tweede kaartje in de Rpi.<br>
     6: Plaats de 5V voeding in de Rpi.<br>
@@ -1136,13 +1136,45 @@ $arr = array (
     'Even geduld aub.','Please wait.','S&aposil vous plaît, attendez.'
     ),
 /* 296 */ array(
-    '','',''
+    'De berekende Ampère waarde (W/V), de slimme meter geeft de waarde alleen weer in stappen van 1 Ampère. ',
+    'The calculated Ampere value (W/V), the smart meter only displays the value in steps of 1 Ampere.',
+    'La valeur d&apos;ampère calculée (W/V), le compteur intelligent affiche uniquement la valeur par pas de 1 ampère.'
     ),
 /* 297 */ array(
+    'Netwerktijd is actief','Network time is active','Le temps réseau est actif'
+    ),
+/* 298 */ array(
+    'Netwerktijd synchronisatie','Network time synchronization','Synchronisation de l&apos;heure du réseau'
+    ),
+/* 299 */ array(
+    'Laatste tijdsynchronisatie','Last time sync','Dernière synchronisation'
+    ),
+/* 300 */ array(
+    'Netwerktijd servernaam','Network time server name','Nom du serveur de temps réseau'
+    ),
+/* 301 */ array(
+    'Netwerktijd server IP','Network time server IP','IP du serveur de temps réseau'
+    ),
+/* 302 */ array(
+    'Tijdzone','Time zone','Fuseau horaire'
+    ),
+/* 303 */ array(
+    'Tijdsverschil slimme meter en het systeem (seconden)',
+    'Time difference smart meter and the system (seconds)',
+    'Compteur intelligent de décalage horaire et système (secondes)'
+    ),
+/* 304 */ array(
+    'Dit is normaal niet meer dan een paar seconden. Als het verschil groter is dan is de tijd van het systeem of van de slimme meter niet correct.',
+    'This is normally no more than a few seconds. If the difference is greater than the time of the system or of the smart meter is not correct.',
+    'Ce n&apos;est normalement pas plus de quelques secondes. Si la différence est supérieure à l&apos;heure du système ou du compteur intelligent n&apos;est pas correcte.'
+    ),
+/* 305 */ array(
     '','',''
     ),
-    
-    
+/* 306 */ array(
+    '','',''
+    ),
+
 
 );
 

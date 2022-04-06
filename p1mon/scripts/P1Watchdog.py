@@ -5,6 +5,7 @@ import glob
 import inspect
 import filesystem_lib
 import network_lib
+import network_time_lib
 import hashlib
 import json
 import time
@@ -19,6 +20,7 @@ import random
 import struct
 import shutil
 import string
+import system_info_lib
 import util
 import urllib.request
 import semaphore3
@@ -42,6 +44,7 @@ prgname = 'P1Watchdog'
 
 rt_status_db            = rtStatusDb()
 config_db               = configDB()
+net_time                = network_time_lib.NetworkTimeStatus()
 p1_no_data_notification = False
 next_version_timestamp  = 0 # if this value is < than utc do retry fetch remote version data.
 next_duckdns_timestamp  = 0 # if this value is < than utc do retry to do an DuckDns update.
@@ -128,7 +131,8 @@ def MainProg():
     getCpuTemperature()
     DuckDNS()
     getDefaultGateway()
-  
+    ntp_status()
+    
     ## Internet IP adres
     rt_status_db.strset(getPublicIpAddress(),26,flog)
     ## DNS naamv van publieke adres
@@ -226,7 +230,6 @@ def MainProg():
                         flog.info(inspect.stack()[0][3]+ "reset van watermeterstand gereed.")
 
 
-
         # elke 10 sec acties
         if cnt%5 == 0:
             ## systeem gegevens updaten.
@@ -236,7 +239,7 @@ def MainProg():
             ## ruimte vrij op ramdisk
             rt_status_db.strset(getDiskPctUsed(const.DIR_RAMDISK),21,flog)
             ## RAMgebruik
-            rt_status_db.strset(getRamUsedPct(),31,flog)
+            rt_status_db.strset(get_ram_used_pct(),31,flog)
             ## CPU temperatuur
             getCpuTemperature()
             ## controle of er nog P1 data binnen komt.
@@ -301,6 +304,8 @@ def MainProg():
             rt_status_db.strset(getOsInfo(),22,flog)
             ## Python versie die we gebruiken.
             rt_status_db.strset(getPythonVersion(),25,flog)
+            ## update the NTP network time status.
+            ntp_status()
 
         # elke 300 sec acties
         if cnt%150 == 0:
@@ -329,6 +334,18 @@ def MainProg():
         if cnt > 1800:
             cnt=1
         time.sleep(2) #DO NOT CHANGE!
+
+########################################################
+# update the network status and status database        #
+########################################################
+def ntp_status():
+    try:
+        net_time.status()
+        rt_status_db.strset( net_time.json() ,124,flog )
+        #print ( net_time.json() )
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+
 
 def getDefaultGateway():
     try:
@@ -1090,7 +1107,8 @@ def checkWatermeterCounterSetRun():
 
 def check_for_p1port_data():
     global p1_no_data_notification
-    time_out = 30 # number of seconds before notification/ detection.
+    # version 1.5.0 higer increased to 45 seconds.
+    time_out = 45 # number of seconds before notification/ detection.
 
     try:
         _id, utc_str, _description, _index = rt_status_db.strget( 87, flog )
@@ -1248,17 +1266,9 @@ def cleanDownload(): #P1 ok
             flog.error(inspect.stack()[0][3]+": Onverwacht fout op file "+name+' '+str(e))
 
 # return how mutch ram is used in pct
-def getRamUsedPct(): #P1 ok
+def get_ram_used_pct(): #P1 ok
     try:
-        proc = subprocess.Popen(['/usr/bin/free','-k'], stdout=subprocess.PIPE)
-        tmp = proc.stdout.read().decode('utf-8')
-        mem_used = tmp.split('\n')[1].split()[3] 
-        mem_total = tmp.split('\n')[1].split()[1] 
-        #print ( mem_used  )
-        #print ( mem_total )
-        r = "{:10.1f}".format( (1 - float(mem_used)/float(mem_total) ) *100).strip()
-        #print ( r )
-        return r
+        return system_info_lib.get_ram_used_pct()
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": Ram gebruik uitlezen gefaald "+str(e))
         return "0"

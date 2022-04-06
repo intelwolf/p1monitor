@@ -307,6 +307,7 @@ def main_prod():
                         phase_db_rec=phase_db_record, 
                         flog=flog 
                         )
+                    #print ("#2", p1_status )
                     update_data_set( 
                         data_set=base_p1_data, 
                         status=p1_status, 
@@ -450,6 +451,8 @@ def check_serial():
 def update_data_set( data_set=None, status=None, phase_db_record=None, flog=None ):
 
     if p1_port_shared_lib.record_sanity_check( data_set=data_set, status=status, flog=flog ) == True:
+
+        rt_status_db.strset( status['p1_time_delta'] , 125 , flog )
 
         p1_port_shared_lib.insert_db_serial_record( data_set=data_set, status=status, dbstatus=rt_status_db, dbserial=e_db_serial, flog=flog )
 

@@ -234,7 +234,7 @@ class configDB():
 
         self.insert_rec("insert or ignore into " + table + " values ( '149','0'                ,'Solar Edge config/DB naar fabrieks instellingen 1/0)')")
 
-        self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'Public dynamiche DNS naam.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'Publieke dynamische DNS naam (FQDN).')")
 
         # DuckDNS
         self.insert_rec("insert or ignore into " + table + " values ( '151',''                 ,'DuckDNS token.')")
@@ -280,6 +280,12 @@ class configDB():
         #self.insert_rec("insert or ignore into " + table + " values ( '152','eth0'             ,'no-ip netwerk device (eth0/wifi).')")
         #self.insert_rec("insert or ignore into " + table + " values ( '153','30'               ,'no-ip update timeout in seconden.')")
         #self.insert_rec("insert or ignore into " + table + " values ( '154','0'                ,'no-ip is aan(1) of uit(0).')")
+
+
+        # fix typo's from versions higer then 0.1.5
+        sql_update = "update " + table + " set label ='Publieke dynamische DNS naam (FQDN).' where id=150"
+        self.update_rec(sql_update)
+
 
         self.close_db()
 
@@ -717,6 +723,10 @@ class rtStatusDb():
         
         # 123: when 0 no data, or time that data is seen is expired. 
         self.insert_rec("insert or ignore into " + table + " values ( '123','0','P1 data is actief(timeout)',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '124','','JSON status van NTP netwerktijd',0)")
+        # geeft het verschil weer tussen de P1 poort telegram en de systeemtijd 1 tussen de 11 seconden is normaal. 
+        # afhangelijk van de een P1 poort snelheid van 1 of 10 seconden.
+        self.insert_rec("insert or ignore into " + table + " values ( '125','0','P1 telegram tijd delta',0)")
 
 
         # fix typo's from version 0.9.15a and up

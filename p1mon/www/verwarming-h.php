@@ -151,11 +151,11 @@ function createChart() {
         lineColor: '#6E797C',
         lineWidth: 1,
         events: {
-        setExtremes: function(e) {      
+        setExtremes: function(e) {
         if(typeof(e.rangeSelectorButton)!== 'undefined') {
-            for (var j = 0;  j < GselectText.length; j++){    
+            for (var j = 0;  j < GselectText.length; j++){
             if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                toLocalStorage('verwarming-h-select-temperatuur-index',j); // #PARAMETER
+                toLocalStorage('verwarming-h-select-temperatuur-index',j+1); // #PARAMETER
                 break;
             }
             }

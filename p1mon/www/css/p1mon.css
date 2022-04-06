@@ -20,6 +20,11 @@ body#logo {
     text-align: center;
 }
 
+.center-flex {
+    display: flex;
+    justify-content: center;
+}
+
 
 input.error {
     border-color: Red;
@@ -802,6 +807,10 @@ div#right-wrapper-config-right-4 {
     margin: 0px 3px 0px -4px;
 }
 
+.margin-7 {
+    margin: 0px 10px 0px 10px;
+}
+
 
 .text-1 {
     color: #ffffff;
@@ -1004,6 +1013,16 @@ div#right-wrapper-config-right-4 {
     font-size: 2em;
 }
 
+
+.text-32 {
+    position: relative;
+    left: -1px;
+    top: -15px;
+    color: #6E797C;
+    font-size: 26px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: bold;
+}
 
 /* invoer veld */
 

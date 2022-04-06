@@ -254,7 +254,7 @@ if ( isset($_POST["import"]) ) {
      <div class='close_button' id="import_sql_msg_close">
         <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
     </div>
-    <span class="text-15"><?php echo strIdx( 293 );?></span>
+    <span class="text-15"><?php echo strIdx( 294 );?></span>
     <div id="scroll_window" class="text-29" >
         <?php echo strIdx( 295 );?>
     </div>

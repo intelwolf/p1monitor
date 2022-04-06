@@ -240,7 +240,7 @@ function createKwhChart() {
                         }
                     }
                 }
-                }  
+                }
             },
             xAxis: {
             events: {
@@ -248,13 +248,13 @@ function createKwhChart() {
                     if(typeof(e.rangeSelectorButton)!== 'undefined') {
                         for (var j = 0;  j < GselectText.length; j++){    
                             if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                                toLocalStorage('powerprod-d-select-index',j); // PARAMETER
+                                toLocalStorage('powerprod-d-select-index',j+1); // PARAMETER
                                 break;
                             }
                         }
                     }
                 }
-            },   
+            },
             minTickInterval: 1 * 24 * 3600000, // PARAMETER
             range:          31 * 24 * 3600000, // PARAMETER
             minRange:       7  * 24 * 3600000, // PARAMETER
@@ -267,7 +267,7 @@ function createKwhChart() {
             lineColor: '#6E797C',
             lineWidth: 1
             },
-            yAxis:[ 
+            yAxis:[
                 { // kWh
                 gridLineColor: '#6E797C',
                 gridLineDashStyle: 'longdash',
