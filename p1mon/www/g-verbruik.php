@@ -8,7 +8,7 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
 
-if ( checkDisplayIsActive(18) == false) { return; } // TODO
+if ( checkDisplayIsActive(18) == false) { return; }
 ?>
 <!doctype html>
 <html lang="nl">
@@ -49,23 +49,22 @@ function readJsonApiSmartMeter( cnt ){
         var jsondata = JSON.parse(data); 
         var item;
         GdataHourGas.length   = 0;
-        for (var j = jsondata.length; j > 0; j--){    
+        for (var j = jsondata.length; j > 0; j--){
             item = jsondata[ j-1 ];
             item[1] = item[1] * 1000; // highchart likes millisecs.
             if ( Gaverage_gas_value > 0 && predictionInOn == 1 && j==1  ) { 
                 //console.log (" push it " + Gaverage_gas_value)
                 GdataHourGas.push ( [item[1], Gaverage_gas_value ]);
-            }   else {
+            } else {
                 GdataHourGas.push ( [item[1], item[10] ]);
             }
-          
-        }  
-
+        }
 
         $("#gasMeterGrafiekVerbruik").highcharts().series[0].update({
             pointStart: GdataHourGas[0][0],
             data: GdataHourGas
         }, true);
+
         $("#gasMeterGrafiekVerbruik").highcharts().redraw();
         
 
@@ -132,25 +131,10 @@ function readJsonApiHistoryHour(){
             }
 
             //currentGasUsage = Number.parseFloat( parseFloat( jsondata[j][1] ).toFixed(1) );
+            
+            var point = $("#currentuse").highcharts().series[0].points[0];
+            point.update( Number.parseFloat( Number.parseFloat( currentGasUsage.toFixed(2)) ), true, true, true);  
 
-            if ( currentGasUsage < 0 || currentGasUsage > 30000 ) {
-                console.error('niet normale gas waarde');
-                return; //fail save for error values. 
-            }
-        
-            if  ( currentGasUsage < currentGasUsageMinValue ) currentGasUsage = currentGasUsageMinValue
-            if  ( currentGasUsage > currentGasUsageMaxValue ) currentGasUsage = currentGasUsageMaxValue
-                
-            if (previousGasUsage < 0) { // init
-                var point = $("#currentuse").highcharts().series[0].points[0];
-                point.update( Number.parseFloat( Number.parseFloat( currentGasUsage.toFixed(2)) ), true, true, true);  
-            } else {
-                //console.log("step1 currentGasUsage="+currentGasUsage+" previousGasUsage="+previousGasUsage);
-                if ( currentGasUsage !==  previousGasUsage ){
-                        aninmatecurrentGasUsage() 
-                    }
-                }
-            previousGasUsage = currentGasUsage
             readJsonApiSmartMeter( gasCount );
 
       } catch(err) {
@@ -170,77 +154,6 @@ function readJsonApiFinancial(){
 }
 
 
-
-function aninmatecurrentGasUsage() {
-    // failsave for async problenms
-    if ( aninmatecurrentGasUsageTimer != 0 ) {
-        return; // still busy with prevous run.
-    }
-
-    var stepSize = (currentGasUsage - previousGasUsage)/ 19 ; 
-    var looptime = 500;
-    var totalTimeMax = 9500
-    var looptimeTotal = 0 ;
-    var value = previousGasUsage;
-    
-    //console.log("currentGasUsage="+currentGasUsage+" previousGasUsage="+previousGasUsage+ " stepSize="+stepSize+" looptime="+looptime);
-    
-    aninmatecurrentGasUsageTimer = setTimeout(function next() {
-        //console.log("aninmatecurrentGasUsageTimer="+aninmatecurrentGasUsageTimer);
-        looptimeTotal += looptime;
-                    
-        if (looptimeTotal >= totalTimeMax) {
-            updatePoint(currentGasUsage)             
-            //console.log("final currentGasUsage="+currentGasUsage+" previousGasUsage="+previousGasUsage+ " stepSize="+stepSize+" looptime="+looptime+" value="+value);
-            //console.log("Done.");
-            clearTimeout(aninmatecurrentGasUsageTimer);
-            aninmatecurrentGasUsageTimer = 0;
-            //console.log("aninmatecurrentGasUsageTimer Done="+aninmatecurrentGasUsageTimer);
-            return;
-        }
-                    
-        //value = Math.floor(value+stepSize);
-        value = value+stepSize;
-        //console.log("currentGasUsage="+currentGasUsage+" previousGasUsage="+previousGasUsage+ " stepSize="+stepSize+" looptime="+looptime+" value="+value);
-                    
-        if (stepSize < 0 && value < currentGasUsage ) {
-            value = currentGasUsage
-            //console.log("minvalue reached");
-            updatePoint(value);
-            clearTimeout(aninmatecurrentGasUsageTimer);
-            aninmatecurrentGasUsageTimer = 0;
-            //console.log("aninmatecurrentGasUsageTimer minvalue="+aninmatecurrentGasUsageTimer);
-            return;
-        }
-                    
-        if (stepSize > 0 && value > currentGasUsage ) {
-            value = currentGasUsage
-            //console.log("maxvalue reached");
-            updatePoint(value);
-            clearTimeout(aninmatecurrentGasUsageTimer);
-            aninmatecurrentGasUsageTimer = 0;
-            //console.log("aninmatecurrentGasUsageTimer maxvalue="+aninmatecurrentGasUsageTimer);
-            return;
-        }
-                    
-        updatePoint(value)
-        aninmatecurrentGasUsageTimer = setTimeout(next, looptime);
-
-        }, looptime);          
-    } 
-
-
-
-    function updatePoint( val ) {
-    // trim value 
-    val = Number.parseFloat( Number.parseFloat( val.toFixed(2) ) );
-    if  ( val < currentGasUsageMinValue ) val = currentGasUsageMinValue;
-    if  ( val > currentGasUsageMaxValue ) val = currentGasUsageMaxValue;
-    var point = $("#currentuse").highcharts().series[0].points[0];
-    point.update(val, true, true, true);    
-    
-}
-                    
 function createChartVerbruikGrafiek() {
     $("#gasMeterGrafiekVerbruik").highcharts({
     chart: {
@@ -361,7 +274,7 @@ function createDailytUseChart() {
             tickAmount: 0,
             tickWidth: 0,
             title: {
-            y: 95,
+            y: 30,
             useHTML: true,
             text: "m<sup>3</sup>/dag",
             style: {
@@ -389,15 +302,15 @@ function createDailytUseChart() {
             padding: 4,
             borderRadius: 5,
             verticalAlign: "center",
-            y: 25,
+            y: 0,
             color: "#6E797C",
             style: {
                 fontWeight: "bold",
-                fontSize: "60px"
+                fontSize: "45px"
             }
         },
         data: [{
-            y: parseFloat(GDailyGasM3)
+            y: parseFloat( GDailyGasM3 )
         }]
         }]
     });
@@ -443,13 +356,13 @@ function creatCurrentUseChart() {  //DONE
         tickPixelInterval: 1000,
         tickWidth: 0,
         title: {
-            y: 160,
+            y: 40,
             useHTML: true,
             text: "m<sup>3</sup>/uur",
             style: {
                 color: "#6E797C",
                     fontWeight: "bold",
-                    fontSize: "38px"
+                    fontSize: "55px"
                 },
             },
             labels: {
@@ -476,15 +389,15 @@ function creatCurrentUseChart() {  //DONE
             padding: 4,
             borderRadius: 5,
             verticalAlign: "center",
-            y: 30,
+            y: 0,
             color: "#6E797C",
             style: {
                 fontWeight: "bold",
-                fontSize: "92px"
+                fontSize: "72px"
             }
             },
             data: [{
-                y: parseFloat(currentGasUsage)
+                y: parseFloat( currentGasUsage )
             }]
         }]
     });

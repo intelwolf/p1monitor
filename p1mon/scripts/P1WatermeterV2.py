@@ -77,7 +77,7 @@ def Main(argv):
    
     # set proces gestart timestamp
     rt_status_db.timestamp( 98,flog )
-    
+
     try:
         gpioWaterPuls.init( 97, config_db ,flog )
     except Exception as e:
@@ -106,8 +106,9 @@ def Main(argv):
             except:
                 pass
 
+        
         waitForPuls()
-
+        
 
 #######################################################
 # set the file rights of the database files           #
@@ -310,6 +311,8 @@ def startBackgroundDeamon():
 # ######################################################
 def addMissingRecords():
 
+    #flog.setLevel( logging.DEBUG )
+
     missing_records_count   = 0
     max_timestamp           = ""
     min_timestamp           = ""
@@ -322,8 +325,8 @@ def addMissingRecords():
         sql = "select (strftime('%s',max(timestamp)) - strftime('%s',min(timestamp)))/60 - (count()-1), max(timestamp), min(timestamp) from " +\
         const.DB_WATERMETERV2_TAB + " where TIMEPERIOD_ID = " +\
         str(sqldb.INDEX_MINUTE)
-
         sql = " ".join ( sql.split() )
+        flog.debug( inspect.stack()[0][3] + " sql =" + str(sql))
         rec = watermeter_db.select_rec( sql )
         missing_records_count   = rec[0][0] # number of minute records missing in the database.
         max_timestamp           = rec[0][1] # most current timestamp.
@@ -354,7 +357,13 @@ def addMissingRecords():
             sql = " ".join ( sql.split() )
             #print ( sql )
             timestamp_list_from_db = watermeter_db.select_rec( sql )
-            #print ( timestamp_list_from_db )
+        
+            timestamp_set_from_db = set()
+            for i in range(len(timestamp_list_from_db)):
+                ##print ( timestamp_list_from_db[i][0]  )
+                timestamp_set_from_db.add( timestamp_list_from_db[i][0] )
+            
+
             flog.debug( inspect.stack()[0][3] + " maximaal aantal records in database = " + str( len(timestamp_list_from_db) ) )
             #print ( "records in database dat ontbreekt=" + str( timestamp_list_from_db ) )
         except Exception as e:
@@ -369,24 +378,26 @@ def addMissingRecords():
 
     # make a list of all possible timestamps 
     dt_tmp = datetime.strptime( min_timestamp, "%Y-%m-%d %H:%M:%S")
-    all_possible_timestamps = list()
-    #all_possible_timestamps = set()
+    all_possible_timestamps_set = set()
     while True:
         #print ("adding " + datetime.strftime( dt_tmp, "%Y-%m-%d %H:%M:%S") )
         #time.sleep(5)
-        all_possible_timestamps.append( str( dt_tmp ) )
-        #all_possible_timestamps.add( str(dt_tmp)  )
+        all_possible_timestamps_set.add ( str( dt_tmp ) )
         dt_tmp = dt_tmp + timedelta( minutes=1 )
         if datetime.strftime( dt_tmp, "%Y-%m-%d %H:%M:%S") > max_timestamp:
-            #all_possible_timestamps.pop() # remove current timestamp
             break
     
     #print( all_possible_timestamps )
-    flog.debug( inspect.stack()[0][3] + " maximaal aantal mogelijke timestamps = " + str( len( all_possible_timestamps) ) )
+    flog.debug( inspect.stack()[0][3] + " maximaal aantal mogelijke timestamps = " + str( len( all_possible_timestamps_set) ) )
 
+    #fiter_set = set()
+    filter_set = all_possible_timestamps_set.difference( timestamp_set_from_db )
+     
+    #tic_filter = time.perf_counter()
     #print( all_possible_timestamps[0], all_possible_timestamps[len(all_possible_timestamps)-1] )
     #print ( all_possible_timestamps )
     # filter out de records that are in the database
+    """
     for ts_db in timestamp_list_from_db: 
         str_db_ts = str( ts_db[0] )
         try:
@@ -394,10 +405,24 @@ def addMissingRecords():
         except:
             pass
 
+    toc_filter = time.perf_counter()
     #print( all_possible_timestamps )
-    flog.debug( inspect.stack()[0][3] + " aantal mogelijke timestamps na filtering = " + str( len(all_possible_timestamps) ) )
+    flog.debug( inspect.stack()[0][3] + " aantal mogelijke timestamps na filtering = " + str( len(all_possible_timestamps) ) + f" totaal {toc_filter - tic_filter:0.4f} seconden" )
+    """
+    
+    #print ( "all_possible_timestamps = " ,all_possible_timestamps)
+    #print ("----")
+    #print ( "filter_set = "              ,filter_set)
+    #print ("----")
+    all_possible_timestamps = list(filter_set)
+    all_possible_timestamps.sort()
+    #print ( "filter_list = "              ,filter_list)
+    #print ("----")
+    #print ("done")
 
-    if len( all_possible_timestamps) < 1 :
+    #sys.exit()
+
+    if len( all_possible_timestamps ) < 1 :
         flog.info( inspect.stack()[0][3] + ": gestopt geen records toegevoegd (fase 2)." ) 
         return
 
@@ -452,6 +477,7 @@ def addMissingRecords():
     flog.info( inspect.stack()[0][3] + ": invoegen van " + str(len(all_possible_timestamps)) + \
         " ontbrekende minuut records duurde " + f"totaal {toc_process - tic_process:0.4f} seconden" + \
             " process id = " + str(os.getpid()) )
+    #flog.setLevel( logging.DBUG )
 
 ########################################################
 # minute processing                                    #

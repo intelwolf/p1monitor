@@ -77,7 +77,7 @@ def MainProg():
         flog.critical(inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel: "+const.DB_STATUS_TAB+" succesvol geopend.")
-    rt_status_db.timestamp(17,flog)
+   
     
     # open van config database
     try:
@@ -86,6 +86,8 @@ def MainProg():
         flog.critical(inspect.stack()[0][3]+": database niet te openen(2)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
+
+    rt_status_db.timestamp( 17, flog )
 
     # init van processen na een start
     # SAMBA aanpassen
@@ -1118,7 +1120,7 @@ def check_for_p1port_data():
             rt_status_db.strset( 0 ,123 ,flog) # no data
             flog.debug( inspect.stack()[0][3]+ ": P1 data timeout, data is niet actief." )
         else:
-            rt_status_db.strset( 1 ,123 ,flog) # data seen witin the timeframe
+            rt_status_db.strset( 1 ,123 ,flog) # data seen within the timeframe
             flog.debug( inspect.stack()[0][3]+ ": P1 data is actief." )
 
     except Exception as e:
@@ -1126,41 +1128,7 @@ def check_for_p1port_data():
         # do nothing if timestamp is not correct.
         return
 
-    flog.debug( inspect.stack()[0][3]+ ": delta_time = " + str(delta_time) + " getUtcTime()=" + str(getUtcTime())  + " utc_str " + str( int( utc_str )) )
-
-    try:
-        _id, on, _label = config_db.strget( 73, flog )
-        if int(on) != 1:
-            flog.debug(inspect.stack()[0][3]+": email voor controle op P1 data staat uit, geen actie.")  
-            return 
-    except:
-        return
-    
-    # construct subject.
-    _id, subject, _label = config_db.strget( 69, flog )
-    if len( subject) < 1:
-        subject =  const.DEFAULT_EMAIL_NOTIFICATION
-
-    if delta_time >= time_out and p1_no_data_notification == False:
-        subject_str = ' -subject "' + subject + ' (slimme meter data niet ontvangen)."'
-        messagetext = ' -msgtext "Data uit de slimme meter komt niet meer binnen. Laatste slimme meter telegram ' + str(delta_time)+' seconden geleden ontvangen."'
-        messagehtml = ' -msghtml "<p>Data uit de slimme meter komt niet meer binnen.</p><p>Laatste slimme meter telegram <b>' + str(delta_time)+'</b> seconden geleden ontvangen.</p>"'
-        if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-            flog.error(inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald.")
-        else:
-            p1_no_data_notification = True
-            flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen in de afgelopen " + str(delta_time) + " seconden." )
-
-    if delta_time < time_out and p1_no_data_notification == True:
-            p1_no_data_notification = False
-            subject_str = ' -subject "' + subject + ' (slimme meter data ontvangen.)."'
-            messagetext = ' -msgtext "Data uit de slimme meter komt binnen. Laatste slimme meter telegram ' + str(delta_time)+' seconden geleden ontvangen."'
-            messagehtml = ' -msghtml "<p>Data uit de slimme meter komt weer binnen.</p><p>Laatste slimme meter telegram <b>' + str(delta_time) +'</b> seconden geleden ontvangen.</p>"'
-            if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                flog.error(inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald.")
-            flog.info(inspect.stack()[0][3]+" P1 data komt weer binnen, email verstuurd.")
-    
-    #print ( delta_time )
+    # Notifcation via email done via P1Notifier from version 1.7.0 and higher.
 
 def checkVarLogFolder():
     if os.system( 'sudo /p1mon/scripts/logspacecleaner.sh >/dev/null 2>&1' ) > 0:

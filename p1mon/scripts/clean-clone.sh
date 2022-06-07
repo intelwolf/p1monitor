@@ -284,6 +284,15 @@ if [ -d "$ACTIVE_DIR" ]; then
     cd $ACTIVE_DIR 
     PWD=$(pwd)
     delete_from_dir * .*Store ._*
+    rm -rf $ACTIVE_DIR
+fi
+
+ACTIVE_DIR=$CLONE/p1mon/www/txt/archief
+if [ -d "$ACTIVE_DIR" ]; then
+    cd $ACTIVE_DIR 
+    PWD=$(pwd)
+    delete_from_dir * .*Store ._*
+    rm -rf $ACTIVE_DIR
 fi
 
 ACTIVE_DIR=$CLONE/p1mon/www/download
@@ -499,6 +508,10 @@ find $EDITOR -type f -name "._*" -delete
 VARBACKUP=$CLONE/var/backups/*.gz
 echo "=> verwijderden van gzip files : $VARBACKUP"
 rm -f $VARBACKUP
+
+DHCPCDFILE=$CLONE/etc/dhcpcd.conf
+echo "=> default dhcpcd config file naar clone schrijven : $DHCPCDFILE"
+/p1mon/scripts/P1NetworkConfig.py --defaultdhcpconfig --forced -fp $DHCPCDFILE
 
 cd $CUR_DIR
 echo "=> unmounting $CLONE/boot"

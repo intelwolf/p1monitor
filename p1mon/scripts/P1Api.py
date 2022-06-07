@@ -2,45 +2,44 @@ import apiconst
 import apierror
 import apiutil
 import const
-import datetime
-import json
 import falcon
 import inspect
-import numbers
-import sys
+import json
+import logger
 import os
+import sqldb
+import sys
+import api_phaseminmax_lib
 import api_solarpower_lib
 import api_catalog_lib
+import api_p1_port_lib
 
 from apiutil import p1_serializer, validate_timestamp, clean_timestamp_str, list_filter_to_str, validate_timestamp_by_length
-from sqldb import SqlDb1, SqlDb2, SqlDb3, SqlDb4, rtStatusDb, financieelDb, historyWeatherDB, configDB, currentWeatherDB, temperatureDB, WatermeterDBV2, PhaseDB, powerProductionDB, powerProductionSolarDB
-
-from sys import exit
-from logger import fileLogger,logging
 
 # INIT
 prgname = 'P1Api'
-e_db_serial                 = SqlDb1()
-e_db_history_sqldb2         = SqlDb2() # min
-e_db_history_uur_sqldb3     = SqlDb3() # hour
-e_db_history_uur_sqldb4     = SqlDb4() # day,month, year
-rt_status_db                = rtStatusDb()
-config_db                   = configDB()
-e_db_financieel             = financieelDb()
-weer_history_db             = historyWeatherDB()
-weer_db                     = currentWeatherDB()
-temperature_db              = temperatureDB()
-watermeter_db               = WatermeterDBV2()
-fase_db                     = PhaseDB()
-power_production_db         = powerProductionDB()
+e_db_serial                 = sqldb.SqlDb1()
+e_db_history_sqldb2         = sqldb.SqlDb2() # min
+e_db_history_uur_sqldb3     = sqldb.SqlDb3() # hour
+e_db_history_uur_sqldb4     = sqldb.SqlDb4() # day,month, year
+rt_status_db                = sqldb.rtStatusDb()
+config_db                   = sqldb.configDB()
+e_db_financieel             = sqldb.financieelDb()
+weer_history_db             = sqldb.historyWeatherDB()
+weer_db                     = sqldb.currentWeatherDB()
+temperature_db              = sqldb.temperatureDB()
+watermeter_db               = sqldb.WatermeterDBV2()
+fase_db                     = sqldb.PhaseDB()
+power_production_db         = sqldb.powerProductionDB()
+fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
 
 try:
     os.umask( 0o002 )
-    flog = fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )
-    flog.setLevel( logging.INFO )
+    flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )
+    flog.setLevel( logger.logging.INFO )
     flog.consoleOutputOn( True ) 
 except Exception as e:
-    print ("critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )
+    print ( "critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
     sys.exit(1)
 
 
@@ -136,7 +135,7 @@ flog.info( str(__name__) + ": database tabel "+const.DB_TEMPERATUUR_TAB  + " suc
 try:
     watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
 except Exception as e:
-    flog.critical( str(__name__) + ": Database niet te openen(3)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
+    flog.critical( str(__name__) + ": Database niet te openen(11)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
     sys.exit(1)
 flog.info( str(__name__) + ": database tabel " + const.DB_WATERMETERV2_TAB + " succesvol geopend." )
 
@@ -145,7 +144,7 @@ try:
     fase_db.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_REALTIME_TAB )
     fase_db.defrag()
 except Exception as e:
-    flog.critical( str(__name__) + " database niet te openen(1)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
+    flog.critical( str(__name__) + " database niet te openen(12)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
     sys.exit(1)
 flog.info( str(__name__) + ": database tabel " + const.DB_FASE_REALTIME_TAB + " succesvol geopend.")
 
@@ -153,9 +152,18 @@ flog.info( str(__name__) + ": database tabel " + const.DB_FASE_REALTIME_TAB + " 
 try:
     power_production_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_TAB, flog )
 except Exception as e:
-    flog.critical( str(__name__) + ": Database niet te openen(3)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
+    flog.critical( str(__name__) + ": Database niet te openen(13)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
     sys.exit(1)
 flog.info( str(__name__) + ": database tabel " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
+
+# open van fase database voor min/max waarden.
+try:
+    fase_db_min_max_dag.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_MINMAX_DAG_TAB )
+except Exception as e:
+    flog.critical( str(__name__) + " database niet te openen(14)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
+    sys.exit(1)
+flog.info( str(__name__) + ": database tabel " + const.DB_FASE_MINMAX_DAG_TAB + " succesvol geopend.")
+
 
 #TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # ********************************************************************************************
@@ -190,6 +198,25 @@ app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_HOUR_HELP,  power_production
 app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_DAY_HELP,   power_production_solar_resource_help )
 app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_MONTH_HELP, power_production_solar_resource_help )
 app.add_route( apiconst.ROUTE_POWERPRODUCTION_SOLAR_YEAR_HELP,  power_production_solar_resource_help )
+
+# added in version 1.7.0
+phase_min_max_resource =  api_phaseminmax_lib.PhaseMinMax()
+phase_min_max_resource.set_flog( flog )
+phase_min_max_resource.set_database( fase_db_min_max_dag )
+app.add_route( apiconst.ROUTE_PHASE_MINMAX_DAY, phase_min_max_resource )
+
+phase_min_max_resource_help = api_phaseminmax_lib.PhaseMinMaxHelp()
+phase_min_max_resource_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_PHASE_MINMAX_DAY_HELP, phase_min_max_resource_help )
+
+# added in version 1.7.0
+p1_port_telegram = api_p1_port_lib.P1PortTelegram()
+p1_port_telegram.set_flog( flog )
+app.add_route( apiconst.ROUTE_P1_PORT_TELEGRAM, p1_port_telegram )
+
+p1_port_telegram_help = api_p1_port_lib.P1PortTelegramHelp()
+p1_port_telegram_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_P1_PORT_TELEGRAM_HELP, p1_port_telegram_help )
 
 
 ################ alles hierdonder nog omzetten !!!!!!!!!!! naar api_lib_nnnnn functies. 

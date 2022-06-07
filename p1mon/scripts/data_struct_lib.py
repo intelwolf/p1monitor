@@ -21,18 +21,20 @@ kw_min_max_record = {
 # and such. keeps status                    #
 #############################################
 p1_status_record = {
-    'timestamp_last_insert'     : 0,             # UTC timestamp the last time a record was succesfully inserted into the SQL database.
-    'p1_record_is_ok'           : 0,             # 0 last P1 telegram was not ok, 1 is ok.
-    'gas_present_in_serial_data': False,         # is gas processing needed/possible.
-    'g2h_previous_gas_value'    : const.NOT_SET, # gas
-    'g2h_previous_timestamp'    : const.NOT_SET, # gas
-    'p1_crc_check_is_on'        : True,          # P1 telegram check if CRC is valid on(True) or of(False)
-    'gas_record_prefix_number'  : '1',           # Gas code prefix.
-    'day_night_mode'            : 0,             # day/night country flag 0 is NL, 1 is Belgium.
-    'last_crc_check_timestamp'  : 0,             # timestamp of last crc check.
-    'crc_error_cnt'             : 0,             # number of crc error's until last reset.
-    'dbx_utc_ok_timestamp'      : 0,              # laatste keer dat een dbx message was send succesfull.
-    'p1_time_delta'             : 0              # verschil in seconden tussen de P1 timestamp en de systeemtijd. 
+    'timestamp_last_insert'         : 0,             # UTC timestamp the last time a record was succesfully inserted into the SQL database.
+    'p1_record_is_ok'               : 0,             # 0 last P1 telegram was not ok, 1 is ok.
+    'gas_present_in_serial_data'    : False,         # is gas processing needed/possible.
+    'g2h_previous_gas_value'        : const.NOT_SET, # gas
+    'g2h_previous_timestamp'        : const.NOT_SET, # gas
+    'p1_crc_check_is_on'            : True,          # P1 telegram check if CRC is valid on(True) or of(False)
+    'gas_record_prefix_number'      : '1',           # Gas code prefix.
+    'day_night_mode'                : 0,             # day/night country flag 0 is NL, 1 is Belgium.
+    'last_crc_check_timestamp'      : 0,             # timestamp of last crc check.
+    'crc_error_cnt'                 : 0,             # number of crc error's until last reset.
+    'dbx_utc_ok_timestamp'          : 0,             # laatste keer dat een dbx message was send succesfull.
+    'p1_time_delta'                 : 0,             # verschil in seconden tussen de P1 timestamp en de systeemtijd.
+    'large_consumption_user'        : False,         # prcocessing of large power meter telegrams that are different the consumer smart meters.
+    'calculate_missing_values'      : False          # try to calculate values that are not supplied by the smart meter. 
 }
 
 ##########################################################
@@ -48,11 +50,18 @@ p1_data_base_record = {
     'verbrk_kwh_181'            : const.NOT_SET,
     'verbrk_kwh_182'            : const.NOT_SET,
     'gelvr_kwh_281'             : const.NOT_SET,
-    'gelvr_kwh_281'             : const.NOT_SET,
+    'gelvr_kwh_282'             : const.NOT_SET,
     'act_verbr_kw_170'          : const.NOT_SET,
     'act_gelvr_kw_270'          : const.NOT_SET,
     'gas_verbr_m3_2421'         : const.NOT_SET,
-}
+    'tarief_code'               : 'P',              # default value.
+    # lc_xxx specific (large consumer) codes 
+    'lc_091'                    : const.NOT_SET,    # time in format hhmmsss
+    'lc_092'                    : const.NOT_SET,    # date in format ddmmyy
+    'lc_180'                    : const.NOT_SET,    # kWh consumed 
+    'lc_280'                    : const.NOT_SET,    # kWh produced
+    'ls_9070'                   : const.NOT_SET,    # total amps R,S,T (L1,L2,L3)
+}   
 
 #############################################
 # solar edge site id dict                   #
@@ -96,7 +105,7 @@ json_basic  = {
 # phase data record                         #
 #############################################
 phase_db_record = {
-    'timestamp'          : "",
+    #'timestamp'          : "",
     'consumption_L1_kW'  : 0, 
     'consumption_L2_kW'  : 0,
     'consumption_L3_kW'  : 0,
@@ -109,6 +118,34 @@ phase_db_record = {
     'L1_A'               : 0,
     'L2_A'               : 0,
     'L3_A'               : 0,
+}
+
+phase_db_min_max_record = {
+    'timestamp'              : "",
+    'max_consumption_L1_kW'  : 0, 
+    'max_consumption_L2_kW'  : 0,
+    'max_consumption_L3_kW'  : 0,
+    'max_production_L1_kW'   : 0,
+    'max_production_L2_kW'   : 0,
+    'max_production_L3_kW'   : 0,
+    'max_L1_V'               : 0,
+    'max_L2_V'               : 0,
+    'max_L3_V'               : 0,
+    'max_L1_A'               : 0,
+    'max_L2_A'               : 0,
+    'max_L3_A'               : 0,
+    'min_consumption_L1_kW'  : 0, 
+    'min_consumption_L2_kW'  : 0,
+    'min_consumption_L3_kW'  : 0,
+    'min_production_L1_kW'   : 0,
+    'min_production_L2_kW'   : 0,
+    'min_production_L3_kW'   : 0,
+    'min_L1_V'               : 0,
+    'min_L2_V'               : 0,
+    'min_L3_V'               : 0,
+    'min_L1_A'               : 0,
+    'min_L2_A'               : 0,
+    'min_L3_A'               : 0,
 }
 
 #############################################

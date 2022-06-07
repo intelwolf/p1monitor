@@ -364,6 +364,7 @@ def restore( args=None ):
 # make folder with restore data       #
 #######################################
 def save( ):
+
     msg = "Veiligstellen van gegevens gestart." 
     flog.info( msg)
     write_status_to_file( msg )
@@ -524,7 +525,7 @@ def save( ):
             flog.info( msg )
 
         except Exception as e:
-            flog.error( "Wifi configuratie niet te kopieren (" + wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH + ") ->" + str(e) )
+            flog.error( "Wifi configuratie niet te kopiëren (" + wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH + ") ->" + str(e) )
             write_status_to_file( str(e) )
             raise Exception( str(e) )
 
@@ -547,9 +548,13 @@ def save( ):
 
         # step 7 save crontab file
         try:
+            # fail save so there is a least an empty crontab file
+            crontab_lib.empty_crontab( flog=flog )
+
             destination_file = restore_path_cron + "/" + crontab_lib.CRONTAB_TMP_FILE 
             flog.debug ( "cron destination_file = " + destination_file )
             status_text, status_code = crontab_lib.save_to_file( destination_pathfile=destination_file, flog=flog )
+
             if status_code != 0:
                 raise Exception( status_text )
             msg = "crontab voor gebruiker " + pwd.getpwuid( os.getuid() ).pw_name + " gekopieerd naar bestand " + restore_path_cron
@@ -558,7 +563,7 @@ def save( ):
 
         except Exception as e:
             write_status_to_file( str(e) )
-            raise Exception( 'crontab informatie niet te kopieren.')
+            raise Exception( 'crontab informatie niet te kopiëren.')
 
         # step 8 save nginx files
         destination_file = restore_path_nginx + "/" + AIDE_NGINX_CONFIG

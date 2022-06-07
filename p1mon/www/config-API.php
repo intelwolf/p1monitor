@@ -126,11 +126,15 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
     function setIconClasses( itemName,  status ) {
 
         item = document.getElementById( itemName );
-        item.setAttribute( "class", "" ) // clear all previous classes.
+        item.classList.remove('fa-question-circle')
+        item.classList.remove('fa-circle-check')
+        item.classList.remove('fa-exclamation-triangle')
+        item.classList.add('fas');
 
+        //console.log(item.classList )
         if ( status == 0 ) {
             item.classList.add('color-ok');
-            item.classList.add('fa-check-circle');
+            item.classList.add('fa-circle-check');
         } else if ( status == 1 ) {
                 item.classList.add('color-error');
                 item.classList.add('fa-exclamation-triangle')
@@ -351,7 +355,7 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
                                         <label class="text-10"><?php echo strIdx( 267 );?></label>
                                     </div>
                                     <div class="rTableCell pad-18">
-                                        <i id="cert_renew" class="pad-7 text-10 fas fa-question-circle"></i>
+                                        <i id="cert_renew" class="fas fa-question-circle"></i>
                                     </div>
                                 </div>
 
@@ -361,7 +365,7 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
                                         <label class="text-10"><?php echo strIdx( 268 );?></label>
                                     </div>
                                     <div class="rTableCell pad-18">
-                                        <i id="web_config" class="pad-7 text-10 fas fa-question-circle"></i>
+                                        <i id="web_config" class="fas fa-question-circle"></i>
                                     </div>
                                 </div>
 

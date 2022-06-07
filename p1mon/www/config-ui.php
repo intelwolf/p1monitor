@@ -36,10 +36,8 @@ $err_cnt = -1;
 if ( isset($_POST["actueel_e"]) ) { 
     $err_cnt = 0;
     if ($_POST["actueel_e"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 18"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 18"))$err_cnt += 1;
     }
 }
@@ -47,10 +45,8 @@ if ( isset($_POST["actueel_e"]) ) {
 if ( isset($_POST["historie_e"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["historie_e"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 19"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 19"))$err_cnt += 1;
     }
 }
@@ -58,10 +54,8 @@ if ( isset($_POST["historie_e"]) ) {
 if ( isset($_POST["historie_g"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["historie_g"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 20"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 20"))$err_cnt += 1;
     }
 }
@@ -69,10 +63,8 @@ if ( isset($_POST["historie_g"]) ) {
 if ( isset($_POST["finaciel"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["finaciel"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 21"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 21"))$err_cnt += 1;
     }
 }
@@ -80,10 +72,8 @@ if ( isset($_POST["finaciel"]) ) {
 if ( isset($_POST["informatie"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["informatie"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 22"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 22"))$err_cnt += 1;
     }
 }
@@ -91,10 +81,8 @@ if ( isset($_POST["informatie"]) ) {
 if ( isset($_POST["meterstanden"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["meterstanden"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 62"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 62"))$err_cnt += 1;
     }
 }
@@ -102,11 +90,9 @@ if ( isset($_POST["meterstanden"]) ) {
 if ( isset($_POST["verwarming"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["verwarming"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 46"))$err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '1' where ID = 44"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 46"))$err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '0' where ID = 44"))$err_cnt += 1;
     }
@@ -116,10 +102,8 @@ if ( isset($_POST["verwarming"]) ) {
 if ( isset($_POST["watermeter"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["watermeter"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 102"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 102"))$err_cnt += 1;
     }
 }
@@ -127,10 +111,8 @@ if ( isset($_POST["watermeter"]) ) {
 if ( isset($_POST["kWhlevering"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["kWhlevering"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 129"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 129"))$err_cnt += 1;
     }
 }
@@ -138,10 +120,8 @@ if ( isset($_POST["kWhlevering"]) ) {
 if ( isset($_POST["kWhleveringSolarEdge"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["kWhleveringSolarEdge"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 147"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 147"))$err_cnt += 1;
     }
 }
@@ -149,10 +129,8 @@ if ( isset($_POST["kWhleveringSolarEdge"]) ) {
 if ( isset($_POST["ui_water_hide"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["ui_water_hide"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 157"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 157"))$err_cnt += 1;
     }
 }
@@ -160,13 +138,21 @@ if ( isset($_POST["ui_water_hide"]) ) {
 if ( isset($_POST["ui_gas_hide"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["ui_gas_hide"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 158"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 158"))$err_cnt += 1;
     }
 }
+
+if ( isset($_POST["ui_w2kw"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["ui_w2kw"] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 180") )$err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 180") )$err_cnt += 1;
+    }
+}
+
 
 
 if ( isset($_POST["verbruik_list_main"]) ) { 
@@ -235,10 +221,10 @@ if ( isset($_POST["amperage_fase_gauge"]) ) {
 if ( isset($_POST["voorspelling"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["voorspelling"] == '1' ) {
-        #echo "on<br>";
+        
         if ( updateConfigDb("update config set parameter = '1' where ID = 59"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
+        
         if ( updateConfigDb("update config set parameter = '0' where ID = 59"))$err_cnt += 1;
     }
 }
@@ -246,10 +232,10 @@ if ( isset($_POST["voorspelling"]) ) {
 if ( isset($_POST["drie_fasen"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["drie_fasen"] == '1' ) {
-        #echo "on<br>";
+        
         if ( updateConfigDb("update config set parameter = '1' where ID = 61"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
+        
         if ( updateConfigDb("update config set parameter = '0' where ID = 61"))$err_cnt += 1;
     }
 }
@@ -257,10 +243,10 @@ if ( isset($_POST["drie_fasen"]) ) {
 if ( isset($_POST["ui_header"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["ui_header"] == '1' ) {
-        #echo "on<br>";
+        
         if ( updateConfigDb("update config set parameter = '1' where ID = 134"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
+        
         if ( updateConfigDb("update config set parameter = '0' where ID = 134"))$err_cnt += 1;
     }
 }
@@ -289,9 +275,15 @@ if ( isset($_POST["verwarming_uit_label"]) ) {
 }
 
 
+if ( isset($_POST["phase_v_max"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["phase_v_max"],1,499.9,1)."' where ID = 173")) $err_cnt += 1;
+}
 
-
-
+if ( isset($_POST["phase_v_min"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["phase_v_min"],1,499.9,1)."' where ID = 174")) $err_cnt += 1;
+}
 
 function makeSelectorSec( $id ) {
 
@@ -364,47 +356,56 @@ function makeSelectorHomeSelector($id) {
 
 function makeSelectorKWhSelector($id) {
     $configValue = config_read($id);
-    $val_10=$val_20=$val_40=$val_60=$val_80=$val_100='';
+    $val_10=$val_20=$val_40=$val_60=$val_80=$val_100=$val_1000=$val_2000='';
     
-    if ($configValue == '10' ) { $val_10  = 'selected="selected"'; } 
-    if ($configValue == '20' ) { $val_20  = 'selected="selected"'; } 
-    if ($configValue == '40' ) { $val_40  = 'selected="selected"'; } 
-    if ($configValue == '60' ) { $val_60  = 'selected="selected"'; } 
-    if ($configValue == '80' ) { $val_80  = 'selected="selected"'; } 
-    if ($configValue == '100') { $val_100 = 'selected="selected"'; } 
+    if ($configValue == '10' )  { $val_10   = 'selected="selected"'; }
+    if ($configValue == '20' )  { $val_20   = 'selected="selected"'; }
+    if ($configValue == '40' )  { $val_40   = 'selected="selected"'; }
+    if ($configValue == '60' )  { $val_60   = 'selected="selected"'; }
+    if ($configValue == '80' )  { $val_80   = 'selected="selected"'; }
+    if ($configValue == '100')  { $val_100  = 'selected="selected"'; }
+    if ($configValue == '1000') { $val_1000 = 'selected="selected"'; }
+    if ($configValue == '2000') { $val_2000 = 'selected="selected"'; }
 
-    echo '<option ' . $val_10  . ' value="10"  >10 kWh</option>';
-    echo '<option ' . $val_20  . ' value="20"  >20 kWh</option>';
-    echo '<option ' . $val_40  . ' value="40"  >40 kWh</option>';
-    echo '<option ' . $val_60  . ' value="60"  >60 kWh</option>';
-    echo '<option ' . $val_80  . ' value="80"  >80 kWh</option>';
-    echo '<option ' . $val_100 . ' value="100" >100 kWh</option>';
-    
+    echo '<option ' . $val_10   . ' value="10"   >10 kWh</option>';
+    echo '<option ' . $val_20   . ' value="20"   >20 kWh</option>';
+    echo '<option ' . $val_40   . ' value="40"   >40 kWh</option>';
+    echo '<option ' . $val_60   . ' value="60"   >60 kWh</option>';
+    echo '<option ' . $val_80   . ' value="80"   >80 kWh</option>';
+    echo '<option ' . $val_100  . ' value="100"  >100 kWh</option>';
+    echo '<option ' . $val_1000 . ' value="1000" >1000 kWh</option>';
+    echo '<option ' . $val_2000 . ' value="2000" >2000 kWh</option>';
 }
 
 function makeSelectorKwSelector($id) {
         $configValue = config_read($id);
-        $val_1000=$val_2000=$val_2500=$val_5000=$val_10000=$val_20000=$val_25000=$val_50000=$val_100000='';
+        $val_1000=$val_2000=$val_2500=$val_5000=$val_10000=$val_20000=$val_25000=$val_50000=$val_100000=$val_250000=$val_500000=$val_1000000='';
         
-        if ($configValue == '1000'  ) { $val_1000  = 'selected="selected"'; } 
-        if ($configValue == '2000'  ) { $val_2000  = 'selected="selected"'; } 
-        if ($configValue == '2500'  ) { $val_2500  = 'selected="selected"'; } 
-        if ($configValue == '5000'  ) { $val_5000  = 'selected="selected"'; } 
-        if ($configValue == '10000' ) { $val_10000 = 'selected="selected"'; } 
-        if ($configValue == '20000' ) { $val_20000 = 'selected="selected"'; } 
-        if ($configValue == '25000' ) { $val_25000 = 'selected="selected"'; } 
-        if ($configValue == '50000' ) { $val_50000 = 'selected="selected"'; } 
-        if ($configValue == '100000') { $val_100000 = 'selected="selected"'; } 
+        if ($configValue == '1000'   ) { $val_1000    = 'selected="selected"'; }
+        if ($configValue == '2000'   ) { $val_2000    = 'selected="selected"'; }
+        if ($configValue == '2500'   ) { $val_2500    = 'selected="selected"'; }
+        if ($configValue == '5000'   ) { $val_5000    = 'selected="selected"'; }
+        if ($configValue == '10000'  ) { $val_10000   = 'selected="selected"'; }
+        if ($configValue == '20000'  ) { $val_20000   = 'selected="selected"'; }
+        if ($configValue == '25000'  ) { $val_25000   = 'selected="selected"'; }
+        if ($configValue == '50000'  ) { $val_50000   = 'selected="selected"'; }
+        if ($configValue == '100000' ) { $val_100000  = 'selected="selected"'; }
+        if ($configValue == '250000' ) { $val_250000  = 'selected="selected"'; }
+        if ($configValue == '500000' ) { $val_500000  = 'selected="selected"'; }
+        if ($configValue == '1000000') { $val_1000000 = 'selected="selected"'; }
         
-        echo '<option ' . $val_1000  . ' value="1000"  >1 kW</option>';
-        echo '<option ' . $val_2000  . ' value="2000"  >2 kW</option>';
-        echo '<option ' . $val_2500  . ' value="2500"  >2.5 kW</option>';
-        echo '<option ' . $val_5000  . ' value="5000"  >5 kW</option>';
-        echo '<option ' . $val_10000 . ' value="10000" >10 kW</option>';
-        echo '<option ' . $val_20000 . ' value="20000" >20 kW</option>';
-        echo '<option ' . $val_25000 . ' value="25000" >25 kW</option>';
-        echo '<option ' . $val_50000 . ' value="50000" >50 kW</option>';
-        echo '<option ' . $val_100000. ' value="100000" >100 kW</option>';
+        echo '<option ' . $val_1000    . ' value="1000"  >1 kW</option>';
+        echo '<option ' . $val_2000    . ' value="2000"  >2 kW</option>';
+        echo '<option ' . $val_2500    . ' value="2500"  >2.5 kW</option>';
+        echo '<option ' . $val_5000    . ' value="5000"  >5 kW</option>';
+        echo '<option ' . $val_10000   . ' value="10000" >10 kW</option>';
+        echo '<option ' . $val_20000   . ' value="20000" >20 kW</option>';
+        echo '<option ' . $val_25000   . ' value="25000" >25 kW</option>';
+        echo '<option ' . $val_50000   . ' value="50000" >50 kW</option>';
+        echo '<option ' . $val_100000  . ' value="100000" >100 kW</option>';
+        echo '<option ' . $val_250000  . ' value="250000" >250 kW</option>';
+        echo '<option ' . $val_500000  . ' value="500000" >500 kW</option>';
+        echo '<option ' . $val_1000000 . ' value="1000000" >1000 kW</option>';
 }
 
 function makeSelectorGasSelector($id) {
@@ -441,63 +442,88 @@ function makeSelectorGasSelector2($id) {
 
 function makeSelectorKwSelector2($id) {
     $configValue = config_read($id);
-    $val_10=$val_20=$val_50=$val_100=$val_120=$val_150=$val_200=$val_300='';
+    $val_10=$val_20=$val_50=$val_100=$val_120=$val_150=$val_200=$val_300=$val_1000=$val_3000=$val_5000=$val_7500=$val_10000='';
     
-    if ($configValue == '1'  ) { $val_10  = 'selected="selected"'; } 
-    if ($configValue == '2'  ) { $val_20  = 'selected="selected"'; } 
-    if ($configValue == '5'  ) { $val_50  = 'selected="selected"'; } 
-    if ($configValue == '10' ) { $val_100 = 'selected="selected"'; } 
-    if ($configValue == '12' ) { $val_120 = 'selected="selected"'; } 
-    if ($configValue == '15' ) { $val_150 = 'selected="selected"'; } 
-    if ($configValue == '20' ) { $val_200 = 'selected="selected"'; }
-    if ($configValue == '30' ) { $val_300 = 'selected="selected"'; }  
+    if ($configValue == '1'    ) { $val_10   = 'selected="selected"'; }
+    if ($configValue == '2'    ) { $val_20   = 'selected="selected"'; }
+    if ($configValue == '5'    ) { $val_50   = 'selected="selected"'; }
+    if ($configValue == '10'   ) { $val_100  = 'selected="selected"'; }
+    if ($configValue == '12'   ) { $val_120  = 'selected="selected"'; }
+    if ($configValue == '15'   ) { $val_150  = 'selected="selected"'; }
+    if ($configValue == '20'   ) { $val_200  = 'selected="selected"'; }
+    if ($configValue == '30'   ) { $val_300  = 'selected="selected"'; }
+    if ($configValue == '100'  ) { $val_1000 = 'selected="selected"'; }
+    if ($configValue == '300'  ) { $val_3000 = 'selected="selected"'; }
+    if ($configValue == '500'  ) { $val_5000 = 'selected="selected"'; }
+    if ($configValue == '750'  ) { $val_7500 = 'selected="selected"'; }
+    if ($configValue == '1000' ) { $val_10000 = 'selected="selected"'; }
     
-    echo '<option ' . $val_10  . ' value="1"  >1 kW</option>';
-    echo '<option ' . $val_20  . ' value="2"  >2 kW</option>';
-    echo '<option ' . $val_50  . ' value="5"  >5 kW</option>';
-    echo '<option ' . $val_100 . ' value="10" >10 kW</option>';
-    echo '<option ' . $val_120 . ' value="12" >12 kW</option>';
-    echo '<option ' . $val_150 . ' value="15" >15 kW</option>';
-    echo '<option ' . $val_200 . ' value="20" >20 kW</option>';
-    echo '<option ' . $val_300 . ' value="30" >30 kW</option>';
-}    
-    
+    echo '<option ' . $val_10    . ' value="1"  >1 kW</option>';
+    echo '<option ' . $val_20    . ' value="2"  >2 kW</option>';
+    echo '<option ' . $val_50    . ' value="5"  >5 kW</option>';
+    echo '<option ' . $val_100   . ' value="10" >10 kW</option>';
+    echo '<option ' . $val_120   . ' value="12" >12 kW</option>';
+    echo '<option ' . $val_150   . ' value="15" >15 kW</option>';
+    echo '<option ' . $val_200   . ' value="20" >20 kW</option>';
+    echo '<option ' . $val_300   . ' value="30" >30 kW</option>';
+    echo '<option ' . $val_1000  . ' value="100" >100 kW</option>';
+    echo '<option ' . $val_3000  . ' value="300" >300 kW</option>';
+    echo '<option ' . $val_5000  . ' value="500" >500 kW</option>';
+    echo '<option ' . $val_7500  . ' value="750" >750 kW</option>';
+    echo '<option ' . $val_10000 . ' value="1000" >1000 kW</option>';
+}
+
 function makeSelectorWatt( $id ) {
     $configValue = config_read( $id );
-    $val_4000=$val_6000=$val_8000=$val_10000='';
+    $val_4000=$val_6000=$val_8000=$val_10000=$val_60000=$val_100000=$val_320000='';
 
-    if ( $configValue == '4000'  ) { $val_4000  = 'selected="selected"'; } 
-    if ( $configValue == '6000'  ) { $val_6000  = 'selected="selected"'; } 
-    if ( $configValue == '8000'  ) { $val_8000  = 'selected="selected"'; } 
-    if ( $configValue == '10000' ) { $val_10000 = 'selected="selected"'; }
+    if ( $configValue == '4000'   ) { $val_4000   = 'selected="selected"'; } 
+    if ( $configValue == '6000'   ) { $val_6000   = 'selected="selected"'; } 
+    if ( $configValue == '8000'   ) { $val_8000   = 'selected="selected"'; } 
+    if ( $configValue == '10000'  ) { $val_10000  = 'selected="selected"'; }
+    if ( $configValue == '60000'  ) { $val_60000  = 'selected="selected"'; }
+    if ( $configValue == '100000' ) { $val_100000 = 'selected="selected"'; }
+    if ( $configValue == '320000' ) { $val_320000 = 'selected="selected"'; }
    
-    echo '<option ' . $val_4000  . ' value="4000"  >4000 W</option>';
-    echo '<option ' . $val_6000  . ' value="6000"  >6000 W</option>';
-    echo '<option ' . $val_8000  . ' value="8000"  >8000 W</option>';
-    echo '<option ' . $val_10000 . ' value="10000" >10000 W</option>';
+    echo '<option ' . $val_4000   . ' value="4000"   >4 kW</option>';
+    echo '<option ' . $val_6000   . ' value="6000"   >6 kW</option>';
+    echo '<option ' . $val_8000   . ' value="8000"   >8 kW</option>';
+    echo '<option ' . $val_10000  . ' value="10000"  >10 kW</option>';
+    echo '<option ' . $val_60000  . ' value="60000"  >60 kW</option>';
+    echo '<option ' . $val_100000 . ' value="100000" >100 kW</option>';
+    echo '<option ' . $val_320000 . ' value="320000" >320 kW</option>';
+
 }
 
 function makeSelectorAmpere( $id ) {
     $configValue = config_read( $id );
-    $val_10=$val_16=$val_25=$val_35=$val_40=$val_50=$val_63=$val_80='';
+    $val_10=$val_16=$val_25=$val_35=$val_40=$val_50=$val_63=$val_80=$val_160=$val_250=$val_400=$val_1000='';
 
-    if ($configValue == '10' ) { $val_10  = 'selected="selected"'; }
-    if ($configValue == '16' ) { $val_16  = 'selected="selected"'; }
-    if ($configValue == '25' ) { $val_25  = 'selected="selected"'; }
-    if ($configValue == '35' ) { $val_35  = 'selected="selected"'; }
-    if ($configValue == '40' ) { $val_40  = 'selected="selected"'; }
-    if ($configValue == '50' ) { $val_50  = 'selected="selected"'; }
-    if ($configValue == '63' ) { $val_63  = 'selected="selected"'; }
-    if ($configValue == '80' ) { $val_80  = 'selected="selected"'; }
+    if ($configValue == '10'   ) { $val_10  = 'selected="selected"'; }
+    if ($configValue == '16'   ) { $val_16  = 'selected="selected"'; }
+    if ($configValue == '25'   ) { $val_25  = 'selected="selected"'; }
+    if ($configValue == '35'   ) { $val_35  = 'selected="selected"'; }
+    if ($configValue == '40'   ) { $val_40  = 'selected="selected"'; }
+    if ($configValue == '50'   ) { $val_50  = 'selected="selected"'; }
+    if ($configValue == '63'   ) { $val_63  = 'selected="selected"'; }
+    if ($configValue == '80'   ) { $val_80  = 'selected="selected"'; }
+    if ($configValue == '160'  ) { $val_160 = 'selected="selected"'; }
+    if ($configValue == '250'  ) { $val_250 = 'selected="selected"'; }
+    if ($configValue == '400'  ) { $val_400 = 'selected="selected"'; }
+    if ($configValue == '1000' ) { $val_1000 = 'selected="selected"'; }
 
-    echo '<option ' . $val_10 . ' value="10"  >10 A</option>';
-    echo '<option ' . $val_16 . ' value="16"  >16 A</option>';
-    echo '<option ' . $val_25 . ' value="25"  >25 A</option>';
-    echo '<option ' . $val_35 . ' value="35"  >35 A</option>';
-    echo '<option ' . $val_40 . ' value="40"  >40 A</option>';
-    echo '<option ' . $val_50 . ' value="50"  >50 A</option>';
-    echo '<option ' . $val_63 . ' value="63"  >63 A</option>';
-    echo '<option ' . $val_80 . ' value="80"  >80 A</option>';
+    echo '<option ' . $val_10   . ' value="10"   >10 A</option>';
+    echo '<option ' . $val_16   . ' value="16"   >16 A</option>';
+    echo '<option ' . $val_25   . ' value="25"   >25 A</option>';
+    echo '<option ' . $val_35   . ' value="35"   >35 A</option>';
+    echo '<option ' . $val_40   . ' value="40"   >40 A</option>';
+    echo '<option ' . $val_50   . ' value="50"   >50 A</option>';
+    echo '<option ' . $val_63   . ' value="63"   >63 A</option>';
+    echo '<option ' . $val_80   . ' value="80"   >80 A</option>';
+    echo '<option ' . $val_160  . ' value="160"  >160 A</option>';
+    echo '<option ' . $val_250  . ' value="250"  >250 A</option>';
+    echo '<option ' . $val_400  . ' value="400"  >400 A</option>';
+    echo '<option ' . $val_1000 . ' value="1000" >1000 A</option>';
 
 }
 
@@ -642,6 +668,12 @@ function makeSelectorAmpere( $id ) {
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
                                 <label class="text-10"><?php echo strIdx( 200 );?></label>
+                                <p class="p-1"></p>
+                                <i class="text-10 pad-7 fas fa-bolt"></i>
+                                <label class="text-10" title="<?php echo strIdx(307);?>"><?php echo strIdx( 305 );?></label>
+                                <p class="p-1"></p>
+                                <i class="text-10 pad-7 fas fa-bolt"></i>
+                                <label class="text-10" title="<?php echo strIdx(307);?>"><?php echo strIdx( 306 );?></label>
                             </div>
                             <div class="float-left pad-1">    
                                 <select class="select-5 color-select color-input-back cursor-pointer" name="levering_list">
@@ -683,6 +715,10 @@ function makeSelectorAmpere( $id ) {
                                 <select class="select-5 color-select color-input-back cursor-pointer" name="amperage_fase_gauge">
                                     <?php makeSelectorAmpere( 123 );?>
                                 </select>
+                                <p class="p-1"></p>
+                                <input title="<?php echo strIdx(307);?>" class="input-17 color-select color-input-back" id="phase_v_max" name="phase_v_max" type="text" value="<?php echo config_read( 173 );?>">
+                                <p class="p-1"></p>
+                                <input title="<?php echo strIdx(307);?>" class="input-17 color-select color-input-back" id="phase_v_min" name="phase_v_min" type="text" value="<?php echo config_read( 174 );?>">
                             </div>
                         </div>
 
@@ -728,7 +764,6 @@ function makeSelectorAmpere( $id ) {
                             </div>
                         </div>
 
-
                         <p></p>
                         <div class="frame-4-top">
                             <span class="text-15"><?php echo strIdx( 177 );?></span>
@@ -742,6 +777,7 @@ function makeSelectorAmpere( $id ) {
                                     <div class="text-10"><?php echo strIdx( 207 );?></div>
                                     <div class="text-10"><?php echo strIdx( 256 );?></div>
                                     <div class="text-10"><?php echo strIdx( 257 );?></div>
+                                    <div class="text-10" title="<?php echo strIdx(314);?>"><?php echo strIdx( 313 );?></div>
                                 </div>
                                 <!-- right side -->
                                 <div class="float-right">
@@ -764,6 +800,10 @@ function makeSelectorAmpere( $id ) {
                                     <div>
                                         <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="1" <?php if ( config_read( 158 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="0" <?php if ( config_read( 158 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                    <div title="<?php echo strIdx(314);?>">
+                                        <input class="cursor-pointer" name="ui_w2kw" type="radio" value="1" <?php if ( config_read( 180 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="ui_w2kw" type="radio" value="0" <?php if ( config_read( 180 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
                             </div>
@@ -796,7 +836,6 @@ function makeSelectorAmpere( $id ) {
                             </div>
                         </div>
 
-
                         <p></p>
                         <div class="frame-4-top">
                             <span class="text-15"><?php echo strIdx( 179 );?></span>
@@ -819,7 +858,6 @@ function makeSelectorAmpere( $id ) {
                         </div>
                     </div>
                 </div>
-
 
 
                         <!-- placeholder variables for session termination -->
@@ -851,18 +889,40 @@ function makeSelectorAmpere( $id ) {
     <?php echo div_err_succes();?>
 <script>
 
+// make sure the max value is larger then the min value
+jQuery.validator.addMethod( "max_check", function(value, element) {
+    //console.log( document.getElementById("phase_v_max").value )
+    //console.log( document.getElementById("phase_v_min").value )
+    if ( parseInt(document.getElementById("phase_v_max").value) <= parseInt( document.getElementById("phase_v_min").value)  ) {
+        return false;
+    } 
+    return true;
+}, '');
+
 $(function() {
     $("#formvalues").validate({
         rules: {
             'verwarming_in_label':{
                 required: false,
                 maxlength: 10
-             
             },
             'verwarming_uit_label':{
                 required: false,
                 maxlength: 10,
-                
+            },
+            'phase_v_max': {
+                required: true,
+                number: true,
+                max: 499.9,
+                min: 1,
+                max_check: true
+            },
+            'phase_v_min': {
+                required: true,
+                number: true,
+                max: 499.9,
+                min: 1,
+                max_check: true
             },
         },
         invalidHandler: function(e, validator) { 

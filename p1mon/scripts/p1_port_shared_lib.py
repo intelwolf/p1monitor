@@ -13,9 +13,82 @@ import logger
 import shutil
 import string
 import os
+import sys
+import statistics
 import systemid
 import time
 import util
+
+###########################################################
+# email notification when there is no data seen on the P1 #
+# port                                                    #
+###########################################################
+class P1PortDataNotification():
+    
+    def __init__( self, statusdb=None, configdb=None, flog=None ):
+        self.statusdb               = statusdb
+        self.configdb               = configdb
+        self.did_send_data          = False
+        self.flog                   = flog
+
+    def run( self ):
+
+        try:
+            _id, on, _label = self.configdb.strget( 175, self.flog )
+            if int(on) != 1:
+                self.flog.debug(inspect.stack()[0][3]+": email voor controle op P1 data staat uit, geen actie.")  
+                return 
+        except:
+            return
+
+        try:
+
+            # construct subject.
+            _id, subject, _label = self.configdb.strget( 69, self.flog )
+            if len( subject) < 1:
+                subject =  const.DEFAULT_EMAIL_NOTIFICATION
+
+            # get time difference
+            _id, utc_str, _description, _index = self.statusdb.strget( 87, self.flog )
+            delta_time = abs( util.getUtcTime() - int( utc_str ) )
+
+            # make date time string
+            
+            t = time.localtime()
+            timestring = "%04d-%02d-%02d %02d:%02d:%02d"% ( t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec )
+           
+            # 1 is ok, 0 is not ok
+            _id, p1_data_is_ok, _label, _security = self.statusdb.strget( 123, self.flog ) 
+
+            self.flog.debug( inspect.stack()[0][3]+ ": p1_data_is_ok = " + p1_data_is_ok + " self.did_send_data = " +  str( self.did_send_data ) )
+
+            # P1 data is NOT ok
+            if int ( p1_data_is_ok ) == 0 and self.did_send_data == False:
+                self.flog.debug( inspect.stack()[0][3]+ ": P1 data ontbreekt. " )
+                subject_str = ' -subject "' + subject + ' (slimme meter data niet ontvangen)."'
+                messagetext = ' -msgtext "Data uit de slimme meter komt niet meer binnen.\n' +  timestring + ' Laatste slimme meter telegram ' + str( delta_time ) + ' seconden geleden ontvangen."'
+                messagehtml = ' -msghtml "<p>Data uit de slimme meter komt niet meer binnen.</p><p>' + timestring + ': Laatste slimme meter telegram <b>' + str(delta_time)+'</b> seconden geleden ontvangen.</p>"'
+                if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
+                    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald." )
+                else:
+                    self.flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen in de afgelopen " + str( delta_time ) + " seconden." )
+                    self.did_send_data = True
+
+            # P1 data is OK
+            if int( p1_data_is_ok ) == 1 and self.did_send_data == True:
+                self.flog.debug( inspect.stack()[0][3]+ ": P1 data is ok of weer binnengekomen" )
+                subject_str = ' -subject "' + subject + ' (slimme meter data ontvangen.)."'
+                messagetext = ' -msgtext "Data uit de slimme meter komt binnen.\n' + timestring + ' Laatste slimme meter telegram ' + str( delta_time )+' seconden geleden ontvangen."'
+                messagehtml = ' -msghtml "<p>Data uit de slimme meter komt weer binnen.</p><p>' + timestring + ': Laatste slimme meter telegram <b>' + str(delta_time) +'</b> seconden geleden ontvangen.</p>"'
+                if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
+                    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data werkt weer is gefaald." )
+                else:
+                    self.flog.info( inspect.stack()[0][3]+" P1 data komt weer binnen, email verstuurd." )
+                    self.did_send_data = False
+
+        except Exception as e:
+            self.flog.error( inspect.stack()[0][3]+ ": error " + str(e) )
+
 
 ###########################################################
 # read the FQDN from the config database and load the     #
@@ -38,6 +111,8 @@ def fqdn_from_config( verbose=False , configdb=None, data_set=None, flog=None):
 def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db_rec=None, flog=None ):
 
     tarief_code = 'P' # default value when not set
+    timestamp_telegram = None
+
     #global serial_buffer
 
     status['gas_present_in_serial_data'] = False
@@ -159,28 +234,110 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
                 #print ( buf[1] )
                 content = buf[1].split(')')
                 #print ( content )
-                timestamp = util.cleanDigitStr(content[0])
-                #print ( timestamp )
-                #timestamp = timestamp + "10"
-                try: # check if this is a valid date.
-                    p1_time = datetime.datetime.strptime( timestamp, "%y%m%d%H%M%S" ).timestamp()
-                    #print ( abs(int(time.time() - p1_time)) )
-                    status['p1_time_delta'] = str( abs(int(time.time() - p1_time)) )
-                    #print ("#1",status['p1_time_delta'] )
-                except ValueError:
-                    flog.warning( inspect.stack()[0][3] + " Timestamp van P1 bericht is niet correct (yymmddhhmmss) -> " + str(timestamp) )
+                timestamp_telegram = util.cleanDigitStr(content[0])
 
-            if tarief_code == '0002':
-                tarief_code = 'P'
+            # specific codes for large users
+            if status['large_consumption_user'] == True:
+            
+                if buf[0] == '1-0:1.8.0':   # kWh consumed 
+                    content = buf[1].split('*') 
+                    data_set['lc_180'] = util.cleanDigitStr(content[0])
 
-            if tarief_code == '0001':
-                tarief_code = 'D'
+                elif buf[0] == '1-0:2.8.0': # kWh produced
+                    content = buf[1].split('*') 
+                    data_set['lc_280'] = util.cleanDigitStr(content[0])
 
-            data_set['tarief_code'] = tarief_code
+                elif buf[0] == '1-0:90.7.0': # total amps R,S,T (L1,L2,L3)
+                    content = buf[1].split('*') 
+                    data_set['ls_9070'] = util.cleanDigitStr(content[0])
+
+                elif buf[0] == '1-0:0.9.1':  # time in format hhmmsss
+                    content = buf[1].split(')') 
+                    data_set['lc_091'] = util.cleanDigitStr(content[0])
+                
+                elif buf[0] == '1-0:0.9.2': # date in format ddmmyy
+                    content = buf[1].split(')') 
+                    data_set['lc_092'] = util.cleanDigitStr(content[0])
 
         except Exception as e:
             flog.error(inspect.stack()[0][3]+": fout in P1 data. Regel="+\
             line+" melding:"+str(e.args[0]))
+
+    if tarief_code == '0002':
+        tarief_code = 'P'
+
+    if tarief_code == '0001':
+        tarief_code = 'D'
+
+    data_set['tarief_code'] = tarief_code
+
+    if data_set['lc_091'] != const.NOT_SET and data_set['lc_092'] != const.NOT_SET:
+        timestamp_telegram = data_set['lc_092'] + data_set['lc_091']
+
+    if timestamp_telegram != None:
+        #print ( timestamp )
+        #timestamp = timestamp + "10"
+        try: # check if this is a valid date.
+            p1_time = datetime.datetime.strptime( timestamp_telegram, "%y%m%d%H%M%S" ).timestamp()
+            #print ( abs(int(time.time() - p1_time)) )
+            status['p1_time_delta'] = str( abs(int(time.time() - p1_time)) )
+            #print ("#1",status['p1_time_delta'] )
+        except ValueError:
+            flog.warning( inspect.stack()[0][3] + " Timestamp van P1 bericht is niet correct (yymmddhhmmss) -> " + str(timestamp_telegram) )
+
+    #print("#1", data_set)
+
+   
+
+    #flog.setLevel( logger.logging.DEBUG )
+    # convert the large cosumption values to cosumer code and calculate
+    # missing values, where possible
+    if status['large_consumption_user'] == True and status['calculate_missing_values'] == True:
+
+        # conversion of consumed kWh
+        if data_set['lc_180'] != const.NOT_SET:
+            data_set['verbrk_kwh_182'] = data_set['lc_180']
+            data_set['verbrk_kwh_181'] = '000000.000'
+
+        # conversion of produced kWh
+        if data_set['lc_280'] != const.NOT_SET:
+            data_set['gelvr_kwh_282'] = data_set['lc_280']
+            data_set['gelvr_kwh_281'] = '000000.000'
+
+        # try to calculate current consumed power
+        if data_set['act_verbr_kw_170'] == const.NOT_SET:
+            # is total amp set and the voltages used that
+            if data_set['ls_9070'] != const.NOT_SET:
+                v_total = []
+                if phase_db_rec['L1_V'] != const.NOT_SET:
+                       v_total.append( int(phase_db_rec['L1_V']) )
+                if phase_db_rec['L2_V'] != const.NOT_SET:
+                       v_total.append( int(phase_db_rec['L2_V']) ) 
+                if phase_db_rec['L2_V'] != const.NOT_SET:
+                       v_total.append( int(phase_db_rec['L3_V']) )
+
+                data_set['act_verbr_kw_170'] = "{0:06.3f}".format( (float(data_set['ls_9070']) * statistics.mean(v_total))/1000 )
+
+        if data_set['act_verbr_kw_170'] == const.NOT_SET: # fails save if calc fails
+            data_set['act_verbr_kw_170'] = "00.000"
+        
+        if data_set['act_gelvr_kw_270'] == const.NOT_SET:
+            data_set['act_gelvr_kw_270'] = "00.000"
+
+        # check if phase Watt values are set, if not try to calculate them
+        if phase_db_rec['L1_V'] != const.NOT_SET and phase_db_rec['L1_A'] != const.NOT_SET:
+            phase_db_rec['consumption_L1_kW'] = '{0:.3f}'.format(  (float(phase_db_rec['L1_V']) * float(phase_db_rec['L1_A'])) / 1000  )
+
+        if phase_db_rec['L2_V'] != const.NOT_SET and phase_db_rec['L2_A'] != const.NOT_SET:
+            phase_db_rec['consumption_L2_kW'] = '{0:.3f}'.format(   float(phase_db_rec['L2_V']) * float(phase_db_rec['L2_A']) / 1000 )
+
+        if phase_db_rec['L3_V'] != const.NOT_SET and phase_db_rec['L3_A'] != const.NOT_SET:
+            phase_db_rec['consumption_L3_kW'] = '{0:.3f}'.format( float(phase_db_rec['L3_V']) * float(phase_db_rec['L3_A']) / 1000 )
+
+    #print( phase_db_rec )
+    #print("#2", data_set)
+    #print ( phase_db_rec )
+    #sys.exit()
 
     if status['day_night_mode']  == 1:
         flog.debug( inspect.stack()[0][3] + " Dag en nacht tarief staat op mode 1: Belgie" )
@@ -295,6 +452,28 @@ def backup_data_to_disk_by_timestamp( statusdb=None, flog=None, minute_mod=15 ):
         flog.error(inspect.stack()[0][3]+": data back-up fout: "+str(e))
 
 #############################################################
+# get setting for P1 telegram mode of large consumers       #
+# 0: do not process                                         #
+# 1: do process                                             #
+#############################################################
+def get_large_consumer_mode( status=None ,configdb=None, flog=None ):
+
+    try:
+        _id, parameter, _label = configdb.strget( 178, flog )
+
+        if int( parameter ) != status['large_consumption_user']:
+            status['large_consumption_user'] = int( parameter )
+            if int( parameter ) == 0:
+                text = "uit."
+            else:
+                text = "aan."
+            flog.info(inspect.stack()[0][3]+": groot verbruiker mode is " + text )
+
+    except Exception as e:
+            flog.error(inspect.stack()[0][3]+": sql error( config )" + str(e))
+
+
+#############################################################
 # get country settings for day and night mode               #
 # 0: NL verwerking van E velden                             #
 # 1: BE processing of the E fields 181/182 and 281/282      #
@@ -303,7 +482,6 @@ def backup_data_to_disk_by_timestamp( statusdb=None, flog=None, minute_mod=15 ):
 def get_country_day_night_mode( status=None ,configdb=None, flog=None ):
 
     try:
-
         _id, parameter, _label = configdb.strget( 78,flog )
 
         if int( parameter ) != status['day_night_mode']:
@@ -312,6 +490,24 @@ def get_country_day_night_mode( status=None ,configdb=None, flog=None ):
 
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": sql error( config )"+str(e))
+
+
+#############################################################
+# This flag determines if missing values must be calculated #
+# True means calculate if possible                          #
+#############################################################
+def get_calculate_missing_values( status=None ,configdb=None, flog=None ):
+
+    try:
+        _id, parameter, _label = configdb.strget( 179,flog )
+
+        if int( parameter ) != status['calculate_missing_values']:
+            status['calculate_missing_values'] = int( parameter )
+            flog.info(inspect.stack()[0][3]+":  berekenen van ontbrekende waarde mode aangepast met de waarde " + str( status['calculate_missing_values'] ) )
+
+    except Exception as e:
+            flog.error(inspect.stack()[0][3]+": sql error( config )"+str(e))
+
 
 #############################################################
 #  get the telgram prefix from the datbase                  #
@@ -445,7 +641,6 @@ def max_kWh_day_value(data_set=None, dbstatus=None, dbserial=None, flog=None ):
 
     except Exception as e:
         flog.error( inspect.stack()[0][3]+": serial e-buffer kwH waarden vorige dag gefaald. Melding="+str(e.args[0]) )
-
     #flog.setLevel( logger.logging.INFO )
 
 #############################################################
@@ -539,150 +734,6 @@ def current_watermeter_count( configdb=None, waterdb=None, flog=None):
     return 0
 
 #############################################################
-# write a record to the phase datebase en deletes records   #
-# that are passed the rentention time                       #
-#############################################################
-def write_phase_history_values_to_db( phase_db_rec=None, configdb=None, phasedb=None, flog=None ):
-
-    phase_db_rec['timestamp'] = util.mkLocalTimeString()
-
-    # only add data when fase info is set to on.
-    if configdb.strget( 119 ,flog )[1] == "1": 
-        try:
-
-            sqlstr = "insert or replace into " + const.DB_FASE_REALTIME_TAB + " (TIMESTAMP, VERBR_L1_KW,VERBR_L2_KW,VERBR_L3_KW,GELVR_L1_KW,GELVR_L2_KW,GELVR_L3_KW,L1_V,L2_V,L3_V,L1_A,L2_A,L3_A) VALUES ('" + \
-                str( phase_db_rec['timestamp'] )         + "'," + \
-                str( phase_db_rec['consumption_L1_kW'] ) + "," + \
-                str( phase_db_rec['consumption_L2_kW'] ) + "," + \
-                str( phase_db_rec['consumption_L3_kW'] ) + "," + \
-                str( phase_db_rec['production_L1_kW'] )  + "," + \
-                str( phase_db_rec['production_L2_kW'] )  + "," + \
-                str( phase_db_rec['production_L3_kW'] )  + "," + \
-                str( phase_db_rec['L1_V'] )              + ", " + \
-                str( phase_db_rec['L2_V'] )              + ", " + \
-                str( phase_db_rec['L3_V'] )              + ", " + \
-                str( phase_db_rec['L1_A'] )              + ", " + \
-                str( phase_db_rec['L2_A'] )              + ", " + \
-                str( phase_db_rec['L3_A'] )              + ")"
-
-            sqlstr = " ".join( sqlstr.split() )
-            flog.debug( inspect.stack()[0][3] + ": SQL =" + str(sqlstr) )
-            phasedb.insert_rec(sqlstr)
-
-        except Exception as e:
-            flog.error( inspect.stack()[0][3] + ": Insert gefaald. Melding=" + str(e.args[0]) )
-
-#############################################################
-# update the status database of the current phase data      #
-#############################################################
-def write_phase_status_to_db( phase_db_rec=None, statusdb=None, flog=None):
-
-    try:
-        
-        if float( phase_db_rec['consumption_L1_kW'] ) != const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['consumption_L1_kW'] ) ,74, flog )
-        else:
-            statusdb.strset( '0.0' ,74, flog )
-            phase_db_rec['consumption_L1_kW'] = 0
-
-        if float( phase_db_rec['consumption_L2_kW'] ) !=  const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['consumption_L2_kW'] ) ,75, flog )
-
-        else:
-            statusdb.strset( '0.0' ,75, flog )
-            phase_db_rec['consumption_L2_kW'] = 0
-
-        if float( phase_db_rec['consumption_L3_kW'] ) !=  const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['consumption_L3_kW'] ) ,76, flog )
-        else:
-            statusdb.strset( '0.0' ,76, flog )
-            phase_db_rec['consumption_L3_kW'] = 0
-
-        if float( phase_db_rec['production_L1_kW'] ) !=  const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['production_L1_kW'] ) ,77, flog )
-        else:
-            statusdb.strset( '0.0' ,77, flog )
-            phase_db_rec['production_L1_kW'] = 0
-
-        if float( phase_db_rec['production_L2_kW'] ) !=  const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['production_L2_kW'] ) ,78, flog )
-        else:
-            statusdb.strset( '0.0' ,78, flog )
-            phase_db_rec['production_L2_kW'] = 0
-
-        if float( phase_db_rec['production_L3_kW'] ) !=  const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['production_L3_kW'] ) ,79, flog )
-        else:
-            statusdb.strset( '0.0' ,79, flog )
-            phase_db_rec['production_L3_kW'] = 0
-
-        if float( phase_db_rec['L1_V'] ) != const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['L1_V'] ) ,103, flog )
-        else:
-            statusdb.strset( '0.0' ,103, flog )
-            phase_db_rec['L1_V'] = 0
-
-        if float( phase_db_rec['L2_V'] ) != const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['L2_V'] ) ,104, flog )
-        else:
-            statusdb.strset( '0.0' ,104, flog )
-            phase_db_rec['L2_V'] = 0
-
-        if float( phase_db_rec['L3_V'] ) != const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['L3_V'] ) ,105, flog )
-        else:
-            statusdb.strset( '0.0' ,105, flog )
-            phase_db_rec['L3_V'] = 0
-
-        if float( phase_db_rec['L1_A'] ) != const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['L1_A'] ) ,100, flog )
-        else:
-            statusdb.strset( '0.0' ,100, flog )
-            phase_db_rec['L1_A'] = 0
-
-        if float( phase_db_rec['L2_A'] ) != const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['L2_A'] ) ,101, flog )
-        else:
-            statusdb.strset( '0.0' ,101, flog )
-            phase_db_rec['L2_A'] = 0
-
-        if float( phase_db_rec['L3_A'] ) != const.NOT_SET:
-            statusdb.strset( float( phase_db_rec['L3_A'] ) ,102, flog )
-        else:
-            statusdb.strset( '0.0' ,102, flog )
-            phase_db_rec['L3_A'] = 0
-
-        statusdb.timestamp( 106, flog ) # update timestamp of phase values in status database.
-
-    except Exception as e:
-            flog.error( inspect.stack()[0][3] + ": probleem met update van fase data naar status database =" + str(e.args[0]) )
-
-#############################################################
-# deletes the records in the phase data base based on the   #
-# number of retention day's. currently 7 days for 10 sec    #
-# processing and 1 day for 1 second processing              #
-#############################################################
-def delete_phase_record( p1_processing=None, phase_db=None, flog=None ):
-
-    try:
-
-        timestampstr = util.mkLocalTimeString()
-
-        #if ( int( phase_db_rec['timestamp'][14:16] )%5 ) == 0: # delete every 5 minutes and not every record to limit DB load and fragmentaion.
-
-        sql_del_str = "delete from " + const.DB_FASE_REALTIME_TAB + " where timestamp <  '"+\
-                str( datetime.datetime.strptime( \
-                timestampstr, "%Y-%m-%d %H:%M:%S") -\
-                datetime.timedelta( days=p1_processing['max_days_db_data_retention'] )) + "'"
-
-        flog.debug( inspect.stack()[0][3] + ": sql=" + sql_del_str )
-
-        phase_db.del_rec(sql_del_str)
-
-    except Exception as e:
-        flog.error( inspect.stack()[0][3] + ": verwijderen fase records ,delete gefaald. Melding=" + str(e.args[0]) )
-
-#############################################################
 # set all values in the data structure to NOT SET           #
 #############################################################
 def clear_data_buffer( buffer=None ):
@@ -723,6 +774,7 @@ def delete_serial_records( p1_processing=None, serial_db=None, flog=None ):
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": delete gefaald. Melding=" + str(e.args[0]) )
 
+
 ###########################################################
 # set the rate limiting of P1 telegram and the retention  #
 # days of the serial database                             #
@@ -745,6 +797,7 @@ def set_p1_processing_speed( p1_processing = None , config_db=None, flog=None ):
 
     except Exception as e:
         flog.warning( inspect.stack()[0][3] + ": P1 10/of 1 seconden snelheid fout ->  " + str(e.args) )
+
 
 ###########################################################
 # write the json data in the buffer array to a ram file   #

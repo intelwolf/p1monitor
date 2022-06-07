@@ -21,7 +21,7 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
 
-<script defer src="./font/awsome/js/all.js"></script>
+<script src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
@@ -30,7 +30,7 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <script src="./js/p1mon-util.js"></script>
 
 <script>
-const dataIndexOffset           = 50;
+const dataIndexOffset      = 50;
 
 var recordsLoaded          = 0;
 var GWattDataL1Consumed    = [];
@@ -58,8 +58,15 @@ var L3AIsVisible           = 1;
 var L1VIsVisible           = 1;
 var L2VIsVisible           = 1;
 var L3VIsVisible           = 1;
-var faseDbIsActive         = <?php if ( config_read( 119 ) == 1 ) { echo "true;"; } else { echo "false"; } ?>
-var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
+var faseDbIsActive         = <?php if ( config_read( 119 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo "\n";?>
+var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo "\n";?>
+var useKw                  = <?php if ( config_read( 180 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo "\n";?>
+
+if ( useKw ) {
+    var wattText = 'kW'
+} else {
+    var wattText = 'Watt'
+}
 
 function readJsonApiPhaseInformation(){ 
     $.getScript( "./api/v1/phase", function( data, textStatus, jqxhr ) {
@@ -98,16 +105,21 @@ function setDataFromJson() {
             //console.log( 'setDataFromJson() :dataIndexStart = ' + dataIndexStart );
             //console.log( 'setDataFromJson(): dataIndexStop = '  + dataIndexStop  );
 
+            var divisor = 1
+            if ( useKw ) {
+                divisor = 1000
+            }
+
             for ( var j = dataIndexStop ; j > dataIndexStart; j-- ) {    
                 item    = jsondata[ j-1 ];
                 item[1] = item[1] * 1000; // highchart likes millisecs.
 
-                GWattDataL1Consumed.push( [ item[1], item[2] ]    );
-                GWattDataL1Produced.push( [ item[1], item[5]*-1 ] );
-                GWattDataL2Consumed.push( [ item[1], item[3] ]    );
-                GWattDataL2Produced.push( [ item[1], item[6]*-1 ] );
-                GWattDataL3Consumed.push( [ item[1], item[4] ]    );
-                GWattDataL3Produced.push( [ item[1], item[7]*-1 ] );
+                GWattDataL1Consumed.push( [ item[1], item[2] / divisor ] );
+                GWattDataL1Produced.push( [ item[1], (item[5]*-1) / divisor] );
+                GWattDataL2Consumed.push( [ item[1], item[3] / divisor ] );
+                GWattDataL2Produced.push( [ item[1], (item[6]*-1) / divisor ] );
+                GWattDataL3Consumed.push( [ item[1], item[4] / divisor ] );
+                GWattDataL3Produced.push( [ item[1], (item[7]*-1) / divisor ] );
 
                 GAmpereL1.push( [ item[1], item[11] ] );
                 GAmpereL2.push( [ item[1], item[12] ] );
@@ -217,7 +229,9 @@ $(function () {
 
     if ( faseDbIsActive == false ) {
         $('#loading-fasedata').show();
-    }
+        centerPosition('#err_msg');
+        showStuff('err_msg');
+    } 
 
     toLocalStorage('fase-menu',window.location.pathname);
 
@@ -452,8 +466,7 @@ function setButtonVisbilty() {
                 <!-- header 2 --> 
                 <?php pageclock(); ?>
                 <?php page_menu_header_fase( 1 ); ?>
-                <?php weather_info(); ?>
-                </div>
+                <!-- weather info removed due to lack of room version 1.7.0 > -->
             </div>
 
                 <div class="content-wrapper">
@@ -482,7 +495,6 @@ function setButtonVisbilty() {
 
                 <div class="content-wrapper pad-36">
                     <span class="text-10">datapunten:&nbsp;</span><span class="text-10" id="datapunten-value">onbekend</span>
-                    
                 </div>
 
 
@@ -627,7 +639,7 @@ function setButtonVisbilty() {
     var L1WattChart = Highcharts.chart('L1WattGraph', Highcharts.merge( areaSplineOptions, 
     {
         title: {
-            text: 'L1 Watt'
+            text: 'L1 ' + wattText
         },
         tooltip: {
                 formatter: function() {
@@ -638,8 +650,13 @@ function setButtonVisbilty() {
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GWattDataL1Consumed[i][0] ==  this.x ) { // timestamp
-                                verbruikt = GWattDataL1Consumed[i][1].toFixed(0) + " W";
-                                geleverd  = (GWattDataL1Produced[i][1] * -1).toFixed(0) + " W";;
+                                if ( useKw ) {
+                                    verbruikt = GWattDataL1Consumed[i][1].toFixed(1) + ' ' + wattText;
+                                    geleverd  = (GWattDataL1Produced[i][1] * -1).toFixed(1) + ' ' + wattText;
+                                } else { 
+                                    verbruikt = GWattDataL1Consumed[i][1].toFixed(0) + ' ' + wattText;
+                                    geleverd  = (GWattDataL1Produced[i][1] * -1).toFixed(0) + ' ' + wattText;
+                                }
                                 break;
                             }
                         }
@@ -663,7 +680,7 @@ function setButtonVisbilty() {
     var L2WattChart = Highcharts.chart('L2WattGraph', Highcharts.merge( areaSplineOptions, 
     {
         title: {
-            text: 'L2 Watt'
+            text: 'L2 ' + wattText
         },
         tooltip: {
                 formatter: function() {
@@ -674,8 +691,13 @@ function setButtonVisbilty() {
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GWattDataL2Consumed[i][0] ==  this.x ) { // timestamp
-                                verbruikt = GWattDataL2Consumed[i][1].toFixed(0) + " W";
-                                geleverd  = (GWattDataL2Produced[i][1] * -1).toFixed(0) + " W";;
+                                if ( useKw ) {
+                                    verbruikt = GWattDataL2Consumed[i][1].toFixed(1) + ' ' + wattText;
+                                    geleverd  = (GWattDataL2Consumed[i][1] * -1).toFixed(1) + ' ' + wattText;
+                                } else { 
+                                    verbruikt = GWattDataL2Consumed[i][1].toFixed(0) + ' ' + wattText;
+                                    geleverd  = (GWattDataL2Consumed[i][1] * -1).toFixed(0) + ' ' + wattText;
+                                }
                                 break;
                             }
                         }
@@ -698,19 +720,8 @@ function setButtonVisbilty() {
 
     var L3WattChart = Highcharts.chart('L3WattGraph', Highcharts.merge( areaSplineOptions, 
     {
-        /*
-        chart: {
-            events: {
-                redraw: function () {
-                    
-                    console.log(' hide spinner');
-                
-                }
-            }
-        },
-        */
         title: {
-            text: 'L3 Watt'
+            text: 'L3 ' + wattText
         },
         tooltip: {
                 formatter: function() {
@@ -721,8 +732,13 @@ function setButtonVisbilty() {
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GWattDataL3Consumed[i][0] ==  this.x ) { // timestamp
-                                verbruikt = GWattDataL3Consumed[i][1].toFixed(0) + " W";
-                                geleverd  = (GWattDataL3Produced[i][1] * -1).toFixed(0) + " W";;
+                                if ( useKw ) {
+                                    verbruikt = GWattDataL3Consumed[i][1].toFixed(1) + ' ' + wattText;
+                                    geleverd  = (GWattDataL3Consumed[i][1] * -1).toFixed(1) + ' ' + wattText;
+                                } else { 
+                                    verbruikt = GWattDataL3Consumed[i][1].toFixed(0) + ' ' + wattText;
+                                    geleverd  = (GWattDataL3Consumed[i][1] * -1).toFixed(0) + ' ' + wattText;
+                                }
                                 break;
                             }
                         }
@@ -845,7 +861,7 @@ function setButtonVisbilty() {
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GVoltL1[i][0] ==  this.x ) { // timestamp
-                                volt = GVoltL1[i][1].toFixed(0) + " V";
+                                volt = GVoltL1[i][1].toFixed(1) + " V";
                                 break;
                             }
                         }
@@ -876,7 +892,7 @@ function setButtonVisbilty() {
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GVoltL2[i][0] ==  this.x ) { // timestamp
-                                volt = GVoltL2[i][1].toFixed(0) + " V";
+                                volt = GVoltL2[i][1].toFixed(1) + " V";
                                 break;
                             }
                         }
@@ -909,7 +925,7 @@ function setButtonVisbilty() {
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GVoltL3[i][0] ==  this.x ) { // timestamp
-                                volt = GVoltL3[i][1].toFixed(0) + " V";
+                                volt = GVoltL3[i][1].toFixed(1) + " V";
                                 break;
                             }
                         }
@@ -1042,6 +1058,5 @@ function setButtonEvents( active ) {
             }
 
     </script>
-
     </body>
     </html>

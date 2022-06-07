@@ -2,7 +2,8 @@
 import argparse
 import const
 import inspect
-import listOfPidByName
+import filesystem_lib
+#import listOfPidByName
 import logger
 import os
 import pwd
@@ -53,6 +54,10 @@ def Main( argv ):
         required=False,
         action="store_true",
         help="De optie wordt altijd uitgevoerd, bijvoorbeeld het aanmaken van een een configuratie bestand dat al bestaat." )
+
+    parser.add_argument('-fp', '--filepath', 
+        required=False,
+        help="gebruik dit path en filename voor opties die dit ondersteunen." )
 
     parser.add_argument( '-rdgw', '--removedefaultgateway',
         required=False,
@@ -120,9 +125,13 @@ def Main( argv ):
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
     if args.defaultdhcpconfig == True:
-        flog.info( inspect.stack()[0][3] + ": DHCP config file wordt aangemaakt.")
+        if args.filepath != None:
+            filepath = args.filepath
+        else:
+            filepath = network_lib.DHCPCONFIG
+        flog.info( inspect.stack()[0][3] + ": DHCP config file wordt aangemaakt op de locatie " +str(filepath) )
         cf = network_lib.ConfigFile()
-        cf.init( filename=network_lib.DHCPCONFIG, flog=flog, device=None )
+        cf.init( filename=filepath, flog=flog, device=None )
         if cf.write_default_dhcp_config_file( forced=args.forced, flog=flog) == False:
             flog.error( inspect.stack()[0][3] + ": DHCP config file kon niet worden gemaakt.")
             sys.exit( 1 )
@@ -369,10 +378,21 @@ def saveExit(signum, frame):
 # init                                                 #
 ########################################################
 if __name__ == "__main__":
-    global process_bg 
+    #global process_bg 
+
+    logfile_path = const.DIR_FILELOG + prgname + ".log"
+    try:
+        # check if file exist, if so set rights and ownership
+        if os.path.exists( logfile_path ) == True:
+            filesystem_lib.set_file_owners( filepath=logfile_path )
+            filesystem_lib.set_file_permissions( filepath=logfile_path, permissions='664' )
+    except Exception as e:
+        print ("fataal log file probleem:" + str(e.args[0]) )
+        sys.exit(1)
+
     try:
         os.umask( 0o002 )
-        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
+        flog = logger.fileLogger( logfile_path , prgname )
         flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:

@@ -314,9 +314,9 @@ $arr = array (
     'Le temps en secondes pour attendre une réponse du serveur de e-mail.'
     ),
 /* 062 */   array(
-    'Vul hier de instellingen in van de email provider die je wilt gebruiken.<br><br>Mocht je gebruik willen maken van een Gmail account dan moet Multi-factor authenticatie uit staan en toegang tot minder veilige apps moet worden toegestaan. <br><br> <span style="color:red">Er zijn soms problemen met het gebruik van Gmail, dit wordt onderzocht maar daar is nog geen oplossing voor.</span>',
-    'Enter the settings of the email provider you want to use here. <br> <br> If you want to use a Gmail account, Multi-factor authentication must be turned off and access to less secure apps must be allowed. <br> <br> <span style = "color: red"> There are sometimes problems using Gmail, this is being investigated but there is no solution yet.</span>',
-    'Entrez ici les paramètres du fournisseur de messagerie que vous souhaitez utiliser. <br> <br> Si vous souhaitez utiliser un compte Gmail, l&apos;authentification multifacteur doit être désactivée et l&apos;accès à des applications moins sécurisées doit être autorisé. <br> <br> <span style = "color: red"> Il y a parfois des problèmes avec Gmail, ceci est en cours d&apos;investigation mais il n&apos;y a pas encore de solution.</span>'
+    'Vul hier de instellingen in van de email provider die je wilt gebruiken.',
+    'Enter the settings of the email provider you want to use here. ',
+    'Entrez ici les paramètres du fournisseur de messagerie que vous souhaitez utiliser.'
     ),
 /* 063 */   array(
     'Notificatie als er geen slimme meter data wordt ontvangen.',
@@ -1169,15 +1169,50 @@ $arr = array (
     'Ce n&apos;est normalement pas plus de quelques secondes. Si la différence est supérieure à l&apos;heure du système ou du compteur intelligent n&apos;est pas correcte.'
     ),
 /* 305 */ array(
-    '','',''
+    'max. fase spanning (V)','max. phase voltage (V)','tension de phase max (V).'
     ),
 /* 306 */ array(
+    'min. fase spanning (V)','min. phase voltage (V)','tension de phase min (V) .'
+    ),
+/* 307 */ array(
+    'De maximale spanning moet groter zijn dan de minimale spanning. Deze instellingen worden ook gebruikt voor de notificatie als deze geactiveerd is.',
+    'The maximum voltage must be greater than the minimum voltage. These settings are also used for the notification when activated.',
+    'La tension maximale doit être supérieure à la tension minimale. Ces paramètres sont également utilisés pour la notification si celle-ci est activée.'
+    ),
+/* 308 */ array(
+    'grootverbruiker','bulk consumer','grand consommateur'
+    ),
+/* 309 */ array(
+    'Als deze optie wordt geactiveerd dan worden de telegram codes van grootverbruiker meters omgezet zover dat mogelijk is. Daar waar mogelijk worden waarden berekend als ze niet beschikbaar zijn. Grootverbruik meters hebben een beperkte set codes waardoor niet alle functies van de P1 monitor gebruikt kunnen worden. ',
+    'If this option is activated, the telegram codes of large-scale consumer meters are converted as far as possible. Where possible, values are calculated if they are not available. Large consumption meters have a limited set of codes, which means that not all functions of the P1 monitor can be used.',
+    'Si cette option est activée, les codes de télégramme des compteurs grand public sont autant que possible convertis. Dans la mesure du possible, les valeurs sont calculées si elles ne sont pas disponibles. Les grands compteurs de consommation ont un ensemble limité de codes, ce qui signifie que toutes les fonctions du moniteur P1 ne peuvent pas être utilisées.'
+    ),
+/* 310 */ array(
+    'Bereken missende waarden.','Calculate missing values.','Calculer les valeurs manquantes.'
+    ),
+/* 311 */ array(
+    'Bereken onbekende waarden uit waarden die wel door slimme meter worden gemeten. Bijvoorbeeld de Watt waarde als de spanning (V) en stroom (A) wel wordt gemeten.',
+    'Calculate unknown values from values that are measured by smart meters. For example the Watt value if the voltage (V) and current (A) are measured.',
+    'Calculez des valeurs inconnues à partir de valeurs mesurées par des compteurs intelligents. Par exemple la valeur Watt si la tension (V) et le courant (A) sont mesurés.'
+    ),
+/* 312 */ array(
+    'Geef kilo Watts waarden weer i.p.v. Watts',
+    'Display kilo Watts values instead of Watts',
+    'Afficher les valeurs en kilowatts au lieu des watts'
+    ),
+/* 313 */ array(
+    'geef kilowatt waarden weer i.p.v. watt. ','display kilowatt values instead of watts.','afficher les valeurs en kilowatts au lieu des watts.'
+    ),
+/* 314 */ array(
+    'Voor grootgebruikers die grote hoeveelheden vermogen verwerken.',
+    'For those who process large amounts of power.',
+    'Pour ceux qui traitent de grandes quantités d&apos;énergie.'
+    ),
+/* 315 */ array(
     '','',''
     ),
 
-
 );
-
 
 
 

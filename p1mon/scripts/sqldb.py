@@ -1,6 +1,7 @@
 import sqlite3 as lite
 import inspect
 import const
+import datetime
 from util import *
 from utiltimestamp import utiltimestamp
 
@@ -270,9 +271,18 @@ class configDB():
 
         self.insert_rec("insert or ignore into " + table + " values ( '171','0'                ,'UpgradeAide run in save modus (1 is run).')")
 
-        self.insert_rec("insert or ignore into " + table + " values ( '172',''                ,'Bestandsnaam van de DB om naar Excel te exporteren. (normaal leeg)')")
+        self.insert_rec("insert or ignore into " + table + " values ( '172',''                 ,'Bestandsnaam van de DB om naar Excel te exporteren. (normaal leeg)')")
 
-        #[{"TOKEN": "34FADE76DFEBDDDD", "TIMESTAMP": "2021-06-26 11:12:13"}, {"TOKEN": "FFEE676DESAAAAAF", "TIMESTAMP": "2022-07-30 22:23:59"}]
+        self.insert_rec( "insert or ignore into " + table + " values ( '173','253'              ,'maximale netspanning in Volt')" )
+        self.insert_rec( "insert or ignore into " + table + " values ( '174','207'              ,'minimale netspanning in Volt')" )
+        self.insert_rec( "insert or ignore into " + table + " values ( '175','0'                ,'notificatie alarm als de maximale/minimale fase spanning wordt overschreden (0/1).') ")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '176','0'                ,'MQTT E en gas day publish aan/uit (1/0).')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '177','0'                ,'MQTT financiele dag publish aan/uit (1/0).')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '178','0'                ,'P1 telegram mode groot verbruik aan/uit (1/0).')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '179','1'                ,'Bereken missende waarden uit V/A/W indien mogelijk (1/0).')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '180','0'                ,'Laat (Kw) waarde zien in de UI ipv Watt(1/0).')")
 
         # you need an account on www.noip.com before this can be used
         #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")
@@ -301,9 +311,9 @@ class configDB():
         reccount=0
         f = open(filename,"a")
         for i in r:
-        	line = "update " + self.table + " set PARAMETER='"+ str(i[1])+"',LABEL='"+str(i[2])+"' where ID='"+str(i[0])+"';"
-        	f.write(line+'\n')
-        	reccount=reccount+1
+            line = "update " + self.table + " set PARAMETER='"+ str(i[1])+"',LABEL='"+str(i[2])+"' where ID='"+str(i[0])+"';"
+            f.write(line+'\n')
+            reccount=reccount+1
         f.close() #close our file
         return reccount
         
@@ -312,7 +322,7 @@ class configDB():
 
     def close_db(self):
         if self.con:
-        	self.con.close()
+            self.con.close()
 
     def select_rec(self,sqlstr):
         self.con = lite.connect(self.dbname)
@@ -347,19 +357,19 @@ class configDB():
         sql_update = "update "+self.table+" set PARAMETER='"+str(strtmp)+"' where id="+str(idn)
         #print(sql_update);
         try:
-        	self.update_rec(sql_update)
-        	#flog.debug(inspect.stack()[1][3]+": config db update: sql="+sql_update)
+            self.update_rec(sql_update)
+            #flog.debug(inspect.stack()[1][3]+": config db update: sql="+sql_update)
         except Exception as e:
-        	flog.error(inspect.stack()[1][3]+" db config update gefaald voor id="+str(idn)+". Melding="+str(e.args[0]))
+            flog.error(inspect.stack()[1][3]+" db config update gefaald voor id="+str(idn)+". Melding="+str(e.args[0]))
 
     def strget(self, idn, flog):
         sql_select = "select id, parameter, label from "+self.table+" where id="+str(idn)
         try:
-        	set = self.select_rec(sql_select)
-        	#flog.debug(inspect.stack()[1][3]+": config db select per id: sql="+sql_select)
-        	return set[0][0],set[0][1], set[0][2]
+            set = self.select_rec(sql_select)
+            #flog.debug(inspect.stack()[1][3]+": config db select per id: sql="+sql_select)
+            return set[0][0],set[0][1], set[0][2]
         except Exception as e:
-        	flog.error(inspect.stack()[1][3]+" db config select gefaald voor id="+str(idn)+". Melding="+str(e.args[0]))
+            flog.error(inspect.stack()[1][3]+" db config select gefaald voor id="+str(idn)+". Melding="+str(e.args[0]))
 
     def defrag(self):
         self.con = lite.connect(self.dbname)
@@ -728,6 +738,9 @@ class rtStatusDb():
         # afhangelijk van de een P1 poort snelheid van 1 of 10 seconden.
         self.insert_rec("insert or ignore into " + table + " values ( '125','0','P1 telegram tijd delta',0)")
 
+        self.insert_rec("insert or ignore into " + table + " values ( '126','onbekend','Tijdstip start notificatie:',0)")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '127','onbekend','Tijdstip laatste verwerkte financiële dag gegevens:',0)")
 
         # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"
@@ -745,7 +758,7 @@ class rtStatusDb():
 
     def close_db(self):
         if self.con:
-        	self.con.close()
+            self.con.close()
 
     def select_rec(self,sqlstr):
         self.con = lite.connect(self.dbname)
@@ -930,19 +943,19 @@ class powerProductionDB():
         return False
 
     # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
-    def select_one_record(self , order='desc' ):
+    def select_one_record( self, order='desc', db_index=None ):
         try:
             sqlstr = "select \
                 TIMESTAMP, \
-                cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
-                PRODUCTION_KWH_HIGH,\
-                PRODUCTION_KWH_LOW,\
-                PULS_PER_TIMEUNIT_HIGH,\
-                PULS_PER_TIMEUNIT_LOW,\
-                PRODUCTION_KWH_HIGH_TOTAL,\
-                PRODUCTION_KWH_LOW_TOTAL, \
-                PRODUCTION_KWH_TOTAL, \
-                PRODUCTION_PSEUDO_KW \
+                cast(strftime('%s', TIMESTAMP, 'utc' ) as integer), \
+                round( PRODUCTION_KWH_HIGH , 3), \
+                round( PRODUCTION_KWH_LOW, 3), \
+                cast( PULS_PER_TIMEUNIT_HIGH as integer), \
+                cast( PULS_PER_TIMEUNIT_LOW as integer), \
+                round( PRODUCTION_KWH_HIGH_TOTAL, 3),\
+                round( PRODUCTION_KWH_LOW_TOTAL, 3),\
+                round( PRODUCTION_KWH_TOTAL, 3),\
+                round( PRODUCTION_PSEUDO_KW, 3)\
                 from " + self.table + \
                 " where TIMEPERIOD_ID = 11 order by timestamp " + str(order) + " limit 1;"
             sqlstr = " ".join( sqlstr.split() )
@@ -1089,58 +1102,6 @@ class powerProductionSolarDB():
         f.close() #close our file
         return reccount
 
-
-
-    """
-    def get_timestamp_record( self , timestamp, timeperiod_id, power_source_id ):
-        try:
-            sqlstr = "select TIMESTAMP, TIMEPERIOD_ID, POWER_SOURCE_ID, PRODUCTION_KWH_HIGH, PRODUCTION_KWH_LOW, PULS_PER_TIMEUNIT_HIGH, PULS_PER_TIMEUNIT_LOW, PRODUCTION_KWH_HIGH_TOTAL, PRODUCTION_KWH_LOW_TOTAL, PRODUCTION_KWH_TOTAL, PRODUCTION_PSEUDO_KW from " + self.table + " where TIMEPERIOD_ID = " + str( timeperiod_id ) + " and POWER_SOURCE_ID = " + str( power_source_id ) + " and " + " timestamp  = '" + timestamp + "'"
-            sqlstr = " ".join(sqlstr.split())
-            #self.flog.debug( inspect.stack()[0][3] + ": sql(1)=" + sqlstr )
-            set = self.select_rec( sqlstr )
-            #self.flog.debug( inspect.stack()[0][3] + ": waarde van bestaande record" + str( set ) )
-            if len(set) > 0:
-                return set[0][0],set[0][1],set[0][2],set[0][3],set[0][4],set[0][5],set[0][6],set[0][7],set[0][8],set[0][9],set[0][10]
-        except Exception as e:
-            self.flog.error( inspect.stack()[0][3]+": sql error(1) op table " + self.table + " ->" + str(e) )
-            self.close_db()
-        return None
-    
-    
-    # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
-    def select_one_record(self , order='desc' ):
-        try:
-            sqlstr = "select \
-                TIMESTAMP, \
-                cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
-                PRODUCTION_KWH_HIGH,\
-                PRODUCTION_KWH_LOW,\
-                PULS_PER_TIMEUNIT_HIGH,\
-                PULS_PER_TIMEUNIT_LOW,\
-                PRODUCTION_KWH_HIGH_TOTAL,\
-                PRODUCTION_KWH_LOW_TOTAL, \
-                PRODUCTION_KWH_TOTAL, \
-                PRODUCTION_PSEUDO_KW \
-                from " + self.table + \
-                " where TIMEPERIOD_ID = 11 order by timestamp " + str(order) + " limit 1;"
-            sqlstr = " ".join( sqlstr.split() )
-            set = self.select_rec( sqlstr )
-            if len(set) > 0:
-                #return  "test", 1, 2, 3, 4, 5, 6, 7, 8, 9
-                return set[0][0], set[0][1], set[0][2], set[0][3], set[0][4], set[0][5], set[0][6], set[0][7], set[0][8], set[0][9]
-
-            return None
-        except Exception as _e:
-            print ( _e )
-            return None
-
-    # return number of records in database
-    def record_count( self ):
-        sql = "select count() from " + self.table
-        return int( self.select_rec( sql )[0][0] )
-
-    """
-
     def select_rec( self, sqlstr ):
         self.con = lite.connect(self.dbname)
         self.cur = self.con.cursor()
@@ -1269,7 +1230,8 @@ class WatermeterDBV2():
 
     # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
     # neemt nu de minuten records in de vorige versie werd uren verstuurd.
-    def select_one_record(self , order='desc' ):
+    def select_one_record(self , order='desc', db_index = '11' ):
+        # print ( 'db_index = ' + db_index )
         try:
             sqlstr = "select \
                 TIMESTAMP, \
@@ -1278,7 +1240,7 @@ class WatermeterDBV2():
                 VERBR_PER_TIMEUNIT, \
                 VERBR_IN_M3_TOTAAL  \
                 from " + self.table + \
-                " where TIMEPERIOD_ID = 11 order by timestamp " + str(order) + " limit 1;"
+                " where TIMEPERIOD_ID = " + str( db_index ) + " order by timestamp " + str( order ) + " limit 1;"
             sqlstr = " ".join( sqlstr.split() )
             set = self.select_rec( sqlstr )
             if len(set) > 0:
@@ -1355,6 +1317,111 @@ class WatermeterDBV2():
         self.con.commit()
         self.close_db()
 
+
+class PhaseMaxMinDB():
+
+    def init(self, dbname, table):
+        self.dbname = dbname
+        self.con = lite.connect(dbname)
+        self.cur = self.con.cursor()
+        self.table = table
+        # VEBRK = energie waar je voor betaald aan de leverancier (Vattenval, Eneco, enz.) :(
+        # GELVR = energie die je TERUG levert aan de leverancier :)
+        self.cur.execute("CREATE TABLE IF NOT EXISTS " + table + "(\
+        TIMESTAMP TEXT PRIMARY KEY NOT NULL, \
+        MAX_VERBR_L1_KW REAL DEFAULT 0, \
+        MAX_VERBR_L2_KW REAL DEFAULT 0, \
+        MAX_VERBR_L3_KW REAL DEFAULT 0, \
+        MAX_GELVR_L1_KW REAL DEFAULT 0, \
+        MAX_GELVR_L2_KW REAL DEFAULT 0, \
+        MAX_GELVR_L3_KW REAL DEFAULT 0, \
+        MAX_L1_V        REAL DEFAULT 0, \
+        MAX_L2_V        REAL DEFAULT 0, \
+        MAX_L3_V        REAL DEFAULT 0, \
+        MAX_L1_A        REAL DEFAULT 0, \
+        MAX_L2_A        REAL DEFAULT 0, \
+        MAX_L3_A        REAL DEFAULT 0, \
+        MIN_VERBR_L1_KW REAL DEFAULT 0, \
+        MIN_VERBR_L2_KW REAL DEFAULT 0, \
+        MIN_VERBR_L3_KW REAL DEFAULT 0, \
+        MIN_GELVR_L1_KW REAL DEFAULT 0, \
+        MIN_GELVR_L2_KW REAL DEFAULT 0, \
+        MIN_GELVR_L3_KW REAL DEFAULT 0, \
+        MIN_L1_V        REAL DEFAULT 0, \
+        MIN_L2_V        REAL DEFAULT 0, \
+        MIN_L3_V        REAL DEFAULT 0, \
+        MIN_L1_A        REAL DEFAULT 0, \
+        MIN_L2_A        REAL DEFAULT 0, \
+        MIN_L3_A        REAL DEFAULT 0 \
+        );")
+        self.close_db()
+
+    def sql2file( self, filename ):
+        #print filename
+        self.con = lite.connect( self.dbname )
+        self.cur = self.con.cursor()
+        self.cur.execute( 'select TIMESTAMP, MAX_VERBR_L1_KW, MAX_VERBR_L2_KW REAL, MAX_VERBR_L3_KW, MAX_GELVR_L1_KW, MAX_GELVR_L2_KW, MAX_GELVR_L3_KW, MAX_L1_V, MAX_L2_V, MAX_L3_V, MAX_L1_A, MAX_L2_A, MAX_L3_A, MIN_VERBR_L1_KW, MIN_VERBR_L2_KW, MIN_VERBR_L3_KW, MIN_GELVR_L1_KW, MIN_GELVR_L2_KW, MIN_GELVR_L3_KW, MIN_L1_V, MIN_L2_V, MIN_L3_V, MIN_L1_A, MIN_L2_A, MIN_L3_A  from ' + \
+            self.table + ' order by TIMESTAMP' )
+        r=self.cur.fetchall()
+        self.close_db() 
+        # put the stuff into a file
+        # print ( r[0] )
+        reccount = 0
+        f = open(filename,"a")
+        for i in r:
+            line = "replace into " + self.table + " (TIMESTAMP, MAX_VERBR_L1_KW, MAX_VERBR_L2_KW, MAX_VERBR_L3_KW, MAX_GELVR_L1_KW, MAX_GELVR_L2_KW, MAX_GELVR_L3_KW, MAX_L1_V, MAX_L2_V, MAX_L3_V, MAX_L1_A, MAX_L2_A, MAX_L3_A, MIN_VERBR_L1_KW, MIN_VERBR_L2_KW, MIN_VERBR_L3_KW, MIN_GELVR_L1_KW, MIN_GELVR_L2_KW, MIN_GELVR_L3_KW, MIN_L1_V, MIN_L2_V, MIN_L3_V, MIN_L1_A, MIN_L2_A, MIN_L3_A ) values ('" + \
+            str(i[0])  + "'," +\
+            str(i[1])  + "," +\
+            str(i[2])  + "," +\
+            str(i[3])  + "," +\
+            str(i[4])  + "," +\
+            str(i[5])  + "," +\
+            str(i[6])  + "," +\
+            str(i[7])  + "," +\
+            str(i[8])  + "," +\
+            str(i[9])  + "," +\
+            str(i[10]) + "," +\
+            str(i[11]) + "," +\
+            str(i[12]) + "," +\
+            str(i[13]) + "," +\
+            str(i[14]) + "," +\
+            str(i[15]) + "," +\
+            str(i[16]) + "," +\
+            str(i[17]) + "," +\
+            str(i[18]) + "," +\
+            str(i[19]) + "," +\
+            str(i[20]) + "," +\
+            str(i[21]) + "," +\
+            str(i[22]) + "," +\
+            str(i[23]) + "," +\
+            str(i[24]) + \
+            ");"
+            #print  ( line )
+            f.write(line+'\n')
+            reccount = reccount + 1
+        f.close() #close our file
+        return reccount
+
+    def close_db(self):
+        if self.con:
+            self.con.close()
+
+    def excute(self,sqlstr):
+        self.con = lite.connect(self.dbname)
+        self.cur = self.con.cursor()
+        self.cur.execute(sqlstr)
+        self.con.commit()
+        self.close_db()
+
+    def select_rec(self,sqlstr):
+        self.con = lite.connect(self.dbname)
+        self.cur = self.con.cursor()
+        self.cur.execute(sqlstr)
+        r=self.cur.fetchall()
+        self.close_db()
+        return r
+
+
 class PhaseDB():
 
     def init(self, dbname, table):
@@ -1425,6 +1492,13 @@ class PhaseDB():
         if self.con:
             self.con.close()
 
+    def excute(self,sqlstr):
+        self.con = lite.connect(self.dbname)
+        self.cur = self.con.cursor()
+        self.cur.execute(sqlstr)
+        self.con.commit()
+        self.close_db()
+
     def insert_rec(self,sqlstr):
         self.con = lite.connect(self.dbname)
         self.cur = self.con.cursor()
@@ -1475,7 +1549,7 @@ class WatermeterDB():
         self.close_db()
 
     # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
-    def select_one_record(self , order='desc' ):
+    def select_one_record(self , order='desc', db_index = None ):
         try:
             sqlstr = "select \
                 TIMESTAMP, \
@@ -2038,7 +2112,7 @@ class temperatureDB():
         
     # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
     # subset of database
-    def select_one_record(self , order='desc' , record_id=11):
+    def select_one_record(self , order='desc' , db_index = '11' ):
         try:
             # record id = 10 set as last record
             sqlstr = "select \
@@ -2050,7 +2124,7 @@ class temperatureDB():
                 TEMPERATURE_2_MIN, \
                 TEMPERATURE_2_AVG, \
                 TEMPERATURE_2_MAX  \
-                from " + self.table + " where record_id  = " + str( record_id ) + \
+                from " + self.table + " where record_id  = " + str( db_index ) + \
                 " order by timestamp " + str(order) + " limit 1;"
             sqlstr = " ".join( sqlstr.split() )
             set = self.select_rec( sqlstr )
@@ -2088,31 +2162,32 @@ class temperatureDB():
         self.close_db() 
         # put the stuff into a file
         #print r
-        reccount=0
+        reccount = 0
         f = open(filename,"a")
         for i in r:
-        	line = "replace into " + self.table + " (TIMESTAMP,RECORD_ID,TEMPERATURE_1,TEMPERATURE_1_AVG,TEMPERATURE_1_MIN,TEMPERATURE_1_MAX,\
-        	TEMPERATURE_2,TEMPERATURE_2_AVG,TEMPERATURE_2_MIN,TEMPERATURE_2_MAX) values ('" + \
-        	str(i[0]) + "','" +\
-        	str(i[1]) + "','" +\
-        	str(i[2]) + "','" +\
-        	str(i[3]) + "','" +\
-        	str(i[4]) + "','" +\
-        	str(i[5]) + "','" +\
-        	str(i[6]) + "','" +\
-        	str(i[7]) + "','" +\
-        	str(i[8]) + "','" +\
-        	str(i[9]) + "'" +\
-        	');'
-        #print line 
-        	f.write(line+'\n')
-        	reccount=reccount+1
+            line = "replace into " + self.table + " (TIMESTAMP,RECORD_ID,TEMPERATURE_1,TEMPERATURE_1_AVG,TEMPERATURE_1_MIN,TEMPERATURE_1_MAX,\
+            TEMPERATURE_2,TEMPERATURE_2_AVG,TEMPERATURE_2_MIN,TEMPERATURE_2_MAX) values ('" + \
+            str(i[0]) + "','" +\
+            str(i[1]) + "','" +\
+            str(i[2]) + "','" +\
+            str(i[3]) + "','" +\
+            str(i[4]) + "','" +\
+            str(i[5]) + "','" +\
+            str(i[6]) + "','" +\
+            str(i[7]) + "','" +\
+            str(i[8]) + "','" +\
+            str(i[9]) + "'" +\
+            ');'
+            #print line 
+            f.write(line+'\n')
+            reccount = reccount + 1
+
         f.close() #close our file
         return reccount
 
     def close_db(self):
         if self.con:
-        	self.con.close()
+            self.con.close()
 
     def defrag(self):
         self.con = lite.connect(self.dbname)
@@ -2142,15 +2217,15 @@ class temperatureDB():
         ");"
         
         try:
-        	self.con = lite.connect(self.dbname)
-        	self.cur = self.con.cursor()
-        	self.cur.execute(sqlstr)
-        	self.con.commit()
-        	self.close_db()
-        	flog.debug(inspect.stack()[1][3]+": replace: sql="+sqlstr)
-        	#print (sqlstr)
+            self.con = lite.connect(self.dbname)
+            self.cur = self.con.cursor()
+            self.cur.execute(sqlstr)
+            self.con.commit()
+            self.close_db()
+            flog.debug(inspect.stack()[1][3]+": replace: sql="+sqlstr)
+            #print (sqlstr)
         except Exception as e:
-        	flog.warning(inspect.stack()[1][3]+" db replace mislukt."+" Melding="+str(e.args[0]))
+            flog.warning(inspect.stack()[1][3]+" db replace mislukt."+" Melding="+str(e.args[0]))
 
     # select average, minimum and maximum
     def selectAMM(self, timestamp, record_id,flog ):
@@ -2314,7 +2389,6 @@ WIND_DEGREE_MIN,WIND_DEGREE_AVG,WIND_DEGREE_MAX\
         self.con.execute("PRAGMA quick_check;")
         self.close_db()
 
-
 class currentWeatherDB():
 
     def init(self,dbname, table):
@@ -2340,7 +2414,7 @@ class currentWeatherDB():
         self.close_db()
 
     # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
-    def select_one_record(self , order='desc' ):
+    def select_one_record(self , order='desc', db_index=None ):
         try:
             sqlstr = "select \
                 datetime( TIMESTAMP, 'unixepoch', 'localtime' ), \
@@ -2415,7 +2489,7 @@ WEATHER_ICON,PRESSURE,HUMIDITY,WIND_SPEED,WIND_DEGREE,CLOUDS,WEATHER_ID) values 
         
     def close_db(self):
         if self.con:
-        	self.con.close()
+            self.con.close()
 
     def insert_rec(self,sqlstr):
         self.con = lite.connect(self.dbname)
@@ -2469,7 +2543,7 @@ class SqlDb1():
         self.close_db()
 
     # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
-    def select_one_record(self , order='desc' ):
+    def select_one_record(self , order='desc' , db_index=None ):
         try:
             sqlstr = "select \
                 TIMESTAMP, \
@@ -2660,7 +2734,6 @@ ACT_GELVR_KW_270,VERBR_GAS_2421) values ('" + \
         self.con.execute("PRAGMA quick_check;")
         self.close_db()
 
-
 class SqlDb3():
 
     def init(self,dbname, table):
@@ -2789,6 +2862,33 @@ class SqlDb4():
         # clean up van het database bestand , file kleiner maken
         self.close_db()
 
+
+    # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
+    def select_one_record( self, order='desc', db_index=None ):
+        try:
+            sqlstr = "select \
+                TIMESTAMP, \
+                cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
+                VERBR_KWH_181, \
+                VERBR_KWH_182, \
+                GELVR_KWH_281, \
+                GELVR_KWH_282, \
+                round( VERBR_KWH_X, 3),\
+                round ( GELVR_KWH_X, 3), \
+                VERBR_GAS_2421,\
+                round( VERBR_GAS_X, 3) \
+                from " + self.table + \
+                " order by timestamp " + str( order ) + " limit 1;"
+            sqlstr = " ".join( sqlstr.split() )
+            set = self.select_rec( sqlstr )
+            if len(set) > 0:
+                return set[0][0], set[0][1], set[0][2], set[0][3], set[0][4], set[0][5], set[0][6], set[0][7], set[0][8], set[0][9]
+            return None
+        except Exception as _e:
+            print ( _e )
+            return None
+
+
     def sql2file(self, filename):
         #print filename
         self.con = lite.connect(self.dbname)
@@ -2865,6 +2965,7 @@ GELVR_KWH_281,GELVR_KWH_282,VERBR_KWH_X,GELVR_KWH_X,VERBR_GAS_2421,VERBR_GAS_X) 
         self.close_db()
 
 class financieelDb():
+
     def init(self, dbname, table):
         #print dbname
         #print "[*]",table
@@ -2919,7 +3020,32 @@ class financieelDb():
             reccount=reccount+1
         f.close() #close our file
         return reccount
-        #setFile2user(filename,'p1mon')         
+        #setFile2user(filename,'p1mon')
+
+    #  round( VERBR_KWH_X, 3),\
+
+    # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
+    def select_one_record(self , order='desc' , db_index=None ):
+        try:
+            sqlstr = "select \
+                TIMESTAMP, \
+                cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), \
+                round( VERBR_P, 3), \
+                round( VERBR_D, 3), \
+                round( GELVR_P, 3), \
+                round( GELVR_D, 3), \
+                round( GELVR_GAS, 3), \
+                round( VERBR_WATER, 3) \
+                from " + self.table + \
+                " order by timestamp " + str(order) + " limit 1;"
+            sqlstr = " ".join( sqlstr.split() )
+            set = self.select_rec( sqlstr )
+            if len(set) > 0:
+                return set[0][0], set[0][1], set[0][2], set[0][3], set[0][4], set[0][5], set[0][6], set[0][7]
+            return None
+        except Exception as _e:
+            print ( _e )
+            return None
 
     def close_db(self):
         if self.con:

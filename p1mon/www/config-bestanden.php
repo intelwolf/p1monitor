@@ -25,6 +25,9 @@ if( $localip == False ){
         }
 }
 
+$sw_off  = strIdx( 193 );
+$sw_on   = strIdx( 192 );
+
 $err_cnt = -1;
 if ( isset($_POST["samba"]) ) { 
     $err_cnt = 0;
@@ -70,10 +73,8 @@ if ( isset($_POST["dboxauth"]) ) {
 if ( isset($_POST["dbx_data_active"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["dbx_data_active"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 50"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 50"))$err_cnt += 1;
     }
 }
@@ -81,10 +82,8 @@ if ( isset($_POST["dbx_data_active"]) ) {
 if ( isset($_POST["faseDB_active"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["faseDB_active"] == '1' ) {
-        #echo "on<br>";
         if ( updateConfigDb("update config set parameter = '1' where ID = 119"))$err_cnt += 1;
     } else {
-        #echo "off<br>";
         if ( updateConfigDb("update config set parameter = '0' where ID = 119"))$err_cnt += 1;
     }
 }
@@ -93,6 +92,15 @@ if ( isset( $_POST["systemaction"] ) ) {
     if ( $_POST['systemaction'] === 'db_erase' ) { 
         #echo "db erease";
         writeSemaphoreFile( 'db_erase' );
+    }
+}
+
+if ( isset($_POST["calc_values"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["calc_values"] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 179") )$err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 179") )$err_cnt += 1;
     }
 }
 
@@ -237,8 +245,8 @@ $(function () {
                         </div>
                         <div class="frame-4-bot">
                             <div class='pad-12'>
-                                <input class="cursor-pointer" id="fs_rb_aan_dbx" name="dbx_data_active" type="radio" value="1" <?php if ( config_read(50) == 1 ) { echo 'checked'; }?>>Aan
-                                <input class="cursor-pointer" id="fs_rb_uit_dbx" name="dbx_data_active" type="radio" value="0" <?php if ( config_read(50) == 0 ) { echo 'checked'; }?>>Uit
+                                <input class="cursor-pointer" id="fs_rb_aan_dbx" name="dbx_data_active" type="radio" value="1" <?php if ( config_read(50) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                <input class="cursor-pointer" id="fs_rb_uit_dbx" name="dbx_data_active" type="radio" value="0" <?php if ( config_read(50) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                             </div>
 
                             <p class="p-1"></p>
@@ -271,8 +279,21 @@ $(function () {
                         </div>
                         <div class="frame-4-bot" title="<?php echo strIdx( 82 );?>" >
                             <div class='pad-12'>
-                                <input class="cursor-pointer" id="fs_rb_aan_faseDB" name="faseDB_active" type="radio" value="1" <?php if ( config_read( 119 ) == 1 ) { echo 'checked'; }?>>Aan
-                                <input class="cursor-pointer" id="fs_rb_uit_faseDB" name="faseDB_active" type="radio" value="0" <?php if ( config_read( 119 ) == 0 ) { echo 'checked'; }?>>Uit
+                                <input class="cursor-pointer" id="fs_rb_aan_faseDB" name="faseDB_active" type="radio" value="1" <?php if ( config_read( 119 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                <input class="cursor-pointer" id="fs_rb_uit_faseDB" name="faseDB_active" type="radio" value="0" <?php if ( config_read( 119 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                            </div>
+                        </div>
+
+                        <p></p>
+                        <div class="frame-4-top" title="<?php echo strIdx( 311 );?>">
+                            <span class="text-15"><?php echo strIdx( 310 );?></span>
+                        </div>
+                        <div class="frame-4-bot" title="<?php echo strIdx( 311 );?>" >
+                            <div class='pad-12'>
+                                <div title="<?php echo strIdx(314);?>">
+                                    <input class="cursor-pointer" name="calc_values" type="radio" value="1" <?php if ( config_read( 179 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="calc_values" type="radio" value="0" <?php if ( config_read( 179 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
                             </div>
                         </div>
 
@@ -294,6 +315,8 @@ $(function () {
                         <?php echo strIdx(30);?>
                         <p></p>
                         <?php echo strIdx( 82 );?>
+                        <p></p>
+                        <?php echo strIdx( 311 );?>
                     </div>
                 </div>
             </div>    

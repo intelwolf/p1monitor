@@ -32,11 +32,11 @@ if( isset($_POST["verbr_piek"]) || isset($_POST["verbr_dal"]) || isset($_POST["g
 {
     $err_cnt=0;
     // update database
-    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["verbr_piek"],5,99.99999,1)."' where ID = 2")) $err_cnt += 1;
-    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["verbr_dal"], 5,99.99999,1)."' where ID = 1")) $err_cnt += 1;
-    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["gelvr_piek"],5,99.99999,1)."' where ID = 4")) $err_cnt += 1;
-    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["gelvr_dal"], 5,99.99999,1)."' where ID = 3")) $err_cnt += 1;
-    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["e_vastrecht"], 5,99.99999,0)."' where ID = 5")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["verbr_piek"],5,999.99999,1)."' where ID = 2")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["verbr_dal"], 5,999.99999,1)."' where ID = 1")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["gelvr_piek"],5,999.99999,1)."' where ID = 4")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["gelvr_dal"], 5,999.99999,1)."' where ID = 3")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["e_vastrecht"], 5,999.99999,0)."' where ID = 5")) $err_cnt += 1;
 }
 
 // tarieven GAS aanpassen
@@ -44,8 +44,8 @@ if( isset($_POST["verbr_gas"]) || isset($_POST["vastrecht_gas"]))
 {
     if ( $err_cnt < 0 ) { $err_cnt=0; }
     // update database
-    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["verbr_gas"],5,99.99999,1)."' where ID = 15")) $err_cnt += 1;
-    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["vastrecht_gas"], 5,99.99999,0)."' where ID = 16")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["verbr_gas"],5,999.99999,1)."' where ID = 15")) $err_cnt += 1;
+    if ( updateConfigDb("update config set parameter = '".checkFloat($_POST["vastrecht_gas"], 5,999.99999,0)."' where ID = 16")) $err_cnt += 1;
 }
 
 // tarieven kosten aanpassen
@@ -61,8 +61,8 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
 {
     if ( $err_cnt < 0 ) { $err_cnt=0; }
     // update database
-    if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["verbr_water"],5,99.99999,1) . "' where ID = 104") ) $err_cnt += 1;
-    if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["vastrecht_water"], 5,99.99999,0) . "' where ID = 103") ) $err_cnt += 1;
+    if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["verbr_water"],5,999.99999,1) . "' where ID = 104") ) $err_cnt += 1;
+    if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["vastrecht_water"], 5,999.99999,0) . "' where ID = 103") ) $err_cnt += 1;
 }
 
 ?>

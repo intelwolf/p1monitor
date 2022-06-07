@@ -15,6 +15,7 @@ import sys
 import os
 import p1_port_shared_lib
 import p1_telegram_test_lib
+import phase_shared_lib
 import time
 import util
 
@@ -37,10 +38,14 @@ ser_devices_list = [ "/dev/ttyUSB0" , "/dev/ttyUSB1" ]
 ###################################################################################
 # let op deze optie geef veel foutmelding en in de log deze kunnen geen kwaad     #
 ###################################################################################
-DUMMY_1SEC_PROCCESSING = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_3PHASE_DATA      = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_1SEC_PROCCESSING  = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_3PHASE_DATA       = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_LARGE_CONSUMPTION = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 
-# zet deze op p1_telegram_test_lib.NO_GAS_TEST om de test uit te zetten.
+###################################################################################
+# zet deze op p1_telegram_test_lib.NO_GAS_TEST om de test uit te zetten.          #
+# LETOP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                  #
+###################################################################################
 #gas_test_mode=p1_telegram_test_lib.DUMMY_GAS_MODE_2421
 gas_test_mode=p1_telegram_test_lib.NO_GAS_TEST
 
@@ -90,7 +95,7 @@ def main_prod():
     except Exception as e:
         flog.critical(inspect.stack()[0][3]+" database niet te openen(1)."+const.FILE_DB_E_FILENAME+") melding:"+str(e.args[0]))
         sys.exit(1)
-    flog.info(inspect.stack()[0][3]+": database tabel: "+const.DB_SERIAL_TAB+" succesvol geopend.")
+    flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_SERIAL_TAB+" succesvol geopend.")
 
     # defrag van database
     e_db_serial.defrag()
@@ -103,7 +108,7 @@ def main_prod():
         flog.critical(inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]))
         sys.exit(1)
 
-    flog.info(inspect.stack()[0][3]+": database tabel: "+const.DB_STATUS_TAB+" succesvol geopend.")
+    flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
     # open van config database
     try:
@@ -137,13 +142,13 @@ def main_prod():
     except Exception as e:
         flog.critical(inspect.stack()[0][3]+" database niet te openen(1)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
         sys.exit(1)
-    flog.info(inspect.stack()[0][3]+": database tabel: " + const.DB_FASE_REALTIME_TAB + " succesvol geopend.")
+    flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FASE_REALTIME_TAB + " succesvol geopend.")
 
     # only make object when tests are active
-    if DUMMY_3PHASE_DATA == True or gas_test_mode != p1_telegram_test_lib.NO_GAS_TEST:
+    if DUMMY_3PHASE_DATA == True or gas_test_mode != p1_telegram_test_lib.NO_GAS_TEST or DUMMY_LARGE_CONSUMPTION == True:
         flog.warning(inspect.stack()[0][3]+": test functies geactiveerd ! " )
         p1_test = p1_telegram_test_lib.p1_telegram()
-        p1_test.init( flog, configdb=config_db )
+        p1_test.init( flog, statusdb=rt_status_db )
 
     # sets the rate limiting to 1 record per 10 secs or maximum speed processing of P1 telegrams
     p1_port_shared_lib.set_p1_processing_speed( p1_processing=processing_speed , config_db=config_db, flog=flog )
@@ -161,8 +166,9 @@ def main_prod():
     #read serial settings from status DB
     serCheckCnt = 0
     check_serial_db_config_settings()
+    p1_port_shared_lib.get_calculate_missing_values( status=p1_status ,configdb=config_db, flog=flog )
     p1_port_shared_lib.get_country_day_night_mode( status=p1_status ,configdb=config_db, flog=flog )
-
+    p1_port_shared_lib.get_large_consumer_mode( status=p1_status ,configdb=config_db, flog=flog )
     p1_port_shared_lib.get_gas_telgram_prefix( status=p1_status ,configdb=config_db, flog=flog )
 
     flog.info(inspect.stack()[0][3]+": P1 poort instelling baudrate=" + str(ser1.baudrate)+" bytesize=" +str(ser1.bytesize)+" pariteit="+str(ser1.parity)+" stopbits="+str(ser1.stopbits))
@@ -189,12 +195,19 @@ def main_prod():
         flog.warning(inspect.stack()[0][3]+": Dummy 3 fase waarde staat aan. Zet uit voor productie!")
         flog.warning(inspect.stack()[0][3]+" #### DUMMY 3 FASE STAAT AAN IS DIT CORRECT? ####")
 
-     # check for dummy 3Phase data
+    # check for dummy 3Phase data
     if DUMMY_1SEC_PROCCESSING== True:
         print("DUMMY 1 SECONDEN VERWERKING STAAT AAN?\r")
         flog.warning(inspect.stack()[0][3]+" #############################################")
         flog.warning(inspect.stack()[0][3]+": 1 seconden verwerking staat aan. Zet uit voor productie!")
         flog.warning(inspect.stack()[0][3]+" #### DUMMY 1 SECONDEN  STAAT AAN IS DIT CORRECT? ####")
+
+    # check for dummy grootverbruik data
+    if DUMMY_LARGE_CONSUMPTION== True:
+        print("DUMMY LARGE CONSUMPTION VERWERKING STAAT AAN?\r")
+        flog.warning(inspect.stack()[0][3]+" #############################################")
+        flog.warning(inspect.stack()[0][3]+": LARGE CONSUMPTION staat aan. Zet uit voor productie!")
+        flog.warning(inspect.stack()[0][3]+" #### DUMMY LARGE CONSUMPTION STAAT AAN IS DIT CORRECT? ####")
 
     # read crc check settings from config
     p1_port_shared_lib.get_P1_crc( status=p1_status ,configdb=config_db, flog=flog )
@@ -202,12 +215,13 @@ def main_prod():
     # set intial FQDN
     p1_port_shared_lib.fqdn_from_config( verbose=True, configdb=config_db, data_set=json_data, flog=flog )
 
-  
     day_values.init( dbstatus=rt_status_db, dbserial=e_db_serial, flog=flog )
 
     while True:
         try:
             #print ('ser1.In_waiting='+str(ser1.in_waiting))
+            line = ""
+
             if ser1.in_waiting > 1:
 
                 try:
@@ -216,14 +230,15 @@ def main_prod():
                     #line = filter(lambda x: x in string.printable, line_raw ).rstrip()[0:1024]
                     #flog.debug(inspect.stack()[0][3]+": line filtered = " + str(line_raw ) ) 
                 except:
-                    flog.warning(inspect.stack()[0][3]+": lezen van serieele poort mislukt.")
+                    flog.warning(inspect.stack()[0][3]+": lezen van seriële poort mislukt(1).")
+                    check_serial_db_config_settings()
 
                 serial_buffer.append( line )
                 #flog.debug(inspect.stack()[0][3]+": [** V2.0]serial buffer bytes waiting = " + str(ser1.inWaiting()) ) 
 
                 #the benthouse BUG has 78 lines
                 if len(serial_buffer) > 250: # normale size less then a 100 lines
-                    flog.warning(inspect.stack()[0][3] + ": serieele buffer te groot, gewist! Buffer lengte was " + str( len(serial_buffer) ) )
+                    flog.warning(inspect.stack()[0][3] + ": seriële buffer te groot, gewist! Buffer lengte was " + str( len(serial_buffer) ) )
                     del serial_buffer[:]
 
                 #print  ( serial_buffer )
@@ -250,6 +265,12 @@ def main_prod():
                             #flog.debug("Te snel een nieuw telegram ontvangen. genegeerd.")
                             del serial_buffer[:]
                             continue
+
+                    if DUMMY_LARGE_CONSUMPTION == True:
+                        #phase3StubInstert( line )
+                        p1_test.large_consumption_telegram ( serialbuffer=serial_buffer, set_watt_on=False )
+                        pass 
+                    
 
                     #serial_buffer[-1] = "!0F9B"  #DEBUG
                     #print ( "[*] p1 crc check = " + str(p1_crc_check_is_on) )
@@ -286,6 +307,8 @@ def main_prod():
                             del serial_buffer[:]
                             continue
 
+
+                    #flog.setLevel( logger.logging.INFO )
                     #flog.debug(inspect.stack()[0][3]+": serial buffer "+str(serial_buffer))
                     #flog.setLevel(logging.DEBUG)
                     #print('verwerk seriele data.')
@@ -350,8 +373,9 @@ def main_prod():
 
                 time.sleep( 0.1 )
                 serCheckCnt = serCheckCnt + 1
+
                 if serCheckCnt > 300: #check updates every 30 seconds.
-                    
+
                     # perodic check and change of fqdn.
                     # set intial FQDN
                     p1_port_shared_lib.fqdn_from_config( verbose=False, configdb=config_db, data_set=json_data, flog=flog )
@@ -364,14 +388,15 @@ def main_prod():
                     # often to remove stress on the database.                                                   #
                     #############################################################################################
                     p1_port_shared_lib.delete_serial_records(   p1_processing=processing_speed, serial_db=e_db_serial, flog=flog )
-                    p1_port_shared_lib.delete_phase_record(     p1_processing=processing_speed, phase_db=fase_db,      flog=flog )
+                    phase_shared_lib.delete_phase_record(       p1_processing=processing_speed, phase_db=fase_db,      flog=flog )
 
                     p1_port_shared_lib.set_p1_processing_speed( p1_processing=processing_speed ,config_db=config_db,flog=flog )
 
                     check_serial_db_config_settings()
 
+                    p1_port_shared_lib.get_large_consumer_mode( status=p1_status ,configdb=config_db, flog=flog )
                     p1_port_shared_lib.get_country_day_night_mode( status=p1_status ,configdb=config_db, flog=flog )
-
+                    p1_port_shared_lib.get_calculate_missing_values( status=p1_status ,configdb=config_db, flog=flog )
                     p1_port_shared_lib.get_gas_telgram_prefix( status=p1_status ,configdb=config_db, flog=flog )
                     #checkCRCsettings()
                     p1_port_shared_lib.get_P1_crc( status=p1_status ,configdb=config_db, flog=flog )
@@ -393,10 +418,9 @@ def main_prod():
                             p1_status['crc_error_cnt'] = 0
 
         except Exception as e:
-            flog.warning( inspect.stack()[0][3] + ": fout bij het wachten op seriele gegevens. Error=" + str( e.args ) )
+            flog.warning( inspect.stack()[0][3] + ": fout bij het wachten op seriële gegevens. Error=" + str( e.args ) )
             check_serial()
             time.sleep( 1 )
-
 
 def exist_serial_device( tty ):
     cmd_str = "ls " + tty + " 2> /dev/null| wc -l"
@@ -483,8 +507,8 @@ def update_data_set( data_set=None, status=None, phase_db_record=None, flog=None
         if status['gas_present_in_serial_data'] == True:
             p1_port_shared_lib.instert_db_gas_value( data_set=data_set, status=p1_status, statusdb=rt_status_db, flog=flog )
 
-        p1_port_shared_lib.write_phase_status_to_db( phase_db_rec=phase_db_record, statusdb=rt_status_db, flog=flog )
-        p1_port_shared_lib.write_phase_history_values_to_db( phase_db_rec=phase_db_record, configdb=config_db, phasedb=fase_db, flog=flog )
+        phase_shared_lib.write_phase_status_to_db( phase_db_rec=phase_db_record, statusdb=rt_status_db, flog=flog )
+        phase_shared_lib.write_phase_history_values_to_db( phase_db_rec=phase_db_record, configdb=config_db, phasedb=fase_db, flog=flog )
         p1_port_shared_lib.clear_data_buffer( buffer=phase_db_record )
 
     else:
@@ -492,6 +516,7 @@ def update_data_set( data_set=None, status=None, phase_db_record=None, flog=None
     #flog.setLevel(logging.INFO)
 
 def check_serial_db_config_settings():
+
     global ser1
     #global day_night_mode 
     # 7 P1 poort baudrate
@@ -533,7 +558,10 @@ def check_serial_db_config_settings():
             #if restart:
             #    serClose(ser1)
             #    time.sleep(5) # give it some time.
-                
+
+            # added in version > 1.6.0 
+            ser1.flushInput()
+        
             ser1.baudrate = int(ser_config[0][1])
             ser1.bytesize = int(ser_config[1][1])
             

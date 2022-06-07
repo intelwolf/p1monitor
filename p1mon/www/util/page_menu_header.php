@@ -12,17 +12,17 @@ switch ($id) {
     	$m1 = "menu-active";
         break;
     case 2: /* opties */
-        $m2= "menu-active";		
+        $m2= "menu-active";
         break; 
     case 3: /* opties */
-        $m3= "menu-active";		
+        $m3= "menu-active";
         break; 
     case 4: /* opties */
-        $m4= "menu-active";		
+        $m4= "menu-active";
         break;
 	default:
 	/* default value so always a menu is available */
-	$m0="menu-active";		
+	$m0="menu-active";
 }
 echo <<< EOT
 <div class="pad-13 content-wrapper">

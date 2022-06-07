@@ -5,37 +5,34 @@ import signal
 import shutil
 import os
 import sys
+import sqldb
 import time
 import util
+import phase_shared_lib
+import data_struct_lib
 
-from sqldb import  rtStatusDb,configDB,SqlDb1,SqlDb2,SqlDb3,SqlDb4,financieelDb,WatermeterDBV2
+#from sqldb import  rtStatusDb,configDB,SqlDb1,SqlDb2,SqlDb3,SqlDb4,financieelDb,WatermeterDBV2
 from logger import fileLogger,logging
 from util import setFile2user, daysPerMonth,isMod, mkLocalTimeString, getUtcTime
 from datetime import datetime, timedelta
-#from gpio import gpioDigtalOutput
 from datetime import date
 
 prgname = 'P1Db'
 
-rt_status_db          = rtStatusDb()
-config_db             = configDB()
-
-e_db_serial           = SqlDb1()
-e_db_history_min      = SqlDb2()
-e_db_history_uur      = SqlDb3()
-e_db_history_dag      = SqlDb4()
-e_db_history_maand    = SqlDb4()
-e_db_history_jaar     = SqlDb4()
-e_db_financieel_dag   = financieelDb()
-e_db_financieel_maand = financieelDb()
-e_db_financieel_jaar  = financieelDb()
-watermeter_db         = WatermeterDBV2()
-
-#watermeter_db_uur     = WatermeterDB()
-#watermeter_db_dag     = WatermeterDB()
-#watermeter_db_maand   = WatermeterDB()
-#watermeter_db_jaar    = WatermeterDB()
-
+rt_status_db          = sqldb.rtStatusDb()
+config_db             = sqldb.configDB()
+e_db_serial           = sqldb.SqlDb1()
+e_db_history_min      = sqldb.SqlDb2()
+e_db_history_uur      = sqldb.SqlDb3()
+e_db_history_dag      = sqldb.SqlDb4()
+e_db_history_maand    = sqldb.SqlDb4()
+e_db_history_jaar     = sqldb.SqlDb4()
+e_db_financieel_dag   = sqldb.financieelDb()
+e_db_financieel_maand = sqldb.financieelDb()
+e_db_financieel_jaar  = sqldb.financieelDb()
+watermeter_db         = sqldb.WatermeterDBV2()
+fase_db               = sqldb.PhaseDB()
+fase_db_min_max_dag   = sqldb.PhaseMaxMinDB()
 
 VERBR_KWH_181           = 0.0
 VERBR_KWH_182           = 0.0
@@ -52,6 +49,7 @@ timestamp_min_one       = ''
 
 def Main():
     global timestamp
+    phasemaxmin = data_struct_lib.phase_db_min_max_record
     flog.info("Start van programma.")
 
     DiskRestore()
@@ -148,15 +146,33 @@ def Main():
     try:    
         watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
     except Exception as e:
-        flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
+        flog.critical( inspect.stack()[0][3] + ": Database niet te openen(12)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_WATERMETERV2_TAB + " succesvol geopend." )
+
+    # open van fase database
+    try:
+        fase_db.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_REALTIME_TAB )
+    except Exception as e:
+        flog.critical(inspect.stack()[0][3]+" database niet te openen(13)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
+        sys.exit(1)
+    flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FASE_REALTIME_TAB + " succesvol geopend.")
+
+    # open van fase database voor min/max waarden.
+    try:
+        fase_db_min_max_dag.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_MINMAX_DAG_TAB )
+    except Exception as e:
+        flog.critical(inspect.stack()[0][3]+" database niet te openen(14)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
+        sys.exit(1)
+    flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FASE_MINMAX_DAG_TAB + " succesvol geopend.")
 
     # defrag databases
     e_db_history_min.defrag()
     flog.info(inspect.stack()[0][3]+": database bestand "+const.FILE_DB_E_HISTORIE+" gedefragmenteerd.")
     e_db_financieel_dag.defrag()
     flog.info(inspect.stack()[0][3]+": database bestand "+const.FILE_DB_FINANCIEEL+" gedefragmenteerd.")
+    fase_db.defrag()
+    flog.info(inspect.stack()[0][3]+": database bestand "+const.FILE_DB_PHASEINFORMATION+" gedefragmenteerd.")
 
     #flog.setLevel( logging.DEBUG )
     #flog.consoleOutputOn( True )
@@ -192,7 +208,11 @@ def Main():
             updateGas()
             updateDbDayMoney()
             updateDbMonthMoney()
-            updateDbYearMoney() #TODO
+            updateDbYearMoney()
+
+            #flog.setLevel( logging.DEBUG ) 
+            phase_shared_lib.write_phase_min_max_day_values_to_db( minmaxrec=phasemaxmin, configdb=config_db, phasedb=fase_db, flog=flog, timestamp=timestamp)
+            #flog.setLevel( logging.INFO ) 
 
             #if isMod(timestamp,1) == True: # only once per min to prevent load.
             #    powerSwitcher()
@@ -643,6 +663,8 @@ def updateDbDayMoney():
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": sql error(5)"+str(e))
 
+    rt_status_db.timestamp( 127,flog ) # set timestamp of cost processed day
+
     #flog.setLevel( logging.INFO )
 
 def setFileFlags():
@@ -655,26 +677,30 @@ def setFileFlags():
     setFile2user(const.FILE_DB_WEATHER_HISTORIE,'p1mon')
     setFile2user(const.FILE_DB_TEMPERATUUR_FILENAME,'p1mon')
     setFile2user(const.FILE_DB_WATERMETER,'p1mon')
+    setFile2user(const.FILE_DB_PHASEINFORMATION,'p1mon')
 
-    dummy,tail = os.path.split(const.FILE_DB_E_FILENAME)
+    _dummy,tail = os.path.split(const.FILE_DB_E_FILENAME)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    dummy,tail = os.path.split(const.FILE_DB_E_HISTORIE)
+    _dummy,tail = os.path.split(const.FILE_DB_E_HISTORIE)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    dummy,tail = os.path.split(const.FILE_DB_CONFIG)
+    _dummy,tail = os.path.split(const.FILE_DB_CONFIG)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    dummy,tail = os.path.split(const.FILE_DB_STATUS)
+    _dummy,tail = os.path.split(const.FILE_DB_STATUS)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    dummy,tail = os.path.split(const.FILE_DB_FINANCIEEL)
+    _dummy,tail = os.path.split(const.FILE_DB_FINANCIEEL)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    dummy,tail = os.path.split(const.FILE_DB_WEATHER)
+    _dummy,tail = os.path.split(const.FILE_DB_WEATHER)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    dummy,tail = os.path.split(const.FILE_DB_WEATHER_HISTORIE)
+    _dummy,tail = os.path.split(const.FILE_DB_WEATHER_HISTORIE)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon') 
-    dummy,tail = os.path.split(const.FILE_DB_TEMPERATUUR_FILENAME)
+    _dummy,tail = os.path.split(const.FILE_DB_TEMPERATUUR_FILENAME)
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    dummy,tail = os.path.split( const.FILE_DB_WATERMETERV2 )
+    _dummy,tail = os.path.split( const.FILE_DB_WATERMETERV2 )
     setFile2user(const.DIR_FILEDISK+tail,'p1mon')
-    
+    _dummy,tail = os.path.split( const.FILE_DB_PHASEINFORMATION )
+    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+
+
 def cleanDb():
     timestr=mkLocalTimeString() 
     # minuten records verwijderen

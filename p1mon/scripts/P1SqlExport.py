@@ -13,10 +13,12 @@ import json
 import pwd
 import shutil
 import subprocess
+import time
 import util
+import sqldb
 
 from semaphore3 import writeSemaphoreFile
-from sqldb import *
+#from sqldb import *
 from logger import *
 from util import mkLocalTimeString,setFile2user
 from datetime import datetime, timedelta
@@ -26,25 +28,26 @@ from subprocess import run
 
 prgname = 'P1SqlExport'
 
-config_db                   = configDB()
-e_db_history_min            = SqlDb2() 
-e_db_history_uur            = SqlDb3() 
-e_db_history_dag            = SqlDb4() 
-e_db_history_maand          = SqlDb4() 
-e_db_history_jaar           = SqlDb4() 
-e_db_financieel_dag         = financieelDb()
-e_db_financieel_maand       = financieelDb()
-e_db_financieel_jaar        = financieelDb()
-weer_db                     = currentWeatherDB()
-weer_history_db_uur         = historyWeatherDB()
-weer_history_db_dag         = historyWeatherDB()
-weer_history_db_maand       = historyWeatherDB()
-weer_history_db_jaar        = historyWeatherDB()
-temperature_db              = temperatureDB()
-watermeter_db               = WatermeterDBV2()
-fase_db                     = PhaseDB()
-power_production_db         = powerProductionDB()
-power_production_solar_db   = powerProductionSolarDB()
+config_db                   = sqldb.configDB()
+e_db_history_min            = sqldb.SqlDb2() 
+e_db_history_uur            = sqldb.SqlDb3() 
+e_db_history_dag            = sqldb.SqlDb4() 
+e_db_history_maand          = sqldb.SqlDb4() 
+e_db_history_jaar           = sqldb.SqlDb4() 
+e_db_financieel_dag         = sqldb.financieelDb()
+e_db_financieel_maand       = sqldb.financieelDb()
+e_db_financieel_jaar        = sqldb.financieelDb()
+weer_db                     = sqldb.currentWeatherDB()
+weer_history_db_uur         = sqldb.historyWeatherDB()
+weer_history_db_dag         = sqldb.historyWeatherDB()
+weer_history_db_maand       = sqldb.historyWeatherDB()
+weer_history_db_jaar        = sqldb.historyWeatherDB()
+temperature_db              = sqldb.temperatureDB()
+watermeter_db               = sqldb.WatermeterDBV2()
+fase_db                     = sqldb.PhaseDB()
+power_production_db         = sqldb.powerProductionDB()
+power_production_solar_db   = sqldb.powerProductionSolarDB()
+fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
 
 #e_db_financieel_dag_voorspel= financieelDb()
 
@@ -128,7 +131,7 @@ def Main(argv):
         config_db.init( const.FILE_DB_CONFIG, const.DB_CONFIG_TAB)
         updateStatusPct(statusfile, 3, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(3)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
 
@@ -137,7 +140,7 @@ def Main(argv):
         e_db_history_min.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_MIN_TAB)
         updateStatusPct(statusfile, 4, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(4)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(2)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_HISTORIE_MIN_TAB+" (minuut) succesvol geopend.")
     
@@ -146,7 +149,7 @@ def Main(argv):
         e_db_history_uur.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_UUR_TAB)
         updateStatusPct(statusfile, 5, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(5)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(3)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_HISTORIE_UUR_TAB+" succesvol geopend.")
 
@@ -155,7 +158,7 @@ def Main(argv):
         e_db_history_dag.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_DAG_TAB)
         updateStatusPct(statusfile, 6, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(6)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(4)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_HISTORIE_DAG_TAB+" succesvol geopend.")
 
@@ -164,7 +167,7 @@ def Main(argv):
         e_db_history_maand.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_MAAND_TAB)
         updateStatusPct(statusfile, 7, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": Database niet te openen(7)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": Database niet te openen(5)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_HISTORIE_MAAND_TAB+" succesvol geopend.")
   
@@ -173,7 +176,7 @@ def Main(argv):
         e_db_history_jaar.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_JAAR_TAB)
         updateStatusPct(statusfile, 8, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(8)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(6)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_HISTORIE_JAAR_TAB+" succesvol geopend.")
 
@@ -182,7 +185,7 @@ def Main(argv):
         e_db_financieel_dag.init(const.FILE_DB_FINANCIEEL ,const.DB_FINANCIEEL_DAG_TAB)
         updateStatusPct(statusfile, 9, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(9)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(7)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_FINANCIEEL_DAG_TAB+" succesvol geopend.")
     
@@ -191,7 +194,7 @@ def Main(argv):
         e_db_financieel_maand.init(const.FILE_DB_FINANCIEEL ,const.DB_FINANCIEEL_MAAND_TAB)
         updateStatusPct(statusfile, 10, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(10)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(8)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_FINANCIEEL_MAAND_TAB+" succesvol geopend.")
 
@@ -200,7 +203,7 @@ def Main(argv):
         e_db_financieel_jaar.init(const.FILE_DB_FINANCIEEL ,const.DB_FINANCIEEL_JAAR_TAB)
         updateStatusPct(statusfile, 11, record_cnt)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(11)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(9)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_FINANCIEEL_JAAR_TAB+" succesvol geopend.")
 
@@ -210,7 +213,7 @@ def Main(argv):
             weer_db.init(const.FILE_DB_WEATHER ,const.DB_WEATHER_TAB)
             updateStatusPct(statusfile, 12, record_cnt)
         except Exception as e:
-            flog.critical(inspect.stack()[0][3]+": database niet te openen(12)."+const.FILE_DB_WEATHER+") melding:"+str(e.args[0]))
+            flog.critical(inspect.stack()[0][3]+": database niet te openen(10)."+const.FILE_DB_WEATHER+") melding:"+str(e.args[0]))
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_WEATHER_TAB+" succesvol geopend.")
 
@@ -220,7 +223,7 @@ def Main(argv):
             weer_history_db_uur.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_UUR_TAB)
             updateStatusPct(statusfile, 13, record_cnt)
         except Exception as e:
-            flog.critical(inspect.stack()[0][3]+": database niet te openen(4)."+const.DB_WEATHER_UUR_TAB+" melding:"+str(e.args[0]))
+            flog.critical(inspect.stack()[0][3]+": database niet te openen(11)."+const.DB_WEATHER_UUR_TAB+" melding:"+str(e.args[0]))
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_WEATHER_UUR_TAB+" succesvol geopend.")
     
@@ -229,7 +232,7 @@ def Main(argv):
             weer_history_db_dag.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_DAG_TAB)
             updateStatusPct(statusfile, 14, record_cnt)
         except Exception as e:
-            flog.critical(inspect.stack()[0][3]+": database niet te openen(5)."+const.DB_WEATHER_DAG_TAB+") melding:"+str(e.args[0]))
+            flog.critical(inspect.stack()[0][3]+": database niet te openen(12)."+const.DB_WEATHER_DAG_TAB+") melding:"+str(e.args[0]))
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_WEATHER_DAG_TAB+" succesvol geopend.")
 
@@ -238,7 +241,7 @@ def Main(argv):
             weer_history_db_maand.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_MAAND_TAB)
             updateStatusPct(statusfile, 15, record_cnt)
         except Exception as e:
-            flog.critical(inspect.stack()[0][3]+": database niet te openen(6)."+const.DB_WEATHER_MAAND_TAB+") melding:"+str(e.args[0]))
+            flog.critical(inspect.stack()[0][3]+": database niet te openen(13)."+const.DB_WEATHER_MAAND_TAB+") melding:"+str(e.args[0]))
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_WEATHER_MAAND_TAB+" succesvol geopend.")
 
@@ -247,7 +250,7 @@ def Main(argv):
             weer_history_db_jaar.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_JAAR_TAB)
             updateStatusPct(statusfile, 16, record_cnt)
         except Exception as e:
-            flog.critical(inspect.stack()[0][3]+": database niet te openen(7)."+const.DB_WEATHER_JAAR_TAB+") melding:"+str(e.args[0]))
+            flog.critical(inspect.stack()[0][3]+": database niet te openen(14)."+const.DB_WEATHER_JAAR_TAB+") melding:"+str(e.args[0]))
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_WEATHER_JAAR_TAB+" succesvol geopend.")
 
@@ -257,7 +260,7 @@ def Main(argv):
             temperature_db.init(const.FILE_DB_TEMPERATUUR_FILENAME ,const.DB_TEMPERATUUR_TAB )
             updateStatusPct(statusfile, 17, record_cnt)
         except Exception as e:
-            flog.critical(inspect.stack()[0][3]+": Database niet te openen(1)."+const.FILE_DB_TEMPERATUUR_FILENAME+") melding:"+str(e.args[0]))
+            flog.critical(inspect.stack()[0][3]+": Database niet te openen(15)."+const.FILE_DB_TEMPERATUUR_FILENAME+") melding:"+str(e.args[0]))
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_TEMPERATUUR_TAB +" succesvol geopend.")
 
@@ -267,7 +270,7 @@ def Main(argv):
             watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
             updateStatusPct(statusfile, 18, record_cnt)
         except Exception as e:
-            flog.critical( inspect.stack()[0][3] + ": Database niet te openen(20)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
+            flog.critical( inspect.stack()[0][3] + ": Database niet te openen(16)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
             sys.exit(1)
         flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_WATERMETERV2_TAB + " succesvol geopend." )
 
@@ -277,9 +280,17 @@ def Main(argv):
             fase_db.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_REALTIME_TAB )
             updateStatusPct(statusfile, 19, record_cnt)
         except Exception as e:
-            flog.critical(inspect.stack()[0][3]+" database niet te openen(1)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
+            flog.critical(inspect.stack()[0][3]+" database niet te openen(17)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel: " + const.DB_FASE_REALTIME_TAB + " succesvol geopend.")
+
+        # open van fase database voor min/max waarden.
+        try:
+            fase_db_min_max_dag.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_MINMAX_DAG_TAB )
+        except Exception as e:
+            flog.critical(inspect.stack()[0][3]+" database niet te openen(18)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
+            sys.exit(1)
+        flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FASE_MINMAX_DAG_TAB + " succesvol geopend.")
 
     if os.path.exists ( const.FILE_DB_POWERPRODUCTION ):
         # open van power production database
@@ -287,7 +298,7 @@ def Main(argv):
             power_production_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_TAB, flog )
             updateStatusPct(statusfile, 20, record_cnt)
         except Exception as e:
-            flog.critical( inspect.stack()[0][3] + ": Database niet te openen(1)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
+            flog.critical( inspect.stack()[0][3] + ": Database niet te openen(19)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
             sys.exit(1)
         flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
 
@@ -296,7 +307,7 @@ def Main(argv):
             power_production_solar_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_SOLAR_TAB, flog )
             updateStatusPct(statusfile, 21, record_cnt)
         except Exception as e:
-            flog.critical( inspect.stack()[0][3] + ": Database niet te openen." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
+            flog.critical( inspect.stack()[0][3] + ": Database niet te openen(20)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
             sys.exit(1)
         flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
 
@@ -316,9 +327,10 @@ def Main(argv):
 
     if os.path.exists ( const.FILE_DB_PHASEINFORMATION ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_PHASEINFORMATION )
-        record_cnt = record_cnt + fase_db.sql2file(  const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode)
-        updateStatusPct(statusfile, 33, record_cnt)
-        flog.info(inspect.stack()[0][3]+": fase date sql geëxporteerd.")
+        record_cnt = record_cnt + fase_db.sql2file( const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode )
+        record_cnt = record_cnt + fase_db_min_max_dag.sql2file( const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode )
+        flog.info(inspect.stack()[0][3]+": fase data sql geëxporteerd.")
+        updateStatusPct( statusfile, 33, record_cnt )
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_E_HISTORIE )
     record_cnt = record_cnt + e_db_history_min.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)

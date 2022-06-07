@@ -29,10 +29,7 @@ if ( checkDisplayIsActive(46) == false) { return; }
 <script>
 "use strict"; 
 
-var GhistoryIn        = [];
-var GhistoryOut       = [];
-
-//var seriesOptions   = [];
+var GhistoryIn       = [];
 var recordsLoaded   = 0;
 var initloadtimer;
 //var Gselected       = 0;
@@ -62,8 +59,7 @@ function readJsonIndoorTemperature( cnt ){
         var item;
         recordsLoaded = jsondata.length;
         GhistoryIn.length = 0;
-        GhistoryOut.length= 0;
-      
+
         for (var j = jsondata.length; j > 0; j--){    
           item = jsondata[j-1];
           item[1] = item[1]*1000; // highcharts likes millisecs.
@@ -71,10 +67,13 @@ function readJsonIndoorTemperature( cnt ){
         } 
         
         $("#grafiekTemp").highcharts().series[0].setData( GhistoryIn )
-
         $("#tempChartIn").highcharts().series[0].points[0].update( GhistoryIn[GhistoryIn.length-1][1],  true, true, true);
         $("#tempChartOut").highcharts().series[0].points[0].update( GhistoryIn[GhistoryIn.length-1][2], true, true, true);
+
         $("#tempChartIn").highcharts().redraw();
+        $("#tempChartOut").highcharts().redraw();
+
+        //console.log( "in=" + GhistoryIn[GhistoryIn.length-1][1] + " out=" + GhistoryIn[GhistoryIn.length-1][2] )
 
         var deltatemp = Math.abs( GhistoryIn[GhistoryIn.length-1][1] - GhistoryIn[GhistoryIn.length-1][2] ).toFixed(1);
         //console.log( deltatemp )
@@ -452,9 +451,7 @@ function createChartGrafiek() {
 function DataLoop() {
     //readJsonData(maxrecords);
     readJsonIndoorTemperature( maxrecords )
-
-
-    setTimeout('DataLoop()',5000);
+    setTimeout('DataLoop()',1000);
 }
 
 $(function() {

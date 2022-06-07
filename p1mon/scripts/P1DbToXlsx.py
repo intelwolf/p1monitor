@@ -58,7 +58,7 @@ def Main( argv ):
                 flog.info(inspect.stack()[0][3] + ": Excel output bestand " + str(xlxs_filepath) + " wordt gebruikt")
 
             if os.path.exists( xlxs_filepath ):
-                rm_with_delay.rm_with_delay( filepath=None, timeout=0 )
+                filesystem_lib.rm_with_delay( filepath=None, timeout=0 )
 
             # start the conversion
             database_conversion( db_filepath=args.datebase, xlsx_filepath=xlxs_filepath, flog=flog )
@@ -182,7 +182,7 @@ if __name__ == "__main__":
         logfile = const.DIR_FILELOG + prgname + ".log"
         util.setFile2user( logfile, 'p1mon' )
         flog = logger.fileLogger( logfile, prgname )
-        flog.setLevel( logger.logging.DEBUG )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
 
     except Exception as e:

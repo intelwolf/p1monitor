@@ -100,6 +100,7 @@ function readJsonApiConfiguration(){
 }
 
 function readJsonApiStatus(){ 
+
     $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
       try {
         var jsonarr = JSON.parse(data); 
@@ -407,6 +408,10 @@ function readJsonApiStatus(){
                 case 125:
                     $('#sm1v').text(jsonarr[j][1]);
                     break;
+                case 126:
+                    $('#pr11v').text(jsonarr[j][1]);
+                    $('#pr11t').text(jsonarr[j][2]);
+                    break;
                 default:
                     break;
             }
@@ -419,13 +424,24 @@ function readJsonApiStatus(){
    });
 }
 
+
 function readTextMeterTelegram(){ 
-    $('#slimmemeter').load( "/txt/txt-meter.php", function( response, status, xhr ) {
-        if ( status == "error" ) {
-            $("#slimmemeter").html('Slimme meter data niet beschikbaar.');
+    $.getScript( "./api/v1/p1port/telegram", function( data, textStatus, jqxhr ) {
+      try {
+        var jsonarr = JSON.parse(data); 
+        if (jsonarr[2] == 'valid') {
+            $("#slimmemeter").html( jsonarr[3].split("\n").join("<br />") )
+        } else {
+            $("#slimmemeter").html('Slimme meter data niet beschikbaar(1).');
         }
-    });  
+      } catch(err) {
+          console.log( err );
+          $("#slimmemeter").html('Slimme meter data niet beschikbaar(2).');
+      }
+   });
+
 }
+
 
 function getFormattedDate() {
     var date = new Date();
@@ -858,6 +874,7 @@ $(function () {
                     <div id="pr8t" class="text-9"></div><div id="pr8v" class="text-9"></div><br>
                     <div id="pr9t" class="text-9"></div><div id="pr9v" class="text-9"></div><br>
                     <div id="pr10t" class="text-9"></div><div id="pr10v" class="text-9"></div><br>
+                    <div id="pr11t" class="text-9"></div><div id="pr11v" class="text-9"></div><br>
                  </div>
                  <br>
                      <div class="frame-2-top">

@@ -82,11 +82,20 @@ if ( isset($_POST["p1_telgram_speed"]) ) {
     }
 }
 
+if ( isset($_POST["p1_large_consumer"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["p1_large_consumer"] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 178")) $err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 178")) $err_cnt += 1;
+    }
+}
 
 if( isset($_POST["day_night_mode"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '" . $_POST["day_night_mode"] . "' where ID = 78"))  $err_cnt += 1;
 }
+
 
 function makeSelector($id) {
 
@@ -473,6 +482,20 @@ $(function () {
                                         <input class="cursor-pointer" name="p1_telgram_speed" type="radio" value="0" <?php if ( config_read(154) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 309 );?>">
+                                    <div class="rTableCell width-24">
+                                        <i class="text-10 fa-solid fa-industry"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10"><?php echo strIdx( 308 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" name="p1_large_consumer" type="radio" value="1" <?php if ( config_read( 178 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="p1_large_consumer" type="radio" value="0" <?php if ( config_read( 178 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div>
+
 
                             </div>
                         </div>

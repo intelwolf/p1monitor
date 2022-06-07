@@ -38,11 +38,33 @@ var secs            = 10;
 var GdailyKWh       = 0;
 var GData10sec      = [];
 
-var currentWattageMaxValue      = <?php echo config_read(24); ?>;
-var currentKWhMaxValue          = <?php echo config_read(57); ?>;
+var currentWattageMaxValue      = <?php echo config_read( 24  ); ?>;
+var currentKWhMaxValue          = <?php echo config_read( 57  ); ?>;
+var useKw                       = <?php echo config_read( 180 ); ?>;
 var currentWattageMinValue      = 0
 var aninmateCurrentWattageTimer = 0;
 var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
+
+if ( useKw ) {
+    var wattText = 'kW'
+    currentWattageMaxValue = currentWattageMaxValue/1000
+} else {
+    var wattText = 'watt'
+}
+
+Number.prototype.countDecimals = function () {
+
+    if (Math.floor(this.valueOf()) === this.valueOf()) return 0;
+
+    var str = this.toString();
+    if (str.indexOf(".") !== -1 && str.indexOf("-") !== -1) {
+        return str.split("-")[1] || 0;
+    } else if (str.indexOf(".") !== -1) {
+        return str.split(".")[1].length || 0;
+    }
+    return str.split("-")[1] || 0;
+}
+
 
 function readJsonApiSmartMeter(){ 
     $.getScript( "./api/v1/smartmeter?limit=720", function( data, textStatus, jqxhr ) {
@@ -63,26 +85,18 @@ function readJsonApiSmartMeter(){
         }, true);
          $("#vermogenMeterGrafiekVerbruik").highcharts().redraw();
 
-        currentWattage = ( jsondata[0][8] );
-        
-        if ( currentWattage < 0 || currentWattage > 30000 ) {
-           return; //fail save for error values. 
+        if ( useKw ) { 
+            currentWattage = ( jsondata[0][8] / 1000 );
+        } else { 
+            currentWattage = ( jsondata[0][8] );
         }
-        //console.log(currentWattage);
-        
-        if  ( currentWattage < currentWattageMinValue ) currentWattage = currentWattageMinValue
-        if  ( currentWattage > currentWattageMaxValue ) currentWattage = currentWattageMaxValue
-                
-        if (previousWattage < 0) { // init
-            var point = $("#currentuse").highcharts().series[0].points[0];
-            point.update(currentWattage, true, true, true);    
-         } else  {
-            //console.log("step1 currentWattage="+currentWattage+" previousWattage="+previousWattage);
-            if ( currentWattage !==  previousWattage ){
-                aninmateCurrentWattage() 
-            }
-         }
-        previousWattage = currentWattage;
+
+        if ( currentWattage.countDecimals() == 0 ) {
+            currentWattage = parseInt( currentWattage ) // remove trailing zero's when the are 0
+        }
+
+        var point = $("#currentuse").highcharts().series[0].points[0];
+        point.update( currentWattage, true, true, true );
 
       } catch(err) {}
    });
@@ -103,73 +117,9 @@ function readJsonApiFinancial(){
         try {
             var jsondataCost = JSON.parse(data); 
             verbrKosten = jsondataCost[0][2] + jsondataCost[0][3];
-            $("#dailycosttext").text(padXX(parseFloat(verbrKosten), 2, 2));
+            $("#dailycosttext").text(padXX(parseFloat(verbrKosten), 3, 2));
         } catch(err) {}
     });
-}
-
-function aninmateCurrentWattage() {
-    // failsave for async problenms
-    if ( aninmateCurrentWattageTimer != 0 ) {
-        return; // still busy with prevous run.
-    }
-
-    var stepSize = (currentWattage - previousWattage)/ 19 ; 
-    var looptime = 500;
-    var totalTimeMax = 9500
-    var looptimeTotal = 0 ;
-    var value = previousWattage;
-    
-    //console.log("currentWattage="+currentWattage+" previousWattage="+previousWattage+ " stepSize="+stepSize+" looptime="+looptime);
-    
-    aninmateCurrentWattageTimer = setTimeout(function next() {
-        //console.log("aninmateCurrentWattageTimer="+aninmateCurrentWattageTimer);
-        looptimeTotal += looptime;
-                    
-        if (looptimeTotal >= totalTimeMax) {
-            updatePoint(currentWattage)             
-            //console.log("final currentWattage="+currentWattage+" previousWattage="+previousWattage+ " stepSize="+stepSize+" looptime="+looptime+" value="+value);
-            //console.log("Done.");
-            clearTimeout(aninmateCurrentWattageTimer);
-            aninmateCurrentWattageTimer = 0;
-            //console.log("aninmateCurrentWattageTimer Done="+aninmateCurrentWattageTimer);
-            return;
-        }
-                    
-        value = Math.floor(value+stepSize);
-        //console.log("currentWattage="+currentWattage+" previousWattage="+previousWattage+ " stepSize="+stepSize+" looptime="+looptime+" value="+value);
-                    
-        if (stepSize < 0 && value < currentWattage ) {
-            value = currentWattage
-            //console.log("minvalue reached");
-            updatePoint(value);
-            clearTimeout(aninmateCurrentWattageTimer);
-            aninmateCurrentWattageTimer = 0;
-            //console.log("aninmateCurrentWattageTimer minvalue="+aninmateCurrentWattageTimer);
-            return;
-        }
-                    
-        if (stepSize > 0 && value > currentWattage ) {
-            value = currentWattage
-            //console.log("maxvalue reached");
-            updatePoint(value);
-            clearTimeout(aninmateCurrentWattageTimer);
-            aninmateCurrentWattageTimer = 0;
-            //console.log("aninmateCurrentWattageTimer maxvalue="+aninmateCurrentWattageTimer);
-            return;
-        }
-                    
-        updatePoint(value)
-            aninmateCurrentWattageTimer = setTimeout(next, looptime);
-        }, looptime);          
-    } 
-            
-function updatePoint(val) {
-    val = Number.parseInt( Number.parseFloat(val.toFixed(1) ) );
-    if  ( val < currentWattageMinValue ) val = currentWattageMinValue;
-    if  ( val > currentWattageMaxValue ) val = currentWattageMaxValue;
-    var point = $("#currentuse").highcharts().series[0].points[0];
-    point.update(val, true, true, true);    
 }
 
 function createChartVerbruikGrafiek() {
@@ -198,7 +148,11 @@ function createChartVerbruikGrafiek() {
         },
         formatter: function () {
             var s = "<b>" + Highcharts.dateFormat("%A %H:%M:%S", this.x) + "</b>";
-            s += "<br/><span style='color: #F2BA0F;'>Watt verbruikt: </span>" + (this.y * 1000).toFixed(0);
+            if ( useKw ) {
+                s += "<br/><span style='color: #F2BA0F;'>kW verbruikt: </span>" + (this.y );
+            } else {
+                s += "<br/><span style='color: #F2BA0F;'>Watt verbruikt: </span>" + (this.y * 1000).toFixed(0);
+            }
             return s;
         },
         backgroundColor: "#F5F5F5",
@@ -227,7 +181,11 @@ function createChartVerbruikGrafiek() {
             align: "left",
             distance: 0,
             formatter: function () {
-                return (this.value * 1000) + " W"
+                if ( useKw ) {
+                    return ( this.value ) + " kW"
+                } else {
+                    return ( this.value * 1000 ) + " W"
+                }
             }
         }
     },
@@ -291,12 +249,12 @@ function createDailytUseChart() {
             tickAmount: 0,
             tickWidth: 0,
             title: {
-            y: 105,
+            y: 30,
             text: "kWh",
             style: {
                 color: "#6E797C",
                 fontWeight: "bold",
-                fontSize: "32px"
+                fontSize: "36px"
             },
         },
         labels: {
@@ -307,7 +265,7 @@ function createDailytUseChart() {
             y: 30,
             x: 0,
             align: "center",
-            distance: -30
+            distance: -35
             }
         },
         series: [{
@@ -318,15 +276,15 @@ function createDailytUseChart() {
                 padding: 4,
                 borderRadius: 5,
                 verticalAlign: "center",
-                y: 20,
+                y: 0,
                 color: "#6E797C",
                 style: {
                     fontWeight: "bold",
-                    fontSize: "60px"
+                    fontSize: "45px"
                 }
             },
         data: [{
-            y: parseFloat(GdailyKWh)
+            y: parseFloat( GdailyKWh )
         }]
         }]
     });
@@ -372,12 +330,12 @@ function creatCurrentUseChart() {
         tickPixelInterval: 1000,
         tickWidth: 0,
         title: {
-            y: 165,
-            text: "watt",
+            y: 50,
+            text: wattText,
             style: {
                 color: "#6E797C",
                     fontWeight: "bold",
-                    fontSize: "42px"
+                    fontSize: "60px"
                 },
             },
             labels: {
@@ -404,15 +362,15 @@ function creatCurrentUseChart() {
             padding: 4,
             borderRadius: 5,
             verticalAlign: "center",
-            y: 20,
+            y: 0,
             color: "#6E797C",
             style: {
                 fontWeight: "bold",
-                fontSize: "92px"
+                fontSize: "72px"
             }
             },
             data: [{
-                y: parseFloat(currentWattage)
+                y: parseFloat( currentWattage )
             }]
         }]
     });

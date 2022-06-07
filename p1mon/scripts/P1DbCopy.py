@@ -2,19 +2,19 @@
 import argparse
 import const
 import inspect
-import glob
+#import glob
 import os
 import pwd
-import stat
+#import stat
 import sys
 import shutil
 import logger
 
-from logger  import logging,fileLogger
-from shutil  import copy2
-from pwd     import getpwnam
-from os      import umask, geteuid
-from pwd     import getpwuid
+#from logger  import logging,fileLogger
+#from shutil  import copy2
+#from pwd     import getpwnam
+#from os      import umask, geteuid
+#from pwd     import getpwuid
 
 prgname = 'P1DbCopy'
 
@@ -139,6 +139,15 @@ def Main(argv):
 ##########################################
 def makeBackupFileSet( filePath ):
 
+    ####################################
+    # deactivated in version 1.7.0.    #
+    # limited value, mayby used in the #
+    # future.                          #
+    ####################################
+
+    return
+
+
     if ( fileExist( filePath ) == False ):
         #print ( "# 0 geen file = ", filePath )
         return # there is no source file so return.
@@ -232,11 +241,11 @@ def fileExist(filename):
     else:
         return False
 
-def name2uid(name):
-    return getpwnam(name).pw_uid
+#def name2uid(name):
+#    return getpwnam(name).pw_uid
     
-def name2gid(group):
-    return grp.getgrnam(group).gr_gid
+#def name2gid(group):
+#    return grp.getgrnam(group).gr_gid
 
 #-------------------------------
 if __name__ == "__main__":
@@ -244,9 +253,9 @@ if __name__ == "__main__":
         os.umask( 0o002 )
         logfile = const.DIR_FILELOG+prgname+".log" 
         #setFile2user(logfile,'p1mon')
-        flog = fileLogger(logfile,prgname)    
+        flog = logger.fileLogger( logfile, prgname)    
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn(True) 
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )

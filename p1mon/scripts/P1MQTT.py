@@ -6,16 +6,18 @@ import const
 import crypto3
 import inspect
 import json
+import logger
 import signal
 import sys
+import sqldb
 import time 
 import os
 
 import paho.mqtt.client as mqtt
 from datetime import datetime
 
-from sqldb import configDB, rtStatusDb, SqlDb1, WatermeterDBV2, currentWeatherDB, temperatureDB, powerProductionDB
-from logger import fileLogger, logging
+#from sqldb import configDB, rtStatusDb, SqlDb1, WatermeterDBV2, currentWeatherDB, temperatureDB, powerProductionDB
+#from logger import fileLogger, logging
 from util import setFile2user, getUtcTime
 #from makeLocalTimeString import makeLocalTimeString
 #from getQuote import getQuote
@@ -24,13 +26,16 @@ from util import setFile2user, getUtcTime
 MQTT_PREFIX         = 'p1monitor'
 
 prgname             = 'P1MQTT'
-config_db           = configDB()
-rt_status_db        = rtStatusDb()
-e_db_serial         = SqlDb1()
-watermeter_db       = WatermeterDBV2()
-weer_db             = currentWeatherDB()
-temperature_db      = temperatureDB()
-power_production_db = powerProductionDB()
+
+config_db           = sqldb.configDB()
+rt_status_db        = sqldb.rtStatusDb()
+e_db_serial         = sqldb.SqlDb1()
+watermeter_db       = sqldb.WatermeterDBV2()
+weer_db             = sqldb.currentWeatherDB()
+temperature_db      = sqldb.temperatureDB()
+power_production_db = sqldb.powerProductionDB()
+e_db_history_dag    = sqldb.SqlDb4()
+e_db_financieel_dag = sqldb.financieelDb()
 
 # Status velden.
 # timestamp process gestart                           DB status index =  95
@@ -38,14 +43,17 @@ power_production_db = powerProductionDB()
 
 mqtt_client                     = None
 mqtt_topics_smartmeter          = None
-mqtt_topics_watermeter          = None
+mqtt_topics_watermeter_minute   = None
+mqtt_topics_watermeter_day      = None
 mqtt_topics_weather             = None
 mqtt_topics_indoor_temperature  = None
 mqtt_topics_phase               = None
 mqtt_topics_powerproduction     = None
+mqtt_topics_powergas_day        = None
+mqtt_topics_cost_day            = None
 
 mqtt_para = {
-    'clientname':'p1monitor',                       # client name  DB config index 105
+    'clientname':'p1monitor',                       # client name DB config index 105
     'topicprefix':'p1montor',                       # Make the topic specific DB config index 106
     'brokeruser': None,                             # broker user name DB config index 107
     'brokerpassword': None,                         # broker password DB config index 108
@@ -60,6 +68,8 @@ mqtt_para = {
     'indoortemperatureprocessedtimestamp': '',      # timestamp of latest time when the publish was performed.
     'phaseprocessedtimestamp': '',                  # timestamp of latest time when the publish was performed.
     'powerproductionprocessedtimestamp': '',        # timestamp of latest time when the publish was performed.
+    'powergasdayprocessedtimestamp': '',            # timestamp of latest time when the publish was performed.
+    'costdayprocessedtimestamp': '',                # timestamp of latest time when the publish was performed.
     'brokerconnectionstatustext': 'onbekend',       # status of the broker connection, text
     'brokerconnectionisok': False,                  # status of the broker connection, flag
     'reconnecttimeoute': 30,                        # sleeptime before trying a reconnect.
@@ -69,6 +79,8 @@ mqtt_para = {
     'indoortemperaturepublishisactive': False,      # publish on or off DB config index 117
     'phasepublishisactive': False,                  # publish on or off DB config index 120
     'powerproductionpublishisactive': False,        # publish on or off DB config index 136
+    'powergasdaypublishisactive': False,            # publish on or off DB config index 176
+    'costdaypublishisactive': False,                # publish on or off DB config index 177
     'anypublishisactive': False,                    # publish on or off for all publish.
 }
 
@@ -86,7 +98,15 @@ mqtt_payload_smartmeter = {
     10: int( 0 )
 }
 
-mqtt_payload_watermeter = {
+mqtt_payload_watermeter_minute = {
+    0: str( '' ),
+    1: int( 0 ),
+    2: int( 0 ),
+    3: float( 0 ),
+    4: float( 0 )
+}
+
+mqtt_payload_watermeter_day = {
     0: str( '' ),
     1: int( 0 ),
     2: int( 0 ),
@@ -151,6 +171,31 @@ mqtt_payload_powerproduction = {
     9: float( 0 )
 }
 
+mqtt_payload_powergasday = {
+    0: str( '' ),
+    1: int( 0 ),
+    2: float( 0 ),
+    3: float( 0 ),
+    4: float( 0 ),
+    5: float( 0 ),
+    6: float( 0 ),
+    7: float( 0 ),
+    8: float( 0 ),
+    9: float( 0 )
+}
+
+mqtt_payload_costday = {
+    0: str( '' ),
+    1: int( 0 ),
+    2: float( 0 ),
+    3: float( 0 ),
+    4: float( 0 ),
+    5: float( 0 ),
+    6: float( 0 ),
+    7: float( 0 )
+}
+
+
 def checkActiveState():
     global mqtt_para
 
@@ -190,13 +235,25 @@ def checkActiveState():
     else:
         mqtt_para['indoortemperaturepublishisactive'] = False
 
+    _id, parameter, _label = config_db.strget( 176, flog )
+    if int(parameter) == 1:
+        mqtt_para['powergasdaypublishisactive'] = True
+    else:
+        mqtt_para['powergasdaypublishisactive'] = False
+
+    _id, parameter, _label = config_db.strget( 177, flog )
+    if int(parameter) == 1:
+        mqtt_para['costdaypublishisactive'] = True
+    else:
+        mqtt_para['costdaypublishisactive'] = False
+
     mqtt_para['anypublishisactive'] = (mqtt_para['smartmeterpublishisactive'] or mqtt_para['watermeterpublishisactive'] or \
-        mqtt_para['weatherpublishisactive'] or mqtt_para['indoortemperaturepublishisactive'] or mqtt_para['phasepublishisactive'] )
-    
+        mqtt_para['weatherpublishisactive'] or mqtt_para['indoortemperaturepublishisactive'] or mqtt_para['phasepublishisactive'] or mqtt_para['powergasdaypublishisactive'] or mqtt_para['costdaypublishisactive'] )
+
     #print ( mqtt_para )
     
 def setConfigFromDb():
-    global mqtt_para, mqtt_topics_smartmeter, mqtt_topics_watermeter, mqtt_topics_weather, mqtt_topics_indoor_temperature, mqtt_topics_phase, mqtt_topics_powerproduction
+    global mqtt_para, mqtt_topics_smartmeter, mqtt_topics_watermeter_minute, mqtt_topics_watermeter_day, mqtt_topics_weather, mqtt_topics_indoor_temperature, mqtt_topics_phase, mqtt_topics_powerproduction, mqtt_topics_powergas_day, mqtt_topics_cost_day
 
     try:
         _id, parameter, _label = config_db.strget( 105, flog )
@@ -259,12 +316,20 @@ def setConfigFromDb():
         10: mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_SMARTMETER) + '/' + apiconst.JSON_API_REC_PRCSSD.lower(),
     }   
 
-    mqtt_topics_watermeter = {
+    mqtt_topics_watermeter_minute = {
         0: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/minute'.lower()  + '/' + apiconst.JSON_TS_LCL.lower(),
         1: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/minute'.lower()  + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
         2: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/minute'.lower()  + '/' + apiconst.JSON_API_WM_PULS_CNT.lower(),
         3: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/minute'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR.lower(),
         4: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/minute'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR_M3.lower()
+    }
+
+    mqtt_topics_watermeter_day = {
+        0: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL.lower(),
+        1: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
+        2: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_API_WM_PULS_CNT.lower(),
+        3: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR.lower(),
+        4: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR_M3.lower()
     }
 
     mqtt_topics_weather = {
@@ -324,9 +389,34 @@ def setConfigFromDb():
         9:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWERPRODUCTION_S0  + '/minute'.lower()  + '/' + apiconst.JSON_API_PROD_W_PSEUDO.lower(),
     }
 
+    mqtt_topics_powergas_day = {
+        0:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL.lower(),
+        1:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
+        2:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_CNSMPTN_KWH_L.lower(),
+        3:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_CNSMPTN_KWH_H.lower(),
+        4:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_PRDCTN_KWH_L.lower(),
+        5:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_PRDCTN_KWH_H.lower(),
+        6:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_CNSMPTN_DLT_KWH.lower(),
+        7:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_PRDCTN_DLT_KWH.lower(),
+        8:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_CNSMPTN_GAS_M3.lower(),
+        9:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_POWER_GAS + '/day'.lower()  + '/' + apiconst.JSON_API_CNSMPTN_GAS_DLT_M3.lower(),
+    }
+
+    mqtt_topics_cost_day = {
+        0:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL.lower(),
+        1:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
+        2:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_API_FNCL_CNSMPTN_E_H.lower(),
+        3:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_API_FNCL_CNSMPTN_E_L.lower(),
+        4:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_API_FNCL_PRDCTN_E_H.lower(),
+        5:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_API_FNCL_PRDCTN_E_L.lower(),
+        6:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_API_FNCL_CNSMPTN_GAS.lower(),
+        7:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_FINANCIAL + '/day'.lower()  + '/' + apiconst.JSON_API_FNCL_CNSMPTN_WATER.lower()
+    }
+
+
     #flog.info (inspect.stack()[0][3]+": MQTT parameters :" + str( mqtt_para ) )
 
-# when the minimal set of broker paramters are set return True or False
+# when the minimal set of broker parameters are set return True or False
 def minimalBrokerSettingsAvailable():
     try:   
         if len( mqtt_para['brokerhost']) < 1:
@@ -353,7 +443,7 @@ def Main(argv):
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
     except Exception as e:
-        flog.critical( inspect.stack()[0][3]+": database niet te openen(2)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]) )
+        flog.critical( inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]) )
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
   
@@ -363,7 +453,7 @@ def Main(argv):
     try:    
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
-        flog.critical( inspect.stack()[0][3]+": Database niet te openen(1)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]) )
+        flog.critical( inspect.stack()[0][3]+": Database niet te openen(2)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]) )
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
@@ -371,7 +461,7 @@ def Main(argv):
     try:
         e_db_serial.init(const.FILE_DB_E_FILENAME ,const.DB_SERIAL_TAB)        
     except Exception as e:
-        flog.critical( inspect.stack()[0][3] + " database niet te openen(3)."+const.FILE_DB_E_FILENAME+") melding:" + str(e.args[0]) )
+        flog.critical( inspect.stack()[0][3] + " database niet te openen(4)."+const.FILE_DB_E_FILENAME+") melding:" + str(e.args[0]) )
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel "+const.DB_SERIAL_TAB+" succesvol geopend." )
 
@@ -379,7 +469,7 @@ def Main(argv):
     try:    
         watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
     except Exception as e:
-        flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
+        flog.critical( inspect.stack()[0][3] + ": Database niet te openen(5)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_WATERMETERV2_TAB + " succesvol geopend." )
 
@@ -387,7 +477,7 @@ def Main(argv):
     try:
         weer_db.init(const.FILE_DB_WEATHER ,const.DB_WEATHER_TAB)
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(3)."+const.DB_WEATHER_TAB+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(6)."+const.DB_WEATHER_TAB+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.debug(inspect.stack()[0][3]+": database tabel "+const.DB_WEATHER_TAB+" succesvol geopend.")
 
@@ -395,7 +485,7 @@ def Main(argv):
     try:    
         temperature_db.init(const.FILE_DB_TEMPERATUUR_FILENAME ,const.DB_TEMPERATUUR_TAB )
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": Database niet te openen(1)."+const.FILE_DB_TEMPERATUUR_FILENAME+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": Database niet te openen(7)."+const.FILE_DB_TEMPERATUUR_FILENAME+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_TEMPERATUUR_TAB +" succesvol geopend.")
     
@@ -403,15 +493,28 @@ def Main(argv):
     try:    
         power_production_db.init( const.FILE_DB_POWERPRODUCTION , const.DB_POWERPRODUCTION_TAB, flog )
     except Exception as e:
-        flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
+        flog.critical( inspect.stack()[0][3] + ": Database niet te openen(8)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
 
+    # open van history database (dag interval)
+    try:    
+        e_db_history_dag.init( const.FILE_DB_E_HISTORIE, const.DB_HISTORIE_DAG_TAB )    
+    except Exception as e:
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(9)."+const.FILE_DB_E_HISTORIE+") melding:"+str(e.args[0]))
+        sys.exit(1)
+    flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_HISTORIE_DAG_TAB+" succesvol geopend.")
+
+    # open van financieel database (dag interval)
+    try:
+        e_db_financieel_dag.init( const.FILE_DB_FINANCIEEL ,const.DB_FINANCIEEL_DAG_TAB )
+    except Exception as e:
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(10)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
+        sys.exit(1)
+    flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FINANCIEEL_DAG_TAB + " succesvol geopend." )
+
     # set proces gestart timestamp
     rt_status_db.timestamp( 95, flog )
-
-   
-
 
     checkActiveState()
     setConfigFromDb()
@@ -499,22 +602,53 @@ def Main(argv):
             # _id, timestamp, _label, _security = rt_status_db.strget( xx, flog ) #
             #######################################################################
 
-            # watermeter proceessing
+            # cost day processing
             try:
-                #_id, parameter, _label = config_db.strget( 115, flog )
+                if mqtt_para['costdaypublishisactive'] == True:  #is active
+                    _id, timestamp, _label, _security = rt_status_db.strget( 127, flog ) 
+                    if ( mqtt_para['costdayprocessedtimestamp'] ) != timestamp:
+                        getPayloadFromDB( mqtt_payload_costday, e_db_financieel_dag )
+                        if len( mqtt_payload_costday[0] ) > 0: # only send when when we have data
+                            mqttPublish( mqtt_client, mqtt_topics_cost_day,  mqtt_payload_costday )
+                            mqtt_para['costdayprocessedtimestamp'] = timestamp
+            except Exception as e:
+                flog.warning(inspect.stack()[0][3]+": onverwachte fout bij financiele gegevens day publish van melding:" + str(e) )
+
+
+            # powergas day processing
+            try:
+                if mqtt_para['powergasdaypublishisactive'] == True:  #is active
+                    _id, timestamp, _label, _security = rt_status_db.strget( 13, flog ) 
+                    if ( mqtt_para['powergasdayprocessedtimestamp'] ) != timestamp:
+                        getPayloadFromDB( mqtt_payload_powergasday, e_db_history_dag )
+                        if len( mqtt_payload_powergasday[0] ) > 0: # only send when when we have data
+                            mqttPublish( mqtt_client, mqtt_topics_powergas_day,  mqtt_payload_powergasday )
+                            mqtt_para['powergasdayprocessedtimestamp'] = timestamp
+            except Exception as e:
+                flog.warning(inspect.stack()[0][3]+": onverwachte fout bij power gas day publish van melding:"+str(e))
+
+
+            # watermeter processing
+            try:
                 if mqtt_para['watermeterpublishisactive'] == True:  #is active
                     _id, timestamp, _label, _security = rt_status_db.strget( 90, flog )
                     if ( mqtt_para['watermeterprocessedtimestamp'] ) != timestamp:
-                        getPayloadFromDB( mqtt_payload_watermeter, watermeter_db )
-                        if len( mqtt_payload_watermeter[0] ) > 0: # only send when when we have data
-                            mqttPublish( mqtt_client, mqtt_topics_watermeter,  mqtt_payload_watermeter )
+                        # minute processing
+                        getPayloadFromDB( mqtt_payload_watermeter_minute, watermeter_db , db_index = '11' )
+                        if len( mqtt_payload_watermeter_minute[0] ) > 0: # only send when when we have data
+                            mqttPublish( mqtt_client, mqtt_topics_watermeter_minute,  mqtt_payload_watermeter_minute )
                             mqtt_para['watermeterprocessedtimestamp'] = timestamp
+                        # day processing 
+                        getPayloadFromDB( mqtt_payload_watermeter_day, watermeter_db , db_index = '13' )
+                        if len( mqtt_payload_watermeter_day[0] ) > 0: # only send when when we have data
+                            mqttPublish( mqtt_client, mqtt_topics_watermeter_day,  mqtt_payload_watermeter_day )
+                            mqtt_para['watermeterprocessedtimestamp'] = timestamp
+
             except Exception as e:
                 flog.warning(inspect.stack()[0][3]+": onverwachte fout bij watermeter publish van melding:"+str(e))
 
             # weather processing
             try:
-                #_id, parameter, _label = config_db.strget( 116, flog )
                 if mqtt_para['weatherpublishisactive'] == True:  #is active
                     _id, timestamp, _label, _security = rt_status_db.strget( 45, flog )
                     if ( mqtt_para['weatherprocessedtimestamp'] ) != timestamp:
@@ -527,11 +661,10 @@ def Main(argv):
 
             # indoor temperature processing
             try:
-                #_id, parameter, _label = config_db.strget( 117, flog )
                 if mqtt_para['indoortemperaturepublishisactive'] == True:  #is active
                     _id, timestamp, _label, _security = rt_status_db.strget( 58, flog )
                     if ( mqtt_para['indoortemperatureprocessedtimestamp'] ) != timestamp:
-                        getPayloadFromDB( mqtt_payload_indoor_temperature, temperature_db )
+                        getPayloadFromDB( mqtt_payload_indoor_temperature, temperature_db, db_index = '11' )
                         if len( mqtt_payload_indoor_temperature[0] ) > 0: # only send when we have data
                             mqttPublish( mqtt_client, mqtt_topics_indoor_temperature,  mqtt_payload_indoor_temperature )
                             mqtt_para['indoortemperatureprocessedtimestamp'] = timestamp
@@ -613,7 +746,8 @@ def makeTopicJsonFile():
     if mqtt_para['smartmeterpublishisactive'] == True:
         topicToJson( mqtt_topics_smartmeter, list_of_topics )
     if mqtt_para['watermeterpublishisactive'] == True:
-        topicToJson( mqtt_topics_watermeter, list_of_topics )
+        topicToJson( mqtt_topics_watermeter_minute, list_of_topics )
+        topicToJson( mqtt_topics_watermeter_day, list_of_topics )
     if mqtt_para['weatherpublishisactive'] == True:
         topicToJson( mqtt_topics_weather, list_of_topics ) 
     if mqtt_para['indoortemperaturepublishisactive'] == True:
@@ -622,13 +756,18 @@ def makeTopicJsonFile():
         topicToJson( mqtt_topics_phase, list_of_topics )
     if mqtt_para['powerproductionpublishisactive'] == True:
         topicToJson( mqtt_topics_powerproduction, list_of_topics )
+    if mqtt_para['powergasdaypublishisactive'] == True:
+        topicToJson( mqtt_topics_powergas_day, list_of_topics )
+    if mqtt_para['costdaypublishisactive'] == True:
+        topicToJson( mqtt_topics_cost_day, list_of_topics )
+
 
     try:
         filename = const.FILE_MQTT_TOPICS
         flog.debug( inspect.stack()[0][3] + ": topics json output =" + json.dumps( list_of_topics , sort_keys=True ) + " naar bestand " + filename )
-        with open(filename, 'w') as outfile:
-            json.dump( list_of_topics , outfile, sort_keys=True )
-        setFile2user(filename,'p1mon') # to make sure we can process the file
+        with open( filename, 'w') as outfile:
+            json.dump( sorted(list_of_topics), outfile, sort_keys=True )
+        setFile2user( filename,'p1mon' ) # to make sure we can process the file
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": wegschrijven data naar ramdisk is mislukt. melding:"+str(e.args[0]))
 
@@ -770,9 +909,9 @@ def getPhasePayloadFromDB( mqtt_payload ):
     _id, mqtt_payload[ 13 ], _label, _security = rt_status_db.strget( 102, flog) #L1 Ampere
     #print  (mqtt_payload )
 
-def getPayloadFromDB( mqtt_payload, database ):
+def getPayloadFromDB( mqtt_payload, database, db_index=None ):
     try:
-        rec = database.select_one_record()
+        rec = database.select_one_record( db_index = db_index )
         flog.debug( inspect.stack()[0][3] + ": rec= " + str( rec ) )
         if rec != None:
             for i in range(0 , len(rec) ):
@@ -813,9 +952,9 @@ if __name__ == "__main__":
     try:
         logfile = const.DIR_FILELOG + prgname + ".log" 
         setFile2user( logfile,'p1mon' )
-        flog = fileLogger( logfile,prgname )
+        flog = logger.fileLogger( logfile,prgname )
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:" + str( e.args[0] ) )

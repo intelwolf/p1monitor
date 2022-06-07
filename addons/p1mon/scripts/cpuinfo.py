@@ -49,13 +49,13 @@ def getCpuInfo():
             if 'Serial' in line:
                     result['Serial'] = line.split(':')[1].strip()
 
-        if os.path.exists('/.dockerenv'):
+#        if os.path.exists('/.dockerenv'): 
             model = {0:'Docker'}
             result['Hardware'] = 'Docker Container'
             result['Revision'] = 'Docker'
             result['Serial'] = '-'
-        else:
-            model = list(open('/proc/device-tree/model', 'r'))
+#        else:
+#            model = list(open('/proc/device-tree/model', 'r'))
         clean_str = "".join(filter( lambda x: x in string.printable, model[0] ))
         result['Pi-model'] = clean_str
 

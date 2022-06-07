@@ -13,6 +13,12 @@ ROUTE_SMARTMETER_HELP = ROUTE_SMARTMETER + '/help'
 ROUTE_PHASE          = '/api/v1/phase'
 ROUTE_PHASE_HELP     = ROUTE_PHASE + '/help'
 
+ROUTE_PHASE_MINMAX_DAY      = '/api/v1/phaseminmax/day'
+ROUTE_PHASE_MINMAX_DAY_HELP = ROUTE_PHASE_MINMAX_DAY  + '/help'
+
+ROUTE_P1_PORT_TELEGRAM      = '/api/v1/p1port/telegram'
+ROUTE_P1_PORT_TELEGRAM_HELP = ROUTE_P1_PORT_TELEGRAM  + '/help'
+
 ROUTE_STATUS         = '/api/v1/status'
 ROUTE_STATUS_HELP    = ROUTE_STATUS    + '/help'
 ROUTE_STATUS_ID      = ROUTE_STATUS    + '/{id}'
@@ -23,6 +29,7 @@ ROUTE_CONFIG_HELP    = ROUTE_CONFIG    + '/help'
 ROUTE_CONFIG_ID      = ROUTE_CONFIG    + '/{id}'
 ROUTE_CONFIG_ID_HELP = ROUTE_CONFIG_ID + '/help'
 
+BASE_FINANCIAL            = 'financial' # don't use in path in the code
 ROUTE_FINANCIAL_DAY       = '/api/v1/financial/day'
 ROUTE_FINANCIAL_DAY_HELP  = ROUTE_FINANCIAL_DAY + '/help'
 
@@ -32,6 +39,7 @@ ROUTE_FINANCIAL_MONTH_HELP = ROUTE_FINANCIAL_MONTH + '/help'
 ROUTE_FINANCIAL_YEAR      = '/api/v1/financial/year'
 ROUTE_FINANCIAL_YEAR_HELP = ROUTE_FINANCIAL_YEAR + '/help'
 
+BASE_POWER_GAS           = 'powergas' # don't use in path in the code
 ROUTE_POWER_GAS_MIN      = '/api/v1/powergas/minute'
 ROUTE_POWER_GAS_MIN_HELP = ROUTE_POWER_GAS_MIN + '/help'
 
@@ -62,7 +70,7 @@ ROUTE_WEATHER_YEAR_HELP     = ROUTE_WEATHER_YEAR + '/help'
 ROUTE_WEATHER_CURRENT       = '/api/v1/weather'
 ROUTE_WEATHER_CURRENT_HELP  = ROUTE_WEATHER_CURRENT + '/help'
 
-BASE_INDOOR                         = 'indoor/temperature' # don't use in path
+BASE_INDOOR                         = 'indoor/temperature' # don't use in path in the code
 ROUTE_INDOOR_TEMPERATURE            = '/api/v1/indoor/temperature'
 ROUTE_INDOOR_TEMPERATURE_HELP       = ROUTE_INDOOR_TEMPERATURE + '/help'
 
@@ -82,7 +90,7 @@ ROUTE_INDOOR_TEMPERATURE_YEAR       = '/api/v1/indoor/temperature/year'
 ROUTE_INDOOR_TEMPERATURE_YEAR_HELP  = ROUTE_INDOOR_TEMPERATURE_YEAR + '/help'
 
 """
-#BASE_WATERMETER                     = 'watermeter' # don't use in path
+#BASE_WATERMETER                     = 'watermeter' # don't use in path in the code
 #ROUTE_WATERMETER_MIN                = '/api/v1/watermeter/min'
 #ROUTE_WATERMETER_MIN_HELP           = ROUTE_WATERMETER_MIN + '/help'
 
@@ -99,7 +107,7 @@ ROUTE_INDOOR_TEMPERATURE_YEAR_HELP  = ROUTE_INDOOR_TEMPERATURE_YEAR + '/help'
 #ROUTE_WATERMETER_YEAR_HELP          = ROUTE_WATERMETER_YEAR + '/help'
 """
 
-BASE_WATERMETER                     = 'watermeter' # don't use in path
+BASE_WATERMETER                     = 'watermeter' # don't use in path in the code
 ROUTE_WATERMETER_MIN_V2             = '/api/v2/watermeter/minute'
 ROUTE_WATERMETER_MIN_HELP_V2        = ROUTE_WATERMETER_MIN_V2 + '/help'
 
@@ -115,7 +123,7 @@ ROUTE_WATERMETER_MONTH_HELP_V2      = ROUTE_WATERMETER_MONTH_V2 + '/help'
 ROUTE_WATERMETER_YEAR_V2            = '/api/v2/watermeter/year'
 ROUTE_WATERMETER_YEAR_HELP_V2       = ROUTE_WATERMETER_YEAR_V2 + '/help'
 
-BASE_POWERPRODUCTION_S0             = 'powerproduction' # don't use in path
+BASE_POWERPRODUCTION_S0             = 'powerproduction' # don't use in path in the code
 ROUTE_POWERPRODUCTION_S0_MIN        = '/api/v1/powerproduction/minute'
 ROUTE_POWERPRODUCTION_S0_MIN_HELP   = ROUTE_POWERPRODUCTION_S0_MIN + '/help'
 
@@ -131,7 +139,7 @@ ROUTE_POWERPRODUCTION_S0_MONTH_HELP = ROUTE_POWERPRODUCTION_S0_MONTH + '/help'
 ROUTE_POWERPRODUCTION_S0_YEAR       = '/api/v1/powerproduction/year'
 ROUTE_POWERPRODUCTION_S0_YEAR_HELP  = ROUTE_POWERPRODUCTION_S0_YEAR + '/help'
 
-BASE_POWERPRODUCTION_SOLAR          = 'powerproductionsolar' # don't use in path
+BASE_POWERPRODUCTION_SOLAR          = 'powerproductionsolar' # don't use in path in the code
 ROUTE_POWERPRODUCTION_SOLAR_MIN      = '/api/v1/powerproductionsolar/minute/{power_source_id}/{db_index}'
 ROUTE_POWERPRODUCTION_SOLAR_MIN_HELP = '/api/v1/powerproductionsolar/minute/help'
 
@@ -161,6 +169,7 @@ JSON_API_CNSMPTN_KW         = 'CONSUMPTION_KW'                       # the consu
 JSON_API_PRDCTN_KW          = 'PRODUCTION_KW'                        # the production in kilo Watt at this moment.
 JSON_API_VALID_DATA         = 'VALID_DATA'                           # used to flag the data good/complete enough to process.
 JSON_API_FQDN               = 'API_FQDN'                             # Fully Qualified Domain Name for the remote inet access to the API
+JSON_API_P1_TELEGRAM        = 'P1_TELEGRAM'                          # ASCII string P1 telegram.
 
 JSON_API_CNSMPTN_DLT_KWH    = 'CONSUMPTION_DELTA_KWH'                # the consumption in kilo Watt hour during this period
 JSON_API_PRDCTN_DLT_KWH     = 'PRODUCTION_DELTA_KWH'                 # the production in kilo Watt hour during this period.
@@ -237,6 +246,32 @@ JSON_API_PHS_L3_V           = 'L3_V'                                 # Voltage p
 JSON_API_PHS_L1_A           = 'L1_A'                                 # Amperage phase L1
 JSON_API_PHS_L2_A           = 'L2_A'                                 # Amperage phase L2
 JSON_API_PHS_L3_A           = 'L3_A'                                 # Amperage phase L3
+
+JSON_API_PHS_CNSMPTN_L1_W_MAX  = 'CONSUMPTION_L1_W_MAX'              # Consumption of W for phase L1 maximum
+JSON_API_PHS_CNSMPTN_L2_W_MAX  = 'CONSUMPTION_L2_W_MAX'              # Consumption of W for phase L2 maximum
+JSON_API_PHS_CNSMPTN_L3_W_MAX  = 'CONSUMPTION_L3_W_MAX'              # Consumption of W for phase L3 maximum
+JSON_API_PHS_PRDCTN_L1_W_MAX   = 'PRODUCTION_L1_W_MAX'               # Production of W for phase L1 maximum
+JSON_API_PHS_PRDCTN_L2_W_MAX   = 'PRODUCTION_L2_W_MAX'               # Production of W for phase L2 maximum
+JSON_API_PHS_PRDCTN_L3_W_MAX   = 'PRODUCTION_L3_W_MAX'               # Production of W for phase L3 maximum
+JSON_API_PHS_L1_V_MAX          = 'L1_V_MAX'                          # Voltage phase L1 maximum
+JSON_API_PHS_L2_V_MAX          = 'L2_V_MAX'                          # Voltage phase L2 maximum
+JSON_API_PHS_L3_V_MAX          = 'L3_V_MAX'                          # Voltage phase L3 maximum
+JSON_API_PHS_L1_A_MAX          = 'L1_A_MAX'                          # Amperage phase L1 maximum
+JSON_API_PHS_L2_A_MAX          = 'L2_A_MAX'                          # Amperage phase L2 maximum
+JSON_API_PHS_L3_A_MAX          = 'L3_A_MAX'                          # Amperage phase L3 maximum
+
+JSON_API_PHS_CNSMPTN_L1_W_MIN  = 'CONSUMPTION_L1_W_MIN'              # Consumption of W for phase L1 minimum
+JSON_API_PHS_CNSMPTN_L2_W_MIN  = 'CONSUMPTION_L2_W_MIN'              # Consumption of W for phase L2 minimum
+JSON_API_PHS_CNSMPTN_L3_W_MIN  = 'CONSUMPTION_L3_W_MIN'              # Consumption of W for phase L3 minimum
+JSON_API_PHS_PRDCTN_L1_W_MIN   = 'PRODUCTION_L1_W_MIN'               # Production of W for phase L1 minimum
+JSON_API_PHS_PRDCTN_L2_W_MIN   = 'PRODUCTION_L2_W_MIN'               # Production of W for phase L2 minimum
+JSON_API_PHS_PRDCTN_L3_W_MIN   = 'PRODUCTION_L3_W_MIN'               # Production of W for phase L3 minimum
+JSON_API_PHS_L1_V_MIN          = 'L1_V_MIN'                          # Voltage phase L1 minimum
+JSON_API_PHS_L2_V_MIN          = 'L2_V_MIN'                          # Voltage phase L2 minimum
+JSON_API_PHS_L3_V_MIN          = 'L3_V_MIN'                          # Voltage phase L3 minimum
+JSON_API_PHS_L1_A_MIN          = 'L1_A_MIN'                          # Amperage phase L1 minimum
+JSON_API_PHS_L2_A_MIN          = 'L2_A_MIN'                          # Amperage phase L2 minimum
+JSON_API_PHS_L3_A_MIN          = 'L3_A_MIN'                          # Amperage phase L3 minimum
 
 JSON_API_PROD_PERIOD_ID     = 'TIMEPERIOD_ID'                        # Number  / index of time period.
 JSON_API_PROD_PWR_SRC_ID    = 'POWER_SOURCE_ID'                      # Number / index of the power source, 0 is not defined, 1 is S0 kWh puls.
@@ -323,6 +358,9 @@ EXPL_API_RM_TMPRTR_OUT_L    = 'Room temperature output, low value in degrees Cel
 EXPL_API_RM_TMPRTR_OUT_A    = 'Room temperature output, average value degrees Celsius.'
 EXPL_API_RM_TMPRTR_OUT_H    = 'Room temperature output, high value in degrees Celsius.'
 
+EXPL_API_P1_TELEGRAM        = 'ASCII string P1 telegram.'
+EXPL_API_VALID_DATA         = 'used to flag the data good/complete enough to process. options valid or invalid'
+
 EXPL_API_WM_PULS_CNT        = 'Nummer of detected pulses per timeunit (minute,hour, day, month, year).'
 EXPL_API_WM_CNSMPTN_LTR     = 'Liter of waterused per timeunit (minute,hour, day, month, year).'
 EXPL_API_WM_CNSMPTN_LTR_M3  = 'Consumption of water in M3 during the period.'
@@ -339,6 +377,33 @@ EXPL_API_PHS_L3_V           = 'Voltage phase L3'
 EXPL_API_PHS_L1_A           = 'Amperage phase L1'
 EXPL_API_PHS_L2_A           = 'Amperage phase L2'
 EXPL_API_PHS_L3_A           = 'Amperage phase L3'
+
+
+EXPL_API_PHS_CNSMPTN_L1_W_MAX = 'Consumption of W for phase L1 maximum'
+EXPL_API_PHS_CNSMPTN_L2_W_MAX = 'Consumption of W for phase L2 maximum'
+EXPL_API_PHS_CNSMPTN_L3_W_MAX = 'Consumption of W for phase L3 maximum'
+EXPL_API_PHS_PRDCTN_L1_W_MAX  = 'Production of W for phase L1 maximum'
+EXPL_API_PHS_PRDCTN_L2_W_MAX  = 'Production of W for phase L2 maximum'
+EXPL_API_PHS_PRDCTN_L3_W_MAX  = 'Production of W for phase L3 maximum'
+EXPL_API_PHS_L1_V_MAX         = 'Voltage phase L1 maximum'
+EXPL_API_PHS_L2_V_MAX         = 'Voltage phase L2 maximum'
+EXPL_API_PHS_L3_V_MAX         = 'Voltage phase L3 maximum'
+EXPL_API_PHS_L1_A_MAX         = 'Amperage phase L1 maximum'
+EXPL_API_PHS_L2_A_MAX         = 'Amperage phase L2 maximum'
+EXPL_API_PHS_L3_A_MAX         = 'Amperage phase L3 maximum'
+
+EXPL_API_PHS_CNSMPTN_L1_W_MIN = 'Consumption of W for phase L1 minimum'
+EXPL_API_PHS_CNSMPTN_L2_W_MIN = 'Consumption of W for phase L2 minimum'
+EXPL_API_PHS_CNSMPTN_L3_W_MIN = 'Consumption of W for phase L3 minimum'
+EXPL_API_PHS_PRDCTN_L1_W_MIN  = 'Production of W for phase L1 minimum'
+EXPL_API_PHS_PRDCTN_L2_W_MIN  = 'Production of W for phase L2 minimum'
+EXPL_API_PHS_PRDCTN_L3_W_MIN  = 'Production of W for phase L3 minimum'
+EXPL_API_PHS_L1_V_MIN         = 'Voltage phase L1 minimum'
+EXPL_API_PHS_L2_V_MIN         = 'Voltage phase L2 minimum'
+EXPL_API_PHS_L3_V_MIN         = 'Voltage phase L3 minimum'
+EXPL_API_PHS_L1_A_MIN         = 'Amperage phase L1 minimum'
+EXPL_API_PHS_L2_A_MIN         = 'Amperage phase L2 minimum'
+EXPL_API_PHS_L3_A_MIN         = 'Amperage phase L3 minimum'
 
 EXPL_API_PROD_PERIOD_ID     = 'Number/index of time period 11-15 (minute,day,hour,month,year).'
 EXPL_API_PROD_PERIOD_ID_SOLAR = 'Number/index of time period (minute,day,hour,month,year).'
@@ -372,6 +437,8 @@ API_PARAMETER_RANGETIMESTAMP = 'range'
 API_STATUS_TEST              = 'test'
 API_STATUS_PRODUCTION        = 'production'
 API_STATUS_DEPRECATED        = 'deprecated'
+API_STATUS_VALID             = 'valid'
+API_STATUS_INVALID           = 'invalid'
 
 #api options 
 API_OPTION_LIMIT          =  API_PARAMETER_LIMIT          + ' {default all, >0 } number of entries returned'
@@ -462,6 +529,42 @@ HELP_ROUTE_SMARTMETER_JSON = {
         }
     ]
 }
+
+
+# config data
+# SQL AS Reference
+# 'select ID,PARAMETER,LABEL from config order by id'
+HELP_ROUTE_P1_PORT_TELEGRAM = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_JSON,
+    "api_description"   : "The P1 telegram as received from the smart meter. It is the last telegram that is successfully received in the form of a JSON array.",
+    "api_usage"         : "<ip>" + ROUTE_P1_PORT_TELEGRAM + "?" + API_PARAMETER_JSON_TYPE + "=object",
+    "fields": [
+        {
+           "name" : JSON_TS_LCL,
+           "description" : EXPL_TS_LCL,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_TS_LCL_UTC,
+           "description" : EXPL_TS_LCL_UTC,
+           "type": TYPE_JSON_INTEGER
+         },
+         { 
+           "name" : JSON_API_VALID_DATA ,
+           "description" : EXPL_API_VALID_DATA ,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_API_P1_TELEGRAM,
+           "description" : EXPL_API_P1_TELEGRAM,
+           "type": TYPE_JSON_STRING
+         },
+
+    ]
+}
+
 
 # config data
 # SQL AS Reference
@@ -1302,3 +1405,154 @@ HELP_ROUTE_POWER_PRODUCTION_SOLAR_MIN_DAY_MONTH_YEAR_JSON = {
          }
     ]
 }
+
+
+
+
+#help data 
+# SQL AS Reference
+# select TIMESTAMP, cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), MAX_VERBR_L1_KW * 1000,MAX_VERBR_L2_KW * 1000,MAX_VERBR_L3_KW * 1000,MAX_GELVR_L1_KW * 1000, MAX_GELVR_L2_KW * 1000,MAX_GELVR_L3_KW * 1000,MAX_L1_V,MAX_L2_V,MAX_L3_V,MAX_L1_A,MAX_L2_A,MAX_L3_A,MIN_VERBR_L1_KW * 1000,MIN_VERBR_L2_KW * 1000,MIN_VERBR_L3_KW * 1000, MIN_GELVR_L1_KW * 1000, MIN_GELVR_L2_KW * 1000, MIN_GELVR_L3_KW * 1000, MIN_L1_V,MIN_L2_V,MIN_L3_V,MIN_L1_A,MIN_L2_A,MIN_L3_A 
+HELP_ROUTE_POWER_PHASE_MINMAX_DAY_JSON = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP + ", " + API_OPTION_RANGE,
+    "api_description"   : "The maximum and minimum  values of the three phases (L1,L2,L3). ",
+    "api_usage"         : "<ip>{"+ ROUTE_PHASE_MINMAX_DAY + '}?' +\
+                                  API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2022-04-24 10:21:55, or ' +\
+                                  API_PARAMETER_RANGETIMESTAMP + '=2020-04-24, <ip>{'+ ROUTE_PHASE_MINMAX_DAY + '},<ip>{' + ROUTE_PHASE_MINMAX_DAY_HELP + '}',
+    "fields": [
+         {
+           "name" : JSON_TS_LCL,
+           "description" : EXPL_TS_LCL,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_TS_LCL_UTC,
+           "description" : EXPL_TS_LCL_UTC,
+           "type": TYPE_JSON_INTEGER
+         },
+         { 
+           "name" : JSON_API_PHS_CNSMPTN_L1_W_MAX ,
+           "description" : EXPL_API_PHS_CNSMPTN_L1_W_MAX ,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         { 
+           "name" : JSON_API_PHS_CNSMPTN_L2_W_MAX,
+           "description" : EXPL_API_PHS_CNSMPTN_L2_W_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_CNSMPTN_L3_W_MAX,
+           "description" : EXPL_API_PHS_CNSMPTN_L3_W_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_PRDCTN_L1_W_MAX,
+           "description" : EXPL_API_PHS_PRDCTN_L1_W_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_PRDCTN_L2_W_MAX,
+           "description" : EXPL_API_PHS_PRDCTN_L2_W_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_PRDCTN_L3_W_MAX,
+           "description" : EXPL_API_PHS_PRDCTN_L3_W_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L1_V_MAX,
+           "description" : EXPL_API_PHS_L1_V_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L2_V_MAX,
+           "description" : EXPL_API_PHS_L2_V_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L3_V_MAX,
+           "description" : EXPL_API_PHS_L3_V_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L1_A_MAX,
+           "description" : EXPL_API_PHS_L1_A_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L2_A_MAX,
+           "description" : EXPL_API_PHS_L2_A_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L3_A_MAX,
+           "description" : EXPL_API_PHS_L3_A_MAX,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_CNSMPTN_L1_W_MIN,
+           "description" : EXPL_API_PHS_CNSMPTN_L1_W_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_CNSMPTN_L2_W_MIN,
+           "description" : EXPL_API_PHS_CNSMPTN_L2_W_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_CNSMPTN_L3_W_MIN,
+           "description" : EXPL_API_PHS_CNSMPTN_L3_W_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_PRDCTN_L1_W_MIN,
+           "description" : EXPL_API_PHS_PRDCTN_L1_W_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_PRDCTN_L2_W_MIN,
+           "description" : EXPL_API_PHS_PRDCTN_L2_W_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_PRDCTN_L3_W_MIN,
+           "description" : EXPL_API_PHS_PRDCTN_L3_W_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L1_V_MIN,
+           "description" : EXPL_API_PHS_L1_V_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L2_V_MIN,
+           "description" : EXPL_API_PHS_L2_V_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L3_V_MIN,
+           "description" : EXPL_API_PHS_L3_V_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L1_A_MIN,
+           "description" : EXPL_API_PHS_L1_A_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L2_A_MIN,
+           "description" : EXPL_API_PHS_L2_A_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         {
+           "name" : JSON_API_PHS_L3_A_MIN,
+           "description" : EXPL_API_PHS_L3_A_MIN,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+    ]
+}
+
+
+

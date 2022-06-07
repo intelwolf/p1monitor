@@ -3,13 +3,15 @@
 ################################################
 
 import const
+import datetime
 import inspect
 import random
 import string
 import util
 
 
-DUMMY_GAS_TIME_ELAPSED = 300 # sec. die verstreken moet zijn voor volgend gas record in dummy mode.
+#DUMMY_GAS_TIME_ELAPSED = 300 # sec. die verstreken moet zijn voor volgend gas record in dummy mode.
+DUMMY_GAS_TIME_ELAPSED = 10 
 
 NO_GAS_TEST            = 0
 DUMMY_GAS_MODE_2421    = 1
@@ -18,18 +20,28 @@ DUMMY_GAS_MODE_2423    = 3
 
 class p1_telegram():
 
-    ############### static class vars ################
-    dev_dummy_gas_value         = 0
-    timestamp_last_gas_update   = 0
-
     ###################################################
     # init of the class                               #
     ###################################################
-    def init( self, flog, configdb=None ):
-        self.flog = flog
+    def init( self, flog=None, statusdb=None ):
+        self.flog                       = flog
+        self.lc_1_0_170                 = 1.23
+        self.lc_1_0_270                 = 3.45
+        self.lc_1_0_180                 = 123456.78
+        self.lc_1_0_280                 = 567.89
+        self.lc_1_0_3170                = 50  #L1 (R) A
+        self.lc_1_0_5170                = 100 #L2 (S) A
+        self.lc_1_0_7170                = 200 #L3 (T) A
+        self.lc_1_0_3270                = 220 #L1 (R) V
+        self.lc_1_0_5270                = 230 #L2 (S) V
+        self.lc_1_0_7270                = 240 #L3 (T) V
+        self.statusdb                   = statusdb
+        self.timestamp_last_gas_update  = 0
+        self.dev_dummy_gas_value        = 0
+
         try:
             sqlstr = "select status from " + const.DB_STATUS_TAB + " where id =43"
-            gas_dummy_val_rec=configdb.select_rec(sqlstr)
+            gas_dummy_val_rec=self.statusdb.select_rec(sqlstr)
             self.dev_dummy_gas_value=float(gas_dummy_val_rec[0][0])
         except Exception as e:
             flog.warning (inspect.stack()[0][3]+": oude gas waarde was niet te lezen in de configuratie database -> " + str( e.args[0] ) )
@@ -89,6 +101,7 @@ class p1_telegram():
                 self.flog.debug(inspect.stack()[0][3]+": "+line_2)
                 
             serialbuffer.append( line )
+
 
         except Exception as e:
             self.flog.warning( inspect.stack()[0][3]+": test gas test insert probleem " +  str( e ) )
@@ -179,3 +192,55 @@ class p1_telegram():
 
             except Exception as e:
                 self.flog.warning( inspect.stack()[0][3]+": test drie fase test insert probleem " +  str( e ) )
+
+    ###################################################
+    # replace the serial buffer with a dummy large    #
+    # consumption (grootverbruikers)                  #
+    # this type of meters use a different telegram    #
+    # codes.                                          #
+    ###################################################
+    def large_consumption_telegram( self, serialbuffer=None, set_watt_on=False ):
+        del serialbuffer[:]
+        dt = datetime.datetime.now()
+        
+        self.lc_1_0_3270 = random.randint( 207, 253 ) # volt
+        self.lc_1_0_5270 = random.randint( 207, 253 ) # volt
+        self.lc_1_0_7270 = random.randint( 207, 253 ) # volt
+
+        self.lc_1_0_3170 = random.randint( 1, 200 ) # Amps
+        self.lc_1_0_5170 = random.randint( 1, 200 ) # Amps
+        self.lc_1_0_7170 = random.randint( 1, 200 ) # Amps
+
+        self.lc_1_0_180 += random.uniform ( 1, 10 )
+        self.lc_1_0_280 += random.uniform ( 1, 5 )
+
+        a_total = self.lc_1_0_3170 + self.lc_1_0_5170 + self.lc_1_0_7170
+        self.lc_1_0_170 = (a_total * ((self.lc_1_0_3270 + self.lc_1_0_5270 + self.lc_1_0_7270)/3))/1000
+        
+        header = '/ISk5\\2MT382-1008'
+        serialbuffer.append( header )
+        serialbuffer.append( '\n' )
+        serialbuffer.append( '0-0:96.1.0(69588595)' ) # type number of the manufacturer
+        serialbuffer.append( '1-0:0.9.1(' + dt.strftime("%H%M%S") + ')' ) # time 
+        serialbuffer.append( '1-0:0.9.2(' + dt.strftime("%y%m%d") + ')' ) # date
+        if set_watt_on == True:
+            serialbuffer.append( '1-0:1.7.0(' + "{0:06.3f}".format( self.lc_1_0_170 ) + '*kW)' ) # current power (W) consumed from the net
+            serialbuffer.append( '1-0:2.7.0(' + "{0:06.3f}".format( self.lc_1_0_270 ) + '*kW)' ) # current power (W) produced from the net
+        serialbuffer.append( '1-0:1.8.0(' + "{0:09.2f}".format( self.lc_1_0_180 )+ '*kWh)' ) # kWh consumed 
+        serialbuffer.append( '1-0:2.8.0(' + "{0:09.2f}".format( self.lc_1_0_280 )+ '*kWh)' ) # kWh produced
+        serialbuffer.append( '1-0:3.8.0(043983.56*kvarh)' ) # positive reactive power
+        serialbuffer.append( '1-0:4.8.0(005085.48*kvarh)' ) # negative reactive power
+        serialbuffer.append( '1-0:90.7.0(' + "{0:d}".format( a_total ) + '*A)' ) # total amps R,S,T (L1,L2,L3)
+        serialbuffer.append( '1-0:31.7.0(' + "{0:d}".format( self.lc_1_0_3170 ) + '*A)' ) # L1 Amps (R)
+        serialbuffer.append( '1-0:32.7.0(' + "{0:d}".format( self.lc_1_0_3270 ) + '*V)' ) # L1 Volt (R)
+        serialbuffer.append( '1-0:51.7.0(' + "{0:d}".format( self.lc_1_0_5170 ) + '*A)' ) # L2 Amps (S)
+        serialbuffer.append( '1-0:52.7.0(' + "{0:d}".format( self.lc_1_0_5270 ) + '*V)' ) # L2 Volt (S)
+        serialbuffer.append( '1-0:71.7.0(' + "{0:d}".format( self.lc_1_0_7170 ) + '*A)' ) # L3 Amps (T)
+        serialbuffer.append( '1-0:72.7.0(' + "{0:d}".format( self.lc_1_0_7270 ) + '*V)' ) # L3 Volt (T)
+        serialbuffer.append( '!' )
+
+        self.flog.debug (inspect.stack()[0][3]+": dummy buffer voor grootverbruik -> " + str( serialbuffer) )
+
+        #print ( serialbuffer )
+
+

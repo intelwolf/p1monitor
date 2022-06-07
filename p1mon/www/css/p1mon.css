@@ -249,42 +249,6 @@ div#qrcode {
     font-size: 1em;
     display: none;
 }
-
-/*
-div#succes_msg_samba {
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    border: 1px solid #DCE1E3;
-    padding:10px 0px 10px 0px;
-    width: 24em;
-    text-align: center;
-    color: #83B31E;
-    background-color: #F5F5F5;
-    box-shadow: 0px 5px 8px -2px #eaeaea;
-    font-size: 1em;
-    display: none;
-}
-*/
-
-
-/*
-div#succes_msg_wifi {
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    border: 1px solid #DCE1E3;
-    padding:10px 0px 10px 0px;
-    width: 24em;
-    text-align: center;
-    color: #83B31E;
-    background-color: #F5F5F5;
-    box-shadow: 0px 5px 8px -2px #eaeaea;
-    font-size: 1em;
-    display: none;
-}
-*/
-
 div#dialog {
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
@@ -890,7 +854,7 @@ div#right-wrapper-config-right-4 {
 
 .text-13 {
     color: #6E797C;
-    font-size: 5em;
+    font-size: 4.6em;
     text-align: center;
 }
 
@@ -1194,6 +1158,19 @@ div#right-wrapper-config-right-4 {
     font-family: 'robotoblack';
 }
 
+.input-17 {
+    width: 82px;
+    border-radius: 3px 3px 3px 3px;
+    -moz-border-radius: 3px 3px 3px 3px;
+    -webkit-border-radius: 3px 3px 3px 3px;
+    font-size: 1em;
+    font-family: 'robotoblack';
+    margin: 0px 0px 4px 0px;
+    padding: 0px 0px 0px 5px;
+    border-width: 1px;
+    border-color: #6E797C;
+}
+
 *:focus {
     outline: 0 !important;
 }
@@ -1245,7 +1222,7 @@ div#right-wrapper-config-right-4 {
 }
 
 .select-5 {
-    width: 80px;
+    width: 90px;
     border-radius: 3px 3px 3px 3px;
     -moz-border-radius: 3px 3px 3px 3px;
     -webkit-border-radius: 3px 3px 3px 3px;
@@ -2068,21 +2045,7 @@ a:hover {
     padding-bottom: 8px;
 }
 
-.weather_box {
-    margin-top: 10px;
-    margin-left: 4px;
-    padding-top: 8px;
-    padding-bottom: 4px;
-    padding-left: 5px;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    border: 1px solid #DCE1E3;
-    background-color: #F5F5F5;
-    height: 23px;
-    width: 370px;
-    display: inline-block;
-}
+
 
 .fieldset-1 {
     border: 0px;

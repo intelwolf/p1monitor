@@ -10,12 +10,13 @@ import json
 import os
 import pwd
 import subprocess
+import sqldb
 import sys
 import systemid
 import time
 import crypto3
 
-from sqldb import configDB, SqlDb2, financieelDb, currentWeatherDB, historyWeatherDB, temperatureDB, WatermeterDB, PhaseDB, powerProductionDB, WatermeterDBV2, powerProductionSolarDB
+#from sqldb import configDB, SqlDb2, financieelDb, currentWeatherDB, historyWeatherDB, temperatureDB, WatermeterDB, PhaseDB, powerProductionDB, WatermeterDBV2, powerProductionSolarDB
 from logger import fileLogger,logging
 from datetime import datetime, timedelta
 from util import setFile2user
@@ -23,25 +24,26 @@ from listOfPidByName import listOfPidByName
 
 prgname = 'P1SqlImport'
 
-config_db                   = configDB()
-e_db_history_min            = SqlDb2() 
-e_db_financieel_dag         = financieelDb()
-e_db_financieel_maand       = financieelDb()
-e_db_financieel_jaar        = financieelDb()
-weer_db                     = currentWeatherDB()
-weer_history_db_uur         = historyWeatherDB()
-temperature_db              = temperatureDB()
-temperature_db              = temperatureDB()
+config_db                   = sqldb.configDB()
+e_db_history_min            = sqldb.SqlDb2() 
+e_db_financieel_dag         = sqldb.financieelDb()
+e_db_financieel_maand       = sqldb.financieelDb()
+e_db_financieel_jaar        = sqldb.financieelDb()
+weer_db                     = sqldb.currentWeatherDB()
+weer_history_db_uur         = sqldb.historyWeatherDB()
+temperature_db              = sqldb.temperatureDB()
+temperature_db              = sqldb.temperatureDB()
 #V1 of the watermeter database, we keep supporting this for older software versions that import data
-watermeter_db_uur           = WatermeterDB()
-watermeter_db_dag           = WatermeterDB()
-watermeter_db_maand         = WatermeterDB()
-watermeter_db_jaar          = WatermeterDB()
+watermeter_db_uur           = sqldb.WatermeterDB()
+watermeter_db_dag           = sqldb.WatermeterDB()
+watermeter_db_maand         = sqldb.WatermeterDB()
+watermeter_db_jaar          = sqldb.WatermeterDB()
 #V2 of the watermeter database
-watermeter_db               = WatermeterDBV2()
-fase_db                     = PhaseDB()
-power_production_db         = powerProductionDB()
-power_production_solar_db   = powerProductionSolarDB()
+watermeter_db               = sqldb.WatermeterDBV2()
+fase_db                     = sqldb.PhaseDB()
+fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
+power_production_db         = sqldb.powerProductionDB()
+power_production_solar_db   = sqldb.powerProductionSolarDB()
 no_status_messages    = False   # dont write to the status file. 
 
 statusdata = {
@@ -258,11 +260,11 @@ def Main(argv):
 
             ############################################
             elif tail.startswith( const.DB_PHASEINFORMATION ):
-                processImportDataSet( const.DB_PHASEINFORMATION, fase_db, zf, fname, 'replace into ' + const.DB_FASE_REALTIME_TAB + '*' )
-                
+                processImportDataSet( const.DB_PHASEINFORMATION, fase_db, zf, fname, 'replace into fase*' )
+
             ############################################
             elif tail.startswith( const.DB_POWERPRODUCTION ):
-                processImportDataSet( const.DB_POWERPRODUCTION, power_production_db, zf, fname, 'replace into ' + const.DB_POWERPRODUCTION_TAB + '*' )
+                 processImportDataSet( const.DB_POWERPRODUCTION, power_production_db, zf, fname, 'replace into ' + const.DB_POWERPRODUCTION_TAB + '*' )
 
     except Exception as e:
         msg = "ZIP file verwerking globale fout -> " + str(e)
@@ -690,6 +692,17 @@ def openDatabases():
         stop( 16 )
 
     msgToInfoLogAndStatusFile( "database " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
+
+    # open van fase database voor min/max waarden.
+    try:
+        fase_db_min_max_dag.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_MINMAX_DAG_TAB )
+    except Exception as e:
+        msg = ": database niet te openen (" + const.DB_FASE_MINMAX_DAG_TAB + ") melding: " + str(e.args[0] )
+        writeLineToStatusFile( msg )
+        flog.critical(inspect.stack()[0][3] + ": " + msg )
+        stop( 17 )
+
+    msgToInfoLogAndStatusFile( "database " + const.DB_FASE_MINMAX_DAG_TAB + " succesvol geopend." )
 
 #####################################################
 # exit the program as clean as possible by closing  #

@@ -37,6 +37,7 @@ PRG16="P1WatermeterV2.py"
 PRG17="P1SolarEdgeReader.py"
 PRG18="P1NetworkConfig.py"
 PRG19="P1UpgradeAide.py"
+PRG20="P1Notifier.py"
 P1FILE="p1msg.txt"
 
 
@@ -147,6 +148,11 @@ start() {
     $PRG_PATH$PRG14 &>/dev/null &
     echo "$PRG14 gestart."
 
+    # Notifier start
+    $PRG_PATH$PRG20 2>&1 >/dev/null &
+    echo "$PRG20 gestart."
+
+
 }
 
 #function is_script_running() {
@@ -188,13 +194,9 @@ function process_kill() {
             PID=$( pidof -x $1 )
             sudo kill -s SIGINT $PID 1>&2 >/dev/null
             echo "timeout is $2 seconden"
-            sleep 1
-            if [ -z "$PID" ]; then
-                echo "forceer het stoppen van proces "$1
-                sudo kill -s SIGTERM $PID 1>&2 >/dev/null
-                sleep 1
-                sudo killall $1
-            fi
+            sleep 2
+            echo "sudo killall "$1" wordt uitgevoerd."
+            sudo killall $1
         fi
     fi
 }
@@ -202,6 +204,9 @@ function process_kill() {
 stop() {
 
     echo "Processen worden gestopt, even geduld aub."
+
+    # Notifier stop
+    process_kill $PRG20 2
 
     # Serial interface stop
     process_kill $PRG1
@@ -243,6 +248,8 @@ stop() {
 
     # MQTT stop
     process_kill $PRG13 5
+
+    
 
 }
 

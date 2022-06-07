@@ -19,8 +19,8 @@ FILEPATH_SIZE = {
 
 
 ################################################
-# remove a file after the seconds parameter is #
-# pased                                        #
+# remove a file after the seconds parameter    #
+# time has pased                               #
 ################################################
 def rm_with_delay( filepath=None, timeout=3600 ):
         cmd_str = "/bin/sleep " + str(timeout) +" && /usr/bin/sudo /bin/rm --force " + filepath + " &"

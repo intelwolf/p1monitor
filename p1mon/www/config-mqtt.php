@@ -153,6 +153,27 @@ if ( isset($_POST["publish_ownpowerproduction_data"]) ) {
     $update_MQTT_setting_flag = True;
 }
 
+if ( isset($_POST["publish_kwhgas_data"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["publish_kwhgas_data"] == '1' ) {
+        if ( updateConfigDb( "update config set parameter = '1' where ID = 176") )$err_cnt += 1;
+    } else {
+        if ( updateConfigDb( "update config set parameter = '0' where ID = 176") )$err_cnt += 1;
+    }
+    $update_MQTT_setting_flag = True;
+}
+
+if ( isset($_POST["publish_finance_data"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["publish_finance_data"] == '1' ) {
+        if ( updateConfigDb( "update config set parameter = '1' where ID = 177") )$err_cnt += 1;
+    } else {
+        if ( updateConfigDb( "update config set parameter = '0' where ID = 177") )$err_cnt += 1;
+    }
+    $update_MQTT_setting_flag = True;
+}
+
+
 
 if ( isset( $_POST["fs_rb_mqtt"] ) ) { //ok
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -321,25 +342,6 @@ $(function () {
                                 <label class="text-10">protocol versie</label>
                                 <p class="p-1"></p>
                                 <br>
-                                <i class="text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">verzenden smartmeter data</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">verzenden watermeter data</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">verzenden weer data</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">verzenden binnentemperatuur data</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">verzenden fase data</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">verzenden opgewekte vermogen</label>
-                                <p class="p-1"></p>
-                                <br>
                                 <label class="text-10">laatst verstuurde bericht:</label>
                                 <p class="p-1"></p>
                                 <label class="text-10">status</label>
@@ -383,44 +385,105 @@ $(function () {
                                 </select>
                                 <p class="p-1"></p>
                                 <br>
-
-                                <div class="">
-                                    <input class="cursor-pointer" id="publish_smartmeter_data_on"  name="publish_smartmeter_data" type="radio" value="1" <?php if ( config_read( 114 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="publish_smartmeter_data_off" name="publish_smartmeter_data" type="radio" value="0" <?php if ( config_read( 114 ) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                <p class="p-1"></p>
-                                <div class=''>
-                                    <input class="cursor-pointer" id="publish_watermeter_data_on"  name="publish_watermeter_data" type="radio" value="1" <?php if ( config_read( 115 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="publish_watermeter_data_off" name="publish_watermeter_data" type="radio" value="0" <?php if ( config_read( 115 ) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                <p class="p-1"></p>
-                                <div class=''>
-                                    <input class="cursor-pointer" id="publish_weather_data_on"  name="publish_weather_data" type="radio" value="1" <?php if ( config_read( 116 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="publish_weather_data_off" name="publish_weather_data" type="radio" value="0" <?php if ( config_read( 116 ) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                <p class="p-1"></p>
-                                <div class=''>
-                                    <input class="cursor-pointer" id="publish_indoortemperature_data_on"  name="publish_indoortemperaturer_data" type="radio" value="1" <?php if ( config_read( 117 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="publish_indoortemperature_data_off" name="publish_indoortemperaturer_data" type="radio" value="0" <?php if ( config_read( 117 ) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                <p class="p-1"></p>
-                                <div class=''>
-                                    <input class="cursor-pointer" id="publish_phase_data_on"  name="publish_phase_data" type="radio" value="1" <?php if ( config_read( 120 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="publish_phase_data_off" name="publish_phase_data" type="radio" value="0" <?php if ( config_read( 120 ) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                <p class="p-1"></p>
-                                <div class=''>
-                                    <input class="cursor-pointer" id="publish_ownpowerproduction_data_on"  name="publish_ownpowerproduction_data" type="radio" value="1" <?php if ( config_read( 136 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="publish_ownpowerproduction_data_off" name="publish_ownpowerproduction_data" type="radio" value="0" <?php if ( config_read( 136 ) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                <p class="p-1"></p>
-                                <br>
                                 <label class="text-10"><span id="publish_timestamp"></span></label>
                                 <p class="p-1"></p>
                                 <div class="text-10 pos-51"><span id="publish_status"></span></div>
                                 <p class="p-1"></p>
 
                             </div>
+
+                            <div class="rTable text-10">
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden smartmeter</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_smartmeter_data_on"  name="publish_smartmeter_data" type="radio" value="1" <?php if ( config_read( 114 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_smartmeter_data_off" name="publish_smartmeter_data" type="radio" value="0" <?php if ( config_read( 114 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden watermeter</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_watermeter_data_on"  name="publish_watermeter_data" type="radio" value="1" <?php if ( config_read( 115 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_watermeter_data_off" name="publish_watermeter_data" type="radio" value="0" <?php if ( config_read( 115 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden weer</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_weather_data_on"  name="publish_weather_data" type="radio" value="1" <?php if ( config_read( 116 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_weather_data_off" name="publish_weather_data" type="radio" value="0" <?php if ( config_read( 116 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden binnentemperatuur</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_indoortemperature_data_on"  name="publish_indoortemperaturer_data" type="radio" value="1" <?php if ( config_read( 117 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_indoortemperature_data_off" name="publish_indoortemperaturer_data" type="radio" value="0" <?php if ( config_read( 117 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden fase</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_phase_data_on"  name="publish_phase_data" type="radio" value="1" <?php if ( config_read( 120 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_phase_data_off" name="publish_phase_data" type="radio" value="0" <?php if ( config_read( 120 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden opgewekte vermogen</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_ownpowerproduction_data_on"  name="publish_ownpowerproduction_data" type="radio" value="1" <?php if ( config_read( 136 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_ownpowerproduction_data_off" name="publish_ownpowerproduction_data" type="radio" value="0" <?php if ( config_read( 136 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden kWh en gas</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_kwhgas_data_on"  name="publish_kwhgas_data" type="radio" value="1" <?php if ( config_read( 176 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_kwhgas_data_off" name="publish_kwhgas_data" type="radio" value="0" <?php if ( config_read( 176 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label>verzenden financieel</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_finance_data_on"  name="publish_finance_data" type="radio" value="1" <?php if ( config_read( 177 ) == 1 ) { echo 'checked'; }?>>Aan
+                                        <input class="cursor-pointer" id="publish_finance_data_off" name="publish_finance_data" type="radio" value="0" <?php if ( config_read( 177 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    </div>
+                                </div> <!-- row end -->
+
+                            </div> <!-- table end -->
+                            
                         </div>
                         <br>
                         <div class="frame-4-top">

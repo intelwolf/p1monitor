@@ -22,7 +22,7 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
 
-<script defer src="./font/awsome/js/all.js"></script>
+<script src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
@@ -34,9 +34,18 @@ if ( checkDisplayIsActive(61) == false) { return; }
 
 var maxAmperageFromConfig  = <?php echo config_read( 123 ) . ";\n"?>
 var maxWattFromConfig      = <?php echo config_read( 124 ) . ";\n"?>
+var useKw                  = <?php echo config_read( 180 ) . ";\n"?>
 var graphIdArray           =  [ 'L1Watt',    'L1Amperage', 'L1Voltage', 'L2Watt',    'L2Amperage', 'L2Voltage', 'L3Watt',    'L3Amperage', 'L3Voltage' ]
 var buttonIdArray          = [ 'L1WButton', 'L1AButton',  'L1VButton', 'L2WButton', 'L2AButton',  'L2VButton', 'L3WButton', 'L3AButton',  'L3VButton' ]
 var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
+
+
+if ( useKw ) {
+    var wattText = 'kW'
+    maxWattFromConfig =  maxWattFromConfig / 1000
+} else {
+    var wattText = 'W'
+}
 
 function readJsonApiPhaseInformationFromStatus(){ 
 
@@ -56,38 +65,60 @@ function readJsonApiPhaseInformationFromStatus(){
         var L1V             = 0;
         var L2V             = 0;
         var L3V             = 0;
-        
+
         for (var j=73;  j < jsondata.length; j++){  
             //console.log( jsondata[j][0] + ' - ' + jsondata[j][1] )
             if ( j > 105 ) break; // loop only when needed
             if ( jsondata[j][0] == 74 ) {
-                L1Wconsumption = Math.ceil( jsondata[j][1] * 1000 );
-                //L1Wconsumption = 6000
+                if ( useKw ) {
+                    L1Wconsumption  = parseFloat( jsondata[j][1] ).toFixed(1).toString()
+                } else { 
+                    L1Wconsumption  = Math.ceil( jsondata[j][1] * 1000 );
+                }
                 continue;
             }
             if ( jsondata[j][0] == 75 ) {
-                L2Wconsumption = Math.ceil(  jsondata[j][1] * 1000 );
+                if ( useKw ) {
+                    L2Wconsumption = parseFloat( jsondata[j][1] ).toFixed(1).toString()
+                } else { 
+                    L2Wconsumption = Math.ceil( jsondata[j][1] * 1000 );
+                }
                 continue;
             }
             if ( jsondata[j][0] == 76 ) {
-                L3Wconsumption = Math.ceil( jsondata[j][1] * 1000 );
+                if ( useKw ) {
+                    L3Wconsumption = parseFloat( jsondata[j][1] ).toFixed(1).toString()
+                } else { 
+                    L3Wconsumption = Math.ceil( jsondata[j][1] * 1000 );
+                }
                 continue;
             }
             if ( jsondata[j][0] == 77  ) {
-                L1Wproduction = Math.ceil( jsondata[j][1] * 1000 );
+                if ( useKw ) {
+                    L1Wproduction = parseFloat( jsondata[j][1] ).toFixed(1).toString()
+                } else { 
+                    L1Wproduction = Math.ceil( jsondata[j][1] * 1000 );
+                }
                 continue;
             }
             if ( jsondata[j][0] == 78  ) {
-                L2Wproduction = Math.ceil( jsondata[j][1] * 1000 );
+                if ( useKw ) {
+                    L2Wproduction = parseFloat( jsondata[j][1] ).toFixed(1).toString()
+                } else { 
+                    L2Wproduction = Math.ceil( jsondata[j][1] * 1000 );
+                }
                 continue;
             }
             if ( jsondata[j][0] == 79 ) {
-                L3Wproduction = Math.ceil( jsondata[j][1] * 1000 );
+                if ( useKw ) {
+                    L3Wproduction = parseFloat( jsondata[j][1] ).toFixed(1).toString()
+                } else { 
+                    L3Wproduction = Math.ceil( jsondata[j][1] * 1000 );
+                }
                 continue;
             }
             if ( jsondata[j][0] == 100 ) {
                 L1A = jsondata[j][1];
-                //L1A = 0
                 continue;
             }
             if ( jsondata[j][0] == 101 ) {
@@ -100,6 +131,7 @@ function readJsonApiPhaseInformationFromStatus(){
             }
             if ( jsondata[j][0] == 103 ) {
                 L1V = jsondata[j][1];
+                //L1V = 0
                 continue;
             }
             if ( jsondata[j][0] == 104 ) {
@@ -187,22 +219,30 @@ function readJsonApiPhaseInformationFromStatus(){
         if ( L1Wconsumption > L1Wproduction ) {
             $('#L1Watt').highcharts().series[0].data[0].color = '#F2BA0F';
             $('#L1Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
-            $('#L1Watt').highcharts().series[0].points[0].update( parseInt( L1Wconsumption ), true, true, true );
+            $('#L1Watt').highcharts().series[0].points[0].update( parseFloat( L1Wconsumption ), true, true, true );
             $('#L1Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
-
-            L1Caculated = L1Wconsumption / L1V  
+            if ( useKw ) {
+                L1Caculated = L1Wconsumption * 1000 / L1V
+            }  else {
+                L1Caculated = L1Wconsumption / L1V
+            }
         } else {
             $('#L1Watt').highcharts().series[0].data[0].color = '#98D023';
             $('#L1Watt').highcharts().yAxis[0].setTitle({text: "levering"});
-            $('#L1Watt').highcharts().series[0].points[0].update( parseInt( L1Wproduction ), true, true, true );
+            $('#L1Watt').highcharts().series[0].points[0].update( parseFloat( L1Wproduction ), true, true, true );
             $('#L1Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
-            L1Caculated = L1Wproduction / L1V 
+            if ( useKw ) {
+                L1Caculated = L1Wproduction * 1000 / L1V
+            }  else {
+                L1Caculated = L1Wproduction / L1V
+            }
         }
         // L1 Amperage
         $('#L1Amperage').highcharts().series[0].points[0].update( parseInt( L1A ), true, true, true );
         // L1 Voltage
+        
         $('#L1Voltage').highcharts().series[0].points[0].update( parseFloat( L1V ), true, true, true );
-        if ( isNaN(L1Caculated) ==  false ) {
+        if ( isNaN(L1Caculated) == false && L1V > 0) {
             $("#L1Calc").text( L1Caculated.toFixed(2) + " A" )
         }
         
@@ -211,21 +251,29 @@ function readJsonApiPhaseInformationFromStatus(){
         if ( L2Wconsumption > L2Wproduction ) {
             $('#L2Watt').highcharts().series[0].data[0].color = '#F2BA0F';
             $('#L2Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
-            $('#L2Watt').highcharts().series[0].points[0].update( parseInt( L2Wconsumption ), true, true, true );
+            $('#L2Watt').highcharts().series[0].points[0].update( parseFloat( L2Wconsumption ), true, true, true );
             $('#L2Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
-            L2Caculated = L2Wconsumption / L2V
+            if ( useKw ) {
+                L2Caculated = L2Wconsumption * 1000 / L2V
+            }  else {
+                L2Caculated = L2Wconsumption / L2V
+            }
         } else {
             $('#L2Watt').highcharts().series[0].data[0].color = '#98D023';
             $('#L2Watt').highcharts().yAxis[0].setTitle({text: "levering"});
-            $('#L2Watt').highcharts().series[0].points[0].update( parseInt( L2Wproduction ), true, true, true );
+            $('#L2Watt').highcharts().series[0].points[0].update( parseFloat( L2Wproduction ), true, true, true );
             $('#L2Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
-            L2Caculated = L2Wproduction / L2V 
+            if ( useKw ) {
+                L2Caculated = L2Wproduction * 1000 / L2V
+            }  else {
+                L2Caculated = L2Wproduction / L2V
+            }
         }
         // L2 Amperage
         $('#L2Amperage').highcharts().series[0].points[0].update( parseInt( L2A ), true, true, true );
         // L2 Voltage
         $('#L2Voltage').highcharts().series[0].points[0].update( parseFloat( L2V ), true, true, true );
-        if ( isNaN(L2Caculated) ==  false ) {
+        if ( isNaN(L2Caculated) == false && L2V > 0) {
             $("#L2Calc").text( L2Caculated.toFixed(2) + " A" )
         }
        
@@ -235,21 +283,29 @@ function readJsonApiPhaseInformationFromStatus(){
         if ( L3Wconsumption > L3Wproduction ) {
             $('#L3Watt').highcharts().series[0].data[0].color = '#F2BA0F';
             $('#L3Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
-            $('#L3Watt').highcharts().series[0].points[0].update( parseInt( L3Wconsumption ), true, true, true );
+            $('#L3Watt').highcharts().series[0].points[0].update( parseFloat( L3Wconsumption ), true, true, true );
             $('#L3Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
-            L3Caculated = L3Wconsumption / L3V
+            if ( useKw ) {
+                L3Caculated = L3Wconsumption * 1000 / L3V
+            }  else {
+                L3Caculated = L3Wconsumption / L3V
+            }
         } else {
             $('#L3Watt').highcharts().series[0].data[0].color = '#98D023';
             $('#L3Watt').highcharts().yAxis[0].setTitle({text: "levering"});
-            $('#L3Watt').highcharts().series[0].points[0].update( parseInt( L3Wproduction ), true, true, true );
+            $('#L3Watt').highcharts().series[0].points[0].update( parseFloat( L3Wproduction ), true, true, true );
             $('#L3Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
-            L3Caculated = L3Wproduction / L3V 
+            if ( useKw ) {
+                L3Caculated = L3Wproduction * 1000 / L3V
+            }  else {
+                L3Caculated = L3Wproduction / L3V
+            }
         }
         // L3 Amperage
         $('#L3Amperage').highcharts().series[0].points[0].update( parseInt( L3A ), true, true, true );
         // L3 Voltage
         $('#L3Voltage').highcharts().series[0].points[0].update( parseFloat( L3V ), true, true, true );
-        if ( isNaN(L3Caculated) ==  false ) {
+        if ( isNaN(L3Caculated) == false && L3V > 0) {
             $("#L3Calc").text( L3Caculated.toFixed(2) + " A" )
         }
        
@@ -260,9 +316,9 @@ function readJsonApiPhaseInformationFromStatus(){
 }
 
 function DataLoop() {
-    
+
     readJsonApiPhaseInformationFromStatus();
-    
+
     if ( p1TelegramMaxSpeedIsOn == true ) {
         setTimeout( 'DataLoop()', 1000 );
     } else {
@@ -279,12 +335,10 @@ $(function () {
     });
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop(); 
-
 }); 
 
-
 function toggelCalculatedAmpValues() {
-    
+
     if ( document.getElementById('L1Amperage').offsetParent === null ) {
         hideStuff( "L1AmperageCalc" );
     } else {
@@ -300,9 +354,8 @@ function toggelCalculatedAmpValues() {
     } else {
         showStuff( "L3AmperageCalc" );
     }
-    
-}
 
+}
 
 function toggleButtonAndGraphView( graph, button ) {
     //console.log (  graph, button );
@@ -324,7 +377,7 @@ function toggleButtonAndGraphView( graph, button ) {
 
 
 function readGraphVisibilityFromBrowserMemory(){
-    
+
     for ( var j=0;  j < graphIdArray.length; j++ ){ 
 
         var status = JSON.parse( getLocalStorage( 'phase-a-' + graphIdArray[ j ] ) )  // helper var, to make and reduce parsing.
@@ -353,11 +406,9 @@ function readGraphVisibilityFromBrowserMemory(){
                     <?php pageclock(); ?>
                     <?php page_menu_header_fase( 0 ); ?>
                     <?php weather_info(); ?>
-                </div>
             </div>
         </div>
 
-        
         <div class="mid-section">
             <div class="left-wrapper pad-34">
                 <?php page_menu( 10 ); ?>
@@ -464,7 +515,8 @@ function readGraphVisibilityFromBrowserMemory(){
                     fontWeight: 'bold',
                     fontSize: '16px'
                 },
-                y: 16
+                y: 16,
+                x: -3
             }
         },
         tooltip: {
@@ -681,7 +733,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} W</span><br/>' +
+                    '<span style="font-size:25px">{point.y} '+ wattText + '</span><br/>' +
                     '</div>',
             },
         }]
@@ -714,7 +766,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} W</span><br/>' +
+                    '<span style="font-size:25px">{point.y} '+ wattText + '</span><br/>' +
                     '</div>',
             },
         }]
@@ -746,7 +798,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} W</span><br/>' +
+                    '<span style="font-size:25px">{point.y} '+ wattText + '</span><br/>' +
                     '</div>',
             },
         }]
@@ -787,7 +839,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L1AmperageChart.renderer.text( maxAmperageFromConfig, 225, 145 )
+    L1AmperageChart.renderer.text( maxAmperageFromConfig, 220, 145 )
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -795,7 +847,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
     
-    L2AmperageChart.renderer.text( maxAmperageFromConfig, 225, 145 )
+    L2AmperageChart.renderer.text( maxAmperageFromConfig, 220, 145 )
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -803,7 +855,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
     
-    L3AmperageChart.renderer.text( maxAmperageFromConfig, 225, 145)
+    L3AmperageChart.renderer.text( maxAmperageFromConfig, 220, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
