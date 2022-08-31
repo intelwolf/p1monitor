@@ -1,0 +1,18 @@
+#! /bin/sh
+#
+# Bogus SMBD service for p1monitor
+
+DESC="SMBD bogus service"
+DAEMON=/sbin/sysctl
+PIDFILE=none
+
+# Comment this out for sysctl to print every item changed
+QUIET_SYSCTL="-q"
+
+do_start_cmd() {
+	STATUS=0
+	return $STATUS
+}
+
+do_stop() { return 0; }
+do_status() { return 0; }
