@@ -43,7 +43,7 @@ if [[ ! -z $SOCAT_CONF ]]; then
 fi
 
 echo "Starting p1mon"
-sudo /p1mon/scripts/p1mon.sh start
+sudo --preserve-env=GPIOZERO_PIN_FACTORY,PIGPIO_ADDR /p1mon/scripts/p1mon.sh start
 
 echo "Setting ramdisk rights"
 sudo chown p1mon:p1mon /p1mon/mnt/ramdisk/*db

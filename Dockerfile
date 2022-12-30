@@ -12,7 +12,7 @@ RUN addgroup -gid 997 gpio && addgroup -gid 1001 p1mon && adduser --gid 1001 --d
 RUN echo >>/etc/sudoers "p1mon ALL=(ALL) NOPASSWD: ALL" && echo >>/etc/sudoers "www-data ALL=(p1mon) NOPASSWD: /p1mon/scripts/*"
 
 # Install Python packages required
-RUN pip3 install pythoncrc gunicorn certifi cffi chardet colorzero dropbox falcon future gpiozero idna iso8601 paho-mqtt psutil pycparser pycrypto pyserial python-crontab python-dateutil pytz PyYAML requests RPi.GPIO setuptools spidev urllib3 xlsxwriter
+RUN pip3 install pythoncrc gunicorn certifi cffi chardet colorzero dropbox falcon future gpiozero idna iso8601 paho-mqtt pigpio psutil pycparser pycrypto pyserial python-crontab python-dateutil pytz PyYAML requests RPi.GPIO setuptools spidev urllib3 xlsxwriter
 # --no-cache-dir
 
 # Copy original p1mon directory
