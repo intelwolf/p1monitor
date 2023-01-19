@@ -98,6 +98,7 @@ function readJsonApiSmartMeter(){
 
         var point = $("#currentuse").highcharts().series[0].points[0];
         point.update( currentWattage, true, true, true );
+        //console.log( currentWattage + " currentWattage update")
 
       } catch(err) {}
    });
@@ -260,6 +261,7 @@ function createDailytUseChart() {
             },
         },
         labels: {
+            format: '{value:.0f}',
             style: {
                 fontWeight: "bold",
                 fontSize: "28px"

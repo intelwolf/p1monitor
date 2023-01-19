@@ -39,7 +39,9 @@ if (!isset($_GET['exportid']) ) { // valid message syntax wise
 if ( isset($_GET['command']) ) {
     if ($_GET['command'] === 'STARTEXPORT') {
         
-        $command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1SqlExport.py -e $export_id' > /dev/null &";
+        #$command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1SqlExport.py -e $export_id' > /dev/null &";
+        $command = "/p1mon/scripts/pythonlaunch.sh P1SqlExport.py -e $export_id > /dev/null &";
+
         exec($command ,$arr_execoutput, $exec_ret_value );
         #print_r($arr_execoutput);
         $arr['status_text']  = $STARTED;

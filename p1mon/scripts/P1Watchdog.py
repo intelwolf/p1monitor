@@ -1,49 +1,42 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1Watchdog.py
+
 import const
-import cpuinfo
+import crypto3
+import crontab_lib
+import filesystem_lib
+import findProcessIdByName
 import glob
 import inspect
-import filesystem_lib
+import json
+import listOfPidByName
+import logger
 import network_lib
 import network_time_lib
-import hashlib
-import json
-import time
-import subprocess
-import urllib
+import os
+import process_lib
 import psutil
 import random
-import platform
-import socket
-import os
 import random
-import struct
 import shutil
-import string
-import system_info_lib
-import util
-import urllib.request
-import semaphore3
 import signal
+import socket
+import sqldb
+import subprocess
 import sys
+import samba_lib
+import system_info_lib
 import systemid
-import crypto3
-import base64
-
-from datetime import datetime, timedelta
-from cpuinfo import getCpuInfo
-from logger import logging,fileLogger
-from sqldb import configDB, rtStatusDb, SqlDb2
-from subprocess import check_output
-from util import getUtcTime,fileExist,setFile2user
-from semaphore3 import writeSemaphoreFile, readSemaphoreFiles
-from findProcessIdByName import findProcessIdByName
-from listOfPidByName import listOfPidByName
+import time
+import urllib
+import urllib.request
+import util
+import wifi_lib
 
 prgname = 'P1Watchdog'
 
-rt_status_db            = rtStatusDb()
-config_db               = configDB()
+rt_status_db            = sqldb.rtStatusDb()
+config_db               = sqldb.configDB()
+
 net_time                = network_time_lib.NetworkTimeStatus()
 p1_no_data_notification = False
 next_version_timestamp  = 0 # if this value is < than utc do retry fetch remote version data.
@@ -52,24 +45,20 @@ auto_import_is_active   = False # used as flag to see if import is running
 msg_import_busy         = "SQL import loopt"
 
 
-def DiskRestore():
-    if not util.fileExist(const.FILE_SESSION):
-        dummy,tail = os.path.split(const.FILE_SESSION)   
-        try:
-            shutil.copy2(const.DIR_FILEDISK+tail, const.FILE_SESSION)
-            flog.info(inspect.stack()[0][3]+": "+const.DIR_FILEDISK+tail+" naar "+const.FILE_SESSION+" gekopieerd.")
-        except Exception as e:
-            flog.error(inspect.stack()[0][3]+": kopie"+const.FILE_SESSION+" Fout: "+str(e)) 
-    os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
-
 def MainProg():
 
     flog.info("Start van programma.")
 
-    checkVarLogFolder() #clean the /var/log folder when the space is more then 80%
+    try:
+        crontab_lib.set_crontab_logcleaner( flog=flog )
+    except Exception as e:
+        flog.error(inspect.stack()[0][3]+": crontab log cleaner fout: " + str(e.args[0]) )
+    flog.info(inspect.stack()[0][3]+": crontab log cleaner ge(re)activeerd." )
+
+    # check_and_clean_log_folder() #clean the /var/log folder when the space is more then 80% 2.0.0 removed.
 
     DiskRestore()
-   
+
     # open van status database
     try:
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)     
@@ -77,29 +66,20 @@ def MainProg():
         flog.critical(inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel: "+const.DB_STATUS_TAB+" succesvol geopend.")
-   
-    
+
     # open van config database
     try:
-        config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
+        config_db.init(const.FILE_DB_CONFIG, const.DB_CONFIG_TAB )
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": database niet te openen(2)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(2)." + const.FILE_DB_CONFIG +" ) melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
 
-    rt_status_db.timestamp( 17, flog )
+    #dhcpconfig = network_lib.DhcpcdConfig(config_db=config_db, flog=flog )
+    #dhcpconfig.set_config_from_db()
+    #sys.exit()
 
-    # init van processen na een start
-    # SAMBA aanpassen
-    try:
-        sqlstr = "select id, parameter from "+const.DB_CONFIG_TAB+" where id=6"
-        sqlstr=" ".join(sqlstr.split())
-        flog.debug(inspect.stack()[0][3]+": sql(1)="+sqlstr)
-        rec_config=config_db.select_rec(sqlstr)
-        flog.debug(inspect.stack()[0][3]+": SAMBA status"+str(rec_config))
-        setSambaMode(rec_config[0][1]) ##DEBUG TERUG ZETTEN
-    except Exception as e:
-        flog.error(inspect.stack()[0][3]+": sql error(1)"+str(e))
+    rt_status_db.timestamp( 17, flog )
 
     # lees systeem ID uit en zet deze in de config database. 
     # versleuteld om dat deze data in een back-up bestand terecht kan komen.
@@ -110,37 +90,37 @@ def MainProg():
     except Exception as e:
         flog.warning(inspect.stack()[0][3]+": System ID zetten mislukt -> " + str(e.args[0]))
 
-    #get WLAN SSID (init the wifi essids bij het starten)
-    getWlanSSID()
-    getUptime()
+    # get WLAN SSID (init the wifi essids bij het starten)
+    wifi_lib.list_wifi_ssid( output_path=const.FILE_WIFISSID, flog=flog )
 
     # set CPU info
-    cpu_info = getCpuInfo()
+    cpu_info = system_info_lib.get_cpu_info()
     rt_status_db.strset(cpu_info['CPU-model'],51,flog)
     rt_status_db.strset(cpu_info['Hardware'],52,flog)
     rt_status_db.strset(cpu_info['Revision'],53,flog)
     rt_status_db.strset(cpu_info['Pi-model'],55,flog)
 
-    # writeSemaphoreFile('debugdump' + '999',flog) # for debug only
-    
     #init P1 new version check. Empty status records
     #rt_status_db.strset( '', 66,  flog )
     #rt_status_db.strset( '', 67,  flog )
     #rt_status_db.strset( '', 68,  flog )
     #rt_status_db.strset( '', 110, flog )
 
-    checkForNewP1Version()
-    getCpuTemperature()
+    check_for_new_p1monitor_version()
+    get_cpu_temperature()
     DuckDNS()
-    getDefaultGateway()
+    get_default_gateway()
     ntp_status()
+    check_and_set_samba_mode( setforced=True )
     
     ## Internet IP adres
-    rt_status_db.strset(getPublicIpAddress(),26,flog)
+    rt_status_db.strset( network_lib.get_public_ip_address(),26,flog )
     ## DNS naamv van publieke adres
-    rt_status_db.strset(getHostname(getPublicIpAddress()),27,flog)
+    #rt_status_db.strset(getHostname(getPublicIpAddress()),27,flog)
+    rt_status_db.strset( network_lib.get_host_name_by_ip( network_lib.get_public_ip_address() ), 27, flog )
     ## is het Internet bereikbaar
-    if getInternetStatusByDnsServers():
+    #if getInternetStatusByDnsServers():
+    if network_lib.fqdn_ping( flog=flog ,info_messages=True):
         rt_status_db.strset("ja",24,flog)
         rt_status_db.timestamp(23,flog)
     else:
@@ -152,98 +132,19 @@ def MainProg():
     # main loop
     cnt = 0
     while 1:
-       
-        # elke 2 sec. acties
-        ## semafoor files verwerken
-
-        list = semaphore3.readSemaphoreFiles(flog)
-        #print ( list )
-        if len(list) == 0:
-            #flog.debug(inspect.stack()[0][3]+" geen semafoor files gevonden")
-            pass
-        else:
-            for cmd in list:
-                if cmd[:9] == 'debugdump': # nodig om file id uit de semafoor te halen
-                    flog.info(inspect.stack()[0][3]+" debug dump gestart.")
-                    makeDebugDump(cmd[9:-6])
-                if cmd[:17] == 'custom_www_import': # nodig om file id uit de semafoor te halen
-                    flog.info(inspect.stack()[0][3]+" import van custom www folder gestart.")
-                    makeCustomWwwImport(cmd[17:-6])
-                if cmd[:17] == 'custom_www_export': # nodig om file id uit de semafoor te halen
-                    flog.info(inspect.stack()[0][3]+" export van custom www folder gestart.")
-                    makeCustomWwwExport(cmd[17:-6]) 
-                if cmd == 'backup.p1mon':
-                    flog.info(inspect.stack()[0][3]+" backup.")
-                    makeBackup()
-                if cmd == 'cron.p1mon': #TODO nog nodig?
-                    flog.info(inspect.stack()[0][3]+" P1Scheduler.")
-                    if os.system('sudo -u p1mon /p1mon/scripts/P1Scheduler.py') > 0:
-                        flog.error(inspect.stack()[0][3]+" chron update gefaald.")
-                if cmd == 'halt.p1mon':
-                    flog.info(inspect.stack()[0][3]+" poweroff.")
-                    databaseRam2Disk()
-                    if os.system('sudo /sbin/init 0') > 0:
-                        flog.error(inspect.stack()[0][3]+" poweroff gefaald.")
-                if cmd == 'reboot.p1mon':
-                    flog.info(inspect.stack()[0][3]+" reboot.")
-                    databaseRam2Disk()
-                    if os.system('sudo /sbin/init 6') > 0:
-                        flog.error(inspect.stack()[0][3]+" reboot gefaald.")
-                if cmd == 'samba_uit.p1mon':
-                    flog.info(inspect.stack()[0][3]+" SAMBA(bestand delen) service stoppen.")
-                    setSambaMode(const.FILESHARE_MODE_UIT)
-                if cmd == 'samba_data.p1mon':
-                    flog.info(inspect.stack()[0][3]+" SAMBA(bestand delen) alleen data.")
-                    setSambaMode(const.FILESHARE_MODE_DATA)            
-                if cmd == 'samba_dev.p1mon':
-                    flog.info(inspect.stack()[0][3]+" SAMBA(bestand delen) development.")
-                    setSambaMode(const.FILESHARE_MODE_DEV)
-                if cmd == 'wifi_aanpassen.p1mon':
-                    flog.info(inspect.stack()[0][3]+" Wifi aanpassingen.")
-                    #writeLanMacToDisk()
-                    if os.system('sudo /p1mon/scripts/P1SetWifi.py') > 0: #TODO nog nodig? doen network lib. nog uitzoeken.
-                        flog.error(inspect.stack()[0][3]+" Wifi aanpassen gefaald.")
-                if cmd == 'upgrade_assist.p1mon':
-                    flog.info(inspect.stack()[0][3]+" Upgrade assist save van data gestart")
-                    if os.system('/p1mon/scripts/P1UpgradeAssist.py --save') > 0:
-                        flog.error(inspect.stack()[0][3]+" Upgrade assist save gefaald.")
-                if cmd == 'db_erase.p1mon':
-                    flog.info(inspect.stack()[0][3]+" Database wordt gewist")
-                    if os.system('/p1mon/scripts/p1mon.sh cleardatabase') > 0:
-                        flog.error(inspect.stack()[0][3]+" Database wordt gewist gefaald.")
-                #if cmd == 'watermeter_gpio.p1mon':
-                #    restartWatermeterProcess( 'GPIO pin reset' )
-                #if cmd == 'watermeter_import_data.p1mon':
-                #    restartWatermeterProcess( 'import van data' )
-                if cmd == 'email_test.p1mon':
-                    if os.system('/p1mon/scripts/P1SmtpCopy.py --testmail') > 0:
-                        flog.error(inspect.stack()[0][3]+" Sturen van test email is gefaald.") 
-                if cmd == 'powerproduction_counter_reset.p1mon':
-                    flog.info(inspect.stack()[0][3]+ "reset van opgewekte energie meterstand(S0) gestart.")
-                    if os.system('/p1mon/scripts/P1PowerProductionS0CounterSet.py') > 0:
-                        flog.error(inspect.stack()[0][3]+"reset van opgewekte energie meterstand(S0) gefaald.")
-                    else:
-                        flog.info(inspect.stack()[0][3]+ "reset van opgewekte energie meterstand(S0) gereed.")
-                if cmd == 'watermeter_counter_reset.p1mon':
-                    flog.info(inspect.stack()[0][3]+ "reset van opgewekte energie meterstand(S0) gestart.")
-                    if os.system('/p1mon/scripts/P1WatermeterV2CounterSet.py') > 0:
-                        flog.error(inspect.stack()[0][3]+"reset van watermeterstand gefaald.")
-                    else:
-                        flog.info(inspect.stack()[0][3]+ "reset van watermeterstand gereed.")
-
 
         # elke 10 sec acties
         if cnt%5 == 0:
             ## systeem gegevens updaten.
-            rt_status_db.strset(getUptime(),19,flog)
+            rt_status_db.strset( system_info_lib.get_system_uptime(flog), 19, flog)
             ## cpu load
             rt_status_db.strset(str(psutil.cpu_percent(interval=None, percpu=False)),18,flog)
             ## ruimte vrij op ramdisk
-            rt_status_db.strset(getDiskPctUsed(const.DIR_RAMDISK),21,flog)
+            rt_status_db.strset( system_info_lib.get_disk_pct_used( const.DIR_RAMDISK), 21, flog  )
             ## RAMgebruik
-            rt_status_db.strset(get_ram_used_pct(),31,flog)
+            rt_status_db.strset( ram_used_percentage(),31,flog)
             ## CPU temperatuur
-            getCpuTemperature()
+            get_cpu_temperature()
             ## controle of er nog P1 data binnen komt.
             check_for_p1port_data()
             ## Watermeter reset.
@@ -273,20 +174,133 @@ def MainProg():
             DropboxAuthenticationRequest()
             check_upgrade_aide_save_run()
             export_db_to_excel_run()
+            check_and_set_samba_mode( setforced=False )
+            set_wifi( setforced=False )
+            check_and_run_backup()
+            run_patch()
+
+            # debug dump 
+            trigger_function(
+                prg_name="sudo nohup /p1mon/scripts/in_ex_custom_www.sh export", 
+                prg_parameters="> /dev/null 2>&1 &",
+                db_config_index=195,
+                db_config_parameter_index=196,
+                start_msg="export custom www gestart.",
+                stop_msg="export custom www gereed.",
+                err_msg="export custom www gefaald.",
+                timeout=120,
+                use_python_launcer=False
+            )
+
+            # debug dump 
+            trigger_function(
+                prg_name="nohup /p1mon/scripts/debugdump.sh", 
+                prg_parameters="> /dev/null 2>&1 &",
+                db_config_index=191,
+                db_config_parameter_index=192,
+                start_msg="debug dump gestart.",
+                stop_msg="debug dump gereed.",
+                err_msg="debug dump gefaald.",
+                timeout=500,
+                use_python_launcer=False
+            )
+
+            # halt / poweroff van de Rpi
+            trigger_function(
+                prg_name="sudo", 
+                prg_parameters="halt",
+                db_config_index=190,
+                start_msg="stoppen (halt) van Rpi gestart.",
+                stop_msg="stoppen (halt) van Rpi gereed.",
+                err_msg="stoppen (halt) van Rpi gefaald.",
+                timeout=180,
+                use_python_launcer=False
+            )
+
+            # reboot van de Rpi
+            trigger_function( 
+                prg_name="sudo", 
+                prg_parameters="reboot",
+                db_config_index=189,
+                start_msg="reboot van Rpi gestart.",
+                stop_msg="reboot van Rpi gereed.",
+                err_msg="reboot van Rpi gefaald.",
+                timeout=180,
+                use_python_launcer=False
+            )
+
+            # database wissen
+            trigger_function( 
+                prg_name="nohup /p1mon/scripts/p1mon.sh cleardatabase > /dev/null 2>&1 &", 
+                prg_parameters="",
+                db_config_index=188,
+                start_msg="wissen van database gestart.",
+                stop_msg="wissen van database gereed.",
+                err_msg="wissen van database gefaald.",
+                use_python_launcer=False
+            )
+
+            # test email function.
+            trigger_function( 
+                prg_name="P1SmtpCopy.py", 
+                prg_parameters="--testmail &",
+                db_config_index=187,
+                start_msg="test email gestart.",
+                stop_msg="test email gereed.",
+                err_msg="test email gefaald.",
+            )
+
+            # kWh reset meter (S0).
+            trigger_function( 
+                prg_name="P1PowerProductionS0CounterSet.py", 
+                prg_parameters="&",
+                db_config_index=186,
+                start_msg="reset van opgewekte energie meterstand(S0) gestart.",
+                stop_msg="reset van opgewekte energie meterstand(S0) gestopt.",
+                err_msg="reset van opgewekte energie meterstand(S0) gefaald.",
+                timeout=500
+             )
+
+            # watermeter reset.
+            trigger_function( 
+                prg_name="P1WatermeterV2CounterSet.py", 
+                prg_parameters="&",
+                db_config_index=185,
+                start_msg="reset van watermeterstand gestart.",
+                stop_msg="reset van watermeterstand gestopt.",
+                err_msg="reset van watermeterstand gestart gefaald.",
+                timeout=500
+             )
+
+            # Graaddagen rest.
+            trigger_function( 
+                prg_name="P1Weather.py", 
+                prg_parameters="--recoverforced &",
+                db_config_index=203,
+                start_msg="Graagdagen herstellen gestart.",
+                stop_msg="Graagdagen herstellengereed.",
+                err_msg="Graagdagen herstellen gefaald.",
+            )
+
+            socat()
 
         # elke 60 sec acties
         if cnt%30 == 0:
+            # check if we need to change the cron entries.
+            check_cron_backup()
+
             wlan_info = network_lib.get_nic_info( 'wlan0' )
             lan_info  = network_lib.get_nic_info( 'eth0' )
-            getDefaultGateway()
+            get_default_gateway()
 
             #get WLAN SSID
-            getWlanSSID()
+            wifi_lib.list_wifi_ssid( output_path=const.FILE_WIFISSID, flog=flog )
             ## get lan IP en Wifi adres
             if lan_info['ip4'] != None:
                 rt_status_db.strset(lan_info['ip4'],20,flog)
                 ## get LAN hostnaam
-                rt_status_db.strset(getHostname(lan_info['ip4']),28,flog)
+                #rt_status_db.strset(  getHostname(lan_info['ip4']),28,flog) 
+                rt_status_db.strset( network_lib.get_host_name_by_ip( lan_info['ip4']), 28, flog )
             else:
                 rt_status_db.strset('onbekend',20,flog)
             if wlan_info['ip4'] != None:
@@ -303,29 +317,36 @@ def MainProg():
                 rt_status_db.strset( 'onbekend', 73, flog )
 
             ## besturingssysteem versie
-            rt_status_db.strset(getOsInfo(),22,flog)
+            rt_status_db.strset( system_info_lib.get_os_version(), 22, flog )
             ## Python versie die we gebruiken.
-            rt_status_db.strset(getPythonVersion(),25,flog)
+            rt_status_db.strset( system_info_lib.get_python_version(), 25, flog )
             ## update the NTP network time status.
             ntp_status()
 
         # elke 300 sec acties
         if cnt%150 == 0:
             ## check for new P1 monitor version.
-            checkForNewP1Version()
+            check_for_new_p1monitor_version()
             ## clean download dir
             cleanDownload()
             ## clear /var/log als deze te vol is.
-            checkVarLogFolder()
-            
-         # elke 3600 sec acties
+            ## check_and_clean_log_folder() 2.0.0 done by crontab
+
+        # 900 sec processes (15 min)
+        if cnt%450== 0:
+            # read data via de weather API
+            update_weather_data()
+
+        # elke 3600 sec acties
         if cnt%1800 == 0:
             ## Internet IP adres
-            rt_status_db.strset(getPublicIpAddress(),26,flog)
+            rt_status_db.strset( network_lib.get_public_ip_address(), 26, flog )
+
             ## DNS naam van publieke adres
-            rt_status_db.strset(getHostname(getPublicIpAddress()),27,flog)
+            rt_status_db.strset( network_lib.get_host_name_by_ip( network_lib.get_public_ip_address() ), 27, flog)
+
             ## is het Internet bereikbaar
-            if getInternetStatusByDnsServers():
+            if network_lib.fqdn_ping( flog=flog , info_messages=False):
                 rt_status_db.strset("ja",24,flog)
                 rt_status_db.timestamp(23,flog)
             else:
@@ -337,10 +358,207 @@ def MainProg():
             cnt=1
         time.sleep(2) #DO NOT CHANGE!
 
+
+def DiskRestore(): #180ok
+    if not util.fileExist(const.FILE_SESSION):
+        dummy,tail = os.path.split(const.FILE_SESSION)   
+        try:
+            shutil.copy2( const.DIR_FILEDISK+tail, const.FILE_SESSION )
+            flog.info(inspect.stack()[0][3]+": "+const.DIR_FILEDISK+tail+" naar "+const.FILE_SESSION+" gekopieerd.")
+        except Exception as e:
+            flog.warning( inspect.stack()[0][3] + ": kopie" + const.FILE_SESSION + " Melding: "+str(e) ) 
+
+    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
+    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2ram" # 1.8.0 upgrade
+    process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+    )
+
+def set_wifi( setforced=False ):
+
+    try:
+        _id, run_status, _label = config_db.strget( 183, flog )
+
+        if int( run_status ) == 1 or setforced == True: # start process
+            config_db.strset( 0, 183, flog ) # reset the flag to prevent an endless loop.
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh P1SetWifi.py &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+            if r[2] > 0:
+                flog.error(inspect.stack()[0][3]+" Wifi aanpassen gefaald.")
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " Wifi onverwachte fout: " + str( e ) )
+        config_db.strset( 0, 183, flog ) # fail save.
+
+######################################################
+# check and start or stop the socat systemd service  #
+######################################################
+def socat():
+    try:
+        _id, socat_is_on, _label = config_db.strget( 200, flog )
+        parameter = "--disable"
+        if int(socat_is_on) == 1:
+            parameter = "--enable"
+        # SOCAT P1 poort activate.
+        trigger_function( 
+            prg_name="P1SocatConfig.py", 
+            prg_parameters=parameter + " &",
+            db_config_index=201,
+            start_msg="socat service gestart.",
+            stop_msg="socat service gestopt.",
+            err_msg="socat service gefaald.",
+            timeout=500
+            )
+            
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " onverwachte fout: " + str( e ) )
+
+###########################################################
+# general use trigger fuction to start other processes    #
+# TODO: refactor older functions to this general function #
+###########################################################
+def trigger_function(
+    prg_name=None, 
+    prg_parameters="",
+    db_config_index=None,
+    db_config_parameter_index=None, # use this if the parameter is set in the database
+    start_msg="start message onbekend",
+    stop_msg="stop message onbekend",
+    err_msg="fout message onbekend",
+    timeout=30,
+    use_python_launcer=True):
+    try:
+        _id, needs_to_run_status, _label = config_db.strget( int(db_config_index), flog )
+
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
+        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+        if int( needs_to_run_status ) == 1 and len( pid_list ) == 0: # start process
+            flog.info( inspect.stack()[0][3] + " " + prg_name + " " + prg_parameters + " " + start_msg )
+
+            config_db.strset( '0', int(db_config_index), flog ) # reset run bit
+            
+            if use_python_launcer == True:
+                cmd_prefix = "/p1mon/scripts/pythonlaunch.sh "
+            else:
+                cmd_prefix = ""
+
+            if db_config_parameter_index != None:
+                _id, parameter_by_index, _label = config_db.strget( int(db_config_parameter_index), flog )
+            else:
+                parameter_by_index = ""
+
+            cmd = cmd_prefix + prg_name + " " +  parameter_by_index + " " + prg_parameters
+            flog.debug( inspect.stack()[0][3] + " cmd = " +  cmd )
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=timeout
+            )
+            if r[2] > 0:
+                flog.error(inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " + err_msg )
+            else:
+                flog.info(inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " +stop_msg )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " + err_msg + " onverwachte fout: " + str( e ) )
+        config_db.strset( '0', int(db_config_index), flog ) # reset run bit # fail save to stop
+
+
+def check_and_set_samba_mode( setforced=False ):
+
+    try:
+        _id, run_status, _label = config_db.strget( 182, flog )
+
+        if int( run_status ) == 1 or setforced == True: # start process
+            
+            config_db.strset( 0, 182, flog ) # reset the flag to prevent an endless loop.
+
+            flog.info( inspect.stack()[0][3] + ": SAMBA mode configuratie gestart" )
+            _id, fileshare_mode,  _label = config_db.strget( 6, flog ) # read the fileshare modus from config db.
+
+            mode = samba_lib.FILESHARE_MODE_OFF
+            if fileshare_mode == "data":
+                mode = samba_lib.FILESHARE_MODE_DATA
+            elif fileshare_mode == "dev":
+                mode = samba_lib.FILESHARE_MODE_DEV
+
+            flog.info( inspect.stack()[0][3] + ": SAMBA mode " + str(mode) + " wordt geactiveerd.")
+            samba = samba_lib.Samba( flog )
+            samba.set_share_mode( fileshare_mode = mode )
+
+            flog.info( inspect.stack()[0][3] + ": SAMBA mode configuratie gereed." )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " SAMBA onverwachte fout: " + str( e ) )
+
+
+def run_patch():
+    try:
+        prg_name = "P1Patcher.py"
+        _id, needs_to_run_status, _label = config_db.strget( 194, flog )
+        flog.debug( inspect.stack()[0][3] + ": needs_to_run_status =" +str(needs_to_run_status) )
+        if int( needs_to_run_status ) > 0:
+            flog.info( inspect.stack()[0][3] + ": P1Patcher.py gestart." )
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " > /dev/null 2>&1 &"
+            flog.debug( inspect.stack()[0][3] + ": cmd =" +str(cmd) )
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset( '0', 194, flog) # fail save to stop and suppres no integer settings
+
+
+def check_cron_backup():
+    try:
+        _id, needs_to_run_status, _label = config_db.strget( 181, flog )
+        if int( needs_to_run_status ) > 0:
+            crontab_lib.update_crontab_backup( flog=flog )
+        config_db.strset( "0", 181, flog ) # reset bit needs to run bit
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+
+def update_weather_data():
+
+    try:
+        # check if API key is set.
+        _id, api_key, _label = config_db.strget( 13, flog )
+        if len( api_key ) > 31: # possible valid API key
+            cmd = "/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather"
+            process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=False,
+                flog=flog 
+            )
+        else:
+           flog.error(inspect.stack()[0][3]+": weer API key is korter dan verwacht." )
+
+    except Exception as e:
+        flog.error(inspect.stack()[0][3]+": sql error(config API key)"+str(e))
+
+
 ########################################################
 # update the network status and status database        #
 ########################################################
-def ntp_status():
+def ntp_status(): #180ok
     try:
         net_time.status()
         rt_status_db.strset( net_time.json() ,124,flog )
@@ -348,8 +566,7 @@ def ntp_status():
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
-
-def getDefaultGateway():
+def get_default_gateway(): #180ok
     try:
         result_list = network_lib.get_default_gateway()
         if result_list == []:
@@ -364,114 +581,31 @@ def getDefaultGateway():
 ########################################################
 # config static Ip address when flags are set          #
 ########################################################
-def P1NetworkConfig():
+def P1NetworkConfig(): #180ok
     try:
-
-        prg_name = "P1NetworkConfig.py" 
-       
         _id, needs_to_run_status, _label = config_db.strget( 168, flog )
-        
-        # fail save flag test so only the first 4 bits are set/used
-        needs_to_run_status = ( int(needs_to_run_status) & 15 )
-
-        pid_list, _process_list = listOfPidByName( prg_name )
-        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
-
-        if int( needs_to_run_status ) > 0 and len( pid_list) == 0: # start process
-
-             # DEBUG TODO
-            _id, needs_to_run_status, _label = config_db.strget( 168, flog )
-            print ("# before=", needs_to_run_status )
-
-            # when an dhcp deamon reload is needed do only once
-            # and not for every options that need it. 
-            do_dhcp_deamon_reload = False
-
-            # etho ip changed 
-            if ( int(needs_to_run_status) & 1 ) == 1: #eth0 has changed
-                config_db.strset( int(needs_to_run_status) & 14, 168, flog ) # reset bit
-                _id, eth0_ip, _label   = config_db.strget( 164, flog )
-                if len(eth0_ip) == 0:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removestaticip eth0 gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --removestaticip eth0 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --removestaticip eth0." )
-                else:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip eth0 gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip eth0 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip eth0." )
-
-                if os.system('/p1mon/scripts/' + prg_name + ' --devicereload eth0 2>&1') > 0:
-                    flog.error( inspect.stack()[0][3] + prg_name + " eth0 devicereload." )
-
-            # wlan ip changed 
-            if ( int(needs_to_run_status) & 2 ) == 2: #wlan0 has changed
-                config_db.strset( int(needs_to_run_status) & 13, 168, flog ) # reset bit
-                _id, wlan0_ip, _label  = config_db.strget( 165, flog )
-                if len(wlan0_ip) == 0:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removestaticip wlan0 gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --removestaticip wlan0 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --removestaticip wlan0." )
-                else:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --staticip wlan0 gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --staticip wlan0 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --staticip wlan0." )
-
-                if os.system('/p1mon/scripts/' + prg_name + ' --devicereload wlan0 2>&1') > 0:
-                    flog.error( inspect.stack()[0][3] + prg_name + "  wlan0 device reload." )
-                
-                do_dhcp_deamon_reload = True
-
-            # router/gateway has changed
-            if ( int(needs_to_run_status) & 4 ) == 4: 
-                config_db.strset( int(needs_to_run_status) & 11, 168, flog ) # reset bit
-                _id, router_ip, _label = config_db.strget( 166, flog )
-                if len( router_ip ) == 0:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removedefaultgateway gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --removedefaultgateway 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --removedefaultgateway." )
-                else:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --defaultgateway gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --defaultgateway 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --defaultgateway." )
-
-                do_dhcp_deamon_reload = True
-
-            # DNS has changed
-            if ( int(needs_to_run_status) & 8 ) == 8: 
-                config_db.strset( int(needs_to_run_status) & 7, 168, flog ) # reset bit
-                _id, dns_ip, _label    = config_db.strget( 167, flog )
-                if len( dns_ip ) == 0:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removednsserver gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --removednsserver 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --removednsserver." )
-                else:
-                    flog.info( inspect.stack()[0][3] + ": " + prg_name + " --dnsserver gestart." )
-                    if os.system('/p1mon/scripts/' + prg_name + ' --dnsserver 2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " --dnsserver." )
-
-                do_dhcp_deamon_reload = True
-
-            # DEBUG TODO
-            _id, needs_to_run_status, _label = config_db.strget( 168, flog )
-            print ( "# after=",needs_to_run_status )
-
-            if do_dhcp_deamon_reload == True:
-                if os.system('/p1mon/scripts/' + prg_name + ' --reloaddhcp  2>&1') > 0:
-                        flog.error( inspect.stack()[0][3] + prg_name + " reloaddhcp" )
+        if int( needs_to_run_status ) > 0: # start process
+            flog.info( inspect.stack()[0][3] + ": dhcp daemon configuratie aanpassen gestart." )
+            config_db.strset( '0', 168, flog ) # reset run bit
+            dhcpconfig = network_lib.DhcpcdConfig(config_db=config_db, flog=flog )
+            if dhcpconfig.set_config_from_db() == False:
+                raise Exception( "dhcp configuratie aanpassen.")
+            flog.info( inspect.stack()[0][3] + ": dhcp daemon configuratie aanpassen succesvol." )
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
-        config_db.strset(0, 149, flog) # fail save to stop
+        config_db.strset( '0', 168, flog ) # reset run bit # fail save to stop
 
 
 ########################################################
 # start set or reset the NGINX config file and install #
 # or deinstall the Lets Encrypt certifcates            #
 ########################################################
-def P1NginxConfigApi():
+def P1NginxConfigApi(): #180ok
     #flog.setLevel( logging.DEBUG )
     try:
         prg_name = "P1NginxConfig.py" 
+        #print( prg_name )
 
         _id, needs_to_run_status, _label = config_db.strget( 162, flog )
         flog.debug( inspect.stack()[0][3] + ": uitvoeren flag is " + str(needs_to_run_status) )
@@ -493,14 +627,41 @@ def P1NginxConfigApi():
             P1NginxSetApiTokens() # important tokens must exist, otherwise the nginx will fail
             
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --activatecert gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --activatecert 2>&1') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --activatecert 2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --activatecert gefaald." )
+            #    rt_status_db.strset( 1, 117, flog )
+            #else:
+            #    rt_status_db.strset( 0, 117, flog )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --activatecert 2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --activatecert gefaald." )
                 rt_status_db.strset( 1, 117, flog )
             else:
                 rt_status_db.strset( 0, 117, flog )
 
+
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --autorenewon gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --autorenewon  2>&1') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --autorenewon  2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --autorenewon gefaald." )
+            #    rt_status_db.strset( 1, 118, flog )
+            #else:
+            #    rt_status_db.strset( 0, 118, flog )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --autorenewon  2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --autorenewon gefaald." )
                 rt_status_db.strset( 1, 118, flog )
             else:
@@ -508,7 +669,20 @@ def P1NginxConfigApi():
 
             # wait 20 sec because Lets Encrypt takes more time or is still busy.
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --https gestart." )
-            if os.system('sleep 20; /p1mon/scripts/' + prg_name + ' --https 2>&1') > 0:
+            #if os.system('sleep 20; /p1mon/scripts/' + prg_name + ' --https 2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --https gefaald." )
+            #    rt_status_db.strset( 1, 119, flog )
+            #else:
+            #    rt_status_db.strset( 0, 119, flog )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --https 2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --https gefaald." )
                 rt_status_db.strset( 1, 119, flog )
             else:
@@ -517,21 +691,60 @@ def P1NginxConfigApi():
         else:
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --autorenewoff gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --autorenewoff 2>&1') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --autorenewoff 2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --autorenewoff  gefaald." )
+            #    rt_status_db.strset( 1, 118, flog )
+            #else:
+            #    rt_status_db.strset( 0, 118, flog )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --autorenewoff 2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --autorenewoff  gefaald." )
                 rt_status_db.strset( 1, 118, flog )
             else:
                 rt_status_db.strset( 0, 118, flog )
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --http gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --http  2>&1') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --http  2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --http gefaald." )
+            #    rt_status_db.strset( 1, 119, flog )
+            #else:
+            #    rt_status_db.strset( 0, 119, flog )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --http  2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --http gefaald." )
                 rt_status_db.strset( 1, 119, flog )
             else:
                 rt_status_db.strset( 0, 119, flog )
             
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --deactivatecert gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --deactivatecert  2>&1') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --deactivatecert 2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --deactivatecert gefaald." )
+            #    rt_status_db.strset( 1, 117, flog )
+            #else:
+            #    rt_status_db.strset( 0, 117, flog )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --deactivatecert 2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --deactivatecert gefaald." )
                 rt_status_db.strset( 1, 117, flog )
             else:
@@ -547,14 +760,14 @@ def P1NginxConfigApi():
 ########################################################
 # start the process to generate or updated API tokens  #
 ########################################################
-def P1NginxSetApiTokens():
+def P1NginxSetApiTokens(): #180ok
     #flog.setLevel( logging.DEBUG )
     try:
         prg_name = "P1NginxConfig.py" 
        
         _id, needs_to_run_status, _label = config_db.strget( 161, flog )
 
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int( needs_to_run_status ) == 1 and len( pid_list) == 0: # start process
@@ -562,22 +775,33 @@ def P1NginxSetApiTokens():
             config_db.strset(0, 161, flog)
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --apitokens gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --apitokens 2>&1') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --apitokens 2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --apitokens gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --apitokens 2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --apitokens gefaald." )
-            
+
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
         config_db.strset(0, 149, flog) # fail save to stop
     
     #flog.setLevel( logging.INFO )
 
-# processing #####################
-# 1: check if there is a export file to import with the extention zip.pu1a
-# 2: rename the file to see if we have full access 
-# 3: check if there is data in the database before doing a import.
-# 4: start the import by running import script
 
-def checkAutoImport():
+#############################################################################
+# 1: check if there is a export file to import with the extention zip.pu1a  #
+# 2: rename the file to see if we have full access                          #
+# 3: check if there is data in the database before doing a import.          #
+# 4: start the import by running import script                              #
+#############################################################################
+def checkAutoImport(): #180ok
     global auto_import_is_active ,msg_import_busy 
     
     #flog.setLevel( logging.DEBUG )
@@ -603,7 +827,7 @@ def checkAutoImport():
         #check if we have data in the database
         if auto_import_is_active == False and os.path.isfile( import_filename_zip ) == True:
             flog.debug( inspect.stack()[0][3] + ": check if we have data in the database" )
-            e_db_history_min = SqlDb2()
+            e_db_history_min = sqldb.SqlDb2()
             try:
                 e_db_history_min.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_MIN_TAB)
                 sqlstr = "select count() from " + const.DB_HISTORIE_MIN_TAB
@@ -636,10 +860,23 @@ def checkAutoImport():
                 rt_status_db.strset( "SQL import wordt gestart", 93, flog )
                 rt_status_db.timestamp( 94,flog )
                 auto_import_is_active = True
-                cmd = "/p1mon/scripts/P1SqlImport.py -i " + import_filename_zip + " > /dev/null 2>&1 &"
+                #cmd = "/p1mon/scripts/P1SqlImport.py -i " + import_filename_zip + " > /dev/null 2>&1 &"
                 rt_status_db.strset( "SQL import gestart", 93, flog )
                 rt_status_db.timestamp( 94,flog )
-                if os.system( cmd ) > 0:
+                #if os.system( cmd ) > 0:
+                #   msg = "P1SqlImport gefaalt"
+                #    flog.error(inspect.stack()[0][3] + msg  )
+                #    rt_status_db.strset( msg, 93, flog )
+                #    rt_status_db.timestamp( 94,flog )
+
+                cmd = "/p1mon/scripts/pythonlaunch.sh P1SqlImport.py -i " + import_filename_zip + " > /dev/null 2>&1 &" # 1.8.0 upgrade
+                r = process_lib.run_process( 
+                    cms_str = cmd,
+                    use_shell=True,
+                    give_return_value=True,
+                    flog=flog 
+                )
+                if r[2] > 0:
                     msg = "P1SqlImport gefaalt"
                     flog.error(inspect.stack()[0][3] + msg  )
                     rt_status_db.strset( msg, 93, flog )
@@ -661,11 +898,10 @@ def checkAutoImport():
     
     #flog.setLevel( logging.INFO )
 
-
 #########################################################
 # start the process to export a DB to an Excel workbook #
 #########################################################
-def export_db_to_excel_run():
+def export_db_to_excel_run(): #180ok
     try:
         prg_name = "P1DbToXlsx.py" 
        
@@ -675,7 +911,7 @@ def export_db_to_excel_run():
         else:
             needs_to_run_status = 0
 
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int( needs_to_run_status ) == 1 and len( pid_list) == 0: # start process
@@ -687,10 +923,11 @@ def export_db_to_excel_run():
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestart." )
 
-            cmd = const.DIR_SCRIPTS + prg_name + ' --datebase ' + database + ' --output ' + excel_filepath
-            # print ( cmd )
+            cmd = "/p1mon/scripts/pythonlaunch.sh "  + prg_name + ' --datebase ' + database + ' --output ' + excel_filepath
+            #print ( cmd )
+
             proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            stdout, stderr  = proc.communicate()
+            stdout, _stderr  = proc.communicate()
             returncode = int( proc.wait( timeout=60 ) )
             
             if returncode != 0:
@@ -707,17 +944,16 @@ def export_db_to_excel_run():
         config_db.strset( '', 172, flog) # fail save to stop
 
 
-
 ##############################################
 # run the P1UpgradeAide program in save mode #
 ##############################################
-def check_upgrade_aide_save_run():
+def check_upgrade_aide_save_run(): #180ok
     try:
         prg_name = "P1UpgradeAide.py" 
        
         _id, needs_to_run_status, _label = config_db.strget( 171, flog )
 
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int( needs_to_run_status ) == 1 and len( pid_list) == 0: # start process
@@ -725,8 +961,18 @@ def check_upgrade_aide_save_run():
             config_db.strset( 0, 171, flog )
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --save gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --save 2>&1') > 0:
-                flog.error( inspect.stack()[0][3] + prg_name + " --save gefaald." )
+            #if os.system('/p1mon/scripts/' + prg_name + ' --save 2>&1') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --save gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --save 2>&1" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
+                 flog.error( inspect.stack()[0][3] + prg_name + " --save gefaald." )
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
@@ -737,7 +983,7 @@ def check_upgrade_aide_save_run():
 # checks if the Sql database script must run or must   #
 # run                                                  #
 ########################################################
-def checkP1SqlImportRun():
+def checkP1SqlImportRun(): #180ok
 
     #flog.setLevel( logging.DEBUG )
 
@@ -745,34 +991,34 @@ def checkP1SqlImportRun():
         prg_name = "P1SqlImport.py" 
        
         _id, run_status, _label = config_db.strget( 137, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": P1SqlImport run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) > 0 and len( pid_list) == 0: # start process
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " wordt gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " start gefaald." )
+            
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " start gefaald." )
-                
-        """
-        #########################################################################
-        # fail save, the program self does also a check if it should be active. #
-        #########################################################################
-        if int( run_status ) == 0 and len( pid_list ) > 0: # stop process.
-            flog.info( inspect.stack()[0][3] + ": " + prg_name + " wordt gestopt." )
-            for pid in pid_list:
-                flog.info( inspect.stack()[0][3] + ": pid = " + str(pid) + " wordt gestopt.")
-                os.kill( pid, signal.SIGINT ) # do a nice stop
-        """
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
     #flog.setLevel( logging.INFO )
 
+
 ########################################################
 # make an url text file so an php can redirect         #
 ########################################################
-def DropboxAuthenticationRequest():
+def DropboxAuthenticationRequest(): #180ok
     try:
         prg_name = 'P1DropBoxAuth.py'
 
@@ -781,18 +1027,29 @@ def DropboxAuthenticationRequest():
         if int( run_status ) == 1: # start process
             config_db.strset(0, 169, flog) 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --url 2>&1 >/dev/null &') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --url 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --url 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " gefaald." )
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
         config_db.strset(0, 169, flog) # fail save to stop
 
+
 ########################################################
 # Update de DuckDNS entry for the FQDN and your public #
 # IP adres                                             #
 ########################################################
-def DuckDNS():
+def DuckDNS(): #180ok
     #flog.setLevel( logging.DEBUG )
     global next_duckdns_timestamp 
     #print ( next_duckdns_timestamp  )
@@ -815,8 +1072,18 @@ def DuckDNS():
                 return
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --update 2>&1 >/dev/null &') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --update 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " gefaald." )
+
+            r = process_lib.run_process( 
+                cms_str = '/p1mon/scripts/pythonlaunch.sh ' + prg_name + ' --update 2>&1 >/dev/null &',
+                use_shell=True,
+                give_return_value=True,
+                flog=flog
+                )
+            if ( r[2] ) > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " gefaald." )
+
             else:
                  next_duckdns_timestamp = util.getUtcTime() + 21600 # update after 6 hour
 
@@ -830,28 +1097,37 @@ def DuckDNS():
 # Start the Solar Edge reader process to get periodic  #
 # data from the api                                    #
 ########################################################
-def P1SolarReader():
+def P1SolarReader(): #180ok
     #flog.setLevel( logging.DEBUG )
     try:
         prg_name = "P1SolarEdgeReader.py" 
        
         _id, run_status, _label = config_db.strget( 141, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
 
             #config_db.strset(0, 142, flog)
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " gefaald." )
+
+            r = process_lib.run_process( 
+                cms_str = '/p1mon/scripts/pythonlaunch.sh ' + prg_name + ' --update 2>&1 >/dev/null &',
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout = None
+                )
+            if ( r[2] ) > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " gefaald." )
-            
+
         if int(run_status) == 0 and len(pid_list) > 0: # stop process.
             flog.info(inspect.stack()[0][3] + ": " + prg_name + " wordt gestopt." )
             for pid in pid_list:
                 flog.info(inspect.stack()[0][3] + ": pid = " + str(pid) + " wordt gestopt. ")
                 os.kill( pid, signal.SIGINT ) # do a nice stop
-
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
@@ -863,21 +1139,32 @@ def P1SolarReader():
 # reset to factory settings. Delete config and all)    #
 # database data.                                       #
 ########################################################
-def P1SolarFactoryReset():
+def P1SolarFactoryReset(): #180ok
     #flog.setLevel( logging.DEBUG )
     try:
         prg_name = "P1SolarEdgeSetup.py" 
        
         _id, run_status, _label = config_db.strget( 149, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
 
-            config_db.strset(0, 149, flog)
+            config_db.strset( 0, 149, flog )
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --http gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --http 2>&1 >/dev/null &') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --http 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --http gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --http 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+            if r[2] > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --http gefaald." )
             
     except Exception as e:
@@ -891,13 +1178,13 @@ def P1SolarFactoryReset():
 # reload the sqlite database with all the data the     #
 # API can deliver                                      #
 ########################################################
-def P1SolarReloadAllData():
+def P1SolarReloadAllData(): #180ok
     #flog.setLevel( logging.DEBUG )
     try:
         prg_name = "P1SolarEdgeSetup.py" 
        
         _id, run_status, _label = config_db.strget( 142, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
@@ -905,7 +1192,17 @@ def P1SolarReloadAllData():
             config_db.strset(0, 142, flog)
 
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " --reloadsites gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' --reloadsites 2>&1 >/dev/null &') > 0:
+            #if os.system('/p1mon/scripts/' + prg_name + ' --reloadsites 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --reloadsites gefaald." )
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --reloadsites 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+                )
+            if ( r[2] ) > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --reloadsites gefaald." )
             
     except Exception as e:
@@ -917,27 +1214,49 @@ def P1SolarReloadAllData():
 ########################################################
 # re-reads the sites from the API                      #
 ########################################################
-def P1SolarResetConfig():
+def P1SolarResetConfig(): #180ok
     #flog.setLevel( logging.DEBUG )
     try:
         prg_name = "P1SolarEdgeSetup.py" 
        
         _id, run_status, _label = config_db.strget( 145, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
 
             config_db.strset(0, 145, flog)
 
-            if os.system('/p1mon/scripts/' + prg_name + ' --removesites 2>&1 >/dev/null &') > 0:
-                flog.error( inspect.stack()[0][3] + prg_name + " --removesites gefaald." )
-            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removesites gereed." )
+            #if os.system('/p1mon/scripts/' + prg_name + ' --removesites 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --removesites gefaald." )
 
-            if os.system('/p1mon/scripts/' + prg_name + ' --savesites 2>&1 >/dev/null &') > 0:
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --removesites 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+                )
+            if ( r[2] ) > 0:
+                 flog.error( inspect.stack()[0][3] + prg_name + " --removesites gefaald." )
+            else:
+                flog.info( inspect.stack()[0][3] + ": " + prg_name + " --removesites gereed." )
+
+            #if os.system('/p1mon/scripts/' + prg_name + ' --savesites 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --savesites gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --savesites 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+                )
+            if ( r[2] ) > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --savesites gefaald." )
-            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --savesites gereed." )
-
+            else:
+                flog.info( inspect.stack()[0][3] + ": " + prg_name + " --savesites gereed." )
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
@@ -949,27 +1268,48 @@ def P1SolarResetConfig():
 # loads the solaredge config and deletes records from  #
 # the database                                         #
 ########################################################
-def P1SolarSetup():
+def P1SolarSetup(): #180ok
 
     #flog.setLevel( logging.DEBUG )
     try:
         prg_name = "P1SolarEdgeSetup.py" 
        
         _id, run_status, _label = config_db.strget( 144, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
 
             config_db.strset(0, 144, flog)
 
-            if os.system('/p1mon/scripts/' + prg_name + ' --savesites 2>&1 >/dev/null &') > 0:
-                flog.error( inspect.stack()[0][3] + prg_name + " --savesites gefaald." )
-            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --savesites gereed." )
+            #if os.system('/p1mon/scripts/' + prg_name + ' --savesites 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --savesites gefaald." )
 
-            if os.system('/p1mon/scripts/' + prg_name + ' --deletedb 2>&1 >/dev/null &') > 0:
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --savesites 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog
+                )
+            if ( r[2] ) > 0:
+                flog.error( inspect.stack()[0][3] + prg_name + " --savesites gefaald." )
+            else:
+                flog.info( inspect.stack()[0][3] + ": " + prg_name + " --savesites gereed." )
+
+            #if os.system('/p1mon/scripts/' + prg_name + ' --deletedb 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " --deletedb gefaald." )
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " --deletedb 2>&1 >/dev/null &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog
+            )
+            if ( r[2] ) > 0:
                 flog.error( inspect.stack()[0][3] + prg_name + " --deletedb gefaald." )
-            flog.info( inspect.stack()[0][3] + ": " + prg_name + " --deletedb gereed." )
+            else:
+                flog.info( inspect.stack()[0][3] + ": " + prg_name + " --deletedb gereed." )
 
 
     except Exception as e:
@@ -982,21 +1322,31 @@ def P1SolarSetup():
 # checks if the MQTT script must run or must be        #
 # stopped                                              #
 ########################################################
-def checkMQTTRun():
+def checkMQTTRun(): #180ok
 
     #flog.setLevel( logging.DEBUG )
 
     try:
         prg_name = "P1MQTT.py" 
-       
+
         _id, run_status, _label = config_db.strget( 135, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": P1MQTT run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " wordt gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
-                flog.error( inspect.stack()[0][3] + prg_name + " start gefaald." )
+            #if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
+            #    flog.error( inspect.stack()[0][3] + prg_name + " start gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " 2>&1 >/dev/null &" # 1.8.0 upgrade
+            process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=False,
+                flog=flog,
+                timeout=None # needed to set to None for a process that keep running.
+            )
+
         #########################################################################
         # fail save, the program self does also a check if it should be active. #
         #########################################################################
@@ -1015,18 +1365,30 @@ def checkMQTTRun():
 # checks if the watermeter script must run or must be  #
 # stopped                                              #
 ########################################################
-def checkWaterMeter():
+def checkWaterMeter(): #180ok
     try:
+        #flog.setLevel( logger.logging.DEBUG )
         prg_name = "P1WatermeterV2.py" 
        
         _id, run_status, _label = config_db.strget( 96, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug(inspect.stack()[0][3] + ": checkWaterMeter want to run status is = " + str(run_status) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
             flog.info(inspect.stack()[0][3] + ": " + prg_name + " wordt gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
-                flog.error(inspect.stack()[0][3] + prg_name + " start gefaald." )
+            #if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
+            #    flog.error(inspect.stack()[0][3] + prg_name + " start gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " 2>&1 >/dev/null &" # 1.8.0 upgrade
+            process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=False,
+                flog=flog,
+                timeout=None # needed to set to None for processes that keep running.
+            )
+
+
         #########################################################################
         # fail save, the program self does also a check if it should be active. #
         #########################################################################
@@ -1038,23 +1400,38 @@ def checkWaterMeter():
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+    #flog.setLevel( logger.logging.INFO )
 
 ########################################################
 # checks if the S0 Power productions script must run   #
 # or must be stopped                                   #
 ########################################################
-def checkPowerProductionS0Run():
+def checkPowerProductionS0Run(): #180ok
     try:
-        prg_name = "P1PowerProductionS0.py" 
+        #flog.setLevel( logger.logging.DEBUG )
+        prg_name = "P1PowerProductionS0.py"
        
         _id, run_status, _label = config_db.strget( 125, flog )
-        pid_list, _process_list = listOfPidByName( prg_name )
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug(inspect.stack()[0][3] + ": checkPowerProductionS0 want to run status is = " + str(run_status) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
             flog.info(inspect.stack()[0][3] + ": " + prg_name + " wordt gestart." )
-            if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
-                flog.error(inspect.stack()[0][3] + prg_name + " start gefaald." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " 2>&1 >/dev/null &" # 1.8.0 upgrade
+
+            #if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
+            #    flog.error(inspect.stack()[0][3] + prg_name + " start gefaald." )
+
+            process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=False,
+                flog=flog,
+                timeout=None # needed to set to None for a process that keep running.
+            )
+
+
         #########################################################################
         # fail save, the program self does also a check if it should be active. #
         #########################################################################
@@ -1067,11 +1444,13 @@ def checkPowerProductionS0Run():
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
-def restartWatermeterProcess( reason = '??????' ):
+   #flog.setLevel( logger.logging.INFO )
+
+def restartWatermeterProcess( reason = '??????' ): #180ok
     try:
         flog.info(inspect.stack()[0][3] + ": " + reason + " verzoek, herstart van de P1Watermeter.py" )
-        flog.debug(inspect.stack()[0][3] +  str( findProcessIdByName( 'P1Watermeter.py' )) )
-        listOfProcessIds = findProcessIdByName( 'P1Watermeter.py' )
+        flog.debug(inspect.stack()[0][3] +  str( findProcessIdByName.findProcessIdByName( 'P1Watermeter.py' )) )
+        listOfProcessIds = findProcessIdByName.findProcessIdByName( 'P1Watermeter.py' )
         if len(listOfProcessIds) > 0:
             for elem in listOfProcessIds: # possibel more running processes.
                 processID = elem['pid']
@@ -1089,7 +1468,18 @@ def restartWatermeterProcess( reason = '??????' ):
         listOfProcessIds = findProcessIdByName( 'P1Watermeter.py' )
         if len(listOfProcessIds) == 0:
             flog.info(inspect.stack()[0][3] + ": herstart P1Watermeter.py wordt uitgevoerd." )
-            if os.system('sudo -u p1mon /p1mon/scripts/P1Watermeter.py &') > 0:
+            #if os.system('sudo -u p1mon /p1mon/scripts/P1Watermeter.py &') > 0:
+            #    flog.error(inspect.stack()[0][3]+" herstart gefaald.")
+
+            # sudo -u p1mon verwijderd, waarom was dit nodig als de P1Watchdog toch als p1mon loopt 
+            cmd = "/p1mon/scripts/pythonlaunch.sh P1Watermeter.py &" # 1.8.0 upgrade
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+                )
+            if ( r[2] ) > 0:
                 flog.error(inspect.stack()[0][3]+" herstart gefaald.")
         else:
             flog.warning( inspect.stack()[0][3] + ": P1Watermeter.py herstart niet uitgevoerd, process loopt nog" )   
@@ -1097,24 +1487,45 @@ def restartWatermeterProcess( reason = '??????' ):
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": Watermeter " + reason + " aanpassing gefaald door fout " + str(e) )
 
-def checkWatermeterCounterSetRun():
+def checkWatermeterCounterSetRun(): #180ok
     # watermeter reset
     _config_id, reset_watermeter_is_on, _text = config_db.strget( 101,flog )
     if int(reset_watermeter_is_on) == 1:
         flog.info(inspect.stack()[0][3]+": watermeter reset wordt uitgevoerd.")
         rt_status_db.strset( 'proces start(watchdog)', 107, flog )
-        if os.system('/p1mon/scripts/P1WatermeterCounterSet.py') > 0:
-            rt_status_db.strset( 'proces gefaald (watchdog)', 107, flog )
-            flog.error(inspect.stack()[0][3]+" Watermeterstand reset is gefaald.")
+        #if os.system('/p1mon/scripts/P1WatermeterCounterSet.py') > 0:
+        #    rt_status_db.strset( 'proces gefaald (watchdog)', 107, flog )
+        #    flog.error(inspect.stack()[0][3]+" Watermeterstand reset is gefaald.")
 
-def check_for_p1port_data():
+        cmd = "/p1mon/scripts/pythonlaunch.sh P1WatermeterCounterSet.py" # 1.8.0 upgrade
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog 
+        )
+        if ( r[2] ) > 0:
+            rt_status_db.strset( 'proces gefaald (watchdog)', 107, flog )
+            flog.error( inspect.stack()[0][3]+" Watermeterstand reset is gefaald." )
+
+# Notification via email done via P1Notifier from version 1.7.0 and higher.
+def check_for_p1port_data():  #180ok
     global p1_no_data_notification
     # version 1.5.0 higer increased to 45 seconds.
+    # version 2.0.0 decreased to 30 seconds
+    # version 2.1.0 increased to 45 seconds
     time_out = 45 # number of seconds before notification/ detection.
 
     try:
         _id, utc_str, _description, _index = rt_status_db.strget( 87, flog )
-        delta_time = abs( getUtcTime() - int( utc_str ) )
+
+        try:
+            utc = int( utc_str )
+        except Exception as _e:
+             return # if it is not a integer then the time is not set
+
+        delta_time = abs( util.getUtcTime() - utc )
+        #print( "delta_time = ", delta_time )
 
         if delta_time >= time_out:
             rt_status_db.strset( 0 ,123 ,flog) # no data
@@ -1128,24 +1539,14 @@ def check_for_p1port_data():
         # do nothing if timestamp is not correct.
         return
 
-    # Notifcation via email done via P1Notifier from version 1.7.0 and higher.
-
-def checkVarLogFolder():
-    if os.system( 'sudo /p1mon/scripts/logspacecleaner.sh >/dev/null 2>&1' ) > 0:
-        flog.error(inspect.stack()[0][3]+" logspacecleaner.sh gefaald.")
-
-def getCpuTemperature(): #P3 ok
-    tfile = open('/sys/class/thermal/thermal_zone0/temp','r')
-    temp = float(tfile.read())
-    tfile.close()
-    tempC = temp/1000
-    rt_status_db.strset( str(tempC), 69, flog )
+def get_cpu_temperature(): #2.0.0
+    rt_status_db.strset( system_info_lib.get_cpu_temperature(), 69, flog )
 
 ########################################################
 # checks there is a new P1 sofware version available   #
 # by an https url request to www.ztatz.nl              #
 ########################################################
-def checkForNewP1Version(): #P3 ok
+def check_for_new_p1monitor_version():  #180ok
     #flog.setLevel(logging.DEBUG)
     global next_version_timestamp
     random.seed() # change random time for retry
@@ -1188,39 +1589,67 @@ def checkForNewP1Version(): #P3 ok
             rt_status_db.strset( '', 110, flog )
         
         next_version_timestamp = util.getUtcTime() + 82800 + random.randint(300, 3600) #82800 = 23 uur. random add 5 to 60 min before repeat.
-        #next_version_timestamp = util.getUtcTime() #TODO
 
     except Exception as e:
          flog.error(inspect.stack()[0][3]+': ophalen remote versie informatie gefaald -> ' + str(e) )
-     
-    #flog.setLevel(logging.INFO)
 
+    # flog.setLevel(logging.INFO)
 
-def databaseRam2Disk(): #P3 ok
-    os.system("/p1mon/scripts/P1DbCopy.py --allcopy2disk --forcecopy")
+def databaseRam2Disk(): #180ok
+    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2disk --forcecopy")
+    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2disk --forcecopy" # 1.8.0 upgrade
+    process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+    )
     # wait 10 sec to flush data,just to make sure.
-    time.sleep(10)
+    time.sleep( 10 )
 
-def makeDebugDump(id): #P3 ok
-    #print id
-    if os.system('sudo /p1mon/scripts/debugdump.sh '+ id ) > 0:
+def makeDebugDump( id ): #180ok
+    #if os.system('sudo /p1mon/scripts/debugdump.sh '+ id ) > 0:
+    #    flog.error(inspect.stack()[0][3]+" debug dump gefaald.")
+    cmd = '/p1mon/scripts/debugdump.sh '+ id + " &" # 2.0.0 upgrade
+    r = process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog,
+        timeout=None
+        )
+    if ( r[2] ) > 0:
         flog.error(inspect.stack()[0][3]+" debug dump gefaald.")
 
-def makeCustomWwwImport(id): #TODO 2021-03-07: wordt niet meer gebruikt door P1SqlImport.py controleren of deze code er uit kan 
-    #print id
-    if os.system('sudo /p1mon/scripts/in_ex_custom_www.sh import '+ const.FILE_PREFIX_CUSTOM_UI + id + ".gz" ) > 0:
-        flog.error(inspect.stack()[0][3]+" custom www import gefaald.")
 
-def makeCustomWwwExport(id): #P3 ok
-    #print id
-    if os.system('sudo /p1mon/scripts/in_ex_custom_www.sh export '+id) > 0:
-        flog.error(inspect.stack()[0][3]+" custom www export gefaald.")
 
-def makeBackup(): #P3 ok
-    #os.system('/p1mon/scripts/P1Backup.py  --forcebackup yes &')
-    os.system('/p1mon/scripts/P1Backup.py  --forcebackup  &')
+def check_and_run_backup(): #2.0.0
 
-def cleanDownload(): #P1 ok
+    prg_name = "P1Backup.py"
+    _id, run_status, _label = config_db.strget( 184, flog )
+    
+    pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
+    flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+    if int( run_status ) == 1 and len( pid_list ) == 0: # start process
+        try:
+
+            flog.info(inspect.stack()[0][3] + ": " + prg_name + " wordt gestart." )
+
+            cmd = "/p1mon/scripts/pythonlaunch.sh P1Backup.py --forcebackup &" # 1.8.0 upgrade
+            process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+        except Exception as e:
+            flog.error(inspect.stack()[0][3]+": Onverwacht fout " + str(e) )
+
+        config_db.strset( 0, 184, flog ) # reset the run flag
+
+def cleanDownload(): #180ok
     for name in glob.glob(const.DIR_DOWNLOAD +'*.zip'):
         try:
             file_time_delta = int(util.getUtcTime() - os.path.getmtime(name))
@@ -1233,141 +1662,12 @@ def cleanDownload(): #P1 ok
         except Exception as e:
             flog.error(inspect.stack()[0][3]+": Onverwacht fout op file "+name+' '+str(e))
 
-# return how mutch ram is used in pct
-def get_ram_used_pct(): #P1 ok
+def ram_used_percentage(): #180ok
     try:
         return system_info_lib.get_ram_used_pct()
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": Ram gebruik uitlezen gefaald "+str(e))
         return "0"
-
-def setSambaMode(mode):
-    flog.info(inspect.stack()[0][3]+" SAMBA mode="+mode)
-    if mode == const.FILESHARE_MODE_DATA:
-        if os.system('sudo /bin/rm /etc/samba/smb.conf;sudo /bin/ln /etc/samba/smb.conf.data /etc/samba/smb.conf; sudo /usr/sbin/service smbd restart') > 0:
-            flog.error(inspect.stack()[0][3]+" SAMBA(bestand delen) alleen data gefaald.")
-    if mode == const.FILESHARE_MODE_DEV:
-            if os.system('sudo /bin/rm /etc/samba/smb.conf;sudo /bin/ln /etc/samba/smb.conf.dev /etc/samba/smb.conf;sudo /usr/sbin/service smbd restart') > 0:
-                flog.error(inspect.stack()[0][3]+" SAMBA(bestand delen) development gefaald.")
-    if mode == const.FILESHARE_MODE_UIT:
-            if os.system('sudo /usr/sbin/service smbd stop') > 0:
-                flog.error(inspect.stack()[0][3]+" SAMBA (bestand delen) service stoppen gefaald.")
-      
-def getWlanSSID(): #P1 ok
-    try:
-
-        p = subprocess.Popen("sudo iwlist wlan0 scan|grep ESSID:| sort | uniq", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.stdout.readlines()
-        ssid_list=[]
-        try:
-            for line in output:
-                ssid=line.decode('utf-8').split('"')[1]
-                #print ( ssid  )
-                if "\\x00" not in ssid: 
-                    ssid_list.append(ssid)
-            ssid_list.sort()
-            #print ( ssid_list )
-        except Exception as e:
-            flog.debug(inspect.stack()[0][3]+": geen wlan0 info gevonden ")
-            return
-    
-        #dump buffer naar bestand.
-        try:
-            fo = open(const.FILE_WIFISSID+".tmp", "w")
-            for x in ssid_list:
-                fo.write(x+"\n")
-            fo.close
-            flog.debug(inspect.stack()[0][3]+": file weggeschreven naar "+const.FILE_WIFISSID+".tmp")
-            shutil.move(const.FILE_WIFISSID+".tmp", const.FILE_WIFISSID)
-        except Exception as e:
-            flog.error(inspect.stack()[0][3]+": ssid buffer wegschrijven naar file "+str(e.args[0]))  
-        
-    
-    except Exception as e:
-        flog.error(inspect.stack()[0][3]+": Wifi probleem "+str(e))
-   
-def getHostname(ip): #P3 ok
-    try:
-        return socket.gethostbyaddr(ip)[0]
-    except Exception as _e:
-        return "onbekend"     
-    
-def getPublicIpAddress(): #P3 ok
-    try:
-        url = 'https://api.ipify.org/'
-        request = urllib.request.Request(url)
-        response = urllib.request.urlopen(request)
-        return str(response.read().decode('utf-8'))
-
-    except Exception:
-        return "onbekend"
-
-def getPythonVersion(): #P3 ok
-    try :
-        return platform.python_version()
-    except Exception:
-        return "onbekend"
-
-def getOsInfo(): #P3 ok
-    try :
-        return platform.platform(aliased=0, terse=0)
-    except Exception as _e:
-        return "onbekend"
-
-def getInternetStatusByDnsServers(): #P3 ok
-	r = False
-	li = ["8.8.8.8",\
-	"8.8.4.4",\
-	"209.244.0.3",\
-	"209.244.0.4",\
-	"208.67.222.222",\
-	"37.235.1.174",\
-	"91.239.100.100"\
-	]
-
-	random.shuffle(li)
-	for i in range(len(li)):
-		try :
-			hostname = li[i]
-			p = subprocess.Popen(["/bin/ping", "-c1", "-W1", hostname], stdout=subprocess.PIPE).stdout.read()
-			for item in str(p).split("\n"):
-				if "0% packet loss" in item:
-					return True
-		except Exception as inst:
-			print(type(inst))
-			print(inst.args)
-			print(inst)
-		return r	
-
-def getDiskPctUsed(path): #P3 ok
-    try:
-        r = float(str.replace(str(psutil.disk_usage(path)).split()[3].split('=')[1],')','')) 
-        return str(r)
-    except Exception as _e:
-            #print ( str(e) )
-            return "onbekend."
-
-def getUptime(): #P3 Ok
-    #flog.setLevel(logging.DEBUG)
-    try:
-        proc = subprocess.Popen(['/bin/cat','/proc/uptime'], stdout=subprocess.PIPE)
-        tmp = proc.stdout.read().decode('utf-8')
-        #secpassed = long(tmp.split()[0].split('.',1)[0])
-        secpassed = int(tmp.split()[0].split('.',1)[0])
-        #secpassed = secpassed + 180000
-        days = int(secpassed/86400)
-        flog.debug(inspect.stack()[0][3]+" raw secs ="+str(tmp)+" secs. cleaned="+str(secpassed)+" dagen verstreken="+str(days) )
-        timestr = ''
-        if days > 1:
-            timestr =  str(days)+  " dagen "
-        if days == 1:
-            timestr =  str(days)+  " dag "    
-        timestr = timestr+time.strftime("%H:%M:%S", time.gmtime(secpassed) )
-        flog.debug(inspect.stack()[0][3]+" uptime is: "+timestr)
-        return timestr
-    except Exception as e:
-            flog.error(inspect.stack()[0][3]+" geen uptime gevonden? error="+str(e))
-            return "onbekend."
 
 def saveExit(signum, frame):
     #setFileFlags()
@@ -1378,9 +1678,9 @@ def saveExit(signum, frame):
 #-------------------------------
 if __name__ == "__main__":
     os.umask( 0o002 )
-    flog = fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )   
-    flog.setLevel( logging.INFO )
-    flog.consoleOutputOn(True)
-    original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
+    flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )   
+    flog.setLevel( logger.logging.INFO )
+    flog.consoleOutputOn( True )
+    original_sigint = signal.getsignal( signal.SIGINT )
+    signal.signal( signal.SIGINT, saveExit )
     MainProg()

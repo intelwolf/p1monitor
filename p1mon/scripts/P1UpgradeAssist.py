@@ -1,15 +1,19 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1UpgradeAssist.py
+
 import argparse
 import const
 import crypto3
+import crontab_lib
 import glob
 import inspect
 import os.path
 import string
 import sys
+import time
 import subprocess
 import shutil
 import os
+import process_lib
 
 from logger import *
 from util import setFile2user
@@ -111,8 +115,15 @@ def save( ):
             flog.info ( inspect.stack()[0][3] + msg )
             writeStatus( msg )
             exportfilename = const.DIR_VAR + const.EXPORT_PREFIX + "-" + const.P1_UPGRADE_ASSIST + ".zip"
-            cmd = "/p1mon/scripts/P1SqlExport.py -e " + makeLocalTimestamp() + " -f " + exportfilename + " --rmstatus"
-            if os.system( cmd ) > 0:
+            cmd = "/p1mon/scripts/pythonlaunch.sh P1SqlExport.py -e " + makeLocalTimestamp() + " -f " + exportfilename + " --rmstatus"
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+                )
+            if ( r[2] ) > 0:
+            #if os.system( cmd ) > 0:
                 msg = "Export door P1SqlExport gefaald."
                 flog.error( inspect.stack()[0][3] + msg )
                 writeStatus( msg )
@@ -253,8 +264,27 @@ def restore():
         _head,tail = os.path.split( const.FILE_DB_CONFIG ) 
         copyFile( const.DIR_FILEDISK + tail, const.DIR_RAMDISK ) #disk to ram, scripts uses ram location
         
-        if os.system('sudo -u p1mon /p1mon/scripts/P1Scheduler.py') > 0:
+        #if os.system('sudo -u p1mon /p1mon/scripts/P1Scheduler.py') > 0:
+        #    flog.error(inspect.stack()[0][3]+" cron jobs update gefaald.")
+
+        """
+        r = process_lib.run_process( 
+                cms_str = 'sudo -u p1mon /p1mon/scripts/pythonlaunch.sh P1Scheduler.py',
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+                )
+        if ( r[2] ) > 0:
             flog.error(inspect.stack()[0][3]+" cron jobs update gefaald.")
+        """
+        
+        try:
+            crontab_lib.update_crontab_backup( flog=flog )
+            flog.info( "cron jobs zijn aangemaakt uit de database." )
+        except Exception as e:
+             flog.error(inspect.stack()[0][3]+" cron jobs update gefaald.")
+        
+
         time.sleep(2)
 
         flog.info( "Filesysteem wordt vergroot naar de maximale ruimte van de SDHC kaart." )
@@ -269,18 +299,47 @@ def restore():
         # file exist nginx fails if the token file is missing. This also makes     #
         # sure that nginx is reloaded or restarted if it is not running            #
         ############################################################################
-        if os.system('sudo -u p1mon /p1mon/scripts/P1NginxConfig.py --apitokens' ) > 0:
+        #if os.system('sudo -u p1mon /p1mon/scripts/P1NginxConfig.py --apitokens' ) > 0:
+        #    msg = "Nginx API tokens update gefaald."
+        #    flog.error( inspect.stack()[0][3] + ": " + msg )
+
+        r = process_lib.run_process( 
+                cms_str = 'sudo -u p1mon /p1mon/scripts/pythonlaunch.sh P1NginxConfig.py --apitokens',
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+                )
+        if ( r[2] ) > 0:
             msg = "Nginx API tokens update gefaald."
             flog.error( inspect.stack()[0][3] + ": " + msg )
 
-        if os.system('sudo -u p1mon /p1mon/scripts/P1NginxConfig.py --gateway' ) > 0:
+
+        #if os.system('sudo -u p1mon /p1mon/scripts/P1NginxConfig.py --gateway' ) > 0:
+        #    msg = "Nginx gateway update gefaald."
+        #    flog.error( inspect.stack()[0][3] + ": " + msg )
+        
+        r = process_lib.run_process( 
+                cms_str = 'sudo -u p1mon /p1mon/scripts/pythonlaunch.sh P1NginxConfig.py --gateway',
+                use_shell=True,
+                give_return_value=True,
+                flog=flog 
+                )
+        if ( r[2] ) > 0:
             msg = "Nginx gateway update gefaald."
             flog.error( inspect.stack()[0][3] + ": " + msg )
 
         flog.info( "file system sync uitvoeren." )
-        if os.system('sudo sync' ) > 0:
-                flog.warning(inspect.stack()[0][3]+" file system sync gefaald.")
-
+        #if os.system('sudo sync' ) > 0:
+        #    flog.warning(inspect.stack()[0][3]+" file system sync gefaald.")
+        cmd = "sudo sync" # 1.8.0 upgrade
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog 
+        )
+        if r[2] > 0:
+            flog.warning(inspect.stack()[0][3]+" file system sync gefaald.")
 
         flog.info( "Data herstelt vanaf de USB drive. Er wordt een reboot uitgevoerd." )
         time.sleep( 5 )

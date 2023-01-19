@@ -1,27 +1,32 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1DropBoxDeamon.py
+
 import const
-import dropbox
+#import dropbox
 import dropbox_lib
 import inspect
+import logger
 import signal
+import sqldb
 import systemid
-import time
+#import time
 import os
 import sys
-import crypto3
+import time
+import util
+#import crypto3
 
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
-from logger import *
-from os import listdir, chmod
-from os.path import isfile,join
-from sqldb import configDB,rtStatusDb
-from util import *
-from time import sleep
+#from logger import *
+#from os import listdir, chmod
+#from os.path import isfile,join
+#from sqldb import configDB,rtStatusDb
+#from util import *
+#from time import sleep
 
 prgname         = 'P1DropBoxDeamon'
-config_db       = configDB()
-rt_status_db    = rtStatusDb()
+config_db       = sqldb.configDB()
+rt_status_db    = sqldb.rtStatusDb()
 
 files_backup   = [] 
 files_data     = [] 
@@ -34,7 +39,7 @@ def Main(argv):
     flog.info("Start van programma.")
     local_dbx_folders = []
    
-    # open van status database      
+    # open van status database
     try:    
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
@@ -42,7 +47,7 @@ def Main(argv):
         sys.exit(1)
     flog.debug(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
-    # open van config database      
+    # open van config database
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
     except Exception as e:
@@ -65,7 +70,7 @@ def Main(argv):
     
     # open DropBox session / access
    
-    dbx = dropbox_lib.authenticate_dbx(flog=flog, config_db=config_db, rt_status_db=rt_status_db )
+    dbx = dropbox_lib.authenticate_dbx( flog=flog, config_db=config_db, rt_status_db=rt_status_db )
     #print( dbx.users_get_current_account() )
     #print( dbx.check_and_refresh_access_token() )
     #dbx.close()
@@ -101,7 +106,7 @@ def Main(argv):
 
         if int(drop_box_backup_on) == 0 and int(drop_box_data_on) == 0: 
             flog.debug(inspect.stack()[0][3]+": Dropbox staat uit, wacht 30 seconden.")
-            sleep(30)
+            time.sleep(30)
             continue
 
         if file_count > 0: #something to do.
@@ -113,7 +118,7 @@ def Main(argv):
         if dbx == None: 
             flog.error(inspect.stack()[0][3]+": Dropbox authenticatie gefaald en gestopt.")
             rt_status_db.strset('Authenticatie gefaald en gestopt.',62,flog) 
-            sleep(10)
+            time.sleep(10)
             continue
 
         """
@@ -232,7 +237,7 @@ def Main(argv):
 
         #flog.setLevel( logging.INFO )
 
-        sleep( loop_timeout ) # by nice to your cpu cycles
+        time.sleep( loop_timeout ) # by nice to your cpu cycles
 
         #######################
         # files not processed #
@@ -242,7 +247,7 @@ def Main(argv):
             delay = 30
             flog.warning(inspect.stack()[0][3]+" bestanden gevonden die niet te wissen waren of niet gekopierd. Vertraagde verwerking van " + \
                 str( delay ) + " seconden actief.")
-            sleep( delay  )
+            time.sleep( delay  )
         
 
 
@@ -265,10 +270,10 @@ def validFilePermissions(filename):
 
 def fillFileListBuffer():
     global files_backup, files_data
-    files_backup = [f for f in listdir( const.DIR_DBX_LOCAL + const.DBX_DIR_BACKUP ) \
-            if isfile(join(const.DIR_DBX_LOCAL + const.DBX_DIR_BACKUP, f))]
-    files_data =   [f for f in listdir( const.DIR_DBX_LOCAL + const.DBX_DIR_DATA )\
-            if isfile(join(const.DIR_DBX_LOCAL + const.DBX_DIR_DATA, f))]
+    files_backup = [f for f in os.listdir( const.DIR_DBX_LOCAL + const.DBX_DIR_BACKUP ) \
+            if os.path.isfile(os.path.join( const.DIR_DBX_LOCAL + const.DBX_DIR_BACKUP, f ))]
+    files_data =   [f for f in os.listdir( const.DIR_DBX_LOCAL + const.DBX_DIR_DATA )\
+            if os.path.isfile(os.path.join( const.DIR_DBX_LOCAL + const.DBX_DIR_DATA, f ))]
     file_count = len(files_backup) + len(files_data)
     return file_count
 
@@ -330,7 +335,7 @@ def createCheckFolder(folder):
         else:  
             flog.debug(inspect.stack()[0][3]+": folder %s succesvol aangemaakt." % folder)
     try:  
-        setFile2user( folder, 'p1mon' )
+        util.setFile2user( folder, 'p1mon' )
         os.chmod( folder, 0o774) 
     except Exception as e: 
         flog.error(inspect.stack()[0][3]+": " + folder + "rechten zijn niet aan te passen ->" + str(e.args[0]))
@@ -359,16 +364,15 @@ def saveExit( signum, frame ):
 if __name__ == "__main__":
     try:
         os.umask( 0o002 )
-        logfile = const.DIR_FILELOG+prgname+".log" 
-        setFile2user(logfile,'p1mon')
-        flog = fileLogger(logfile,prgname)
-        #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        logfile = const.DIR_FILELOG + prgname+".log"
+        util.setFile2user( logfile,'p1mon' )
+        flog = logger.fileLogger(logfile,prgname)
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn(True)
     except Exception as e:
         print ("critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(10) #  error: no logging check file rights
 
     original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
-    Main(sys.argv[1:])     
+    signal.signal( signal.SIGINT, saveExit )
+    Main(sys.argv[1:])

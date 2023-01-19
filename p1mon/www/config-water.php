@@ -33,7 +33,7 @@ if ( isset($_POST["fs_rb_watermeter_reset"]) ) {
     if ( $_POST[ "fs_rb_watermeter_reset" ] == '1' ) {
         # remove status file
         unlink( $file_name );
-        writeSemaphoreFile('watermeter_counter_reset');
+        if ( updateConfigDb("update config set parameter = '1' where ID = 185") ) $err_cnt += 1;
         $showStatusOutput = 1;
         ##echo "<br>action=" . $showStatusOutput . "<br>";
     }
@@ -92,9 +92,6 @@ if( isset($_POST["gpio_water"]) ) { //ok
     #echo "<br>";
     #echo $int . "<br>";
     #echo $configValue  . "<br>";
-    if ( $int !=  $configValue ) { // create load only do when there is a change
-        writeSemaphoreFile( 'water_gpio' );  
-    }
     if ( updateConfigDb( "update config set parameter = '" . (string)$int . "' where ID = 97") )  $err_cnt += 1;
 }
 
@@ -288,7 +285,7 @@ $(function () {
     <!-- start block -->
     <div id="counter_status" class="pos-45" style="display: none" >
         <div class='close_button-2' id="assist_logging_close">
-            <i class="color-select fas fa-times-circle" data-fa-transform="grow-6"" aria-hidden="true"></i>
+            <i class="color-select fas fa-times-circle" data-fa-transform="grow-6"></i>
         </div>
     <div class="frame-4-top">
         <span class="text-15">Meterstand reset logging</span>

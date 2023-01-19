@@ -34,6 +34,8 @@ $ethO_previous_ip   = config_read( 164 );
 $wlan0_previous_ip  = config_read( 165 );
 $router_previous_ip = config_read( 166 );
 $dns_previous_ip    = config_read( 167 );
+$wifi_previous_ssd  = config_read( 11  );
+$wifi_previous_pw   = config_read( 12  );
 
 #echo $ethO_previous_ip."<br>";
 #echo $wlan0_previous_ip."<br>";
@@ -79,7 +81,7 @@ if( isset($_POST["ip_dns"]) ) {
     }
 }
 
-#echo $watchdog_flag."<br>";
+#echo "watchdog_flag=".$watchdog_flag."<br>";
 
 if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
 {
@@ -87,11 +89,14 @@ if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
     if ( $err_cnt == -1 ) $err_cnt=0;
 
     $crypto_wifi_pw = encodeString (trim($_POST["wifi_pw"]), 'wifipw');
+
     if ( updateConfigDb("update config set parameter = '".$_POST["wifi_essid"]."' where ID = 11")) $err_cnt += 1;
     if ( updateConfigDb("update config set parameter = '".$crypto_wifi_pw."' where ID = 12"))      $err_cnt += 1;
     
-    #echo "error count = "+$err_cnt+"<br>";
-    writeSemaphoreFile('wifi_aanpassen');
+    if ( strcmp( $wifi_previous_ssd, $_POST["wifi_essid"]) != 0 or strcmp( $wifi_previous_pw , $crypto_wifi_pw) ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 183") ) $err_cnt += 1;
+    } 
+
 }
 
 if( isset($_POST["FQDN"]) ) {
@@ -308,11 +313,11 @@ $(function () {
                                 <input class="input-7 color-settings color-input-back" id="wifi_pw" name="wifi_pw"  type="password" value="<?php echo decodeString(12, 'wifipw');?>">
                                 <p class="p-1"></p>
                             </div>
-                            <div id="wifi_search" onclick=wifiSelectClick() class="float-left pad-1 cursor-pointer">    
+                            <div id="wifi_search" onclick=wifiSelectClick() class="float-left pad-1 cursor-pointer">
                                 <span><i class="color-menu pad-7 fas fa-search"></i></span>
                             </div>
                             <p class="p-1"></p>
-                            <div id="wifi_password" onclick="toggelPasswordVisibility('wifi_pw')" class="float-left pad-21 cursor-pointer">    
+                            <div id="wifi_password" onclick="toggelPasswordVisibility('wifi_pw')" class="float-left pad-21 cursor-pointer">
                                 <span><i class="color-menu pad-7 fas fa-eye"></i></span>
                             </div>
                             <p class="p-1"></p>
@@ -438,7 +443,7 @@ $(function () {
                                         <p class="p-1"></p> 
                                     </div>
                                     <div class="rTableCell">
-                                        <div id="duckDNStoken_eye" onclick="toggelPasswordVisibility('duckDNStoken')" class="cursor-pointer">    
+                                        <div id="duckDNStoken_eye" onclick="toggelPasswordVisibility('duckDNStoken')" class="cursor-pointer">
                                             <span><i class="color-menu pad-7 fas fa-eye"></i></span>
                                         </div>
                                     </div>

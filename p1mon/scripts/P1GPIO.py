@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1GPIO.py
+
 import const
 import datetime
 import gpio
@@ -362,7 +363,7 @@ def saveExit(signum, frame):
     signal.signal(signal.SIGINT, original_sigint)
     gpioTarifSwitcher.close()
     gpioPowerSwitcher.close()
-    flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
+    flog.info( inspect.stack()[0][3] + " SIGINT ontvangen, gestopt." )
     sys.exit(0)
 
 #-------------------------------
@@ -379,5 +380,5 @@ if __name__ == "__main__":
         sys.exit(10) #  error: no logging check file rights
 
     original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
+    signal.signal( signal.SIGINT, saveExit )
     Main(sys.argv[1:])

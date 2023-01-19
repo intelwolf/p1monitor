@@ -1,0 +1,10 @@
+/var/log/p1monitor/*.log {
+	daily
+	su p1mon p1mon
+	missingok
+	rotate 7
+	compress
+	delaycompress
+	notifempty
+	copytruncate
+}

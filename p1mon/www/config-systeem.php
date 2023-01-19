@@ -1,3 +1,5 @@
+<!doctype html>
+<html lang="nl">
 <?php
 session_start(); #must be here for every page using login
 include_once '/p1mon/www/util/auto_logout.php';
@@ -24,7 +26,7 @@ if( $localip == False ){
         }
 }
 
-#print_r($_POST);
+#print_r( $_POST );
 $err_cnt = 0;
 
 if ( isset($_POST["udp_deamon_active"]) ) { 
@@ -53,13 +55,13 @@ if ( isset($_POST['systemaction']) ) {
 
     if ($_POST['systemaction'] === 'reboot'){ 
         //print "Reboot !<br>";
-        writeSemaphoreFile('reboot');
+        if ( updateConfigDb("update config set parameter = '1' where ID = 189"))$err_cnt += 1;
         header('Location:bye.php');
     }
 
     if ( $_POST['systemaction'] === 'stop'){ 
         //print "Stop !<br>";
-        writeSemaphoreFile('halt');
+        if ( updateConfigDb("update config set parameter = '1' where ID = 190"))$err_cnt += 1;
         header('Location:bye-halt.php');
     }
     
@@ -69,9 +71,22 @@ if ( isset($_POST['systemaction']) ) {
     }
 
 }
+
+if ( isset($_POST["patchfilepath"]) ) { 
+
+    #remove old status file 
+    unlink('/p1mon/mnt/ramdisk/patch.status');
+
+    // set the upload path and file of the patchfile
+    if( updateConfigDb("update config set parameter = '" . $_POST["patchfilepath"] . "' where ID = 193"))$err_cnt += 1;
+    if ( isset($_POST["patch_run_mode"]) ) { 
+        if( updateConfigDb("update config set parameter = '" . $_POST["patch_run_mode"] . "' where ID = 194"))$err_cnt += 1;
+    }
+    # shows the dialog
+    setcookie("patch_messages_show", "on", time()+300); //5 min
+}
+
 ?>
-<!doctype html>
-<html lang="nl">
 <head>
 <meta name="robots" content="noindex">
 <title>Systeem configuratie</title>
@@ -84,7 +99,25 @@ if ( isset($_POST['systemaction']) ) {
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/download2.js"></script>
+
+<script src="/fine-uploader/fine-uploader.min.js"></script>
+<script type="text/template" id="qq-template">
+    <div class="qq-uploader-selector qq-uploader">
+        <div class="qq-upload-button-selector qq-upload-button">
+            <div>
+                <button class="input-2 but-1 float-left" id="patchbutton">
+                    <i class="color-menu fas fa-3x  fa-bandage"></i><br>
+                    <span class="color-menu text-7">patch</span>
+                </button>
+            </div>
+        </div>
+        <ul class="qq-upload-list-selector" style="display: none">
+            <div></div>
+        </ul>
+    </div>
+</script>
 </head>
+
 
 <body>
 
@@ -126,7 +159,7 @@ if ( isset($_POST['systemaction']) ) {
                                     </div>
                                 </div>
                             
-                            </div>    
+                            </div>
                         </div>
                         <p></p>
                         <div class="frame-4-top">
@@ -148,16 +181,28 @@ if ( isset($_POST['systemaction']) ) {
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left pos-32">
-                                <div class="float-left margin-3">    
+                                <div class="float-left margin-3">
                                     <button class="input-2 but-1 cursor-pointer" id="sysdump_button" name="sysdump_button" type="submit">
-                                        <i class="color-menu fas fa-3x fa-download"></i><br>    
+                                        <i class="color-menu fas fa-3x fa-download"></i><br> 
                                         <span class="color-menu text-7">&nbsp;dump</span>
                                     </button>
                                 </div>
-                            </div>    
+                            </div>
                         </div>
 
                         <p></p>
+                        <div class="frame-4-top" title="<?php echo strIdx( 316 );?>">
+                            <span class="text-15">patch bestand uploaden</span>
+                        </div>
+                        <div class="frame-4-bot" title="<?php echo strIdx( 316 );?>">
+                            <div class="float-left margin-3" id="uploader"></div>
+                            <div class="pad-1" title="<?php echo strIdx( 315 );?>">
+                                <input type="checkbox" id="cb_unsigned_allow" name="cb_unsigned_allow">
+                                <label class="text-10" for="cb_unsigned_allow">unsigned patch toestaan</label>
+                            </div>
+                        </div>
+                        <p></p>
+
                         <div class="frame-4-top">
                             <span class="text-15">Nieuwe P1 monitor versie controle</span>
                         </div>
@@ -181,9 +226,11 @@ if ( isset($_POST['systemaction']) ) {
 
                     <!-- end pay load area -->    
                     <!-- placeholder variables for session termination -->
-                    <input type="hidden" name="logout" id="logout" value="">
-                    <input type="hidden" name="systemaction" id="systemaction" value="">
+                    <input type="hidden" name="logout"         id="logout"         value="">
+                    <input type="hidden" name="systemaction"   id="systemaction"   value="">
                     <input type="hidden" name="passwordaction" id="passwordaction" value="">
+                    <input type="hidden" name="patchfilepath"  id="patchfilepath"  value="">
+                    <input type="hidden" name="patch_run_mode" id="patch_run_mode" value="">
                     </form>
                     </div>
                         <div id="right-wrapper-config-right-2">
@@ -191,11 +238,13 @@ if ( isset($_POST['systemaction']) ) {
                                 <span class="text-15">hulp</span>
                             </div>
                             <div class="frame-4-bot text-10">
-                                <?php echo strIdx(5);?>
+                                <?php echo strIdx( 5 );?>
                                 <p></p>
-                                <?php echo strIdx(33);?>
+                                <?php echo strIdx( 33 );?>
                                 <p></p>
-                                <?php echo strIdx(34);?>
+                                <?php echo strIdx( 34 );?>
+                                <p></p>
+                                <?php echo strIdx( 317 );?>
                             </div>
                         </div>
             </div>    
@@ -222,16 +271,94 @@ if ( isset($_POST['systemaction']) ) {
     <div id="dump_dl_link" ><br><a id='dump_dl_href' href="">Als de download niet start klik dan hier</a></div>
 </div>
 
-<script>    
-  
+<div id="patch_status_message">
+     <div class='close_button' id="patch_status_message_close">
+        <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
+    </div>
+    <span class="text-15">patch status</span>
+    <div id="scroll_window" class="text-29" >
+        <?php echo strIdx( 295 );?>
+    </div>
+</div> 
+
+<script> 
+
+
+
+function readJsonApiConfigurationToStop( id ){
+
+    $.getScript( "./api/v1/configuration/"+id, function( data, textStatus, jqxhr ) {
+      try {
+        var jsonarr = JSON.parse(data);
+        if ( jsonarr[0][1] == 0 ) {
+            clearInterval( patchLogTimer );
+        } 
+      } catch(err) {
+          console.log( err );
+      }
+   });
+   
+
+}
+
+
+function readPatchStatusLogging(){ 
+    $.get( "/txt/txt-patch-status.php", function( response, status, xhr ) {
+        
+        if ( status == "error" ) {
+            $("#scroll_window").html('patch status nog niet beschikbaar.');
+        }
+        
+        if ( response.length > 0 ) {
+            //console.log("update =" + response.length )
+            $('#scroll_window').html( response );
+
+            // keep scroll window scrolled down.
+             $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
+        } else {
+            $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+        }
+
+    });
+}
+
+
+function getCookie(name) {
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+
+$('#patch_status_message_close').click(function() {
+   hideStuff('patch_status_message');
+   PatchMessagesShow = undefined;
+   document.cookie = "patch_messages_show=''; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}); 
+
+PatchMessagesShow=getCookie("patch_messages_show"); 
+
 $(function() {
     hideStuff('dump_dl_link')
     centerPosition('#cancel_bar');
     centerPosition('#system_dump');
+    centerPosition('#patch_status_message');
     if ( sysdump_id > 0 ) {
         systemDump(sysdump_id);
-    }    
+    }
+
+    if ( PatchMessagesShow !== undefined ) {
+        showStuff('patch_status_message');
+        patchLogTimer = setInterval('updatePatchLogging();', 1000);
+    }
+
 });
+
+
+function updatePatchLogging(){
+    readPatchStatusLogging();
+    readJsonApiConfigurationToStop('193');
+}
 
 var sysdump_id = 0;
 var progressPct = 0;
@@ -272,7 +399,7 @@ function readJsonDataSystemDump(){
             
             $('#dump_spinner').removeClass("fa-pulse");
             $('#dump_spinner').removeClass("fa-spinner");
-            $('#dump_spinner').addClass("fa-check-square");
+            $('#dump_spinner').addClass("fa-square-check");
             showStuff('dump_dl_link');
 
             autoDownLoad(dl_link);
@@ -286,7 +413,7 @@ function readJsonDataSystemDump(){
 }
 
 function progressIndicator() {
-    if (progressPct >= 100) {
+    if (progressPct > 95) {
         
         if ( action === 'clear_password' ) {
              console.log("clear_password");
@@ -322,20 +449,20 @@ function setUpCancelBar(text) {
 $('#sysdump_button').click(function(event) {
     document.formvalues.systemaction.value = 'system_dump';
     $('#formvalues').submit();
-    event.preventDefault();    
+    event.preventDefault(); 
 });
 
 
 $('#pwreset_button').click(function(event) {
     action = "clear_password";
     setUpCancelBar("Onderbreek wissen van wachtwoord");
-    event.preventDefault();    
+    event.preventDefault();
 });
 
 $('#fr_button').click(function(event) {
     action = "reboot";
     setUpCancelBar("Onderbreek systeem herstart");
-    event.preventDefault();    
+    event.preventDefault();
 });
 
 $('#fs_button').click(function(event) {
@@ -344,12 +471,12 @@ $('#fs_button').click(function(event) {
     event.preventDefault();    
 });
 
-$('#cancel_bar').click(function() {    
+$('#cancel_bar').click(function() {
     hideStuff('cancel_bar');
     progressPct = 0;
-    clearInterval(progress);    
+    clearInterval(progress);
 });
-    
+
 </script>
 <?php echo autoLogout(); ?>
 <?php
@@ -358,12 +485,58 @@ if ( isset($_POST['systemaction']) ) {
     if ( $_POST['systemaction'] === 'system_dump'){ 
         $sysdump_id = strval(mt_rand (100,999));
         $sysdump_filename = 'debugdump'.$sysdump_id;
-        writeSemaphoreFile($sysdump_filename);
+        if ( updateConfigDb("update config set parameter = '1' where ID = 191") ) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '".$sysdump_id."' where ID = 192") ) $err_cnt += 1;
         echo "<script>
             var sysdump_id = $sysdump_id;
         </script>";
     }
 }
 ?>
+
+<script>
+    var uploader = new qq.FineUploader({
+        element: document.getElementById("uploader"),
+        debug: false,
+        request: {
+            endpoint: "/fine-uploader/endpoint.php"
+        },
+        deleteFile: {
+            enabled: false,
+            endpoint: "/fine-uploader/endpoint.php"
+        },
+        chunking: {
+            enabled: true,
+            concurrent: {
+                enabled: true
+            },
+            success: {
+                endpoint: "/fine-uploader/endpoint.php?done"
+            }
+        },
+        resume: {
+            enabled: true
+        },
+        retry: {
+            enableAuto: true,
+            showButton: true
+        },
+        callbacks: {
+            onComplete: function(id, fileName, responseJSON) {
+                if (responseJSON.success) {
+                    document.formvalues.patchfilepath.value = '/p1mon/var/tmp/'+this.getUuid (id)+'/'+fileName
+                    document.formvalues.patch_run_mode.value = 1; // allow signed only patch file
+                    if ( document.formvalues.cb_unsigned_allow.checked == true ) {
+                        document.formvalues.patch_run_mode.value = 2; // allow unsigned and signed patch file
+                    }
+                    document.forms["formvalues"].submit();
+                    }
+                }
+            },
+        validation: {
+            allowedExtensions: ['signed.zip','unsigned.zip'],
+        },
+    });
+</script>
 </body>
 </html>

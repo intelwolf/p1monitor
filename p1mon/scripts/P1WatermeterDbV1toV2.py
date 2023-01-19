@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1WatermeterDbV1toV2.py
+
 import argparse
 import const
 import inspect
@@ -27,7 +28,7 @@ watermeter_db_dag     = WatermeterDB()
 watermeter_db_maand   = WatermeterDB()
 watermeter_db_jaar    = WatermeterDB()
 
-def Main(argv): 
+def Main(argv):
     
     my_pid = os.getpid()
     flog.info("Start van programma met process id " + str(my_pid) )

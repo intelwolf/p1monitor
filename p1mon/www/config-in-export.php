@@ -100,7 +100,6 @@ if ( isset($_POST["import"]) ) {
             <div></div>
         </ul>
     </div>
-    
 </script>
 </head>
 <body>

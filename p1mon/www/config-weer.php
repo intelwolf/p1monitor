@@ -25,6 +25,9 @@ if( $localip == False ){
         }
 }
 
+$sw_off  = strIdx( 193 );
+$sw_on   = strIdx( 192 );
+
 $err_cnt = -1;
 $err_str = '';
 $weather_api = array( "city_id"=>"" );
@@ -45,16 +48,19 @@ if ( isset($_POST["API_key"]) ) {
                 $err_cnt+=1;
         }
     
-    if ( strlen(trim($_POST["stad_id"])) == 0 ) {
-       if ( strlen( trim($_POST["stad"]) ) < 3) {
-           $err_str = $err_str.'Stad lijkt niet correct.<br>';
-            $err_cnt+=1;
+        if ( strlen(trim($_POST["stad_id"])) == 0 ) {
+            if ( strlen( trim($_POST["stad"]) ) < 3) {
+                $err_str = $err_str.'Stad lijkt niet correct.<br>';
+                    $err_cnt+=1;
+                }
         }
-    }
 
         $input = preg_replace('/[\x00-\x1F\x7F]/u', '',$_POST["API_key"]);
         $crypto_api_key = encodeString ($input, 'weatherapikey');
-        #debugLog('$crypto_api_key api key='.$crypto_api_key);
+
+        #debugLog( '$crypto_api_key api key plain ='.$input );
+        #debugLog( '$crypto_api_key api key encoded ='.$crypto_api_key );
+        #debugLog( '$crypto_api_key api key decoded ='. decodeString(13, 'weatherapikey') );
         
         if ( updateConfigDb("update config set parameter = '".$crypto_api_key."' where ID = 13")) $err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '".preg_replace('/[\x00-\x1F\x7F]/u', '',$_POST["stad"])."' where ID = 14")) $err_cnt += 1;
@@ -62,7 +68,7 @@ if ( isset($_POST["API_key"]) ) {
         $busy_indicator = '';
         if ( strlen(trim($_POST["API_key"])) == 0 ) { # to prevent error on a empty input
         header('Location: '.$_SERVER['PHP_SELF']);
-        die;        
+        die;
     }
         getJsonGetWeatherData(); // setting the weather id from the city name.
 }
@@ -80,6 +86,22 @@ if ( isset($_POST["stad_id"]) ) {
     }
 }
 
+
+
+if ( isset($_POST["graaddagen_recover"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["graaddagen_recover"] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 203")) $err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 203")) $err_cnt += 1;
+    }
+}
+
+
+if( isset($_POST["roomtemperature"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '" . inputCleanDigitsOnly($_POST["roomtemperature"]) . "' where ID = 202"))  $err_cnt += 1;
+}
 
 function setCityNameByID( $city_id ) {
     #echo "setCityNameByID id ". $city_id ."<br>";
@@ -105,11 +127,11 @@ function setCityNameByID( $city_id ) {
     }
     
     # update database 
-    $command = '/p1mon/scripts/P1Weather.py &'; 
-    exec($command ,$arr_execoutput, $exec_ret_value );
+    #$command = '/p1mon/scripts/P1Weather.py &'; 
+    $command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
+    exec( $command ,$arr_execoutput, $exec_ret_value );
     return true;
 }
-
 
 
 function getJsonGetWeatherData() {
@@ -126,7 +148,7 @@ function getJsonGetWeatherData() {
         }
     }
 
-        $api_key = decodeString(13, 'weatherapikey');
+        $api_key = decodeString( 13, 'weatherapikey');
         
         $url = 'http://api.openweathermap.org/data/2.5/weather?q='.config_read(14).'&units=metric&lang=nl&appid='.$api_key; 
         #echo '<br>'.$url.'<br>';
@@ -151,7 +173,8 @@ function getJsonGetWeatherData() {
     }
     
         # update database 
-        $command = '/p1mon/scripts/P1Weather.py &'; 
+        #$command = '/p1mon/scripts/P1Weather.py &'; 
+        $command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
         exec($command ,$arr_execoutput, $exec_ret_value );
         return true;
 }
@@ -168,14 +191,17 @@ function getJsonGetWeatherData() {
 <head>
 <meta name="robots" content="noindex">
 <title>Weer configuratie</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script       src="./js/jquery.min.js"></script>
 <script       src="./js/p1mon-util.js"></script>
+<script       src="./js/jquery-validate-link/jquery.validate.min.js"></script>
+<script       src="./js/jquery-validate-link/additional-methods.min.js"></script>
+
 </head>
 <body>
 <script>
@@ -268,73 +294,115 @@ $(function () {
                         
                         <div id="right-wrapper-config"> <!-- right block -->
                         <!-- inner block right part of screen -->
-                                <div id="right-wrapper-config-left-2">
-                                        <!-- start of content -->
-                                        <form name="formvalues" id="formvalues" method="POST">
-                                                
-                                                <div class="frame-4-top">
-                                                        <span class="text-15">weer API configuratie</span><span id="busy_indicator" class="display-none" >&nbsp;&nbsp;&nbsp;<i class="fas fa-spinner fa-pulse fa-1x fa-fw"></i></span>
-                                                </div>
-                                                <div class="frame-4-bot">
-                                                        <div class="float-left">                                
-                                                                <i class="text-10 pad-7 fas fa-key"></i>
-                                                                <label class="text-10">api key</label>
-                                                                <p class="p-1"></p>
-                                                                <i class="text-10 pad-39 fas fa-globe "></i>
-                                                                <label class="text-10">stad</label> 
-                                <p class="p-1"></p>
-                                                                <i class="text-10 pad-39 fas fa-globe "></i>
-                                                                <label class="text-10">stad ID</label> 
-                                                        </div>
-                                                        <div class="float-left pad-1">
-                                                                <input class="input-6 color-settings color-input-back" id="api_key" name="API_key" type="password" value="<?php echo decodeString(13, 'weatherapikey');?>">
-                                                                <p class="p-1"></p>
-                                                                <input class="input-6 color-settings color-input-back" name="stad" type="text" value="<?php echo config_read(14); ?>">
-                                                                <p class="p-1"></p>
-                                                                <input class="input-6 color-settings color-input-back" name="stad_id" type="text" value="" placeholder="gebruik de stad id als alternatief">
-                                                                <p class="p-1"></p>
-                                                        </div>
-                                                        <div id="api_passwd" onclick="toggelPasswordVisibility('api_key')" class="float-left pad-1 cursor-pointer">        
-                                                                <span><i class="color-menu pad-7 fas fa-eye"></i></span>
-                                                        </div>
+                            <div id="right-wrapper-config-left-2">
+                                <!-- start of content -->
+                                <form name="formvalues" id="formvalues" method="POST">
+                                            
+                                    <div class="frame-4-top">
+                                        <span class="text-15">weer API configuratie</span><span id="busy_indicator" class="display-none" >&nbsp;&nbsp;&nbsp;<i class="fas fa-spinner fa-pulse fa-1x fa-fw"></i></span>
+                                    </div>
+                                    <div class="frame-4-bot">
+                                        <div class="float-left">
+                                            <i class="text-10 pad-7 fas fa-key"></i>
+                                            <label class="text-10">api key</label>
+                                            <p class="p-1"></p>
+                                            <i class="text-10 pad-39 fas fa-globe "></i>
+                                            <label class="text-10">stad</label> 
+                                            <p class="p-1"></p>
+                                            <i class="text-10 pad-39 fas fa-globe "></i>
+                                            <label class="text-10">stad ID</label> 
+                                        </div>
+                                        <div class="float-left pad-1">
+                                            <input class="input-6 color-settings color-input-back" id="api_key" name="API_key" type="password" value="<?php echo decodeString(13, 'weatherapikey');?>">
+                                            <p class="p-1"></p>
+                                            <input class="input-6 color-settings color-input-back" name="stad" type="text" value="<?php echo config_read(14); ?>">
+                                            <p class="p-1"></p>
+                                            <input class="input-6 color-settings color-input-back" name="stad_id" type="text" value="" placeholder="gebruik de stad id als alternatief">
+                                            <p class="p-1"></p>
+                                        </div>
+                                        <div id="api_passwd" onclick="toggelPasswordVisibility('api_key')" class="float-left pad-1 cursor-pointer">        
+                                            <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                                        </div>
 
-                                                </div>
-                                                <p></p>
-                                                <div class="frame-4-top">
-                                                        <span class="text-15">weer status</span>
-                                                </div>
-                                                <div class="frame-4-bot">
-                                                        <div class="text-16">stad:&nbsp;            <span id="w_city"></span></div><br>
-                                                        <div class="text-16">tijdstip meting:&nbsp; <span id="w_timestamp"></span></div><br>
-                                                        <div class="text-16">temperatuur:&nbsp;     <span id="w_temperature"></span></div><br>
-                                                        <div class="text-16">conditie:&nbsp;        <span id="w_description"></span></div><br>        
-                                                        <div class="text-16">stad id:&nbsp;         <span id="w_city_id"></span></div><br>
-                                                        <div class="text-16">API status:&nbsp;      <span id="api_status"></span></div><br>
-                            <div class="text-16">API status timestamp:&nbsp; <span id="api_status_timestamp"></span></div><br>
-                            <br>
-                                                </div>
-                                                <!-- placeholder variables for session termination -->
-                                                <input type="hidden" name="logout" id="logout" value="">
-                                        </form>
+                                    </div>
+                                    <p></p>
+                                    <div class="frame-4-top">
+                                        <span class="text-15">weer status</span>
+                                    </div>
+                                    <div class="frame-4-bot">
+                                        <div class="text-16">stad:&nbsp;            <span id="w_city"></span></div><br>
+                                        <div class="text-16">tijdstip meting:&nbsp; <span id="w_timestamp"></span></div><br>
+                                        <div class="text-16">temperatuur:&nbsp;     <span id="w_temperature"></span></div><br>
+                                        <div class="text-16">conditie:&nbsp;        <span id="w_description"></span></div><br>        
+                                        <div class="text-16">stad id:&nbsp;         <span id="w_city_id"></span></div><br>
+                                        <div class="text-16">API status:&nbsp;      <span id="api_status"></span></div><br>
+                                    <div class="text-16">API status timestamp:&nbsp; <span id="api_status_timestamp"></span>
+                                    </div>
+                                    <br>
+
+                                </div>
+                                <p></p>
+                        <!-- graaddagen -->
+                        <p></p>
+                        <div class="frame-4-top" title="<?php echo strIdx( 325 );?>">
+                            <span class="text-15">graaddagen</span>
+                        </div>
+                        <div class="frame-4-bot" title="<?php echo strIdx( 325 );?>">
+                            <div class="rTable">
+
+                                <div class="rTableRow" title="<?php echo strIdx( 328 );?>">
+                                    <div class="rTableCell">
+                                        <i class="text-10 fa-solid fa-toggle-off"></i>
+                                    </div>
+                                    <div class="rTableCell width-280">
+                                        <label class="text-10"><?php echo strIdx( 326 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" name="graaddagen_recover" type="radio" value="1" <?php if ( config_read( 203 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="graaddagen_recover" type="radio" value="0" <?php if ( config_read( 203 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 329 );?>">
+                                    <div class="rTableCell">
+                                        <i class="text-10 fa-solid fa-temperature-half"></i>
+                                    </div>
+                                    <div class="rTableCell width-280">
+                                        <label class="text-10"><?php echo strIdx( 327 );?></label>
+                                    </div>
+                                    <div class="rTableCell witdh-24">
+                                        <input class="input-12 color-settings color-input-back" id="roomtemperature" name="roomtemperature" type="text" 
+                                        value="<?php echo config_read( 202 );?>">
+                                    </div>
                                 </div>
                                 
-                                <div id="right-wrapper-config-right-2">
-                                        <div class="frame-4-top">
-                                                <span class="text-15">hulp</span>
-                                        </div>
-                                        <div class="frame-4-bot text-10">        
-                                                <?php echo strIdx(10);?>
-                                        </div>
-                                        
-                                </div>
-                        </div>        
+                            </div>
+                        </div>
+
+                        <!-- placeholder variables for session termination -->
+                        <input type="hidden" name="logout" id="logout" value="">
+                        </form>
+                            </div>
+                            <div id="right-wrapper-config-right-2">
+                                    <div class="frame-4-top">
+                                            <span class="text-15">hulp</span>
+                                    </div>
+                                    <div class="frame-4-bot text-10">
+                                            <?php echo strIdx( 10 );?>
+                                            <br>
+                                            <br>
+                                            <?php echo strIdx( 325 );?>
+                                    </div>
+                                    
+                            </div>
+                        </div>
                         <!-- end inner block right part of screen -->
         </div>        
         <?php echo div_err_succes();?>
         
-        <?php 
-        //echo "check ".$err_str.'<br>';
-        if ($err_cnt > 0) {        
+<?php 
+//echo "check ".$err_str.'<br>';
+if ($err_cnt > 0) {
 echo <<< "END"
 <script>
         $(function () {
@@ -342,8 +410,25 @@ echo <<< "END"
         });
 </script>
 END;
-        }
-        ?>
-<?php echo autoLogout(); ?>        
+}
+?>
+<script>
+     $(function() {
+         $("#formvalues").validate({
+             rules: {
+                 'roomtemperature': {
+                     required: true,
+                     number: true,
+                     max: 99,
+                     min: 0
+                 }
+             },
+             errorPlacement: function(error, element) {
+                 return false; // will suppress error messages
+             }
+         });
+     });
+     </script>
+<?php echo autoLogout(); ?>
 </body>
 </html>

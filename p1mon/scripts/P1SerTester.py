@@ -1,6 +1,6 @@
-#!/usr/bin/python3 -u 
+# run manual with ./pythonlaunch.sh P1SerTester.py
 import sys
-import getopt
+#import getopt
 import argparse
 import time
 import serial
@@ -10,13 +10,13 @@ import time
 prgname = 'P1SerTester 4.0 (Python 3 version)'
 
 def saveExit(signum, frame):
-        global ser1
-        ser1.close()   
-        signal.signal(signal.SIGINT, original_sigint)
-        print("SIGINT ontvangen, gestopt.")
-        sys.exit(0)
+    global ser1
+    ser1.close()   
+    signal.signal(signal.SIGINT, original_sigint)
+    print("SIGINT ontvangen, gestopt.")
+    sys.exit(0)
 
-def Main(argv): 
+def Main(argv):
     global ser1
     filename = "/var/log/p1monitor/sertest-" + mkLocalTimeString() + ".txt"
   
@@ -30,8 +30,6 @@ def Main(argv):
     parser.add_argument('-mode2',   '--mode11152007E1',  required=False, action="store_true", help="veel gebruikte P1 poort instelling 115200 7 E 1" )
 
     args = parser.parse_args()
-
-
 
     #Set COM port config
     ser1 = serial.Serial()
@@ -82,7 +80,6 @@ def Main(argv):
             
     fp.close() 
 
-
 # sec_offset is het aantal seconden extra of minder van UTC/GMT
 # NL wintertijd = 3600 zomertijd =7200
 def mkLocalTimeString(): 
@@ -95,4 +92,4 @@ def mkLocalTimeString():
 if __name__ == "__main__":
     original_sigint = signal.getsignal(signal.SIGINT)
     signal.signal(signal.SIGINT, saveExit)
-    Main(sys.argv[1:])       
+    Main(sys.argv[1:])

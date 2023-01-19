@@ -1,14 +1,12 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1SqlExport.py
+
 import argparse
 import os
 import sys
 import const
-import zlib
+import logger
 import inspect
-import signal
 import zipfile
-import datetime
-import getopt
 import json
 import pwd
 import shutil
@@ -16,11 +14,9 @@ import subprocess
 import time
 import util
 import sqldb
+import process_lib
 
-from semaphore3 import writeSemaphoreFile
-#from sqldb import *
-from logger import *
-from util import mkLocalTimeString,setFile2user
+#from util import mkLocalTimeString,setFile2user
 from datetime import datetime, timedelta
 from shutil import *
 from os     import umask
@@ -59,7 +55,6 @@ statusdata = {
    'record_count': 0
 }
 
-
 def updateStatusPct(filename, pct, record_cnt):
     statusdata['progress_pct'] = pct
     statusdata['record_count'] = record_cnt
@@ -89,20 +84,29 @@ def writeManifestFile():
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": manifest bestand kon niet worden weggeschreven -> "+str(e))
 
-def Main(argv):             
+def Main( argv ):
+
+    print( argv )
+
     flog.info("Start van programma " + prgname + ".")
-    flog.info(inspect.stack()[0][3]+": wordt uitgevoerd als user -> "+pwd.getpwuid( os.getuid() ).pw_name)
+    flog.info(inspect.stack()[0][3]+": wordt uitgevoerd als user -> " + pwd.getpwuid( os.getuid() ).pw_name )
+    flog.debug("argv = " + str(argv) )
+
+    #flog.info("PATH = " + str( os.environ.get("PATH")) )
+
     timestart = time.time()
     exportcode = ''
     global statusfile
     record_cnt = 0
 
-    parser = argparse.ArgumentParser( description="...." )                              
-    parser.add_argument( '-e'   , '--exportid',                         required=True  ) 
-    parser.add_argument( '-f'   , '--filename',                         required=False ) 
-    parser.add_argument( '-rm'  , '--rmstatus', action='store_true',    required=False ) 
+    parser = argparse.ArgumentParser( description="...." )
+   
+    parser.add_argument( '-e'   , '--exportid',                         required=True  )
+    parser.add_argument( '-f'   , '--filename',                         required=False )
+    parser.add_argument( '-rm'  , '--rmstatus', action='store_true',    required=False )
 
     args = parser.parse_args()
+    flog.info( str( args ) )
     if args.exportid != None:
         exportcode = args.exportid
 
@@ -110,11 +114,6 @@ def Main(argv):
         print (prgname+'.py -e <exportcode id>')
         flog.error("gestopt export code ontbreekt.")
         sys.exit(2)
-    
-    #print 'exportcodeis ', exportcode
-    #return
-    
-    writeSemaphoreFile('custom_www_export' + exportcode,flog)
 
     #timestamp = mkLocalTimestamp();
     zipfilename = const.DIR_EXPORT  + const.EXPORT_PREFIX + exportcode + ".zip"
@@ -134,6 +133,14 @@ def Main(argv):
         flog.critical(inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
+
+    try:
+        config_db.strset( str(exportcode), 196, flog ) # set export ID
+        config_db.strset( '1',             195, flog ) # set start export
+        updateStatusPct(statusfile, 1, record_cnt)
+    except Exception as e:
+        flog.critical(inspect.stack()[0][3]+": export custom www gefaald :" + str(e.args[0]) )
+        sys.exit(1)
 
     # open van history database (1 min interval) 
     try:
@@ -528,22 +535,31 @@ def Main(argv):
             pass
     else:
         backgroundcommand = '(sleep 7200;rm ' + downloadfilename + ' && rm ' + statusfile + ' > /dev/null 2>&1)&'
-        flog.info(inspect.stack()[0][3]+": verwijderen van tijdelijke bestanden ->"+backgroundcommand )
-        os.system( backgroundcommand )
-    
+        flog.info(inspect.stack()[0][3]+": verwijderen van tijdelijke bestanden ->" + backgroundcommand )
+        # os.system( backgroundcommand )
+        cmd = backgroundcommand # 1.8.0 upgrade
+        process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=False,
+            flog=flog, 
+            timeout=None # this process runs long so no timeout
+        )
+
     timestop = time.time()  
     flog.info( inspect.stack()[0][3] + ": Gereed verwerkingstijd is " + f"{timestop - timestart:0.2f} seconden." ) 
-    
+    sys.exit( 0 )
+
 #-------------------------------
 if __name__ == "__main__":
     try:
         os.umask( 0o002 )
-        flog = fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )    
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )    
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
-        flog.consoleOutputOn(True) 
+        flog.setLevel( logger.logging.INFO )
+        flog.consoleOutputOn( True ) 
     except Exception as e:
-        print ("critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )
-        sys.exit(1)
+        print ( "critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )
+        sys.exit( 1 )
 
     Main(sys.argv[1:]) 

@@ -1,7 +1,9 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1SqlImport.py
 import argparse
 import const
+import crontab_lib
 import inspect
+import logger
 import signal
 import zipfile
 import fnmatch
@@ -15,12 +17,13 @@ import sys
 import systemid
 import time
 import crypto3
+import util
+import listOfPidByName
+import process_lib
 
-#from sqldb import configDB, SqlDb2, financieelDb, currentWeatherDB, historyWeatherDB, temperatureDB, WatermeterDB, PhaseDB, powerProductionDB, WatermeterDBV2, powerProductionSolarDB
-from logger import fileLogger,logging
-from datetime import datetime, timedelta
-from util import setFile2user
-from listOfPidByName import listOfPidByName
+#from datetime import datetime, timedelta
+#from util import setFile2user
+##from listOfPidByName import listOfPidByName
 
 prgname = 'P1SqlImport'
 
@@ -55,14 +58,15 @@ statusdata = {
 def Main(argv):
 
     global no_status_messages
-    
+
     my_pid = os.getpid()
-    flog.info("Start van programma met process id " + str(my_pid) )
-    pid_list, _process_list = listOfPidByName( prgname )
+    flog.info("Start van programma met process id " + str( my_pid ) )
+    pid_list, _process_list = listOfPidByName.listOfPidByName( prgname )
+    flog.debug( inspect.stack()[0][3] + ": pid list all (andere lopende proces id's) " + str( pid_list ) )
     #print ( pid_list )
     pid_list.remove( my_pid ) # remove own pid from the count
-    flog.debug( inspect.stack()[0][3] + ": pid list clean (andere lopende proces id's) " + str(pid_list ) )
-    if len( pid_list ) > 0: # more then 1 because the script is started from os.system()
+    flog.debug( inspect.stack()[0][3] + ": pid list clean (andere lopende proces id's) " + str( pid_list ) + " aantal processen = " + str(len( pid_list )) )
+    if len( pid_list ) > 1:
         msg_str = "Gestopt een andere versie van het programma is actief."
         flog.info( inspect.stack()[0][3] + ": " + msg_str )
         sys.exit(1)
@@ -70,14 +74,13 @@ def Main(argv):
     timestart = time.time() # used te calculate the processing time.
 
     flog.info( inspect.stack()[0][3] +  ": Wordt uitgevoerd als user -> " + pwd.getpwuid( os.getuid() ).pw_name  )
-    
+
     parser = argparse.ArgumentParser( description = prgname )
     parser.add_argument( '-i' , '--importfile', help="Naam van het export bestand om te importeren.",     required=False  ) 
     parser.add_argument( '-rm', '--rmstatus',   help="Maak geen status bestand aan", action='store_true', required=False ) 
 
     args = parser.parse_args()
     no_status_messages = args.rmstatus # default False when set True
-
 
     initStatusFile()
 
@@ -128,7 +131,7 @@ def Main(argv):
         stop( 3 ) 
 
     openDatabases()
- 
+
     try:
         zf = zipfile.ZipFile( importfile )
         _head,tail = os.path.split( importfile ) 
@@ -140,18 +143,18 @@ def Main(argv):
         stop( 30 ) 
 
     # set file rights
-    setFile2user( const.FILE_DB_E_FILENAME, 'p1mon' )
-    setFile2user( const.FILE_DB_E_HISTORIE, 'p1mon' )
-    setFile2user( const.FILE_DB_CONFIG, 'p1mon' )
-    setFile2user( const.FILE_DB_STATUS, 'p1mon' )
-    setFile2user( const.FILE_DB_FINANCIEEL, 'p1mon' ) 
-    setFile2user( const.FILE_DB_WEATHER, 'p1mon' )
-    setFile2user( const.FILE_DB_WEATHER_HISTORIE, 'p1mon' )
-    setFile2user( const.FILE_DB_TEMPERATUUR_FILENAME, 'p1mon' )
-    setFile2user( const.FILE_DB_WATERMETER, 'p1mon' )
-    setFile2user( const.FILE_DB_WATERMETERV2, 'p1mon' )
-    setFile2user( const.FILE_DB_POWERPRODUCTION,'p1mon')
-    setFile2user( const.FILE_DB_PHASEINFORMATION, 'p1mon')
+    util.setFile2user( const.FILE_DB_E_FILENAME, 'p1mon' )
+    util.setFile2user( const.FILE_DB_E_HISTORIE, 'p1mon' )
+    util.setFile2user( const.FILE_DB_CONFIG, 'p1mon' )
+    util.setFile2user( const.FILE_DB_STATUS, 'p1mon' )
+    util.setFile2user( const.FILE_DB_FINANCIEEL, 'p1mon' ) 
+    util.setFile2user( const.FILE_DB_WEATHER, 'p1mon' )
+    util.setFile2user( const.FILE_DB_WEATHER_HISTORIE, 'p1mon' )
+    util.setFile2user( const.FILE_DB_TEMPERATUUR_FILENAME, 'p1mon' )
+    util.setFile2user( const.FILE_DB_WATERMETER, 'p1mon' )
+    util.setFile2user( const.FILE_DB_WATERMETERV2, 'p1mon' )
+    util.setFile2user( const.FILE_DB_POWERPRODUCTION,'p1mon')
+    util.setFile2user( const.FILE_DB_PHASEINFORMATION, 'p1mon')
     msgToInfoLogAndStatusFile( "file rechten van database bestanden correct gezet." )
 
     dbIntegrityCheck( config_db,           const.FILE_DB_CONFIG )
@@ -194,7 +197,14 @@ def Main(argv):
                 exportcode = fname[len(const.FILE_PREFIX_CUSTOM_UI)-1:-3]
 
                 cmd = 'sudo tar -zxf ' + const.FILE_PREFIX_CUSTOM_UI + exportcode + '.gz -C ' + const.DIR_WWW_CUSTOM + " 2>/dev/null"
-                if os.system( cmd ) > 0:
+                # 1.8.0 upgrade
+                r = process_lib.run_process( 
+                    cms_str = cmd,
+                    use_shell=True,
+                    give_return_value=True,
+                    flog=flog 
+                )
+                if r[2] > 0:
                     flog.error(inspect.stack()[0][3]+" custom www import gefaald.")
                     msg = "custom www bestanden konden niet worden verwerkt of waren niet aanwezig."
                     writeLineToStatusFile( msg )
@@ -210,7 +220,7 @@ def Main(argv):
     try:
 
         for fname in zf.namelist():
-            
+
             _head,tail = os.path.split(fname)
            
             #print ( "fname=", fname )
@@ -273,12 +283,25 @@ def Main(argv):
 
     zf.close 
     msgToInfoLogAndStatusFile( "alle data uit het ZIP bestand verwerkt." )
-    
+
+    msgToInfoLogAndStatusFile( 'Netwerkinstellingen wordt aangepast.' )
+    config_db.strset( '1', 168, flog ) # set wachtdog flag.
+    time.sleep ( 5 ) # give some time to proces 
+    msgToInfoLogAndStatusFile( 'Netwerkinstellingen doorgeven aan Watchdog process.' )
+
     # waterbase V1 to V2 database conversion
     # set de normale verwerking van de water datbase uit.
     # doe de conversie
     msgToInfoLogAndStatusFile( "watermeting conversie van oude naar nieuwe database gestart." )
-    os.system("/p1mon/scripts/P1WatermeterDbV1toV2.py")
+    # os.system("/p1mon/scripts/P1WatermeterDbV1toV2.py")
+    cmd = "/p1mon/scripts/pythonlaunch.sh P1WatermeterDbV1toV2.py" # 1.8.0 upgrade
+    process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+    )
+
     msgToInfoLogAndStatusFile( "watermeting conversie van oude naar nieuwe database gereed." )
 
     # lees systeem ID uit en zet deze in de config database. 
@@ -296,7 +319,14 @@ def Main(argv):
     setSoftwareVersionInformation()
 
     msgToInfoLogAndStatusFile( 'WiFi wordt aangepast.' )
-    if os.system('sudo /p1mon/scripts/P1SetWifi.py') > 0:
+    cmd = "sudo /p1mon/scripts/pythonlaunch.sh P1SetWifi.py" # 1.8.0 upgrade
+    r = process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+    )
+    if r[2] > 0:
         msg = "Wifi aanpassen gefaald."
         writeLineToStatusFile( msg )
         flog.error( inspect.stack()[0][3] + ": " + msg )
@@ -304,12 +334,15 @@ def Main(argv):
         msgToInfoLogAndStatusFile( 'WiFi aanpassingen gereed.' )
 
     msgToInfoLogAndStatusFile( 'CRON wordt aangepast.' )
-    if os.system('sudo -u p1mon /p1mon/scripts/P1Scheduler.py' ) > 0:
+
+    try:
+        crontab_lib.update_crontab_backup( flog=flog )
+        msgToInfoLogAndStatusFile( 'CRON aanpassingen gereed.' )
+    except Exception as e:
         msg = "CRON update gefaald."
         writeLineToStatusFile( msg )
         flog.error( inspect.stack()[0][3] + ": " + msg )
-    else:
-        msgToInfoLogAndStatusFile( 'CRON aanpassingen gereed.' )
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
     msgToInfoLogAndStatusFile( 'Internet API wordt aangepast.' )
     _id, api_is_active, _label = config_db.strget( 163, flog ) 
@@ -320,7 +353,14 @@ def Main(argv):
 
     #make sure that all is copied to disk
     msgToInfoLogAndStatusFile( "Databases worden van RAM naar het SDHC kaartje geschreven." )
-    os.system( "/p1mon/scripts/P1DbCopy.py --allcopy2disk --forcecopy" )
+    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2disk --forcecopy" # 1.8.0 upgrade
+    process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+    )
+
     msgToInfoLogAndStatusFile( "Databases kopieren gereed." )
 
     msgToInfoLogAndStatusFile( "ZIP bestand wordt verwijderd." )
@@ -336,8 +376,15 @@ def Main(argv):
     msgToInfoLogAndStatusFile( 'Vaste IP adressen worden aangepast als deze actief zijn.' )
     config_db.strset( 3, 168, flog ) # set the flag so the watchdog processes the changes
 
+    msgToInfoLogAndStatusFile( 'SAMBA fileshares worden gezet.' )
+    config_db.strset( 1, 182, flog ) # set the flag so the watchdog processes the changes
+
+    msgToInfoLogAndStatusFile( 'SOCAT aanpassingen, als deze actief is.' )
+    config_db.strset( 1, 201, flog ) # set the flag so the watchdog processes the changes
+
+
     timestop = time.time()
-    m, s = divmod( timestop - timestart , 60) # make minutes and seconds from total secs count
+    m, s = divmod( timestop - timestart , 60 ) # make minutes and seconds from total secs count
     msgToInfoLogAndStatusFile( "Gereed verwerkings tijd is " + '{:02d}:{:02d}.'.format( int(m), int(s) ) )
 
     stop( 0 )
@@ -362,8 +409,8 @@ def msgToInfoLogAndStatusFile( msg ):
 def msgReplaceDb( db_name , forced=False ):
 
     if forced == False:
-        now = datetime.utcnow()
-        if int((now - datetime(1970, 1, 1)).total_seconds())%3 != 0:
+        now = datetime.datetime.utcnow()
+        if int((now - datetime.datetime(1970, 1, 1)).total_seconds())%3 != 0:
             return
 
     # check if manifest data is not set or incomplete;
@@ -447,7 +494,7 @@ def replaceLastLineInStatusFile( msg ):
         initStatusFile()
 
 ########################################################
-# instert the sql lines from an export z9p file        #
+# instert the sql lines from an export zip file        #
 # starts.                                              #
 ########################################################
 def processImportDataSet( db_tabel_name , db_pointer, zip_file, db_filename, sql_match_str ):
@@ -731,10 +778,10 @@ def saveExit(signum, frame):
 if __name__ == "__main__":
     try: 
         os.umask( 0o002 )
-        flog = fileLogger( const.DIR_FILELOG + prgname + ".log", prgname)    
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log", prgname)    
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
-        flog.consoleOutputOn(True)
+        flog.setLevel( logger.logging.INFO )
+        flog.consoleOutputOn( True )
 
         original_sigint = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, saveExit)

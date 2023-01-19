@@ -116,8 +116,10 @@ function setDataFromJson() {
 
                 GWattDataL1Consumed.push( [ item[1], item[2] / divisor ] );
                 GWattDataL1Produced.push( [ item[1], (item[5]*-1) / divisor] );
+
                 GWattDataL2Consumed.push( [ item[1], item[3] / divisor ] );
                 GWattDataL2Produced.push( [ item[1], (item[6]*-1) / divisor ] );
+
                 GWattDataL3Consumed.push( [ item[1], item[4] / divisor ] );
                 GWattDataL3Produced.push( [ item[1], (item[7]*-1) / divisor ] );
 
@@ -693,10 +695,10 @@ function setButtonVisbilty() {
                             if ( GWattDataL2Consumed[i][0] ==  this.x ) { // timestamp
                                 if ( useKw ) {
                                     verbruikt = GWattDataL2Consumed[i][1].toFixed(1) + ' ' + wattText;
-                                    geleverd  = (GWattDataL2Consumed[i][1] * -1).toFixed(1) + ' ' + wattText;
+                                    geleverd  = (GWattDataL2Produced[i][1] * -1).toFixed(1) + ' ' + wattText;
                                 } else { 
                                     verbruikt = GWattDataL2Consumed[i][1].toFixed(0) + ' ' + wattText;
-                                    geleverd  = (GWattDataL2Consumed[i][1] * -1).toFixed(0) + ' ' + wattText;
+                                    geleverd  = (GWattDataL2Produced[i][1] * -1).toFixed(0) + ' ' + wattText;
                                 }
                                 break;
                             }
@@ -734,10 +736,10 @@ function setButtonVisbilty() {
                             if ( GWattDataL3Consumed[i][0] ==  this.x ) { // timestamp
                                 if ( useKw ) {
                                     verbruikt = GWattDataL3Consumed[i][1].toFixed(1) + ' ' + wattText;
-                                    geleverd  = (GWattDataL3Consumed[i][1] * -1).toFixed(1) + ' ' + wattText;
+                                    geleverd  = (GWattDataL3Produced[i][1] * -1).toFixed(1) + ' ' + wattText;
                                 } else { 
                                     verbruikt = GWattDataL3Consumed[i][1].toFixed(0) + ' ' + wattText;
-                                    geleverd  = (GWattDataL3Consumed[i][1] * -1).toFixed(0) + ' ' + wattText;
+                                    geleverd  = (GWattDataL3Produced[i][1] * -1).toFixed(0) + ' ' + wattText;
                                 }
                                 break;
                             }

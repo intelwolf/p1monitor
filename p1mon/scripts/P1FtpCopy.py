@@ -1,32 +1,29 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1FtpCopy.py
+
 import argparse
 import base64
-#import commands
 import const
 import crypto3
 import ftplib
 import inspect
+import logger
 import os.path
-import string
-import tempfile
-import ssl
 import sys
 import shutil
 import subprocess
-import uuid
+import sqldb
 import re
-import glob
 
 from ftplib import FTP_TLS
-from sqldb import configDB,rtStatusDb
-from logger import *
+#from sqldb import configDB,rtStatusDb
+#from logger import *
 from util import setFile2user,getUtcTime
 from subprocess import check_output
 
-prgname = 'P1FtpCopy'
-fileprefix = 'P1BU-'
-config_db        = configDB()
-rt_status_db    = rtStatusDb()
+prgname         = 'P1FtpCopy'
+fileprefix      = 'P1BU-'
+config_db       = sqldb.configDB()
+rt_status_db    = sqldb.rtStatusDb()
 
 # because of ea bug in sftlib we are now using shell comands to connect with FTSP (curl) 
 # this problem occured during the upgrade to buster and python 3.7 
@@ -292,8 +289,17 @@ def Main(argv):
 
             shutil.copy( ftp_para['filename'], changed_filename )
             flog.info(inspect.stack()[0][3]+": probeer bestand " + ftp_para['filename'] + " te kopieren via sftp.")
-           
-            cp = subprocess.run([ "curl","--globoff", "--insecure", "-sSv", server, "--user", ftp_para['user']+":"+ftp_para['password'], "-T", changed_filename  ], \
+            
+            # parameters curl
+            # -s Silent or quiet mode. Do not show progress meter or error messages
+            # -S When used with -s, --silent, it makes curl show an error message if it fails.
+            # -v Makes curl verbose during the operation.
+            # --user Specify the user name and password to use for server authentication.
+            # -T --upload-file <file> Transfer local FILE to destination
+            # --globoff This option switches off the "URL globbing parser"specify URLs that contain the letters {}[]
+            # --insecure For SFTP and SCP, this option makes curl skip the known_hosts verification
+
+            cp = subprocess.run([ "curl","--globoff", "--insecure", "-sSv", server, "--user", ftp_para['user']+":"+ftp_para['password'], "-T", changed_filename ], \
                 universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60 )
 
             flog.debug( inspect.stack()[0][3]+": cp.stdout="        + str(cp.stdout) )
@@ -530,12 +536,12 @@ def grep(pattern,word_list):
 #-------------------------------
 if __name__ == "__main__":
     try:
-        logfile = const.DIR_FILELOG+prgname+".log" 
+        logfile = const.DIR_FILELOG+prgname+".log"
         setFile2user(logfile,'p1mon')
-        flog = fileLogger(logfile,prgname)    
+        flog = logger.fileLogger( logfile,prgname )
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
-        flog.consoleOutputOn(True)
+        flog.setLevel( logger.logging.INFO )
+        flog.consoleOutputOn( True )
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )
         sys.exit(10) #  error: no logging check file rights

@@ -402,7 +402,7 @@ $(function() {
     Gselected = parseInt(getLocalStorage('stat-select-index'),10);
     GseriesVisibilty[0] = JSON.parse(getLocalStorage('stat-verbr-visible'));  // #PARAMETER
     GseriesVisibilty[1] = JSON.parse(getLocalStorage('stat-gelvr-visible'));  // #PARAMETER
-    GseriesVisibilty[2] = JSON.parse(getLocalStorage('stat-gelvr-visible-prognose'));  // ONLY for minute chart
+    GseriesVisibilty[2] = JSON.parse(getLocalStorage('stat-verbr-visible-prognose'));  // ONLY for minute chart
     GseriesVisibilty[3] = JSON.parse(getLocalStorage('stat-gelvr-visible-prognose'));  // ONLY for minute chart
     Highcharts.setOptions({
     global: {

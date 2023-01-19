@@ -1,0 +1,7 @@
+#!/bin/bash
+PYTHONENV="/p1mon/p1monenv"
+cd $PYTHONENV
+source bin/activate
+cd /p1mon/scripts/
+#eval python3 ./digital_sig_test.py
+python3 ./digital_sig_test.py

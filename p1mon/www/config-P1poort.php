@@ -10,7 +10,7 @@ include_once '/p1mon/www/util/config_read.php';
 include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/pageclock.php';
 
-#print_r($_POST);
+//print_r($_POST);
 loginInit();
 passwordSessionLogoutCheck();
 
@@ -26,6 +26,35 @@ if( $localip == False ){
 
 $sw_off  = strIdx( 193 );
 $sw_on   = strIdx( 192 );
+
+$socat_previous_ip     = config_read( 198 );
+$socat_previous_port   = config_read( 199 );
+$socat_previous_active = config_read( 200 );
+$socat_is_changed      = false;
+
+
+if( isset($_POST["socat_ip"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $socat_previous_ip != $_POST["socat_ip"] ) { $socat_is_changed = true; }
+    if ( updateConfigDb("update config set parameter = '" . $_POST["socat_ip"] . "' where ID = 198"))  $err_cnt += 1;
+}
+
+if( isset($_POST["socat_port"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $socat_previous_port != $_POST["socat_port"] ) { $socat_is_changed = true; }
+    if ( updateConfigDb("update config set parameter = '" . $_POST["socat_port"] . "' where ID = 199"))  $err_cnt += 1;
+}
+
+
+if ( isset($_POST["socat_on_off"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $socat_previous_active != $_POST["socat_on_off"] ) { $socat_is_changed = true; }
+    if ($_POST["socat_on_off"] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 200")) $err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 200")) $err_cnt += 1;
+    }
+}
 
 if( isset($_POST["baudrate_list"]) || isset($_POST["bytesize_list"]) || isset($_POST["parity_list"]) || isset($_POST["stopbit_list "]))
 {
@@ -64,6 +93,7 @@ if( isset($_POST["gas_prefix_list"]) ) {
     if ( updateConfigDb("update config set parameter = '" . $_POST["gas_prefix_list"] . "' where ID = 38"))  $err_cnt += 1;
 }
 
+
 if ( isset($_POST["crc"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["crc"] == '1' ) {
@@ -96,6 +126,18 @@ if( isset($_POST["day_night_mode"]) ) {
     if ( updateConfigDb("update config set parameter = '" . $_POST["day_night_mode"] . "' where ID = 78"))  $err_cnt += 1;
 }
 
+
+if( isset($_POST["serial_device"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '" . $_POST["serial_device"] . "' where ID = 197"))  $err_cnt += 1;
+}
+
+//echo "socat_is_changed = ".$socat_is_changed;
+
+if ( $socat_is_changed == true ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '1' where ID = 201"))  $err_cnt += 1;
+}
 
 function makeSelector($id) {
 
@@ -233,20 +275,24 @@ function makeSelector($id) {
 <head>
 <meta name="robots" content="noindex">
 <title><?php echo strIdx( 244 );?></title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
+<script src="./js/jquery-validate-link/additional-methods.min.js"></script>
+
 </head>
 <body>
 <audio id="audio" src="./sound/beep-04.wav"></audio>
 <script>
 var initloadtimer;
 var soundPlayed = false;
+var socat_timestamp_str = '<?php echo strIdx( 324 );?>'
 
 function PlaySound() {
     var sound = document.getElementById("audio");
@@ -299,6 +345,12 @@ function readJsonApiStatus(){
                 if ( jsondata[j][0] == 92 ) {
                     $('#ser_device').text( jsondata[j][1] );
                 }
+
+                if ( jsondata[j][0] == 128 ) {
+                    $('#socat_timestamp').html( socat_timestamp_str + "&nbsp;:&nbsp;" +jsondata[j][1] );
+                }
+
+                socat_timestamp
             }
         } catch(err) {
             console.log( err )
@@ -400,7 +452,78 @@ $(function () {
                                         </div>
                                     </div>
 
+                                    <div class="rTableRow">
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fas fa-network-wired"></i>
+                                        </div>
+                                        <div class="rTableCell width-80">
+                                            <label class="text-10">device</label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <input class="input-3 color-settings color-input-back" id="serial_device" name="serial_device" 
+                                            type="text" placeholder="/dev/xxxx" value="<?php echo config_read(197);?>">
+                                        </div>
+                                    </div>
+
                                 </div>
+                        </div>
+
+                        <!-- socat -->
+                        <p></p>
+                        <div class="frame-4-top" title="<?php echo strIdx( 321 );?>">
+                            <span class="text-15"><?php echo strIdx( 318 );?></span>
+                        </div>
+                        <div class="frame-4-bot" title="<?php echo strIdx( 321 );?>">
+                            <div class="rTable">
+
+                                    <div class="rTableRow">
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fa-solid fa-toggle-off"></i>
+                                        </div>
+                                        <div class="rTableCell">
+                                            <label class="text-10"><?php echo strIdx( 172 );?></label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <input class="cursor-pointer" name="socat_on_off" type="radio" value="1" <?php if ( config_read( 200 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" name="socat_on_off" type="radio" value="0" <?php if ( config_read( 200 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="rTableRow" title="<?php echo strIdx( 322 );?>">
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fas fa-network-wired"></i>
+                                        </div>
+                                        <div class="rTableCell width-80">
+                                            <label class="text-10"><?php echo strIdx( 319 );?></label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <input class="input-3 color-settings color-input-back" placeholder="n.n.n.n" id="socat_ip" name="socat_ip" type="text" value="<?php echo config_read( 198 );?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="rTableRow" title="<?php echo strIdx( 323 );?>">
+                                        <div class="rTableCell width-24">
+                                            <i class="text-10 fas  fa-network-wired"></i>
+                                        </div>
+                                        <div class="rTableCell width-80">
+                                            <label class="text-10">IP poort</label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <input class="input-3 color-settings color-input-back" placeholder="1-65535"  id="socat_port" name="socat_port" type="text" value="<?php echo config_read( 199 );?>">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="rTable">
+                                    <div class="rTableRow">
+                                        <div class="rTableCell width-210x">
+                                            <i class="pad-7 text-10 far fa-clock"></i>
+                                            <label id="socat_timestamp" class="text-10"><?php echo strIdx( 324 );?>:"??-??-?? ??:??:??"</label>
+                                        </div>
+                                    </div>
+                                </div>
+                               
                         </div>
 
                         <p></p>
@@ -496,7 +619,6 @@ $(function () {
                                     </div>
                                 </div>
 
-
                             </div>
                         </div>
  
@@ -516,11 +638,35 @@ $(function () {
                         <?php echo strIdx(29);?>
                         <br><br>
                         <?php echo strIdx(64);?>
+                        <br><br>
+                        <?php echo strIdx( 321 );?>
                     </div>
                 </div>
             </div>    
             <!-- end inner block right part of screen -->
-    </div>    
+    </div>
+
+    <script>
+     $(function() {
+         $("#formvalues").validate({
+             rules: {
+                 'socat_port': {
+                     required: false,
+                     number: true,
+                     max: 65535,
+                     min: 1
+                 },
+                 'socat_ip': {
+                    ipv4: true
+                }
+             },
+             errorPlacement: function(error, element) {
+                 return false; // will suppress error messages
+             }
+         });
+     });
+     </script>
+
     <?php echo autoLogout(); ?>
 </body>
 </html>

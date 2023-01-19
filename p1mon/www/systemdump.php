@@ -23,17 +23,20 @@ if (!isset($_GET['dumpid']) ) { // invalid message syntax wise
 } else {
     $data[0]['file_id'] = $_GET['dumpid'];
     $file = '/p1mon/www/download/full-p1monitor-dump'.$data[0]['file_id'].'.done';
-    if (file_exists($file) == 1 ) {
+    if ( file_exists($file) == 1 ) {
+        $data[0]['file_size']=filesize($dumpfile); 
         $data[0]['status_code']=$OK;
     } else {
-        $dumpfile = '/tmp/full-p1monitor-dump'.$data[0]['file_id'].'.gz';
+        $dumpfile = '/p1mon/var/tmp/full-p1monitor-dump'.$data[0]['file_id'].'.gz';
         if (file_exists($dumpfile ) == 1 ) {
             $data[0]['status_code']=$BUSY;
             $data[0]['file_size']=filesize($dumpfile);
         } else {
             $data[0]['status_code']=$DUMPNOTACTIVE;
         }
+        #debugLog( filesize($dumpfile) );
+        #debugLog( $dumpfile );
     }
 }
-echo json_encode($data); 
+echo json_encode( $data ); 
 ?>

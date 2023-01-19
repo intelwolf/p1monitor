@@ -95,7 +95,7 @@ def prevYearMonth(timestr):
         year = year -1   
     return "%04d-%02d"%(year, month)  
 
-# geeft True terug als in de timestry yyyy-mm-hh dd:mm:ss
+# geeft True terug als in de timestr yyyy-mm-hh dd:mm:ss
 # mm = 0,5,15,2 enz = true
 def isMod(timestr, mod=5):
     if int(timestr[14:16])%mod == 0:

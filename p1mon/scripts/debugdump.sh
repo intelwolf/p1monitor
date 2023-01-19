@@ -3,20 +3,23 @@
 SOURCEPATH="/p1mon /var/log/"
 USAGE="gebruik: $0 <id text>"
 FILEPREFIX="full-p1monitor-dump"
-TMPPATH="/tmp/"
+TMPPATH="/p1mon/var/tmp/"
 DOWNLOADPATH="/p1mon/www/download/"
 
 export() {
     #echo $1 # dump id
 
     FILE=$TMPPATH$FILEPREFIX$1".gz"
-    EXCLUDE="$DOWNLOADPATH$FILEPREFIX"
+    EXCLUDE1="*.gz"
+    EXCLUDE2="/p1mon/mnt/ramdisk/*"
 
-    touch $FILE 
-    chmod 660 $FILE
-    chown p1mon:p1mon $FILE
+    sudo touch $FILE 
+    sudo chmod 660 $FILE
+    sudo chown p1mon:p1mon $FILE
 
-    tar  --absolute-names --ignore-failed-read --exclude="*.gz" -zcf $FILE $SOURCEPATH
+    CMD="sudo tar --absolute-names --ignore-failed-read --exclude=$EXCLUDE1 --exclude=$EXCLUDE2 -zcf $FILE $SOURCEPATH"
+    #echo $CMD
+    eval $CMD
 
     # mv to www download folder
     mv $FILE $DOWNLOADPATH
@@ -24,11 +27,13 @@ export() {
     # export file is done. trigger file
     DONEFILE=$DOWNLOADPATH$FILEPREFIX$1".done"
     touch $DONEFILE
-    chmod 660 $DONEFILE
-    chown p1mon:p1mon $DONEFILE 
+    sudo chmod 660 $DONEFILE
+    sudo chown p1mon:p1mon $DONEFILE 
     
     # remove files after a while 
-    (sleep 7200;rm $DONEFILE && rm $DOWNLOADPATH$FILEPREFIX$1."gz")&
+    CMD="(sleep 7200;rm $DONEFILE;rm $DOWNLOADPATH$FILEPREFIX$1.gz)"
+    #echo "$CMD &"
+    eval "$CMD &"
 }
 
 

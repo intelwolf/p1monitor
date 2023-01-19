@@ -3,14 +3,99 @@
 # !!! TODO migrate other scripts to this lib.                      #
 ####################################################################
 import const
+import crontab
 import inspect
 import os
 import pwd
 import subprocess
+import sqldb
 
 PROCESS_TIMEOUT  = 10
 CRONTAB_TMP_FILE = 'crontab.tmp'
 CRONTAB_PATH = '/var/spool/cron/crontabs'
+FTP_BACKUP_CRONLABEL  = 'FTPbackup'
+LOG_CLEANER_CRONLABEL = 'Logcleaner'
+
+def set_crontab_logcleaner( flog=None ):
+    try:
+        
+        try:
+            my_cron = crontab.CronTab( user='p1mon' )
+        except Exception as e:
+            msg = inspect.stack()[0][3]+": crontab kon niet worden gestart, gestopt. Fout=" + str(e.args[0])
+            raise Exception( msg )
+
+        deleteJob( my_cron, LOG_CLEANER_CRONLABEL, flog=flog ) 
+        job = my_cron.new( command='/p1mon/scripts/logspacecleaner.sh >/dev/null 2>&1', comment=LOG_CLEANER_CRONLABEL )
+        job.setall( '*/5 * * * *')
+        my_cron.write()
+
+    except Exception as e:
+         raise Exception( "error in logcleaner setup " + str(e) )
+
+def update_crontab_backup( flog=None ):
+
+    config_db = sqldb.configDB()
+
+    try:
+        # open van config database
+        try:
+            config_db.init( const.FILE_DB_CONFIG, const.DB_CONFIG_TAB )
+        except Exception as e:
+            msg = inspect.stack()[0][3] + ": database niet te openen(2)." + const.FILE_DB_CONFIG + ") melding:" + str(e.args[0])
+            raise Exception( msg )
+        flog.debug( inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
+
+        try:
+            my_cron = crontab.CronTab( user='p1mon' )
+        except Exception as e:
+            msg = inspect.stack()[0][3]+": crontab kon niet worden gestart, gestopt. Fout="+str(e.args[0])
+            raise Exception( msg )
+
+         #check add or to remove
+        _id, do_ftp_backup, _label = config_db.strget( 36,flog )
+        _id, do_dbx_backup, _label = config_db.strget( 49,flog )
+    
+        # do some casting....comparing strings is a pain
+        do_ftp_backup = int( do_ftp_backup )
+        do_dbx_backup = int( do_dbx_backup )
+        if do_ftp_backup == 1 or do_dbx_backup == 1:
+            parameter = 1
+        else:
+            parameter = 0
+
+        if int(parameter) == 0:
+            flog.info(inspect.stack()[0][3]+": FTP backup staat uit, crontab wordt gewist")
+            deleteJob( my_cron, FTP_BACKUP_CRONLABEL, flog=flog )
+        else:
+            _id,parameter,_label = config_db.strget(37,flog)
+            flog.info(inspect.stack()[0][3]+": cron parameters uit config database="+parameter)
+            parts = parameter.split(':')
+            if len(parts) != 5:
+                msg = inspect.stack()[0][3] +": tijd velden niet correct, gestopt."
+                raise Exception( msg )
+
+            deleteJob( my_cron, FTP_BACKUP_CRONLABEL, flog=flog )
+        try:
+            #job = my_cron.new(command='/p1mon/scripts/P1Backup.py >/dev/null 2>&1', comment=ftp_backup_cronlabel)
+            job = my_cron.new( command='/p1mon/scripts/pythonlaunch.sh P1Backup.py >/dev/null 2>&1', comment=FTP_BACKUP_CRONLABEL )
+            job.setall( str(parts[0]), str(parts[1]), str(parts[2]), str(parts[3]), str(parts[4]))
+            my_cron.write()
+        except Exception as e:
+            msg = inspect.stack()[0][3] + ": crontab backup kon niet worden ingesteld, gestopt! Fout=" + str(e.args[0])
+            raise Exception( msg )
+
+    except Exception as e:
+         raise Exception( "error in update_crontab_backup " + str(e) )
+
+
+def deleteJob( cron, job_id, flog=None ):
+    try:
+        cron.remove_all( comment=job_id )
+        cron.write()
+    except Exception as _e:
+        flog.debug(inspect.stack()[0][3]+": crontab bevat geen commando met het label " + ftp_backup_cronlabel+" geen fout.")
+
 
 #########################################
 # make a crontab file if this not exits #
@@ -84,7 +169,6 @@ def restore_from_file( source_pathfile=None, flog=None ):
         proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
         stdout, stderr  = proc.communicate( timeout=PROCESS_TIMEOUT )
         returncode = int( proc.wait() )
-
 
     except Exception as e:
         flog.error(inspect.stack()[0][3] + str(e) )

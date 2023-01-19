@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1MQTT.py
+
 #import argparse
 import apiconst
 import base64
@@ -12,6 +13,7 @@ import sys
 import sqldb
 import time 
 import os
+import process_lib
 
 import paho.mqtt.client as mqtt
 from datetime import datetime
@@ -715,16 +717,34 @@ def make_json_topic_link():
     link_name = "/p1mon/www/json/mqtt_topics.json"
 
     if not os.path.isfile( target ):
-        if os.system( "touch " + target ) == 0:
+        #if os.system( "touch " + target ) == 0:
+        #    flog.info( inspect.stack()[0][3] + ": leeg " + target + " bestand gemaakt." )
+        cmd = "touch " + target
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog 
+        )
+        if r[2] == 0:
             flog.info( inspect.stack()[0][3] + ": leeg " + target + " bestand gemaakt." )
 
     if not os.path.isfile( link_name ):
-        if os.system( "ln -s " + target + " " + link_name ) >0:
+        #if os.system( "ln -s " + target + " " + link_name ) >0:
+        #    flog.error( inspect.stack()[0][3] + ": link maken van " + link_name +  " gefaald" )
+        #else: 
+        #    flog.info( inspect.stack()[0][3] + ": link maken van " + link_name + " gelukt." )
+        cmd = "ln -s " + target + " " + link_name
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog 
+        )
+        if r[2] > 0:
             flog.error( inspect.stack()[0][3] + ": link maken van " + link_name +  " gefaald" )
         else: 
             flog.info( inspect.stack()[0][3] + ": link maken van " + link_name + " gelukt." )
-
-
 
 #####################################################################
 # check if the programm is set as active otherwise stop the program #
@@ -943,7 +963,7 @@ def stop():
     global mqtt_client
     if mqtt_client != None:
          closeMqtt()
-    signal.signal(signal.SIGINT, original_sigint)
+    signal.signal( signal.SIGINT, original_sigint )
     flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
     sys.exit(0)
 
@@ -953,13 +973,12 @@ if __name__ == "__main__":
         logfile = const.DIR_FILELOG + prgname + ".log" 
         setFile2user( logfile,'p1mon' )
         flog = logger.fileLogger( logfile,prgname )
-        #### aanpassen bij productie
         flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:" + str( e.args[0] ) )
         sys.exit(10) #  error: no logging check file rights
 
-    original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
+    original_sigint = signal.getsignal( signal.SIGINT )
+    signal.signal( signal.SIGINT, saveExit )
     Main(sys.argv[1:])

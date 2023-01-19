@@ -1,35 +1,25 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1PowerProductionS0CounterSet.py
+
 import const
 import inspect
 import os
-import shutil
-import signal
-import socket
+import logger
 import sys
-import random
 import time
 import datetime
 import sqldb
 import subprocess
-import psutil
+#import psutil
+import listOfPidByName
 
-from multiprocessing import Process, Queue
-from threading import Timer
-from datetime import datetime, timedelta, timezone
-from logger import fileLogger,logging
-from sqldb import configDB, rtStatusDb, WatermeterDB, powerProductionDB
-from time import sleep
-from util import fileExist,setFile2user, getUtcTime, mkLocalTimeString
-from utiltimestamp import utiltimestamp
 from dateutil.relativedelta import *
-from listOfPidByName import listOfPidByName
 
 # programme name.
 prgname = 'P1PowerProductionS0CounterSet'
 
-rt_status_db        = rtStatusDb()
-config_db           = configDB()
-power_production_db = powerProductionDB()
+rt_status_db        = sqldb.rtStatusDb()
+config_db           = sqldb.configDB()
+power_production_db = sqldb.powerProductionDB()
 S0_POWERSOURCE      = 1
 
 ########################################################
@@ -39,12 +29,12 @@ def Main(argv):
 
     my_pid = os.getpid()
     flog.info("Start van programma met process id " + str(my_pid) )
-    pid_list, _process_list = listOfPidByName( prgname )
+    pid_list, _process_list = listOfPidByName.listOfPidByName( prgname )
     #flog.debug( inspect.stack()[0][3] + ": pid list raw " + str(pid_list ) )
     #flog.debug( inspect.stack()[0][3] + ": process list raw " + str(_process_list ) )
     pid_list.remove( my_pid ) # remove own pid from the count
     #flog.debug( inspect.stack()[0][3] + ": pid list clean " + str(pid_list ) )
-    if len( pid_list ) > 1: # more then 1 because the script is started from os.system()
+    if len( pid_list ) > 1: # more then 1 because the script is started from a shell
         msg_str = "Gestopt een andere versie van het programma is actief."
         writeLineToStatusFile( msg_str )
         flog.info( inspect.stack()[0][3] + ": " + msg_str )
@@ -157,22 +147,22 @@ def updateCounterRecords( timestamp , max_timestamp, config_high_metervalue ,con
 
     high_meter_value = float(config_high_metervalue)
     low_meter_value  = float(config_low_metervalue)
-    ts_next          = datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S")
+    ts_next          = datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S")
 
     if period == sqldb.INDEX_MINUTE:
         substr_index = 17
         timestamp_str_postfix = "00"
-        timestamp_delta = timedelta( minutes=1 )
+        timestamp_delta = datetime.timedelta( minutes=1 )
         period_text = "Minuut"
     elif period == sqldb.INDEX_HOUR:
         substr_index = 14
         timestamp_str_postfix = "00:00"
-        timestamp_delta = timedelta( hours=1 )
+        timestamp_delta = datetime.timedelta( hours=1 )
         period_text = "Uur"
     elif period == sqldb.INDEX_DAY:
         substr_index = 11
         timestamp_str_postfix = "00:00:00"
-        timestamp_delta = timedelta( days=1 )
+        timestamp_delta = datetime.timedelta( days=1 )
         period_text = "Dag"
     elif period == sqldb.INDEX_MONTH:
         substr_index = 7
@@ -229,7 +219,7 @@ def updateCounterRecords( timestamp , max_timestamp, config_high_metervalue ,con
             flog.debug ( inspect.stack()[0][3] + ": " + msg_str )
             break
 
-        ts_next = datetime.strptime( str(ts_next), "%Y-%m-%d %H:%M:%S") + timestamp_delta
+        ts_next = datetime.datetime.strptime( str(ts_next), "%Y-%m-%d %H:%M:%S") + timestamp_delta
 
 
 ########################################################
@@ -336,9 +326,9 @@ if __name__ == "__main__":
     global process_bg 
     try:
         os.umask( 0o002 )
-        flog = fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
 
         status_fp = open( const.FILE_POWERPRODUCTION_CNT_STATUS , "w")

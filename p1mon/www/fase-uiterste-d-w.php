@@ -216,9 +216,9 @@ function createChart() {
                         min = d[i].point.low.toFixed(1);
                         delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
                     } else {
-                        max = d[i].point.high;
-                        min = d[i].point.low;
-                        delta = Math.abs( d[i].point.high - d[i].point.low );
+                        max = d[i].point.high.toFixed(0);
+                        min = d[i].point.low.toFixed(0);;
+                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
                     }
 
                     txt = '<br/><span style="color: ' + L1C_color + '"><b>' + GserieNames[0] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
@@ -234,9 +234,9 @@ function createChart() {
                         min = d[i].point.low.toFixed(1);
                         delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
                     } else {
-                        max = d[i].point.high;
-                        min = d[i].point.low;
-                        delta = Math.abs( d[i].point.high - d[i].point.low );
+                        max = d[i].point.high.toFixed(0);
+                        min = d[i].point.low.toFixed(0);
+                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
                     }
 
                     txt = '<br/><span style="color: ' + L2C_color + '"><b>' + GserieNames[1] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
@@ -253,9 +253,9 @@ function createChart() {
                         min = d[i].point.low.toFixed(1);
                         delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
                     } else {
-                        max = d[i].point.high;
-                        min = d[i].point.low;
-                        delta = Math.abs( d[i].point.high - d[i].point.low );
+                        max = d[i].point.high.toFixed(0);
+                        min = d[i].point.low.toFixed(0);
+                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
                     }
 
                     txt = '<br/><span style="color: ' + L3C_color + '"><b>' + GserieNames[2] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
@@ -271,9 +271,9 @@ function createChart() {
                         min = d[i].point.low.toFixed(1);
                         delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
                     } else {
-                        max = d[i].point.high;
-                        min = d[i].point.low;
-                        delta = Math.abs( d[i].point.high - d[i].point.low );
+                        max = d[i].point.high.toFixed(0);
+                        min = d[i].point.low.toFixed(0);
+                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
                     }
 
                     txt = '<br/><span style="color: ' + L1P_color + '"><b>' + GserieNames[3] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
@@ -289,9 +289,9 @@ function createChart() {
                         min = d[i].point.low.toFixed(1);
                         delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
                     } else {
-                        max = d[i].point.high;
-                        min = d[i].point.low;
-                        delta = Math.abs( d[i].point.high - d[i].point.low );
+                        max = d[i].point.high.toFixed(0);
+                        min = d[i].point.low.toFixed(0);
+                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
                     }
 
                     txt = '<br/><span style="color: ' + L2P_color + '"><b>' + GserieNames[4] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
@@ -307,9 +307,9 @@ function createChart() {
                         min = d[i].point.low.toFixed(1);
                         delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
                     } else {
-                        max = d[i].point.high;
-                        min = d[i].point.low;
-                        delta = Math.abs( d[i].point.high - d[i].point.low );
+                        max = d[i].point.high.toFixed(0);
+                        min = d[i].point.low.toFixed(0);
+                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
                     }
 
                     txt = '<br/><span style="color: ' + L3P_color + '"><b>' + GserieNames[5] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';

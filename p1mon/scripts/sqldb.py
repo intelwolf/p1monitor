@@ -2,9 +2,9 @@ import sqlite3 as lite
 import inspect
 import const
 import datetime
-from util import *
+import util
+import samba_lib
 from utiltimestamp import utiltimestamp
-
 
 class configDB():
 
@@ -38,7 +38,7 @@ class configDB():
         self.insert_rec("insert or ignore into "+table+\
         " values ( '5','"+const.TARIEF_VASTRECHT_PER_MAAND+"'                                  ,'Vastrecht tarief elektriciteit per maand in euro.')")
         self.insert_rec("insert or ignore into "+table+\
-        " values ( '6','"+const.FILESHARE_MODE_UIT+"'                                          ,'Bestanden delen mode.')")
+        " values ( '6','" + samba_lib.FILESHARE_MODE_OFF + "'                                          ,'Bestanden delen mode.')")
 
         # serial data # in version 1.3.0 changed to 115200.
         self.insert_rec("insert or ignore into "+table+" values ( '7' ,'115200'                ,'P1 poort baudrate:')")
@@ -284,6 +284,41 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '179','1'                ,'Bereken missende waarden uit V/A/W indien mogelijk (1/0).')")
         self.insert_rec( "insert or ignore into " + table + " values ( '180','0'                ,'Laat (Kw) waarde zien in de UI ipv Watt(1/0).')")
 
+        self.insert_rec( "insert or ignore into " + table + " values ( '181','0'                ,'vlag voor het aanpassen van de crontab voor backup(1/0).')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '182','0'                ,'vlag voor het aanpassen van de SAMBA fileshare mode (1/0).')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '183','0'                ,'vlag voor het aanpassen van de Wifi configuratie (1/0).')")
+        
+        # back-up flag for testing of the back-up 1 is run. 
+        self.insert_rec( "insert or ignore into " + table + " values ( '184','0'                ,'vlag voor het triggeren van een back-up (1/0).')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '185','0'                ,'vlag voor resetten van de watermeter stand.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '186','0'                ,'vlag voor resetten van de Kwh(S0) puls teller.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '187','0'                ,'vlag voor sturen van een test email.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '188','0'                ,'vlag voor het wissen van de database, gevaarlijk!.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '189','0'                ,'vlag voor een systeem reboot')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '190','0'                ,'vlag voor een systeem halt.')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '191','0'                ,'vlag voor systeem dump')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '192','0'                ,'vlag voor systeem dump ID')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '193',''                 ,'data patches')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '194','0'                ,'run status patches')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '195','0'                ,'vlag voor custom www export')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '196','0'                ,'vlag voor custom www export ID')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '197',''                 ,'Niet standaard P1 poort devices')")
+
+        # socat 
+        self.insert_rec( "insert or ignore into " + table + " values ( '198',''                ,'socat remote IP adres')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '199',''                ,'socat remote poort nummer')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '200','0'               ,'socat is aan/uit (1/0)')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '201','0'               ,'vlag voor het triggeren van socat aanpassingen')")
+
+        # graaddagen
+        self.insert_rec( "insert or ignore into " + table + " values ( '202','18'              ,'kamertemperatuur graaddagen berekening')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '203','0'               ,'vlag voor recover van graaddagen')")
+
         # you need an account on www.noip.com before this can be used
         #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")
         #self.insert_rec("insert or ignore into " + table + " values ( '151',''                 ,'no-ip account name')")
@@ -291,11 +326,9 @@ class configDB():
         #self.insert_rec("insert or ignore into " + table + " values ( '153','30'               ,'no-ip update timeout in seconden.')")
         #self.insert_rec("insert or ignore into " + table + " values ( '154','0'                ,'no-ip is aan(1) of uit(0).')")
 
-
         # fix typo's from versions higer then 0.1.5
         sql_update = "update " + table + " set label ='Publieke dynamische DNS naam (FQDN).' where id=150"
         self.update_rec(sql_update)
-
 
         self.close_db()
 
@@ -405,13 +438,13 @@ class rtStatusDb():
         " values ( '1','0','Max dagwaarde Kw verbruik',0)")
 
         self.insert_rec("insert or ignore into "+table+\
-        " values ( '2','"+mkLocalTimeString()+"','Max dagwaarde Kw verbruik (timestamp)',0)")
+        " values ( '2','"+util.mkLocalTimeString()+"','Max dagwaarde Kw verbruik (timestamp)',0)")
 
         self.insert_rec("insert or ignore into "+table+\
         " values ( '3','0','Max dagwaarde Kw geleverd',0)")
 
         self.insert_rec("insert or ignore into "+table+\
-        " values ( '4','"+mkLocalTimeString()+"','Max dagwaarde Kw geleverd (timestamp)',0)")
+        " values ( '4','"+util.mkLocalTimeString()+"','Max dagwaarde Kw geleverd (timestamp)',0)")
 
         self.insert_rec("insert or ignore into "+table+\
         " values ( '5','onbekend','Tijdstip start van P1 interface(elektrisch):',0)")
@@ -717,9 +750,9 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '112','onbekend','Tijdstip laatste gefaalde Solar Edge API aanvraag:',0)")
 
         self.insert_rec("insert or ignore into " + table + " values ( '113','0','Min dagwaarde Kw verbruik',0)")
-        self.insert_rec("insert or ignore into " + table + " values ( '114','" + mkLocalTimeString() + "','Min dagwaarde Kw verbruik (timestamp)',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '114','" + util.mkLocalTimeString() + "','Min dagwaarde Kw verbruik (timestamp)',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '115','0','Min dagwaarde Kw geleverd',0)")
-        self.insert_rec("insert or ignore into " + table + " values ( '116','" + mkLocalTimeString() + "','Min dagwaarde Kw geleverd (timestamp)',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '116','" + util.mkLocalTimeString() + "','Min dagwaarde Kw geleverd (timestamp)',0)")
 
         # Lets Encrypt stuff.
         # status 1=error/not ok, 0=ok/succes, 2=unknow
@@ -741,6 +774,8 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '126','onbekend','Tijdstip start notificatie:',0)")
 
         self.insert_rec("insert or ignore into " + table + " values ( '127','onbekend','Tijdstip laatste verwerkte financiële dag gegevens:',0)")
+        
+        self.insert_rec("insert or ignore into " + table + " values ( '128','onbekend','Tijdstip SOCAT start:',0)")
 
         # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"
@@ -784,7 +819,7 @@ class rtStatusDb():
 
     def timestamp(self, idn, flog):
         sql_update = "update status set status='"\
-        + mkLocalTimeString() + "' where id="+str(idn)
+        + util.mkLocalTimeString() + "' where id="+str(idn)
         try:
             self.update_rec(sql_update)
             flog.debug(inspect.stack()[1][3]+": status db update: sql="+sql_update)
@@ -1639,10 +1674,10 @@ class WatermeterDB():
             while True:
                 #print ( "@1 " + timestamp_work + " - " + max_timestamp_rec )
                 if mode == 'hour':   
-                    timestamp_work = str( datetime.strptime( timestamp_work, "%Y-%m-%d %H:%M:%S") + timedelta( hours=1 ) )  
+                    timestamp_work = str( datetime.datetime.strptime( timestamp_work, "%Y-%m-%d %H:%M:%S") + datetime.timedelta( hours=1 ) )  
                 """"
                 if mode == 'day':   
-                    timestamp_work = str( datetime.strptime( timestamp_work, "%Y-%m-%d %H:%M:%S") + timedelta( days=1 ) )                
+                    timestamp_work = str( datetime.strptime( timestamp_work, "%Y-%m-%d %H:%M:%S") + timedelta( days=1 ) )
                 if mode == 'month':       
                     timestamp_obj  = utiltimestamp( timestamp_work )
                     timestamp_work = timestamp_obj.monthmodify(1)
@@ -1714,7 +1749,7 @@ class WatermeterDB():
                         self.replace_rec_with_values( record_values )
                     if timestamp_work == timestamp_stop:
                         return True
-                    timestamp_work = str( datetime.strptime(timestamp_work, "%Y-%m-%d %H:%M:%S") + timedelta( hours=1 ) ) 
+                    timestamp_work = str( datetime.datetime.strptime(timestamp_work, "%Y-%m-%d %H:%M:%S") + datetime.timedelta( hours=1 ) ) 
                     #print (timestamp_work) 
             except Exception as e:
                 self.flog.error( inspect.stack()[0][3]+": sql error(1) op table " + self.table + " ->" + str(e) )
@@ -1729,7 +1764,7 @@ class WatermeterDB():
                         self.replace_rec_with_values( record_values )
                     if timestamp_work == timestamp_stop:
                         return True
-                    timestamp_work = str( datetime.strptime(timestamp_work, "%Y-%m-%d %H:%M:%S") + timedelta(days=1 ) ) 
+                    timestamp_work = str( datetime.datetime.strptime(timestamp_work, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(days=1 ) ) 
             except Exception as e:
                 self.flog.error( inspect.stack()[0][3]+": sql error(1) op table " + self.table + " ->" + str(e) )
                 return False
@@ -1956,7 +1991,8 @@ class temperatureDB():
         UNIQUE(TIMESTAMP,RECORD_ID) \
         );")
         self.close_db()
-       
+        
+
         # index does not help in performance
         # self.cur.execute("drop INDEX if exists record_id_timestamp_desc;")
         #self.change_table()
@@ -2047,7 +2083,7 @@ class temperatureDB():
             month = start_month
 
             while 1:
-                date = datetime(year, month, 1, 0, 0, 0)
+                date = datetime.datetime(year, month, 1, 0, 0, 0)
                 timestamp = date.strftime("%Y-%m-%d %H:%M:%S")
                 #print( "Date and Time:", timestamp )
 
@@ -2249,22 +2285,22 @@ class temperatureDB():
         self.con = lite.connect(self.dbname)
         self.cur = self.con.cursor()
 
-        timestr=mkLocalTimeString() 
+        timestr=util.mkLocalTimeString() 
         # delete seconds values
         sql_del_str = "delete from "+self.table+" where record_id = 10 and timestamp <  '"+\
-        str(datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - timedelta(hours=24))+"'"
+        str(datetime.datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - datetime.timedelta(hours=24))+"'"
         self.cur.execute(sql_del_str)
         flog.debug(inspect.stack()[1][3]+": delete day : sql="+sql_del_str)
         
         # delete minute values
         sql_del_str = "delete from "+self.table+" where record_id = 11 and timestamp <  '"+\
-        str(datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - timedelta(days=7))+"'"
+        str(datetime.datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=7))+"'"
         self.cur.execute(sql_del_str)
         flog.debug(inspect.stack()[1][3]+": delete day : sql="+sql_del_str)
         
         # delete uren values
         sql_del_str = "delete from "+self.table+" where record_id = 12 and timestamp <  '"+\
-        str(datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - timedelta(days=366))+"'"
+        str(datetime.datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=366))+"'"
         self.cur.execute(sql_del_str)
         flog.debug(inspect.stack()[1][3]+": delete day : sql="+sql_del_str)
         
@@ -2297,11 +2333,19 @@ class historyWeatherDB():
         WIND_SPEED_MAX	REAL DEFAULT 0, \
         WIND_DEGREE_MIN	REAL DEFAULT 0, \
         WIND_DEGREE_AVG	REAL DEFAULT 0, \
-        WIND_DEGREE_MAX	REAL DEFAULT 0 \
+        WIND_DEGREE_MAX	REAL DEFAULT 0, \
+        DEGREE_DAYS     REAL DEFAULT 0 NOT NULL\
         );")
         self.close_db()
+        try:  # used to make sure older version of the database are changed
+            sql = "ALTER TABLE " + self.table + " ADD COLUMN DEGREE_DAYS REAL DEFAULT 0 NOT NULL;"
+            #print (sql)
+            self.execute( sql )
+        except Exception as e:
+            pass # don't fail if column allready exits
 
-    def sql2file(self, filename): 
+
+    def sql2file(self, filename):  #TODO nog test doen met sql export is aangepast op 22-10-2022
         #print filename
         self.con = lite.connect(self.dbname)
         self.cur = self.con.cursor()
@@ -2310,7 +2354,7 @@ class historyWeatherDB():
         PRESSURE_MIN, PRESSURE_AVG, PRESSURE_MAX,\
         HUMIDITY_MIN, HUMIDITY_AVG, HUMIDITY_MAX,\
         WIND_SPEED_MIN, WIND_SPEED_AVG, WIND_SPEED_MAX,\
-        WIND_DEGREE_MIN, WIND_DEGREE_AVG, WIND_DEGREE_MAX\
+        WIND_DEGREE_MIN, WIND_DEGREE_AVG, WIND_DEGREE_MAX,DEGREE_DAYS\
         from '+\
         self.table +' order by TIMESTAMP')
         r=self.cur.fetchall()
@@ -2326,7 +2370,7 @@ TEMPERATURE_MIN,TEMPERATURE_AVG,TEMPERATURE_MAX,\
 PRESSURE_MIN,PRESSURE_AVG,PRESSURE_MAX,\
 HUMIDITY_MIN,HUMIDITY_AVG,HUMIDITY_MAX,\
 WIND_SPEED_MIN,WIND_SPEED_AVG,WIND_SPEED_MAX,\
-WIND_DEGREE_MIN,WIND_DEGREE_AVG,WIND_DEGREE_MAX\
+WIND_DEGREE_MIN,WIND_DEGREE_AVG,WIND_DEGREE_MAX,DEGREE_DAYS\
 ) values ('" + \
             str(i[0]) + "'," +\
             str(i[1]) + ",'" +\
@@ -2345,13 +2389,21 @@ WIND_DEGREE_MIN,WIND_DEGREE_AVG,WIND_DEGREE_MAX\
             str(i[14]) + ","+\
             str(i[15]) + ","+\
             str(i[16]) + ","+\
-            str(i[17]) +\
+            str(i[17]) + ","+\
+            str(i[18]) +\
             ");"
             #print line 
             f.write(line+'\n')
             reccount=reccount+1
         f.close() #close our file
         return reccount
+
+    def execute( self, sqlstr ):
+        self.con = lite.connect(self.dbname)
+        self.cur = self.con.cursor()
+        self.cur.execute(sqlstr)
+        self.con.commit()
+        self.close_db()
 
     def select_rec(self,sqlstr):
         self.con = lite.connect(self.dbname)

@@ -1,47 +1,57 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1WatermeterV2.py
+
 import const
+import datetime
 import inspect
+import gpio
+import logger
 import os
-import shutil
 import signal
-import socket
 import sys
 import random
 import time
 import datetime
 import sqldb
-import threading
 import multiprocessing
-import subprocess
+import process_lib
+import util
 
-from multiprocessing import Process, Queue
-from threading import Timer
-from datetime import datetime, timedelta, timezone
-from logger import fileLogger,logging
-from sqldb import configDB, rtStatusDb, WatermeterDB, WatermeterDBV2
-from time import sleep
-from util import setFile2user, mkLocalTimeString
-from gpio import gpioDigtalInput
-from random import randrange
-from utiltimestamp import utiltimestamp
-from listOfPidByName import listOfPidByName
+#from multiprocessing import Process, Queue
+#from threading import Timer
+#from datetime import datetime, timedelta, timezone
+#from logger import fileLogger,logging
+#from sqldb import configDB, rtStatusDb, WatermeterDB, WatermeterDBV2
+#from time import sleep
+#from util import setFile2user, mkLocalTimeString
+#from gpio import gpioDigtalInput
+#from random import randrange
+#from utiltimestamp import utiltimestamp
+#from listOfPidByName import listOfPidByName
 
 # programme name.
 prgname = 'P1WatermeterV2'
 
-rt_status_db            = rtStatusDb()
-config_db               = configDB()
-watermeter_db           = WatermeterDBV2()
-gpioWaterPuls           = gpioDigtalInput()
-timestamp               = mkLocalTimeString() 
+rt_status_db            = sqldb.rtStatusDb()
+config_db               = sqldb.configDB()
+watermeter_db           = sqldb.WatermeterDBV2()
+
+gpioWaterPuls           = gpio.gpioDigtalInput()
+
+timestamp               = util.mkLocalTimeString()
+
 #timestamp_buffer_list   = [] 
 prg_is_active           = True
-mp_queue_1              = Queue()
+mp_queue_1              = multiprocessing.Queue()
 
 QUEUE_CMD_START  = "START"
 
 def Main(argv): 
     global timestamp 
+
+    # TODO test regels mogen weg.
+    #x = datetime.datetime.strptime( "2022-06-24 22:11:03", "%Y-%m-%d %H:%M:%S")
+    # y = datetime.timedelta( minutes=1 )
+    # sys.exit()
 
     my_pid = os.getpid()
     flog.info("Start van programma met process id " + str(my_pid) )
@@ -56,7 +66,7 @@ def Main(argv):
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
 
-    # open van status database      
+    # open van status database
     try:    
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
@@ -65,7 +75,7 @@ def Main(argv):
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
     # open van watermeter database
-    try:    
+    try:
         watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
     except Exception as e:
         flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
@@ -114,9 +124,9 @@ def Main(argv):
 # set the file rights of the database files           #
 #######################################################
 def setFileFlags():
-    setFile2user( const.FILE_DB_WATERMETERV2, 'p1mon' )
+    util.setFile2user( const.FILE_DB_WATERMETERV2, 'p1mon' )
     _head,tail = os.path.split( const.FILE_DB_WATERMETERV2 )
-    setFile2user( const.DIR_FILEDISK+tail, 'p1mon' )
+    util.setFile2user( const.DIR_FILEDISK+tail, 'p1mon' )
 
 ########################################################
 # inserts or replaces a record for the given           #
@@ -184,13 +194,13 @@ def replaceRecordForAPeriod( timestamp, period ):
 # ######################################################
 def deleteRecords():
 
-    timestamp = mkLocalTimeString()
+    timestamp = util.mkLocalTimeString()
 
     try:
         sql_del_str = "delete from " + const.DB_WATERMETERV2_TAB  + \
         " where TIMEPERIOD_ID = " + \
         str( sqldb.INDEX_MINUTE ) + \
-        " and timestamp < '" + str( datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - timedelta(days=31)) + "'"
+        " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=31)) + "'"
         flog.debug( inspect.stack()[0][3] + ": wissen van minuten. sql=" + sql_del_str ) 
         watermeter_db.excute( sql_del_str )
     except Exception as e:
@@ -200,7 +210,7 @@ def deleteRecords():
         sql_del_str = "delete from " + const.DB_WATERMETERV2_TAB + \
         " where TIMEPERIOD_ID = " + \
         str( sqldb.INDEX_HOUR ) + \
-        " and timestamp < '" + str( datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - timedelta(days=1096)) + "'"
+        " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096)) + "'"
         flog.debug( inspect.stack()[0][3] + ": wissen van uren. sql=" + sql_del_str ) 
         watermeter_db.excute( sql_del_str )
     except Exception as e:
@@ -210,7 +220,7 @@ def deleteRecords():
         sql_del_str = "delete from " + const.DB_WATERMETERV2_TAB + \
         " where TIMEPERIOD_ID = " + \
         str( sqldb.INDEX_DAY ) + \
-        " and timestamp < '" + str( datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - timedelta(days=1096)) + "'"
+        " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096)) + "'"
         flog.debug( inspect.stack()[0][3] + ": wissen van dagen. sql=" + sql_del_str ) 
         watermeter_db.excute( sql_del_str )
     except Exception as e:
@@ -224,8 +234,8 @@ def deleteRecords():
 def checkAndInsertMinuteRecord():
     #print( "## checkAndInsertMinuteRecord()" )
 
-    dt = datetime.now()
-    timestamp = datetime.strftime( dt , "%Y-%m-%d %H:%M:00")
+    dt = datetime.datetime.now()
+    timestamp = datetime.datetime.strftime( dt , "%Y-%m-%d %H:%M:00")
 
     #print ("# " + str( dt.second  ) )
     try:
@@ -233,7 +243,7 @@ def checkAndInsertMinuteRecord():
         if dt.second > 30: # limit work.
 
             flog.debug( inspect.stack()[0][3]+": leeg record aanmaken om een data gap te voorkomen." )
-            timetamp_minus_one_minute = datetime.strftime( dt - timedelta( minutes=1 ), "%Y-%m-%d %H:%M:00")
+            timetamp_minus_one_minute =  datetime.datetime.strftime( dt - datetime.timedelta( minutes=1 ), "%Y-%m-%d %H:%M:00")
             #print (" timetamp_minus_one_minute = " + str(timetamp_minus_one_minute) )
             rec = watermeter_db.get_timestamp_record( timetamp_minus_one_minute, sqldb.INDEX_MINUTE )
             #print (" record minus one = " + str(rec) )
@@ -299,7 +309,7 @@ def backgroundDaemon():
 # starting of deamon background process               #
 #######################################################
 def startBackgroundDeamon():
-    p = Process( target=backgroundDaemon )
+    p = multiprocessing.Process( target=backgroundDaemon )
     p.daemon=True
     p.start()
     p.join(timeout=0)
@@ -346,7 +356,7 @@ def addMissingRecords():
         flog.debug( inspect.stack()[0][3] + ": gestopt geen ontbrekende records." ) 
         return
 
-    flog.info( inspect.stack()[0][3] + ": gestart. process id = " + str(os.getpid()) )
+    #flog.info( inspect.stack()[0][3] + ": gestart. process id = " + str(os.getpid()) ) # updated 2.0.0
 
     # build a set of records that are in the database
     if missing_records_count > 0:
@@ -377,13 +387,13 @@ def addMissingRecords():
     # sys.exit()
 
     # make a list of all possible timestamps 
-    dt_tmp = datetime.strptime( min_timestamp, "%Y-%m-%d %H:%M:%S")
+    dt_tmp = datetime.datetime.strptime( min_timestamp, "%Y-%m-%d %H:%M:%S")
     all_possible_timestamps_set = set()
     while True:
         #print ("adding " + datetime.strftime( dt_tmp, "%Y-%m-%d %H:%M:%S") )
         #time.sleep(5)
         all_possible_timestamps_set.add ( str( dt_tmp ) )
-        dt_tmp = dt_tmp + timedelta( minutes=1 )
+        dt_tmp = dt_tmp + datetime.timedelta( minutes=1 )
         if datetime.strftime( dt_tmp, "%Y-%m-%d %H:%M:%S") > max_timestamp:
             break
     
@@ -429,7 +439,7 @@ def addMissingRecords():
     for ts_possible_timestamp in all_possible_timestamps:
 
         # first find the previous record
-        ts_previous = datetime.strptime( ts_possible_timestamp, "%Y-%m-%d %H:%M:%S")- timedelta( minutes=1 )
+        ts_previous = datetime.datetime.strptime( ts_possible_timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta( minutes=1 )
         rec = watermeter_db.get_timestamp_record( str(ts_previous), sqldb.INDEX_MINUTE )
 
         try:
@@ -446,7 +456,6 @@ def addMissingRecords():
         except Exception as e:
                 flog.warning( inspect.stack()[0][3]+": sql insert error op table " + const.DB_POWERPRODUCTION_TAB + " ->" + str(e) )
 
-    
     # make a set ist of missing records per period
     set_of_timestamps_hour   = set()
     set_of_timestamps_day    = set()
@@ -533,12 +542,12 @@ def minuteProcessing( timestamp, puls_value_per_liter ):
 def waitForPuls():
     global gpioWaterPuls
     
-    #if pulsSimulator( probility = 0.005 ) == True: # //TODO uitzetten voor productie
+    #if pulsSimulator( probility = 0.005 ) == True: # 
     if gpioWaterPuls.gpioWaitRead() == True:
         flog.debug(inspect.stack()[0][3]+": Start van verwerken van Watermeter pulsen, verwerking is actief.")
 
         rt_status_db.timestamp( 90, flog ) # set timestamp of puls detected
-        timestamp = mkLocalTimeString()
+        timestamp = util.mkLocalTimeString()
 
         #flog.debug( inspect.stack()[0][3]+": water puls gedetecteerd." )
         _id, puls_value_per_liter, _label = config_db.strget( 98, flog ) 
@@ -572,20 +581,32 @@ def pulsSimulator(probility = 0.2 ):
 ########################################################
 def backupData(): 
     flog.debug( inspect.stack()[0][3] + ": Gestart" )
-    os.system("/p1mon/scripts/./P1DbCopy.py --watermeter2disk --forcecopy")
+    # os.system("/p1mon/scripts/./P1DbCopy.py --watermeter2disk --forcecopy") 1.8.0 upgrade
+    process_lib.run_process( 
+        cms_str = '/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --watermeter2disk --forcecopy',
+        use_shell=True,
+        give_return_value=True,
+        flog=flog
+    )
+
+
 
 ########################################################
 # copy from ram to (flash)disk if the file does not    #
 # exist.                                               #
 ########################################################
-def DiskRestore(): #/TODO specifiek maken
-   #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
-   os.system("/p1mon/scripts/P1DbCopy.py --watermeter2ram")
-
+def DiskRestore():
+   #os.system("/p1mon/scripts/P1DbCopy.py --watermeter2ram") 1.8.0 upgrade
+   process_lib.run_process( 
+        cms_str = '/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --watermeter2ram',
+        use_shell=True,
+        give_return_value=True,
+        flog=flog
+    )
 
 def saveExit(signum, frame):
-    flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
-    signal.signal(signal.SIGINT, original_sigint)
+    flog.info( inspect.stack()[0][3] + " SIGINT ontvangen, gestopt." )
+    signal.signal( signal.SIGINT, original_sigint )
     stop()
 
 def stop():
@@ -600,13 +621,13 @@ if __name__ == "__main__":
     global process_bg 
     try:
         os.umask( 0o002 )
-        flog = fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
-        flog.setLevel( logging.INFO )
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True ) 
     except Exception as e:
-        print ("critical geen logging mogelijke, gestopt.:"+str(e.args[0]))
+        print ("critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(1)
     
     original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
-    Main(sys.argv[1:])           
+    signal.signal( signal.SIGINT, saveExit )
+    Main(sys.argv[1:])

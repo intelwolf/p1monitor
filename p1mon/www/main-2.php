@@ -60,9 +60,9 @@ function readJsonApiWaterHistoryDay( cnt ){
             $('#verbruikWater').text( padXX( jsondata[0][5] ,5, 3 ) );
             // day value 
             if ( jsondata[0][0]. substr( 0, 10 ) == moment().format('YYYY-MM-DD') ) {
-                $('#verbruikWaterDag').text( padXX( jsondata[0][3] ,8, 0 ) );
+                $('#verbruikWaterDag').text( padXX( jsondata[0][4] ,8, 1 ) );
             } else {
-                $('#verbruikWaterDag').text( padXX( 0 ,8, 0 ) );
+                $('#verbruikWaterDag').text( padXX( 0 ,8, 1 ) );
             }
         }
       } catch(err) {}
@@ -94,6 +94,10 @@ function readJsonApiSmartMeter(){
             verbrData10sec.push([item[0],item[8]/1000]); // Watt consumend
         }  
         
+        gaugeDataVerbruik = parseFloat ( verbrData10sec[ verbrData10sec.length-1 ][1] );  //[sqlData[0][7]];
+        var point = $('#actVermogenMeterVerbruik').highcharts().series[0].points[0];
+        point.update( gaugeDataVerbruik, true, true, true );
+
         $('#verbruikDal').text ( padXX( jsondata[0][3]  ,5 ,3 )+" kWh")
         $('#verbruikPiek').text( padXX( jsondata[0][4]  ,5 ,3)+" kWh");
         $('#verbruikDGas').text( padXX( jsondata[0][10] ,5 ,3));
@@ -106,18 +110,15 @@ function readJsonApiSmartMeter(){
             $("#verbruikDalI" ).css("color","#F2BA0F");
         }
 
-        /*
         $("#actVermogenMeterGrafiekVerbruik").highcharts().series[0].update({
             pointStart: verbrData10sec[0][0],
             data: verbrData10sec
         }, true);
         $("#actVermogenMeterGrafiekVerbruik").highcharts().redraw();
-        */
-        $("#actVermogenMeterGrafiekVerbruik").highcharts().series[0].setData( verbrData10sec )
+        
+        //$("#actVermogenMeterGrafiekVerbruik").highcharts().series[0].setData( verbrData10sec )
 
-        gaugeDataVerbruik = verbrData10sec[ verbrData10sec.length-1 ][1]  //[sqlData[0][7]];
-        var point = $('#actVermogenMeterVerbruik').highcharts().series[0].points[0];
-        point.update(gaugeDataVerbruik, true, true, true);
+       
 
       } catch(err) {}
    });
@@ -189,6 +190,8 @@ $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
         }
 
      }
+
+    readJsonApiSmartMeter();
 
     $('#peakKWConsumption').text(" " + peakConsumptionKw + " kW " + peakConsumptionKwTimestamp );
     $('#lowKWConsumption').text(" " + lowConsumptionKw + " kW " + lowConsumptionKwTimestamp );
@@ -682,7 +685,7 @@ function DataLoop() {
     if( secs < 0 ) { 
         secs = 10;
         readJsonApiHistoryHour( gasCount );
-        readJsonApiSmartMeter()
+        //readJsonApiSmartMeter()
         readJsonApiStatus()
         readJsonApiFinancial()
         readJsonApiHistoryDay()

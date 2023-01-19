@@ -59,9 +59,9 @@ function readJsonApiWaterHistoryDay( cnt ){
             $('#verbruikWater').text( padXX( jsondata[0][5] ,5, 3 ) );
             // day value 
             if ( jsondata[0][0]. substr( 0, 10 ) == moment().format('YYYY-MM-DD') ) {
-                $('#verbruikWaterDag').text( padXX( jsondata[0][3] ,8, 0 ) );
+                $('#verbruikWaterDag').text( padXX( jsondata[0][4] ,8, 1 ) );
             } else {
-                $('#verbruikWaterDag').text( padXX( 0 ,8, 0 ) );
+                $('#verbruikWaterDag').text( padXX( 0 ,8, 1 ) );
             }
         }
       } catch(err) {
@@ -81,21 +81,35 @@ function readJsonApiHistoryDay(){
 }
 
 function readJsonApiSmartMeter(){ 
+    //$.getScript( "./api/v1/smartmeter?limit=60", function( data, textStatus, jqxhr ) {
     $.getScript( "./api/v1/smartmeter?limit=60", function( data, textStatus, jqxhr ) {
       try {
     
         var jsondata = JSON.parse(data); 
-        
         var item;
+
         verbrData10sec.length = 0;
         gelvrData10sec.length = 0;
+
         for (var j = jsondata.length; j > 0; j--){    
-            item=jsondata[j-1];
-            item[0]=item[1]*1000; // highchart likes millisecs.
-            verbrData10sec.push([item[0],item[8]/1000]); // Watt consumend
-            gelvrData10sec.push([item[0],item[9]/1000]); // Watt produced 
+            item = jsondata[ j-1 ];
+            item[0] = item[1]*1000; // highchart likes millisecs.
+
+            verbrData10sec.push( [item[0], item[8]/1000] ); // Watt consumend
+            gelvrData10sec.push( [item[0], item[9]/1000] ); // Watt produced
         }  
         
+        gaugeDataVerbruik = parseFloat( verbrData10sec[ verbrData10sec.length-1 ][1] ); //[sqlData[0][7]];
+        var point = $('#actVermogenMeterVerbruik').highcharts().series[0].points[0];
+        point.update( gaugeDataVerbruik, true, true, true );
+
+        //console.log ( gaugeDataVerbruik + " update gaugeDataVerbruik" )
+
+        gaugeDataGeleverd = parseFloat( gelvrData10sec[ gelvrData10sec.length-1][1] ) ;
+        point = $('#actVermogenMeterGeleverd').highcharts().series[0].points[0];
+        point.update( gaugeDataGeleverd, true, true, true );
+        //console.log ( gaugeDataGeleverd + " update gaugeDataGeleverd" )
+
         $('#verbruikDal').text ( padXX( jsondata[0][3]  ,5 ,3 )+" kWh")
         $('#verbruikPiek').text( padXX( jsondata[0][4]  ,5 ,3)+" kWh");
         $('#verbruikDGas').text( padXX( jsondata[0][10] ,5 ,3));
@@ -114,33 +128,22 @@ function readJsonApiSmartMeter(){
             $("#geleverdDalI" ).css("color","#98D023");
         }
 
-        /*
         $("#actVermogenMeterGrafiekGeleverd").highcharts().series[0].update({
             pointStart: gelvrData10sec[0][0],
             data: gelvrData10sec
-        }, true);
+        }, false);
         $("#actVermogenMeterGrafiekGeleverd").highcharts().redraw();
-        */
 
-        $("#actVermogenMeterGrafiekGeleverd").highcharts().series[0].setData( gelvrData10sec )
-        
-        /*
+        //$("#actVermogenMeterGrafiekGeleverd").highcharts().series[0].setData( gelvrData10sec )
+        //$("#actVermogenMeterGrafiekGeleverd").highcharts().redraw();
+
         $("#actVermogenMeterGrafiekVerbruik").highcharts().series[0].update({
             pointStart: verbrData10sec[0][0],
             data: verbrData10sec
         }, true);
         $("#actVermogenMeterGrafiekVerbruik").highcharts().redraw();
-        */
 
-        $("#actVermogenMeterGrafiekVerbruik").highcharts().series[0].setData( verbrData10sec )
-
-        gaugeDataVerbruik = verbrData10sec[ verbrData10sec.length-1 ][1]  //[sqlData[0][7]];
-        var point = $('#actVermogenMeterVerbruik').highcharts().series[0].points[0];
-        point.update(gaugeDataVerbruik, true, true, true);
-
-        gaugeDataGeleverd = gelvrData10sec[ gelvrData10sec.length-1][1] ;
-        point = $('#actVermogenMeterGeleverd').highcharts().series[0].points[0];
-        point.update(gaugeDataGeleverd, true, true, true);
+        //$("#actVermogenMeterGrafiekVerbruik").highcharts().series[0].setData( verbrData10sec )
 
       } catch(err) {}
    });
@@ -490,7 +493,7 @@ function createChartVerbruik(){
                     style: {
                         fontWeight: 'bold',
                         fontSize: '13px',
-                        color: "#6e797c"                        
+                        color: "#6e797c"
                     }
                 },
                 wrap: false  
@@ -500,10 +503,12 @@ function createChartVerbruik(){
             marker: {
                 fillColor: '#384042',
                 lineColor: '#384042'
-            },    
-            animation: {
-                duration: 1000  
             },
+            /*
+            animation: {
+                duration: 1000
+            },
+            */
             data: [{
                 color: '#384042',
                 y: gaugeDataVerbruik
@@ -592,17 +597,18 @@ function createChartGeleverd(){
                         color: "#6e797c"
                     }
                 },
-                wrap: false  
+                wrap: false
             }
         },
         series: [{
             marker: {
                 fillColor: '#384042',
                 lineColor: '#384042'
-            },    
-            animation: {
-                duration: 1000  
             },
+            /*
+            animation: {
+                duration: 1000
+            }*/
             data: [{
                 color: '#384042',
                 y: gaugeDataGeleverd
@@ -611,10 +617,10 @@ function createChartGeleverd(){
     });
 }
 
-function createChartVerbruikGrafiek() {    
+function createChartVerbruikGrafiek() {
     $('#actVermogenMeterGrafiekVerbruik').highcharts({
         chart: {
-            type: 'areaspline'     
+            type: 'areaspline'
         },
         legend: {
             enabled: false
@@ -673,7 +679,7 @@ function createChartVerbruikGrafiek() {
 function createChartGeleverdGrafiek() {    
     $('#actVermogenMeterGrafiekGeleverd').highcharts({
         chart: {
-            type: 'areaspline'     
+            type: 'areaspline'
         },
         legend: {
             enabled: false
@@ -738,7 +744,7 @@ function DataLoop() {
 
     secs--;
     if( secs < 0 ) { 
-        secs = 10;
+        secs = 10
         readJsonApiSmartMeter();
         readJsonApiStatus();
         readJsonApiHistoryDay();

@@ -1,5 +1,5 @@
-#!/usr/bin/python3
-#import argparse
+# run manual with ./pythonlaunch.sh P1Notifier.py
+
 from typing import Counter
 import const
 import inspect
@@ -57,7 +57,7 @@ def Main( argv ):
     # init functions
     p1_port_notification = p1_port_shared_lib.P1PortDataNotification( statusdb=rt_status_db, configdb=config_db, flog=flog )
     fase_max_min_notication = phase_shared_lib.VoltageMinMaxNotification( configdb=config_db, phasedb=fase_db_min_max_dag, flog=flog )
-
+  
     # init run
     p1_port_notification.run()
     fase_max_min_notication.run()

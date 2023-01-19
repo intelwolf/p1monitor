@@ -11,7 +11,7 @@ include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/div_err_succes.php';
 include_once '/p1mon/www/util/pageclock.php';
 
-#print_r($_POST);
+#print_r( $_POST );
 loginInit();
 passwordSessionLogoutCheck();
 
@@ -31,43 +31,53 @@ $sw_on   = strIdx( 192 );
 $err_cnt = -1;
 if ( isset($_POST["samba"]) ) { 
     $err_cnt = 0;
-    if ( updateConfigDb("update config set parameter = '".$_POST["samba"]."' where ID = 6")) $err_cnt += 1;;
-    if ( $_POST["samba"] == 'uit' ) { writeSemaphoreFile('samba_uit');  }
-    if ( $_POST["samba"] == 'data') { writeSemaphoreFile('samba_data'); }
-    if ( $_POST["samba"] == 'dev' ) { writeSemaphoreFile('samba_dev');  }
+    if ( updateConfigDb( "update config set parameter = '".$_POST["samba"]."' where ID = 6")) $err_cnt += 1;
+    if ( updateConfigDb( "update config set parameter = '1' where ID = 182")                ) $err_cnt += 1;
 }
 
 if ( isset($_POST["dboxauth"]) ) {
 
-    
     if ( $err_cnt == -1 ) $err_cnt=0;
+   
     if ( strlen(trim($_POST["dboxauth"])) > 32 ) { /* normale 44 chars long */
         $clean_dbox_auth = trim( $_POST["dboxauth"] );
-        
-        // p1monExec needed !!!
-        //$command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token ' . $clean_dbox_auth . '"';
 
         // magic to handle tokens that start with a hypen, thank you Dropbox :)
         if ( substr( $clean_dbox_auth , 0, 1 ) === "-" ) {
-            $clean_dbox_auth_changed = substr( $clean_dbox_auth , 1, strlen( $clean_dbox_auth  ) );
-            $command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --addhyphen --token ' . $clean_dbox_auth_changed . '"';
+            $clean_dbox_auth_changed = substr( $clean_dbox_auth , 1, strlen( $clean_dbox_auth ) );
+            $command = '/p1mon/scripts/pythonlaunch.sh P1DropBoxAuth.py --token --addhyphen ' . $clean_dbox_auth_changed;
         } else {
-            $command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token  ' . $clean_dbox_auth  . '"';
+            #$command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token  ' . $clean_dbox_auth  . '"';
+            $command = "/p1mon/scripts/pythonlaunch.sh P1DropBoxAuth.py --token " . $clean_dbox_auth;
         }
 
         //echo "command = " . $command . "<br>";
         exec( $command ,$arr_execoutput, $exec_ret_value );
+     
+
+        if ( 'ERROR' == $arr_execoutput[0] ) {
+            $err_cnt += 1;
+            #debugLog(' $err_cnt(1) = '. $err_cnt);
+        }
 
         #print_r( "dropbox token return= ". $arr_execoutput[0]. "<br>" );
 
+        /*
         if ( 'ERROR' != $arr_execoutput[0] ) {
-            $crypto_key = encodeString ($arr_execoutput[0], 'dbxkey');
+            $crypto_key = encodeString ( $arr_execoutput[0], 'dbxkey' );
             #print ($crypto_key.",<br>");
             # if ( updateConfigDb("update config set parameter = '".$crypto_key."' where ID = 47")) $err_cnt += 1;
         } else {
             $err_cnt += 1;
         }
+        */
+    }  else {
+
+       if ( strlen(trim($_POST["dboxauth"]))  > 0 ) {
+        $err_cnt += 1;
+       }
     }
+
 }
 
 if ( isset($_POST["dbx_data_active"]) ) { 
@@ -89,9 +99,9 @@ if ( isset($_POST["faseDB_active"]) ) {
 }
 
 if ( isset( $_POST["systemaction"] ) ) { 
-    if ( $_POST['systemaction'] === 'db_erase' ) { 
+    if ( $_POST['systemaction'] === 'db_erase' ) {
         #echo "db erease";
-        writeSemaphoreFile( 'db_erase' );
+        if ( updateConfigDb("update config set parameter = '1' where ID = 188") )$err_cnt += 1;
     }
 }
 
@@ -336,8 +346,8 @@ function setUpCancelBar(text) {
     progressPct = 0;
     $('#cancel_bar_text').html( text+"&nbsp;&nbsp;" );
     showStuff('cancel_bar');
-    clearInterval(progress);
-    progress = setInterval(function(){ progressIndicator();},20);
+    clearInterval( progress );
+    progress = setInterval (function(){ progressIndicator();},20 );
 }
 
 
@@ -345,16 +355,15 @@ function setUpCancelBar(text) {
 $('#db_erase_button').click( function(event) {
     //console.log( event.type )
     //console.log ('db_erase')
-    action = 'db_erase' 
+    action = 'db_erase';
     setUpCancelBar("Onderbreek database wissen&nbsp;&nbsp;");
-    event.preventDefault();    
+    event.preventDefault();
 });
 
 
-
 function progressIndicator() {
-    //console.log( progressPct )
-    if ( progressPct >= 100 ) {
+    console.log( progressPct )
+    if ( progressPct >95 ) {
         if ( action === 'db_erase' ) {
             //console.log("db_erase do");
             document.formvalues.systemaction.value = 'db_erase';
@@ -364,7 +373,7 @@ function progressIndicator() {
         return;
     }
     progressPct=progressPct+0.1;
-    $('#progressbar').width( progressPct+'%' );    
+    $('#progressbar').width( progressPct +'%' );
 }
 
 

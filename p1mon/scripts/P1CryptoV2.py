@@ -1,14 +1,15 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1CryptoV2.py
+
 import sys
 import argparse
 import const
 import inspect
 #import imp
+import logger
 import util
 import crypto3
 
-from logger import logging,fileLogger
-from Crypto.Cipher import AES
+#from Crypto.Cipher import AES
 
 prgname = 'P1CryptoV2'
 
@@ -30,9 +31,9 @@ def Main(argv):
     try:
         if enc != None:
             if seed != None:
-                result = crypto3.p1Encrypt(enc, seed)
+                result = crypto3.p1Encrypt( enc, seed )
             else:
-                result = crypto3.p1Encrypt(enc)
+                result = crypto3.p1Encrypt( enc )
             print ( result )
             flog.debug(inspect.stack()[0][3]+": encoding result: "+str(result))
     
@@ -50,10 +51,10 @@ def Main(argv):
 if __name__ == "__main__":
     try:
         logfile = const.DIR_FILELOG+prgname+".log" 
-        util.setFile2user(logfile,'p1mon')
-        flog = fileLogger(logfile,prgname)    
+        util.setFile2user( logfile, 'p1mon ')
+        flog = logger.fileLogger( logfile, prgname )
         #### aanpassen bij productie
-        flog.setLevel(logging.INFO)
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn(False)
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )

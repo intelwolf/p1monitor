@@ -1,25 +1,19 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1DbCopy.py
+
 import argparse
 import const
 import inspect
-#import glob
 import os
 import pwd
-#import stat
 import sys
 import shutil
 import logger
-
-#from logger  import logging,fileLogger
-#from shutil  import copy2
-#from pwd     import getpwnam
-#from os      import umask, geteuid
-#from pwd     import getpwuid
+import process_lib
 
 prgname = 'P1DbCopy'
 
 filelist = [
-    const.FILE_DB_E_FILENAME , 
+    const.FILE_DB_E_FILENAME,
     const.FILE_DB_STATUS,
     const.FILE_DB_CONFIG,
     const.FILE_DB_E_HISTORIE,
@@ -217,7 +211,7 @@ def copyFile( sourcefile, destinationfolder, forcecopy ):
             flog.debug(inspect.stack()[0][3]+": bestand "  + destinationfolder + file + " bestaat en niet gekopierd van " +  sourcefile ) 
             return
     try:
-        if fileExist ( destinationfolder + file):
+        if fileExist ( destinationfolder + file  ):
             setFile2user( destinationfolder + file )
         shutil.copy2( sourcefile, destinationfolder ) 
         setFile2user( destinationfolder + file )
@@ -228,8 +222,17 @@ def copyFile( sourcefile, destinationfolder, forcecopy ):
 def setFile2user( filename ):
     try:
         cmd = "sudo /bin/chown -f p1mon:p1mon " + filename
-        if os.system( cmd ) != 0:
-            raise ValueError('system chown command failed!')
+        #if os.system( cmd ) != 0:
+        #    raise ValueError('system chown command failed!')
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog 
+        )
+        if r[2] > 0:
+             raise ValueError('system chown command failed!')
+
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": setFile2user fout: " + str(e) + "voor file " + filename )
         return False
@@ -241,19 +244,13 @@ def fileExist(filename):
     else:
         return False
 
-#def name2uid(name):
-#    return getpwnam(name).pw_uid
-    
-#def name2gid(group):
-#    return grp.getgrnam(group).gr_gid
-
 #-------------------------------
 if __name__ == "__main__":
     try:
         os.umask( 0o002 )
         logfile = const.DIR_FILELOG+prgname+".log" 
         #setFile2user(logfile,'p1mon')
-        flog = logger.fileLogger( logfile, prgname)    
+        flog = logger.fileLogger( logfile, prgname )
         #### aanpassen bij productie
         flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn(True) 

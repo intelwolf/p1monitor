@@ -9,15 +9,16 @@ import const
 import datetime
 import inspect
 import json
-import logger
+#import logger
 import shutil
 import string
 import os
-import sys
-import statistics
+#import sys
+#import statistics
 import systemid
 import time
 import util
+import process_lib
 
 ###########################################################
 # email notification when there is no data seen on the P1 #
@@ -36,7 +37,7 @@ class P1PortDataNotification():
         try:
             _id, on, _label = self.configdb.strget( 175, self.flog )
             if int(on) != 1:
-                self.flog.debug(inspect.stack()[0][3]+": email voor controle op P1 data staat uit, geen actie.")  
+                self.flog.debug( __class__.__name__ + ": email voor controle op P1 data staat uit, geen actie.")  
                 return 
         except:
             return
@@ -49,45 +50,76 @@ class P1PortDataNotification():
                 subject =  const.DEFAULT_EMAIL_NOTIFICATION
 
             # get time difference
-            _id, utc_str, _description, _index = self.statusdb.strget( 87, self.flog )
-            delta_time = abs( util.getUtcTime() - int( utc_str ) )
+            try:
+                _id, utc_str, _description, _index = self.statusdb.strget( 87, self.flog )
+                delta_time = abs( util.getUtcTime() - int( utc_str ) )
+            except:
+                self.flog.debug( __class__.__name__  + ": tijd is niet gezet, er wordt niets uitgevoerd.")
+                return
 
             # make date time string
-            
             t = time.localtime()
             timestring = "%04d-%02d-%02d %02d:%02d:%02d"% ( t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec )
            
             # 1 is ok, 0 is not ok
             _id, p1_data_is_ok, _label, _security = self.statusdb.strget( 123, self.flog ) 
 
-            self.flog.debug( inspect.stack()[0][3]+ ": p1_data_is_ok = " + p1_data_is_ok + " self.did_send_data = " +  str( self.did_send_data ) )
+            self.flog.debug( __class__.__name__ + ": p1_data_is_ok = " + p1_data_is_ok + " self.did_send_data = " +  str( self.did_send_data ) )
 
             # P1 data is NOT ok
             if int ( p1_data_is_ok ) == 0 and self.did_send_data == False:
-                self.flog.debug( inspect.stack()[0][3]+ ": P1 data ontbreekt. " )
+                self.flog.debug( __class__.__name__ + ": P1 data ontbreekt. " )
                 subject_str = ' -subject "' + subject + ' (slimme meter data niet ontvangen)."'
                 messagetext = ' -msgtext "Data uit de slimme meter komt niet meer binnen.\n' +  timestring + ' Laatste slimme meter telegram ' + str( delta_time ) + ' seconden geleden ontvangen."'
                 messagehtml = ' -msghtml "<p>Data uit de slimme meter komt niet meer binnen.</p><p>' + timestring + ': Laatste slimme meter telegram <b>' + str(delta_time)+'</b> seconden geleden ontvangen.</p>"'
-                if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald." )
+                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
+                #    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald." )
+                #else:
+                #    self.flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen in de afgelopen " + str( delta_time ) + " seconden." )
+                #    self.did_send_data = True
+
+                #cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py " + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' #180 upgrade
+                cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+
+                r = process_lib.run_process( 
+                    cms_str = cmd,
+                    use_shell=True,
+                    give_return_value=True,
+                    flog=self.flog 
+                    )
+                if ( r[2] ) > 0:
+                     self.flog.error( __class__.__name__ + " email notificatie P1 data ontbreekt is gefaald." )
                 else:
-                    self.flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen in de afgelopen " + str( delta_time ) + " seconden." )
+                    self.flog.warning( __class__.__name__ + " email verstuurd dat er geen P1 data wordt ontvangen in de afgelopen " + str( delta_time ) + " seconden." )
                     self.did_send_data = True
 
             # P1 data is OK
             if int( p1_data_is_ok ) == 1 and self.did_send_data == True:
-                self.flog.debug( inspect.stack()[0][3]+ ": P1 data is ok of weer binnengekomen" )
+                self.flog.debug( __class__.__name__ + ": P1 data is ok of weer binnengekomen" )
                 subject_str = ' -subject "' + subject + ' (slimme meter data ontvangen.)."'
                 messagetext = ' -msgtext "Data uit de slimme meter komt binnen.\n' + timestring + ' Laatste slimme meter telegram ' + str( delta_time )+' seconden geleden ontvangen."'
                 messagehtml = ' -msghtml "<p>Data uit de slimme meter komt weer binnen.</p><p>' + timestring + ': Laatste slimme meter telegram <b>' + str(delta_time) +'</b> seconden geleden ontvangen.</p>"'
-                if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data werkt weer is gefaald." )
+                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
+                #    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data werkt weer is gefaald." )
+                # else:
+                #    self.flog.info( inspect.stack()[0][3]+" P1 data komt weer binnen, email verstuurd." )
+                #    self.did_send_data = False
+                #cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py " + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' #180 upgrade
+                cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                r = process_lib.run_process( 
+                    cms_str = cmd,
+                    use_shell=True,
+                    give_return_value=True,
+                    flog=self.flog 
+                    )
+                if ( r[2] ) > 0:
+                    self.flog.error( __class__.__name__ + " email notificatie P1 data werkt weer is gefaald." )
                 else:
-                    self.flog.info( inspect.stack()[0][3]+" P1 data komt weer binnen, email verstuurd." )
+                    self.flog.info( __class__.__name__ + " P1 data komt weer binnen, email verstuurd." )
                     self.did_send_data = False
 
         except Exception as e:
-            self.flog.error( inspect.stack()[0][3]+ ": error " + str(e) )
+            self.flog.error( __class__.__name__ + ": error " + str(e) )
 
 
 ###########################################################
@@ -128,7 +160,6 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
             continue
         try:
             buf = line.split('(')
-            #print("#### "+str(buf))
             #print("#### "+str(buf[0]))
             if len(buf) < 2: # verwijder velden die niet interessant zijn
                 continue
@@ -304,7 +335,10 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
             data_set['gelvr_kwh_282'] = data_set['lc_280']
             data_set['gelvr_kwh_281'] = '000000.000'
 
-        # try to calculate current consumed power
+        # try to calculate current consumed power (Watt)
+
+        # old way with total AMP's 
+        """
         if data_set['act_verbr_kw_170'] == const.NOT_SET:
             # is total amp set and the voltages used that
             if data_set['ls_9070'] != const.NOT_SET:
@@ -317,6 +351,7 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
                        v_total.append( int(phase_db_rec['L3_V']) )
 
                 data_set['act_verbr_kw_170'] = "{0:06.3f}".format( (float(data_set['ls_9070']) * statistics.mean(v_total))/1000 )
+        """
 
         if data_set['act_verbr_kw_170'] == const.NOT_SET: # fails save if calc fails
             data_set['act_verbr_kw_170'] = "00.000"
@@ -334,9 +369,22 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
         if phase_db_rec['L3_V'] != const.NOT_SET and phase_db_rec['L3_A'] != const.NOT_SET:
             phase_db_rec['consumption_L3_kW'] = '{0:.3f}'.format( float(phase_db_rec['L3_V']) * float(phase_db_rec['L3_A']) / 1000 )
 
-    #print( phase_db_rec )
-    #print("#2", data_set)
+        # add fase Watt values to total Watt value
+        total_watt = 0.0
+        if phase_db_rec['consumption_L1_kW'] != const.NOT_SET:
+            total_watt += float( phase_db_rec['consumption_L1_kW'] )
+        if phase_db_rec['consumption_L2_kW'] != const.NOT_SET:
+             total_watt += float( phase_db_rec['consumption_L2_kW'] )
+        if phase_db_rec['consumption_L3_kW'] != const.NOT_SET:
+             total_watt += float( phase_db_rec['consumption_L3_kW'] )
+
+        data_set['act_verbr_kw_170'] = '{0:06.3f}'.format( total_watt )
+
+    #print( "#2", data_set )
+    #print( " ----- ")
     #print ( phase_db_rec )
+    #print ( "\n" )
+
     #sys.exit()
 
     if status['day_night_mode']  == 1:
@@ -430,8 +478,15 @@ def record_sanity_check( data_set=None, status=None, flog=None ):
 #############################################################
 # restore data to ram from disk                             #
 #############################################################
-def disk_restore_from_disk_to_ram():
-    os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
+def disk_restore_from_disk_to_ram(flog=None):
+    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
+    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2ram" #180 upgrade
+    process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+    )
 
 #############################################################
 # backup data to disk on the mod minute timestamp           #
@@ -445,7 +500,16 @@ def backup_data_to_disk_by_timestamp( statusdb=None, flog=None, minute_mod=15 ):
         file_sec_delta = util.file_delta_timestamp( const.FILE_DB_E_FILENAME ,const.DIR_FILEDISK )
         
         if file_sec_delta > 60  or file_sec_delta == -1:
-            os.system("/p1mon/scripts/P1DbCopy.py --serialcopy2disk --forcecopy")
+            #os.system("/p1mon/scripts/P1DbCopy.py --serialcopy2disk --forcecopy")
+            cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --serialcopy2disk --forcecopy" #180 upgrade
+            process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=False,
+                flog=flog 
+            )
+
+
             statusdb.timestamp( 41,flog )
 
     except Exception as e:

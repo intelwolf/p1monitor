@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1SolarEdgeReader.py
 
 import const
 import datetime
@@ -1119,7 +1119,7 @@ def check_and_set_api_key( apikey="", api=None ):
 ########################################################
 def saveExit(signum, frame):
     flog.info( inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
-    signal.signal(signal.SIGINT, original_sigint)
+    signal.signal( signal.SIGINT, original_sigint )
     sys.exit(0)
 
 ########################################################
@@ -1137,5 +1137,5 @@ if __name__ == "__main__":
         sys.exit(1)
     
     original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal( signal.SIGINT, saveExit)
+    signal.signal( signal.SIGINT, saveExit )
     Main(sys.argv[1:])

@@ -11,7 +11,7 @@ function readStatusDb($id){
         $db -> busyTimeout(300000);  // fix for database locks, wait 300 sec = 5 min
         $result = $db->query($sqlstr);
         //var_dump($result->fetchArray());
-        $row = $result->fetchArray();    
+        $row = $result->fetchArray();
         $db->close();
         return $row["STATUS"];
     } catch (Exception $e) {
@@ -23,20 +23,30 @@ function debugLog($string) {
     error_log($string."\n", 3, "/var/tmp/php-debug.log");
 }
 
-function encodeString ($input, $seed) {
+function encodeString ( $input, $seed ) { # nog niet getest met zonder p1monExec
         $encoded_string = '';
-        $command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --enc ".base64_encode($input)." --seed ".$seed."'";
+        #$command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --enc ".base64_encode($input)." --seed ".$seed."'";
+        $command = "/p1mon/scripts/pythonlaunch.sh P1CryptoV2.py --enc ".base64_encode( $input )." --seed ".$seed;
+       
+        #debugLog('$input='.$input); 
+        #debugLog('$seed='.$seed);
+
         $arr_execoutput_enc = []; // make sure old stuff is cleared.
-        exec($command ,$arr_execoutput_enc, $exec_ret_value );
+        exec( $command ,$arr_execoutput_enc, $exec_ret_value );
+
         #debugLog('$encodeString output='.$arr_execoutput_enc);
         #debugLog('$encodeString return value='.$exec_ret_value);
+
         if (empty($arr_execoutput_enc)) { return ''; } // nothing to decode.
         return $arr_execoutput_enc[0];
 }
 
 function decodeString( $config_id, $seed ) {
     $decoded_string = '';
-    $command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed."'";
+    #$command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed."'";
+    $command = "/p1mon/scripts/pythonlaunch.sh P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed;
+
+
     $arr_execoutput_dec = []; // make sure old stuff is cleared.
     exec($command ,$arr_execoutput_dec, $exec_ret_value );
     #debugLog('$decodeString output='.$arr_execoutput_dec);
@@ -45,9 +55,11 @@ function decodeString( $config_id, $seed ) {
     return base64_decode($arr_execoutput_dec[0], true);
 }
 
-function decodeStringNoBase64($config_id, $seed) {
+function decodeStringNoBase64( $config_id, $seed ) { # used in API
     $decoded_string = '';
-    $command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed."'";
+    #$command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed."'";
+    $command = "/p1mon/scripts/pythonlaunch.sh P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed;
+
     $arr_execoutput_dec = []; // make sure old stuff is cleared.
     exec($command ,$arr_execoutput_dec, $exec_ret_value );
     if (empty($arr_execoutput_dec)) { return ''; } // nothing to decode.
@@ -82,13 +94,6 @@ function cronSafeCharacters($str_in) {
         return False;
     }
     return True;
-}
-
-// schrijf een semafore file met de volgende layout
-function writeSemaphoreFile($filename) {
-    $command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1Semaphore.py -n ".$filename."' &";
-    $arr_execoutput_dec = []; // make sure old stuff is cleared.
-    exec($command ,$arr_execoutput_dec, $exec_ret_value );
 }
 
 // update de sqllite DB config met de sql
@@ -200,7 +205,7 @@ function checkFloat($in, $decimals, $maxval, $abs) {
       return $in;
   }
 
-  
+
 // indien zomertijd voeg dan een uur in sec toe.
 function TimeDSTAdjustTicks()
 {

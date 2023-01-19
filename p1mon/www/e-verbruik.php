@@ -258,6 +258,7 @@ function createDailytUseChart() {
             },
         },
         labels: {
+            format: '{value:.0f}',
             style: {
                 fontWeight: "bold",
                 fontSize: "28px"

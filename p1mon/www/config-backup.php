@@ -180,16 +180,14 @@ if ( $must_update_cron  == True ) {
         if ( $err_cnt == -1 ) $err_cnt=0;
         $cron_str = $cron_pieces [0].":".$cron_pieces [1].":".$cron_pieces [2].":".$cron_pieces [3].":".$cron_pieces [4];
         if ( updateConfigDb("update config set parameter = '".$cron_str."' where ID = 37")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 181")) $err_cnt += 1;
         #print $cron_str;
-        if ( $err_cnt == 0) {
-                writeSemaphoreFile('cron');
-        }
 }
 
 if ( isset($_POST['systemaction']) ) { 
         #echo 'systemaction<br>';
         if ($_POST['systemaction'] === 'ftp_test_button'){ 
-                writeSemaphoreFile('backup');
+            if ( updateConfigDb("update config set parameter = '1' where ID = 184") ) $err_cnt += 1;
         }
 }
 
@@ -338,300 +336,299 @@ $(function () {
                         
                         <div id="right-wrapper-config"> <!-- right block -->
                         <!-- inner block right part of screen -->
-                                <div id="right-wrapper-config-left">
-                                        <!-- start of content -->
-                                        <form name="formvalues" id="formvalues" method="POST">
-                                                
-                                                <div class="frame-4-top">
-                                                        <span class="text-15">Timer instellingen</span>
-                                                </div>
-                                                <div class="frame-4-bot">
-                                                        
-                                                                <div class="float-left pad-17">
-                                                                        <!-- line minutes -->
-                                                                         <div class="content-wrapper pos-36"> 
-                                                                                <div class="content-wrapper pad-16">
-                                                                                        <label class="text-14">minuten</label>
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <select onchange="selectorUpdate('#minutes','#i_minutes')" class="select-3 color-menu color-input-back cursor-pointer" id="minutes">
-                                                                                                <?php slectorMinutes();?>
-                                                                                        </select>
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <input class="input-7 color-settings color-input-back" id="i_minutes" name="i_minutes"  type="text" value="<?php echo $cron_pieces[0];?>">
-                                                                                </div>
-                                                                         </div> 
-                                                                         
-                                                                         <!-- line hours -->
-                                                                        <div class="content-wrapper pos-36"> 
-                                                                                <div class="pad-16 content-wrapper">
-                                                                                        <label class="text-14">uren</label> 
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <select onchange="selectorUpdate('#hours','#i_hours')"  class="select-3 color-menu color-input-back cursor-pointer" id="hours">
-                                                                                                <?php slectorHours();?>
-                                                                                        </select>
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <input class="input-7 color-settings color-input-back" id="i_hours" name="i_hours" type="text" value="<?php echo $cron_pieces[1];?>">
-                                                                                </div>
-                                                                        </div> 
-                                                                
-                                                                        <!-- line day of the month -->
-                                                                        <div class="content-wrapper pos-36"> 
-                                                                                <div class="pad-16 content-wrapper">
-                                                                                        <label class="text-14">dag van de maand</label> 
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <select onchange="selectorUpdate('#days','#i_days')" class="select-3 color-menu color-input-back cursor-pointer" id="days">
-                                                                                                <?php slectorDays();?>
-                                                                                        </select>
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <input class="input-7 color-settings color-input-back" id="i_days" name="i_days" type="text" value="<?php echo $cron_pieces[2];?>">
-                                                                                </div>
-                                                                        </div> 
-                                                                        
-                                                                        <!-- month -->
-                                                                        <div class="content-wrapper pos-36"> 
-                                                                                <div class="pad-16 content-wrapper">
-                                                                                        <label class="text-14">maand</label> 
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <select onchange="selectorUpdate('#months','#i_months')" class="select-3 color-menu color-input-back cursor-pointer" id="months">
-                                                                                                <?php slectorMonths();?>
-                                                                                        </select>
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <input class="input-7 color-settings color-input-back" id="i_months" name="i_months" type="text" value="<?php echo $cron_pieces[3];?>">
-                                                                                </div>
-                                                                        </div> 
-                                                                        
-                                                                        <!-- weekday -->
-                                                                        <div class="content-wrapper pos-36"> 
-                                                                                <div class="pad-16 content-wrapper">
-                                                                                        <label class="text-14">dag van de week</label>  
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <select onchange="selectorUpdate('#weekdays','#i_weekdays')" class="select-3 color-menu color-input-back cursor-pointer" id="weekdays">
-                                                                                                <?php slectorWeekDays();?>
-                                                                                        </select>
-                                                                                </div>
-                                                                                <div class="content-wrapper">
-                                                                                        <input class="input-7 color-settings color-input-back" id="i_weekdays" name="i_weekdays" type="text" value="<?php echo $cron_pieces[4];?>">
-                                                                                </div>
-                                                                        </div> 
+                            <div id="right-wrapper-config-left">
+                                    <!-- start of content -->
+                                    <form name="formvalues" id="formvalues" method="POST">
+                                            
+                                            <div class="frame-4-top">
+                                                    <span class="text-15">Timer instellingen</span>
+                                            </div>
+                                            <div class="frame-4-bot">
+                                                    
+                                                <div class="float-left pad-17">
+                                                    <!-- line minutes -->
+                                                    <div class="content-wrapper pos-36"> 
+                                                        <div class="content-wrapper pad-16">
+                                                                <label class="text-14">minuten</label>
                                                         </div>
-                                                </div>
-                                                <!-- end of timer part -->
-                                                <p></p>
-                                                <div class="frame-4-top">
-                                                        <span class="text-15">FTP gegevens</span>
-                                                </div>
-                                                <div class="frame-4-bot">
-                                                        <div class="float-left pad-17">
-                                                        
-                                                        <div class="pad-1 content-wrapper float-right" title="<?php echo strIdx(22);?>">
-                                                                <button class="input-2 but-1 cursor-pointer" id="ftp_test_button" name="ftp_test_button" type="submit">
-                                                                        <i class="color-menu fa-3x far fa-play-circle"></i><br>
-                                                                        <span class="color-menu text-7">test</span>
-                                                                </button>
+                                                        <div class="content-wrapper">
+                                                                <select onchange="selectorUpdate('#minutes','#i_minutes')" class="select-3 color-menu color-input-back cursor-pointer" id="minutes">
+                                                                        <?php slectorMinutes();?>
+                                                                </select>
                                                         </div>
-                                                        
-                                                        <div class="content-wrapper pos-36"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">back-up</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="cursor-pointer" id="fs_rb_aan_ftp_backup" name="ftp_backup_active" type="radio" value="1" <?php if ( config_read(36) == 1 ) { echo 'checked'; }?>>Aan
-                                                                        <input class="cursor-pointer" id="fs_rb_uit_ftp_backup" name="ftp_backup_active" type="radio" value="0" <?php if ( config_read(36) == 0 ) { echo 'checked'; }?>>Uit
-                                                                </div>
-                                                        </div> 
-                                                        <p class="p-1"></p>
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(12);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">ftp mode</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="cursor-pointer" id="fs_rb_ftp"  name="ftp_mode" type="radio" value="ftp"  <?php if ( config_read(76) == 1 ) { echo 'checked'; }?>>FTP
-                                    <input class="cursor-pointer" id="fs_rb_ftps" name="ftp_mode" type="radio" value="ftps" <?php if ( config_read(35) == 1 ) { echo 'checked'; }?>>FTPS
-                                    <input class="cursor-pointer" id="fs_rb_sftp" name="ftp_mode" type="radio" value="sftp" <?php if ( config_read(77) == 1)  { echo 'checked'; }?>>SFTP
-                                                                </div>
-                                                        </div> 
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(13);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">account naam</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-6 color-settings color-input-back" id="i_ftp_name" name="i_ftp_name" type="text" value="<?php echo config_read(28);?>">
-                                                                </div>
-                                                        </div> 
-                                                
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(14);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">wachtwoord</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-6 color-settings color-input-back" id="i_ftp_pword" name="i_ftp_pword" type="password" value="<?php echo decodeString(29, 'ftppw');?>">
-                                                                </div>
-                                                                <div class="content-wrapper pad-1 cursor-pointer" id="api_passwd" onclick="toggelPasswordVisibility('i_ftp_pword')" >        
-                                                                        <span><i class="color-menu pad-7 fas fa-eye"></i></span>
-                                                                </div>
-                                                        </div> 
-                                                
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(15);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">ftp folder</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-6 color-settings color-input-back" id="i_ftp_folder" name="i_ftp_folder" type="text" value="<?php echo config_read(30);?>">
-                                                                </div>
-                                                        </div> 
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(16);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">server adres</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-6 color-settings color-input-back" id="i_ftp_host" name="i_ftp_host" type="text" value="<?php echo config_read(31);?>">
-                                                                </div>
-                                                        </div> 
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(17);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">server poort</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-6 color-settings color-input-back" id="i_ftp_host_port" name="i_ftp_host_port" type="text" value="<?php echo config_read(32);?>">
-                                                                </div>
-                                                        </div> 
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(18);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">aantal versies</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-6 color-settings color-input-back" id="i_ftp_max_versions" name="i_ftp_max_versions" type="text" value="<?php echo config_read(34);?>">
-                                                                </div>
-                                                        </div> 
-                                                        <div class="content-wrapper pos-36 margin-4" title="<?php echo strIdx(19);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">laatste backup</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <label id="ftp_backup_timestamp" class="text-14"></label>
-                                                                </div>
-                                                        </div> 
-                                                        <p class="p-1"></p>
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(20);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">succesvol op</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <label id="ftp_backup_timestamp_succes" class="text-14"></label>
-                                                                </div>
-                                                        </div> 
-                                                        <p class="p-1"></p>
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(21);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">backup status</label> 
-                                                                </div>
-                                                                
-                                                        </div> 
-                                                        <div class="content-wrapper pos-37">
-                                                                        <label  id="ftp_backup_status" class="text-14"></label>
+                                                        <div class="content-wrapper">
+                                                                <input class="input-7 color-settings color-input-back" id="i_minutes" name="i_minutes"  type="text" value="<?php echo $cron_pieces[0];?>">
                                                         </div>
-                                                        
-                                                        </div>
-                                                        </div>
-                                                        <!-- end of ftp backup -->
-                                                
+                                                    </div> 
 
-                                                        <p></p>
-                                                <div class="frame-4-top">
-                                                        <span class="text-15">Dropbox gegevens</span>
-                                                </div>
-                                                <div class="frame-4-bot">
-                                                        <div class="float-left pad-17">
-                                                        
-                                                        <div class="content-wrapper pos-36"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">back-up</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="cursor-pointer" id="fs_rb_aan_dbx_backup" name="dbx_backup_active" type="radio" value="1" <?php if ( config_read(49) == 1 ) { echo 'checked'; }?>>Aan
-                                                                        <input class="cursor-pointer" id="fs_rb_uit_dbx_backup" name="dbx_backup_active" type="radio" value="0" <?php if ( config_read(49) == 0 ) { echo 'checked'; }?>>Uit
-                                                                </div>
-                                                        </div> 
-                                                        <p class="p-1"></p>
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(18);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">aantal versies</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <input class="input-6 color-settings color-input-back" id="i_dbx_max_versions" name="i_dbx_max_versions" type="text" value="<?php echo config_read(48);?>">
-                                                                </div>
-                                                        </div> 
-                                                        <div class="content-wrapper pos-36 margin-4" title="<?php echo strIdx(19);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">laatste backup</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <label id="dbx_backup_timestamp" class="text-14"></label>
-                                                                </div>
-                                                        </div> 
-                                                        <p class="p-1"></p>
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(20);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">succesvol op</label> 
-                                                                </div>
-                                                                <div class="content-wrapper">
-                                                                        <label id="dbx_backup_timestamp_succes" class="text-14"></label>
-                                                                </div>
-                                                        </div> 
-                                                        <p class="p-1"></p>
-                                                        
-                                                        <div class="content-wrapper pos-36" title="<?php echo strIdx(21);?>"> 
-                                                                <div class="pad-16 content-wrapper">
-                                                                        <label class="text-14">backup status</label> 
-                                                                </div>
-                                                                
-                                                        </div> 
-                                                        <div class="content-wrapper pos-33">
-                                                                        <label  id="dbx_backup_status" class="text-14"></label>
-                                                        </div>
-                                                        
-                                                        </div>
-                                                        </div>
+                                                    <!-- line hours -->
+                                                    <div class="content-wrapper pos-36"> 
+                                                            <div class="pad-16 content-wrapper">
+                                                                    <label class="text-14">uren</label> 
+                                                            </div>
+                                                            <div class="content-wrapper">
+                                                                    <select onchange="selectorUpdate('#hours','#i_hours')"  class="select-3 color-menu color-input-back cursor-pointer" id="hours">
+                                                                            <?php slectorHours();?>
+                                                                    </select>
+                                                            </div>
+                                                            <div class="content-wrapper">
+                                                                    <input class="input-7 color-settings color-input-back" id="i_hours" name="i_hours" type="text" value="<?php echo $cron_pieces[1];?>">
+                                                            </div>
+                                                    </div> 
 
-                                                <!-- placeholder variables for session termination -->
-                                                <input type="hidden" name="logout" id="logout" value="">
-                                                <input type="hidden" name="systemaction" id="systemaction" value="">
-                                        </form>
+                                                    <!-- line day of the month -->
+                                                    <div class="content-wrapper pos-36"> 
+                                                            <div class="pad-16 content-wrapper">
+                                                                    <label class="text-14">dag van de maand</label> 
+                                                            </div>
+                                                            <div class="content-wrapper">
+                                                                    <select onchange="selectorUpdate('#days','#i_days')" class="select-3 color-menu color-input-back cursor-pointer" id="days">
+                                                                            <?php slectorDays();?>
+                                                                    </select>
+                                                            </div>
+                                                            <div class="content-wrapper">
+                                                                    <input class="input-7 color-settings color-input-back" id="i_days" name="i_days" type="text" value="<?php echo $cron_pieces[2];?>">
+                                                            </div>
+                                                    </div> 
+
+                                                    <!-- month -->
+                                                    <div class="content-wrapper pos-36"> 
+                                                            <div class="pad-16 content-wrapper">
+                                                                    <label class="text-14">maand</label> 
+                                                            </div>
+                                                            <div class="content-wrapper">
+                                                                    <select onchange="selectorUpdate('#months','#i_months')" class="select-3 color-menu color-input-back cursor-pointer" id="months">
+                                                                            <?php slectorMonths();?>
+                                                                    </select>
+                                                            </div>
+                                                            <div class="content-wrapper">
+                                                                    <input class="input-7 color-settings color-input-back" id="i_months" name="i_months" type="text" value="<?php echo $cron_pieces[3];?>">
+                                                            </div>
+                                                    </div> 
+
+                                                    <!-- weekday -->
+                                                    <div class="content-wrapper pos-36"> 
+                                                        <div class="pad-16 content-wrapper">
+                                                                <label class="text-14">dag van de week</label>  
+                                                        </div>
+                                                        <div class="content-wrapper">
+                                                                <select onchange="selectorUpdate('#weekdays','#i_weekdays')" class="select-3 color-menu color-input-back cursor-pointer" id="weekdays">
+                                                                        <?php slectorWeekDays();?>
+                                                                </select>
+                                                        </div>
+                                                        <div class="content-wrapper">
+                                                                <input class="input-7 color-settings color-input-back" id="i_weekdays" name="i_weekdays" type="text" value="<?php echo $cron_pieces[4];?>">
+                                                        </div>
+                                                    </div> 
+                                                </div>
+                                            </div>
+                                            <!-- end of timer part -->
+                                            <p></p>
+                                            <div class="frame-4-top">
+                                                    <span class="text-15">FTP gegevens</span>
+                                            </div>
+                                            <div class="frame-4-bot">
+                                                <div class="float-left pad-17">
+                                                
+                                                <div class="pad-1 content-wrapper float-right" title="<?php echo strIdx(22);?>">
+                                                        <button class="input-2 but-1 cursor-pointer" id="ftp_test_button" name="ftp_test_button" type="submit">
+                                                                <i class="color-menu fa-3x far fa-play-circle"></i><br>
+                                                                <span class="color-menu text-7">test</span>
+                                                        </button>
+                                                </div>
+                                                
+                                                <div class="content-wrapper pos-36"> 
+                                                        <div class="pad-16 content-wrapper">
+                                                                <label class="text-14">back-up</label> 
+                                                        </div>
+                                                        <div class="content-wrapper">
+                                                                <input class="cursor-pointer" id="fs_rb_aan_ftp_backup" name="ftp_backup_active" type="radio" value="1" <?php if ( config_read(36) == 1 ) { echo 'checked'; }?>>Aan
+                                                                <input class="cursor-pointer" id="fs_rb_uit_ftp_backup" name="ftp_backup_active" type="radio" value="0" <?php if ( config_read(36) == 0 ) { echo 'checked'; }?>>Uit
+                                                        </div>
+                                                </div> 
+                                                <p class="p-1"></p>
+                                                <div class="content-wrapper pos-36" title="<?php echo strIdx(12);?>"> 
+                                                        <div class="pad-16 content-wrapper">
+                                                                <label class="text-14">ftp mode</label> 
+                                                        </div>
+                                                        <div class="content-wrapper">
+                                                                <input class="cursor-pointer" id="fs_rb_ftp"  name="ftp_mode" type="radio" value="ftp"  <?php if ( config_read(76) == 1 ) { echo 'checked'; }?>>FTP
+                            <input class="cursor-pointer" id="fs_rb_ftps" name="ftp_mode" type="radio" value="ftps" <?php if ( config_read(35) == 1 ) { echo 'checked'; }?>>FTPS
+                            <input class="cursor-pointer" id="fs_rb_sftp" name="ftp_mode" type="radio" value="sftp" <?php if ( config_read(77) == 1)  { echo 'checked'; }?>>SFTP
+                            </div>
+                        </div> 
+
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(13);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">account naam</label> 
                                 </div>
-                                
-                                <div id="right-wrapper-config-right">
-                                        <div class="frame-4-top">
-                                                <span class="text-15">hulp</span>
-                                        </div>
-                                        <div class="frame-4-bot text-10">        
-                                                <?php echo strIdx(11);?>
-                                        </div>
+                                <div class="content-wrapper">
+                                        <input class="input-6 color-settings color-input-back" id="i_ftp_name" name="i_ftp_name" type="text" value="<?php echo config_read(28);?>">
                                 </div>
-                                
-                        </div>
-                                        
-                <!-- </div> -->
-                                
+                        </div> 
+
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(14);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">wachtwoord</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <input class="input-6 color-settings color-input-back" id="i_ftp_pword" name="i_ftp_pword" type="password" value="<?php echo decodeString( 29, 'ftppw' );?>">
+                                </div>
+                                <div class="content-wrapper pad-1 cursor-pointer" id="api_passwd" onclick="toggelPasswordVisibility('i_ftp_pword')" >
+                                        <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                                </div>
+                        </div> 
+ 
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(15);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">ftp folder</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <input class="input-6 color-settings color-input-back" id="i_ftp_folder" name="i_ftp_folder" type="text" value="<?php echo config_read(30);?>">
+                                </div>
+                        </div> 
+
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(16);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">server adres</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <input class="input-6 color-settings color-input-back" id="i_ftp_host" name="i_ftp_host" type="text" value="<?php echo config_read(31);?>">
+                                </div>
+                        </div> 
                         
-                        <!-- end inner block right part of screen -->
-        </div>        
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(17);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">server poort</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <input class="input-6 color-settings color-input-back" id="i_ftp_host_port" name="i_ftp_host_port" type="text" value="<?php echo config_read(32);?>">
+                                </div>
+                        </div> 
+
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(18);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">aantal versies</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <input class="input-6 color-settings color-input-back" id="i_ftp_max_versions" name="i_ftp_max_versions" type="text" value="<?php echo config_read(34);?>">
+                                </div>
+                        </div> 
+                        <div class="content-wrapper pos-36 margin-4" title="<?php echo strIdx(19);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">laatste backup</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <label id="ftp_backup_timestamp" class="text-14"></label>
+                                </div>
+                        </div> 
+                        <p class="p-1"></p>
+
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(20);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">succesvol op</label> 
+                                </div>
+                                <div class="content-wrapper">
+                                        <label id="ftp_backup_timestamp_succes" class="text-14"></label>
+                                </div>
+                        </div> 
+                        <p class="p-1"></p>
+                                                    
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(21);?>"> 
+                                <div class="pad-16 content-wrapper">
+                                        <label class="text-14">backup status</label> 
+                                </div>
+                                
+                        </div> 
+                        <div class="content-wrapper pos-37">
+                                        <label  id="ftp_backup_status" class="text-14"></label>
+                        </div>
+                        
+                        </div>
+                        </div>
+                        <!-- end of ftp backup -->
+                                            
+
+                        <p></p>
+                        <div class="frame-4-top">
+                                <span class="text-15">Dropbox gegevens</span>
+                        </div>
+                        <div class="frame-4-bot">
+                                <div class="float-left pad-17">
+                                
+                                <div class="content-wrapper pos-36"> 
+                                        <div class="pad-16 content-wrapper">
+                                                <label class="text-14">back-up</label> 
+                                        </div>
+                                        <div class="content-wrapper">
+                                                <input class="cursor-pointer" id="fs_rb_aan_dbx_backup" name="dbx_backup_active" type="radio" value="1" <?php if ( config_read(49) == 1 ) { echo 'checked'; }?>>Aan
+                                                <input class="cursor-pointer" id="fs_rb_uit_dbx_backup" name="dbx_backup_active" type="radio" value="0" <?php if ( config_read(49) == 0 ) { echo 'checked'; }?>>Uit
+                                        </div>
+                                </div> 
+                                <p class="p-1"></p>
+
+                                <div class="content-wrapper pos-36" title="<?php echo strIdx(18);?>"> 
+                                        <div class="pad-16 content-wrapper">
+                                                <label class="text-14">aantal versies</label> 
+                                        </div>
+                                        <div class="content-wrapper">
+                                                <input class="input-6 color-settings color-input-back" id="i_dbx_max_versions" name="i_dbx_max_versions" type="text" value="<?php echo config_read(48);?>">
+                                        </div>
+                                </div> 
+                                <div class="content-wrapper pos-36 margin-4" title="<?php echo strIdx(19);?>"> 
+                                        <div class="pad-16 content-wrapper">
+                                                <label class="text-14">laatste backup</label> 
+                                        </div>
+                                        <div class="content-wrapper">
+                                                <label id="dbx_backup_timestamp" class="text-14"></label>
+                                        </div>
+                                </div> 
+                                <p class="p-1"></p>
+                                
+                                <div class="content-wrapper pos-36" title="<?php echo strIdx(20);?>"> 
+                                        <div class="pad-16 content-wrapper">
+                                                <label class="text-14">succesvol op</label> 
+                                        </div>
+                                        <div class="content-wrapper">
+                                                <label id="dbx_backup_timestamp_succes" class="text-14"></label>
+                                        </div>
+                                </div> 
+                                <p class="p-1"></p>
+
+                                <div class="content-wrapper pos-36" title="<?php echo strIdx(21);?>"> 
+                                        <div class="pad-16 content-wrapper">
+                                                <label class="text-14">backup status</label> 
+                                        </div>
+                                        
+                                </div> 
+                                <div class="content-wrapper pos-33">
+                                                <label  id="dbx_backup_status" class="text-14"></label>
+                                </div>
+                                
+                                </div>
+                                </div>
+
+                                <!-- placeholder variables for session termination -->
+                                <input type="hidden" name="logout" id="logout" value="">
+                                <input type="hidden" name="systemaction" id="systemaction" value="">
+                        </form>
+                </div>
+
+                <div id="right-wrapper-config-right">
+                        <div class="frame-4-top">
+                            <span class="text-15">hulp</span>
+                        </div>
+                        <div class="frame-4-bot text-10">
+                                <?php echo strIdx(11);?>
+                        </div>
+                </div>
+
+                </div>
+
+                <!-- </div> -->
+
+        <!-- end inner block right part of screen -->
+        </div>
         <?php echo div_err_succes();?>
         
 <script>

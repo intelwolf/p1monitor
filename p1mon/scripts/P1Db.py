@@ -1,8 +1,11 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1Db.py
+
 import const
 import inspect
+import datetime
 import signal
 import shutil
+import logger
 import os
 import sys
 import sqldb
@@ -10,12 +13,14 @@ import time
 import util
 import phase_shared_lib
 import data_struct_lib
+import process_lib
+import util
 
 #from sqldb import  rtStatusDb,configDB,SqlDb1,SqlDb2,SqlDb3,SqlDb4,financieelDb,WatermeterDBV2
-from logger import fileLogger,logging
-from util import setFile2user, daysPerMonth,isMod, mkLocalTimeString, getUtcTime
-from datetime import datetime, timedelta
-from datetime import date
+#from logger import fileLogger,logging
+#from util import setFile2user, daysPerMonth,isMod, mkLocalTimeString, getUtcTime
+#from datetime import datetime, timedelta
+#from datetime import date
 
 prgname = 'P1Db'
 
@@ -181,10 +186,9 @@ def Main():
 
     flog.info(inspect.stack()[0][3]+": hoofd programma loop gestart.")
     rt_status_db.timestamp(6,flog)
-    updateWeaterData()
+    #updateWeaterData()
     backupData()
-    
-    #print( getCpuInfo() )
+
     #sys.exit(0)
     #print "###### ->day =" + str( floatX3( float( datetime.now().timetuple().tm_yday)/365 )*100) 
 
@@ -218,13 +222,10 @@ def Main():
             #    powerSwitcher()
             #    tarifSwitcher()
                 
-            if isMod(timestamp,15) == True:
-                updateWeaterData()
-                #ePrediction()
+            if util.isMod( timestamp, 15 ) == True:
                 backupData()
                 cleanDb()
-                #pauze_tijd_hoofdloop=11
-        
+
             #flog.setLevel(logging.INFO)
 
         else: # niet aanpassen!
@@ -237,28 +238,10 @@ def Main():
 
 # functions 
 
-def updateWeaterData():
-    #flog.setLevel(logging.DEBUG)
-    #flog.consoleOutputOn(True) 
-    try:
-        # check if API key is set.
-        sqlstr = "select id, parameter from "+const.DB_CONFIG_TAB+" where id=13"
-        sqlstr=" ".join(sqlstr.split())
-        #flog.debug(inspect.stack()[0][3]+": sql(1)="+sqlstr);
-        config=config_db.select_rec(sqlstr)    
-        #flog.debug(inspect.stack()[0][3]+": waarde config record"+str(config))
-        if len(config[0][1]) > 31: #valid API key, process.
-            os.system('/p1mon/scripts/P1Weather.py')
-    except Exception as e:
-        flog.error(inspect.stack()[0][3]+": sql error(config API key)"+str(e))
-        return    
-    #flog.setLevel(logging.INFO)
-    #flog.consoleOutputOn(False) 
-
 def updateGas():
     
     timestamp_dag = timestamp[0:10]
-    timestamp_yesterday    = str(datetime.strptime(timestamp,"%Y-%m-%d %H:%M") - timedelta(minutes=1440))[0:10]
+    timestamp_yesterday    = str(datetime.datetime.strptime(timestamp,"%Y-%m-%d %H:%M") - datetime.timedelta(minutes=1440))[0:10]
     #print(timestamp_dag)
     #print(timestamp_yesterday)
     min_gas_value=max_gas_value=0
@@ -606,11 +589,11 @@ def updateDbDayMoney():
 
 
     # vastrecht per dag
-    e_vastrecht = float(rec_config[5][1])/daysPerMonth(timestamp_dag)
+    e_vastrecht = float(rec_config[5][1])/util.daysPerMonth(timestamp_dag)
     flog.debug(inspect.stack()[0][3]+": Elektriciteit vastrecht per dag is "+str(e_vastrecht)+" per maand is "+rec_config[5][1])
-    g_vastrecht = float(rec_config[7][1])/daysPerMonth(timestamp_dag)
+    g_vastrecht = float(rec_config[7][1])/util.daysPerMonth(timestamp_dag)
     flog.debug(inspect.stack()[0][3]+": Gas vastrecht per dag is "+str(g_vastrecht)+" per maand is "+rec_config[7][1])
-    w_vastrecht = float(rec_config[8][1])/daysPerMonth(timestamp_dag)
+    w_vastrecht = float(rec_config[8][1])/util.daysPerMonth(timestamp_dag)
     flog.debug(inspect.stack()[0][3]+": Water vastrecht per dag is "+str(w_vastrecht)+" per maand is "+rec_config[8][1])
 
     try:
@@ -668,44 +651,44 @@ def updateDbDayMoney():
     #flog.setLevel( logging.INFO )
 
 def setFileFlags():
-    setFile2user(const.FILE_DB_E_FILENAME,'p1mon')
-    setFile2user(const.FILE_DB_E_HISTORIE,'p1mon')
-    setFile2user(const.FILE_DB_CONFIG,'p1mon')
-    setFile2user(const.FILE_DB_STATUS,'p1mon')
-    setFile2user(const.FILE_DB_FINANCIEEL,'p1mon')
-    setFile2user(const.FILE_DB_WEATHER,'p1mon')
-    setFile2user(const.FILE_DB_WEATHER_HISTORIE,'p1mon')
-    setFile2user(const.FILE_DB_TEMPERATUUR_FILENAME,'p1mon')
-    setFile2user(const.FILE_DB_WATERMETER,'p1mon')
-    setFile2user(const.FILE_DB_PHASEINFORMATION,'p1mon')
+    util.setFile2user(const.FILE_DB_E_FILENAME,'p1mon')
+    util.setFile2user(const.FILE_DB_E_HISTORIE,'p1mon')
+    util.setFile2user(const.FILE_DB_CONFIG,'p1mon')
+    util.setFile2user(const.FILE_DB_STATUS,'p1mon')
+    util.setFile2user(const.FILE_DB_FINANCIEEL,'p1mon')
+    util.setFile2user(const.FILE_DB_WEATHER,'p1mon')
+    util.setFile2user(const.FILE_DB_WEATHER_HISTORIE,'p1mon')
+    util.setFile2user(const.FILE_DB_TEMPERATUUR_FILENAME,'p1mon')
+    util.setFile2user(const.FILE_DB_WATERMETER,'p1mon')
+    util.setFile2user(const.FILE_DB_PHASEINFORMATION,'p1mon')
 
     _dummy,tail = os.path.split(const.FILE_DB_E_FILENAME)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split(const.FILE_DB_E_HISTORIE)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split(const.FILE_DB_CONFIG)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split(const.FILE_DB_STATUS)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split(const.FILE_DB_FINANCIEEL)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split(const.FILE_DB_WEATHER)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split(const.FILE_DB_WEATHER_HISTORIE)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon') 
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon') 
     _dummy,tail = os.path.split(const.FILE_DB_TEMPERATUUR_FILENAME)
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split( const.FILE_DB_WATERMETERV2 )
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
     _dummy,tail = os.path.split( const.FILE_DB_PHASEINFORMATION )
-    setFile2user(const.DIR_FILEDISK+tail,'p1mon')
+    util.setFile2user(const.DIR_FILEDISK+tail,'p1mon')
 
 
 def cleanDb():
-    timestr=mkLocalTimeString() 
+    timestr=util.mkLocalTimeString() 
     # minuten records verwijderen
     sql_del_str = "delete from "+const.DB_HISTORIE_MIN_TAB+" where timestamp <  '"+\
-    str(datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - timedelta(days=31))+"'"
+    str(datetime.datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=31))+"'"
     try:
         flog.debug(inspect.stack()[0][3]+": sql="+sql_del_str)
         e_db_history_min.del_rec(sql_del_str)     
@@ -714,7 +697,7 @@ def cleanDb():
 
     # uur records verwijderen
     sql_del_str = "delete from "+const.DB_HISTORIE_UUR_TAB+" where timestamp <  '"+\
-    str(datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - timedelta(days=1096))+"'"
+    str(datetime.datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096))+"'"
     try:
         flog.debug(inspect.stack()[0][3]+": sql="+sql_del_str)
         e_db_history_uur.del_rec(sql_del_str)     
@@ -723,18 +706,13 @@ def cleanDb():
 
     # dagen records verwijderen
     sql_del_str = "delete from "+const.DB_HISTORIE_DAG_TAB+" where timestamp <  '"+\
-    str(datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - timedelta(days=1096))+"'"
+    str(datetime.datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096))+"'"
     try:
         flog.debug(inspect.stack()[0][3]+": sql="+sql_del_str)
         e_db_history_dag.del_rec(sql_del_str)     
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": verwijderen dag recs,delete gefaald. Melding="+str(e.args[0]))
 
-def saveExit(signum, frame):   
-        signal.signal(signal.SIGINT, original_sigint)
-        backupData()
-        flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, data gekopieerd en gestopt.")
-        sys.exit(0)
 
 def backupFile(filename):
     try:
@@ -748,12 +726,28 @@ def backupFile(filename):
 def backupData():
     #setFileFlags()
     flog.debug(inspect.stack()[0][3]+": Gestart")
-    os.system("/p1mon/scripts/P1DbCopy.py --allcopy2disk --forcecopy")
+    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2disk --forcecopy")
+    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2disk --forcecopy" # 1.8.0
+    process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=False,
+        flog=flog
+    )
+
+
     rt_status_db.timestamp(29,flog)
     flog.debug(inspect.stack()[0][3]+": Gereed")
 
 def DiskRestore():
-    os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
+    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
+    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2ram" # 1.8.0
+    process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+    )
 
 def updateDbYear():
     timestamp_jaar = timestamp[0:4]+"-01-01 00:00:00"
@@ -992,7 +986,7 @@ def powerUsedPerMin():
         sqlstr = "select min(timestamp) from "+const.DB_SERIAL_TAB+" where record_verwerkt=0"
         rec_serial=e_db_serial.select_rec(sqlstr)
         timestamp            = str(rec_serial[0][0])[0:16]
-        timestamp_min_one    = str(datetime.strptime(timestamp,"%Y-%m-%d %H:%M") - timedelta(minutes=1))[0:16]
+        timestamp_min_one    = str(datetime.datetime.strptime(timestamp,"%Y-%m-%d %H:%M") - datetime.timedelta(minutes=1))[0:16]
         flog.debug(inspect.stack()[0][3]+": timestamp nog niet verwerkte oudste record in serieele database ="+timestamp+" vorige minuut ="+timestamp_min_one)
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": sql error(find timestamp)"+str(e))
@@ -1080,19 +1074,24 @@ def serialDataAvailable():
         flog.warning(inspect.stack()[0][3]+": e-serial db kan niet worden gelezen, fout: "+str(e))
         return 0
 
+def saveExit(signum, frame):   
+        signal.signal(signal.SIGINT, original_sigint)
+        backupData()
+        flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, data gekopieerd en gestopt.")
+        sys.exit(0)
+
 #-------------------------------
 if __name__ == "__main__":
 
     try:
         os.umask( 0o002 )
-        flog = fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )    
-        #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log", prgname )    
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True ) 
     except Exception as e:
         print ("critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )
         sys.exit(1)
     
     original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT,  saveExit)
-    Main()       
+    signal.signal( signal.SIGINT,  saveExit )
+    Main()

@@ -219,9 +219,16 @@ fi
 
 # make default http config file
 echo "=> standaard http configuratie wordt aangemaakt."
-export PYTHONPATH=/home/p1mon/.local/lib/python3.7/site-packages # needed because we run as root
 ACTIVE_DIR=$CLONE/etc/nginx/sites-enabled
-/p1mon/scripts/P1NginxConfig.py --createhttpconfigfile $ACTIVE_DIR/p1mon_80
+/p1mon/scripts/pythonlaunch.sh P1NginxConfig.py --createhttpconfigfile $ACTIVE_DIR/p1mon_80
+echo "=> wacht 10 seconden."
+sleep 10
+
+DHCPCDFILE=$CLONE/etc/dhcpcd.conf
+echo "=> default dhcpcd config file naar clone schrijven : $DHCPCDFILE"
+/p1mon/scripts/pythonlaunch.sh P1NetworkConfig.py --defaultdhcpconfig -fp $DHCPCDFILE
+echo "=> wacht 10 seconden."
+sleep 10
 
 ACTIVE_DIR=$CLONE/p1mon/data
 if [ -d "$ACTIVE_DIR" ]; then
@@ -491,6 +498,10 @@ API_TOKENS_FILE=$CLONE/etc/nginx/conf.d/api-tokens.conf
 echo "=> verwijderden van API tokens bestand $API_TOKENS_FILE"
 rm $API_TOKENS_FILE
 
+SOCAT_SERVICE_FILE=$CLONE/etc/systemd/system/socat.service
+echo "=> verwijderden van socat service bestand $SOCAT_SERVICE_FILE"
+rm $SOCAT_SERVICE_FILE
+
 # deze regel zorgt ervoor dat wpa_supplicant start en een reboot niet nodig is om wifi in stellen.
 echo "=> leeg wpa_supplicant bestand wegschrijven "
 cp $P1MON_SCRIPTS/wpa_supplicant.conf.empty $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
@@ -508,10 +519,6 @@ find $EDITOR -type f -name "._*" -delete
 VARBACKUP=$CLONE/var/backups/*.gz
 echo "=> verwijderden van gzip files : $VARBACKUP"
 rm -f $VARBACKUP
-
-DHCPCDFILE=$CLONE/etc/dhcpcd.conf
-echo "=> default dhcpcd config file naar clone schrijven : $DHCPCDFILE"
-/p1mon/scripts/P1NetworkConfig.py --defaultdhcpconfig --forced -fp $DHCPCDFILE
 
 cd $CUR_DIR
 echo "=> unmounting $CLONE/boot"

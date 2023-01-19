@@ -17,6 +17,18 @@ kw_min_max_record = {
 }
 
 #############################################
+# dhcp config fields   #
+# and such. keeps status                    #
+#############################################
+dhcpcd_config = {
+    'eth0_static_ip4' : '',
+    'wlan0_static_ip4': '',
+    'routers_ip4': '',
+    'domain_name_servers_ip4': ''
+}
+
+
+#############################################
 # p1 status record, used for proces status  #
 # and such. keeps status                    #
 #############################################

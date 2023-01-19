@@ -161,6 +161,21 @@ div#import_sql_message {
     display: none;
 }
 
+div#patch_status_message {
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    padding: 10px 0px 10px 0px;
+    width: 900px;
+    text-align: left;
+    /* color: #83B31E; */
+    background-color: #F5F5F5;
+    box-shadow: 0px 5px 8px -2px #eaeaea;
+    font-size: 1em;
+    display: none;
+}
+
 
 div#aide_status {
     border-radius: 5px 5px 5px 5px;
@@ -515,6 +530,11 @@ select {
 .color-voltage {
     color: #ff3333;
 }
+
+.color-degreedays {
+    color: #450f3f;
+}
+
 
 .container {
     display: flex;
@@ -1480,28 +1500,23 @@ a:hover {
 
 
 #progressbar {
-    background-color: #DCE1E3;
     border-radius: 3px;
     padding: 3px;
-    width: 16em;
-    margin: auto;
+    margin-left: 10px;
 }
 
+/*
 #progressbar>div {
     background-color: #10D0E7;
     width: 0%;
     height: 20px;
     border-radius: 3px;
 }
+*/
 
 .progressbar-2 {
     background-color: #10D0E7 !important;
-    border-radius: 3px;
-    padding: 3px;
-    width: 16em;
     height: 20px;
-    margin: auto;
-    text-align: center;
 }
 
 .pad-1 {

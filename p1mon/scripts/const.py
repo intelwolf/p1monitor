@@ -28,14 +28,16 @@
 # Versie 1.5.0 P1UpdateAide en Excel export toegevoegd.
 # Versie 1.6.0 Bug fixes. patch 1 lost een fout in /etc/dhcpcd.conf
 # versie 1.7.0 min max fase info toegevoegd en grootverbruikers meters.
+# versie 2.0.0 os upgrade naar Bulseye OS en introductie van Python virtuele omgevingen.
+# versie 2.1.0 os upgrade naar graaddagen en SOCAT toegevoegd.
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "1.7.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "d"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
-P1_SERIAL_VERSION               = "20220601"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "2.1.0"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "b"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
+P1_SERIAL_VERSION               = "20221105"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'
@@ -151,6 +153,7 @@ FILE_UPGRADE_AIDE_STATUS        ="/p1mon/mnt/ramdisk/upgrade-aide.status"
 FILE_POWERPRODUCTION_CNT_STATUS ="/p1mon/mnt/ramdisk/powerproduction-counter-reset.status"
 FILE_WATERMETER_CNT_STATUS      ="/p1mon/mnt/ramdisk/watermeter-counter-reset.status"
 FILE_SQL_IMPORT_STATUS          ="/p1mon/mnt/ramdisk/sqlimport.status"
+FILE_PATCH_STATUS               ="/p1mon/mnt/ramdisk/patch.status"
 TARIEF_VERBR_LAAG               ="0.20522"
 TARIEF_VERBR_HOOG               ="0.20522"
 TARIEF_GELVR_LAAG               ="0.20522"
@@ -161,11 +164,11 @@ GAS_VASTRECHT_TARIEF_PER_MAAND  ="0"
 TARIEF_WATER_VASTRECHT_PER_MAAND="0"
 TARIEF_WATER_TARIEF_PER_M3      ="0"
 FINANCIEEL_GRENS_MAX            ="0"
-FILESHARE_MODE_UIT              ="uit"
-FILESHARE_MODE_DATA             ="data"
-FILESHARE_MODE_DEV              ="dev"
 P1MSG_BUF_SIZE                  ="120"
 NOT_SET                         = 999999999999
 
-######################### NO-IP config ##################
+######################### NO-IP config #######################
+# niet meer in gebruik maar kan in de toekomst weer gebruikt #
+# worden.                                                    #
+##############################################################
 NO_IP_CONFIG_FILE               = '/p1mon/etc/no-ip2.conf'

@@ -1,35 +1,34 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1WatermeterV2CounterSet.py
+
 import const
 import inspect
+import datetime
+import logger
 import os
-import shutil
-import signal
-import socket
 import sys
-import random
 import time
 import datetime
 import sqldb
 import subprocess
-import psutil
+import listOfPidByName
 
-from multiprocessing import Process, Queue
-from threading import Timer
-from datetime import datetime, timedelta, timezone
-from logger import fileLogger,logging
-from sqldb import configDB, rtStatusDb, WatermeterDB, WatermeterDBV2
-from time import sleep
-from util import fileExist,setFile2user, getUtcTime, mkLocalTimeString
-from utiltimestamp import utiltimestamp
+#from multiprocessing import Process, Queue
+#from threading import Timer
+#from datetime import datetime, timedelta, timezone
+#from logger import fileLogger,logging
+#from sqldb import configDB, rtStatusDb, WatermeterDB, WatermeterDBV2
+#from time import sleep
+#from util import fileExist,setFile2user, getUtcTime, mkLocalTimeString
+#from utiltimestamp import utiltimestamp
 from dateutil.relativedelta import *
-from listOfPidByName import listOfPidByName
+#from listOfPidByName import listOfPidByName
 
 # programme name.
 prgname = 'P1WatermeterV2CounterSet'
 
-rt_status_db        = rtStatusDb()
-config_db           = configDB()
-watermeter_db       = WatermeterDBV2()
+rt_status_db        = sqldb.rtStatusDb()
+config_db           = sqldb.configDB()
+watermeter_db       = sqldb.WatermeterDBV2()
 
 ########################################################
 # start of program                                     #
@@ -38,11 +37,11 @@ def Main(argv):
 
     my_pid = os.getpid()
     flog.info("Start van programma met process id " + str(my_pid) )
-    pid_list, _process_list = listOfPidByName( prgname )
+    pid_list, _process_list = listOfPidByName.listOfPidByName( prgname )
     #print ( pid_list )
     pid_list.remove( my_pid ) # remove own pid from the count
     #flog.debug( inspect.stack()[0][3] + ": pid list clean " + str(pid_list ) )
-    if len( pid_list ) > 1: # more then 1 because the script is started from os.system()
+    if len( pid_list ) > 1: 
         msg_str = "Gestopt een andere versie van het programma is actief."
         writeLineToStatusFile( msg_str )
         flog.info( inspect.stack()[0][3] + ": " + msg_str )
@@ -155,7 +154,7 @@ def updateCounterRecords( timestamp , max_timestamp, verbr_m3_reset_value, perio
 
     verbr_m3_reset_value = float( verbr_m3_reset_value )
     try:
-        ts_next = datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S")
+        ts_next = datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S")
     except Exception as e:
         flog.warning( inspect.stack()[0][3]+": waarschuwing voor timestamp " + str(timestamp) +  " -> " + str(e) + " verwerking gestopt voor deze periode. " )
         return None, None
@@ -163,17 +162,17 @@ def updateCounterRecords( timestamp , max_timestamp, verbr_m3_reset_value, perio
     if period == sqldb.INDEX_MINUTE:
         substr_index = 17
         timestamp_str_postfix = "00"
-        timestamp_delta = timedelta( minutes=1 )
+        timestamp_delta = datetime.timedelta( minutes=1 )
         period_text = "Minuut"
     elif period == sqldb.INDEX_HOUR:
         substr_index = 14
         timestamp_str_postfix = "00:00"
-        timestamp_delta = timedelta( hours=1 )
+        timestamp_delta = datetime.timedelta( hours=1 )
         period_text = "Uur"
     elif period == sqldb.INDEX_DAY:
         substr_index = 11
         timestamp_str_postfix = "00:00:00"
-        timestamp_delta = timedelta( days=1 )
+        timestamp_delta = datetime.timedelta( days=1 )
         period_text = "Dag"
     elif period == sqldb.INDEX_MONTH:
         substr_index = 7
@@ -227,7 +226,7 @@ def updateCounterRecords( timestamp , max_timestamp, verbr_m3_reset_value, perio
             flog.debug ( inspect.stack()[0][3] + ": " + msg_str )
             break
 
-        ts_next = datetime.strptime( str(ts_next), "%Y-%m-%d %H:%M:%S") + timestamp_delta
+        ts_next = datetime.datetime.strptime( str(ts_next), "%Y-%m-%d %H:%M:%S") + timestamp_delta
 
 ########################################################
 # find maximum and minium timestamps for an given      #
@@ -331,9 +330,9 @@ if __name__ == "__main__":
     global process_bg 
     try:
         os.umask( 0o002 )
-        flog = fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
 
         status_fp = open( const.FILE_WATERMETER_CNT_STATUS, "w")
@@ -341,7 +340,7 @@ if __name__ == "__main__":
         status_fp.close()
 
     except Exception as e:
-        print ("critical geen logging mogelijke, gestopt.:"+str(e.args[0]))
+        print ( "critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(1)
 
     Main(sys.argv[1:])

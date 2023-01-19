@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1Backup.py
+
 import argparse
 import const
 import inspect
@@ -10,14 +11,9 @@ import shutil
 import sys
 import systemid
 import sqldb
+import time
 import util
-
-#from sqldb import *
-#from logger import *
-#from util import *
-#from shutil import copy2
-#from os.path import isfile,join
-#from os import listdir
+import process_lib
 
 prgname = 'P1Backup'
 exportfile_base = '/p1mon/www/download/p1mon-sql-export'
@@ -69,16 +65,43 @@ def Main(argv):
     if int(parameter) == 1:
         flog.debug(inspect.stack()[0][3]+": export file wordt gemaakt.")
         file_tmp_id = str( util.getUtcTime() ) + "-" + systemid.getSystemId()
-        cmd = "/p1mon/scripts/P1SqlExport.py -e " + file_tmp_id 
+        # cmd = "/p1mon/scripts/P1SqlExport.py -e " + file_tmp_id 
+        #flog.debug( inspect.stack()[0][3] + ": export commando is ->" + str(cmd ))
+        #retvalue = os.system("/p1mon/scripts/P1SqlExport.py -e " + file_tmp_id )
+        #if retvalue != 0:
+        #    flog.error(inspect.stack()[0][3]+": export van file gefaald, gestopt.")
+        #    sys.exit(3)
+
+        cmd = "/p1mon/scripts/pythonlaunch.sh P1SqlExport.py -e " + file_tmp_id  # 1.8.0 upgrade
         flog.debug( inspect.stack()[0][3] + ": export commando is ->" + str(cmd ))
-        retvalue = os.system("/p1mon/scripts/P1SqlExport.py -e " + file_tmp_id )
-        if retvalue != 0:
+
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog,
+            timeout=None
+        )
+        if r[2] > 0:
             flog.error(inspect.stack()[0][3]+": export van file gefaald, gestopt.")
             sys.exit(3)
-        export_file = exportfile_base+file_tmp_id+'.zip'
-        if util.fileExist(export_file) == False:
-            flog.error(inspect.stack()[0][3]+": export file "+export_file+" niet gevonden, gestopt.")
-            sys.exit(4)
+
+        # wait for the export to complete for max 3 minutes
+        export_file = exportfile_base + file_tmp_id + '.zip'
+        for i in range( 300 ):
+            if util.fileExist( export_file ):
+                flog.info( inspect.stack()[0][3]+": export file " + export_file + " gevonden. ")
+                break
+            time.sleep(1)
+            if i > 180:
+                flog.error(inspect.stack()[0][3]+": export file " + export_file + " niet gevonden, gestopt.")
+                sys.exit(4)
+
+        #export_file = exportfile_base + file_tmp_id + '.zip'
+        #if util.fileExist( export_file ) == False:
+           # flog.error(inspect.stack()[0][3]+": export file " + export_file + " niet gevonden, gestopt.")
+           # sys.exit(4)
+
         # update config database with current name of backup file.
         config_db.strset(export_file,33, flog)
         
@@ -92,17 +115,30 @@ def Main(argv):
             if len ( os.listdir( const.DIR_DBX_LOCAL + const.DBX_DIR_BACKUP ) ) > 10 :
                 flog.critical(inspect.stack()[0][3]+": Dropbox backup bestand niet gekopierd, te veel bestanden in ram buffer.")
             else:
-                flog.debug(inspect.stack()[0][3]+": copy export file naar lokale dropbox folder: "+export_file)
+                flog.debug(inspect.stack()[0][3]+": copy export file naar lokale dropbox folder: " + export_file )
                 shutil.copy2(export_file, const.DIR_DBX_LOCAL+const.DBX_DIR_BACKUP)
                 _head,tail = os.path.split( export_file ) 
                 util.setFile2user(const.DIR_DBX_LOCAL+const.DBX_DIR_BACKUP+'/'+tail,'p1mon')
         except Exception as e:
-            flog.error(inspect.stack()[0][3]+": Dropbox back-up. melding:"+str(e.args[0]))
+            flog.error(inspect.stack()[0][3]+": Dropbox back-up. melding:" + str( e.args[0]) )
     
     if do_ftp_backup == 1:
         flog.info(inspect.stack()[0][3]+": FTP backup gestart")
-        retvalue = os.system("/p1mon/scripts/P1FtpCopy.py")
-        if retvalue > 0:
+        #retvalue = os.system("/p1mon/scripts/P1FtpCopy.py")
+        #if retvalue > 0:
+        #    flog.error(inspect.stack()[0][3]+": ftp backup gefaald, gestopt.")
+        #    sys.exit(5)
+
+        cmd = "/p1mon/scripts/pythonlaunch.sh P1FtpCopy.py" # 1.8.0 upgrade
+        flog.debug( inspect.stack()[0][3] + ": export commando is ->" + str(cmd ))
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog,
+            timeout=None
+        )
+        if r[2] > 0:
             flog.error(inspect.stack()[0][3]+": ftp backup gefaald, gestopt.")
             sys.exit(5)
     

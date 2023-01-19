@@ -1,10 +1,10 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1SolarEdgeSetup.py
+
 import argparse
 import const
 import data_struct_lib
 import datetime_delta_lib
 import datetime
-import json
 import json_lib
 import inspect
 import makeLocalTimeString

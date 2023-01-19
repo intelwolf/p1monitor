@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1NginxConfig.py
+
 import argparse
 import base64
 import const
@@ -16,20 +17,15 @@ import pwd
 import pathvalidate.argparse
 import sqldb
 import signal
-import string
 import subprocess
 import sys
 import random
 import tempfile
 import util
 import network_lib
+import process_lib
 import makeLocalTimeString
 
-# defines moved to nginx_lib.py 2021-10-30 post version 1.4.1
-#nginx_lib.P80FILE         = const.DIR_NGINX_BASE + '/sites-enabled/p1mon_80'
-#nginx_lib.P443FILE        = const.DIR_NGINX_BASE + '/sites-enabled/p1mon_443'
-#nginx_lib.APIKEYFILE      = const.DIR_NGINX_BASE + '/conf.d/api-tokens.conf'
-#nginx_lib.DIVMAPSFILE     = const.DIR_NGINX_BASE + '/conf.d/divmaps.conf'
 LETSENCRYPY_TAG = 'LetsEncrypt'
 NGINX_TMP_EXT   = '_nginx.tmp'
 
@@ -46,13 +42,14 @@ server {
     add_header Strict-Transport-Security 'max-age=63072000; includeSubdomains;' always;
 
     # Content Security Policy (CSP)
-    add_header Content-Security-Policy "default-src 'self'; font-src *;img-src * data:; script-src *; style-src *" always;
+    add_header Content-Security-Policy "default-src 'none'; frame-src 'none'; frame-ancestors 'none';" always;
 
     # X-XSS-Protection
     add_header X-XSS-Protection "1; mode=block" always;
 
     # X-Frame-Options
     add_header X-Frame-Options "SAMEORIGIN" always;
+    #add_header X-Frame-Options "DENY" always;
 
     # X-Content-Type-Options
     add_header X-Content-Type-Options nosniff always;
@@ -157,7 +154,7 @@ server {
     ############################################
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
         fastcgi_read_timeout 305;
     }
 
@@ -281,7 +278,7 @@ def Main( argv ):
         action="store_true",
         help="configureer het config file voor de router/gatway. Nodig voor http naar https redirection." )
 
-    parser.add_argument( '-r',  '--renewcerts', 
+    parser.add_argument( '-r', '--renewcerts',
         required=False,
         action="store_true",
         help="renew alle certificaten die aangemaakt zijn" )
@@ -629,8 +626,14 @@ def set_default_p80_config():
     ##################################################################
     # remove https file if exists, not needed in default http mode   #
     ##################################################################
-    cmd = '/usr/bin/sudo rm -f ' + nginx_lib.P443FILE
-    os.system( cmd ) # may fail silent.
+    #cmd = '/usr/bin/sudo rm -f ' + nginx_lib.P443FILE
+    #os.system( cmd ) # may fail silent. # 1.8.0 upgrade
+    process_lib.run_process( 
+        cms_str='/usr/bin/sudo rm -f ' + nginx_lib.P443FILE,
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+        )
 
     if check_nginx_configuration( flog=flog ) == False:
         flog.error( inspect.stack()[0][3] + ": configuratie bestand fout, gestopt!")
@@ -657,7 +660,8 @@ def set_cert_auto_renew( mode='on' , flog=None ):
 
     if mode == 'on':
         try:
-            job = cron.new(command='/p1mon/scripts/P1NginxConfig.py --renewcerts >/dev/null 2>&1', comment=LETSENCRYPY_TAG)
+            #job = cron.new(command='/p1mon/scripts/P1NginxConfig.py --renewcerts >/dev/null 2>&1', comment=LETSENCRYPY_TAG)
+            job = cron.new(command='/p1mon/scripts/pythonlaunch.sh P1NginxConfig.py --renewcerts >/dev/null 2>&1', comment=LETSENCRYPY_TAG)
             # be nice to LetsEncrypt and not DDOS with P1 monitor.
             hour = random.randint(0,6)
             min  = random.randint(0,59)
@@ -726,13 +730,16 @@ def set_nginx_https_config():
         flog.critical( inspect.stack()[0][3] + ": poort 443 bestand fout " )
         sys.exit(1) # things went wrong.
 
-    if check_nginx_configuration( flog=flog ) == False:
-        flog.error( inspect.stack()[0][3] + ": configuratie bestand fout, gestopt!")
-        sys.exit(1)
-
     # restart the Nginx webserver
     nginx_restart()
 
+    if check_nginx_configuration( flog=flog ) == False:
+        flog.error( inspect.stack()[0][3] + ": configuratie bestand fout, failsave wordt gestart.")
+        # activate failsave
+        flog.warning( inspect.stack()[0][3] + ": standaard configuratie bestand gemaakt als failsave.")
+        make_nginx_conf() 
+        set_default_p80_config()
+        
     # normal exit
     flog.info( inspect.stack()[0][3] + ": config files aanpassen met FQDN " + str( fqdn ) + " gereed.")
     sys.exit(0)
@@ -754,7 +761,7 @@ def nginx_restart( mode='reload' ):
         prg_name ='nginx'
         pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.info( inspect.stack()[0][3] + ": " + prg_name + " aantal gevonden Nginx processen = " + str(len(pid_list) ) )
-        if len(pid_list) < 1:
+        if len( pid_list ) < 1:
             flog.warning( inspect.stack()[0][3] + ": nginx is niet actief forceer een restart." )
             mode = 'restart'
 
@@ -807,13 +814,19 @@ def write_buffer( buffer=None, file=None, flog=None ) -> bool:
     # get rid of old tmp files if any.
     clean_tmp_files()
 
-    tmp_file = generate_temp_filename() + NGINX_TMP_EXT
+    tmp_file = filesystem_lib.generate_temp_filename() + NGINX_TMP_EXT # changed in 1.8.0 temp filename from lib
 
     try:
 
         if os.path.exists( file ):
-            os.system( '/usr/bin/sudo rm ' + file )
-
+            # os.system( '/usr/bin/sudo rm ' + file ) 1.8.0 upgrade
+            process_lib.run_process( 
+                cms_str='/usr/bin/sudo rm ' + file,
+                use_shell=True,
+                give_return_value=False,
+                flog=flog 
+            )
+    
         ##################################################################
         # maken temporary file so we can move the file to root ownership #
         ##################################################################
@@ -838,41 +851,71 @@ def write_buffer( buffer=None, file=None, flog=None ) -> bool:
     
     return True
 
-# TODO gebruik filesystem_lib.py functie
+
 # let op gebruik Excepties en geen status return.
 ################################################################
 # move a file to the destination and set the rights to 644 and #
 # ownership to root:root                                       #
 # true is ok, false is fatal error                             #
 ################################################################
-def move_file_for_root_user(source=None, destination=None ) -> bool:
-    cmd = '/usr/bin/sudo mv -f ' + source + ' ' + destination
+def move_file_for_root_user( source=None, destination=None ) -> bool:
+    #cmd = '/usr/bin/sudo mv -f ' + source + ' ' + destination
     #print ( cmd )
-    if os.system( cmd ) > 0:
+    #if os.system( cmd ) > 0:
+    #    flog.critical( inspect.stack()[0][3] + ": verplaatsen van file error " + source  )
+    #    return False
+
+    r = process_lib.run_process( 
+        cms_str = '/usr/bin/sudo mv -f ' + source + ' ' + destination,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+        )
+    if ( r[2] ) > 0:
         flog.critical( inspect.stack()[0][3] + ": verplaatsen van file error " + source  )
         return False
 
-    cmd = '/usr/bin/sudo chmod 600 ' + destination
+    #cmd = '/usr/bin/sudo chmod 600 ' + destination
     #print( cmd )
-    if os.system( cmd ) > 0:
+    #if os.system( cmd ) > 0:
+    #    flog.warning( inspect.stack()[0][3] + ": file eigenaarschap fout. " + destination  )
+
+    r = process_lib.run_process( 
+        cms_str = '/usr/bin/sudo chmod 600 ' + destination,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+        )
+    if ( r[2] ) > 0:
         flog.warning( inspect.stack()[0][3] + ": file eigenaarschap fout. " + destination  )
 
-    cmd = '/usr/bin/sudo chown root:root ' + destination
+    #cmd = '/usr/bin/sudo chown root:root ' + destination
     #print( cmd )
-    if os.system( cmd ) > 0:
+    #if os.system( cmd ) > 0:
+    #    flog.warning( inspect.stack()[0][3] + ": file rechten fout. " + destination  )
+
+    r = process_lib.run_process(
+        cms_str = '/usr/bin/sudo chown root:root ' + destination,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+        )
+    if ( r[2] ) > 0:
         flog.warning( inspect.stack()[0][3] + ": file rechten fout. " + destination  )
 
     return True 
 
+"""  naar filesystem_lib verplaatst in versie 1.8.0
 ##########################################################
 # generate a tempory file name in the default tmp folder #
 ##########################################################
 def generate_temp_filename() -> str:
     random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
     return os.path.join(tempfile.gettempdir(), random_string)
+"""
 
 ########################################################
-# header timstamp string                               #
+# header timestamp string                              #
 ########################################################
 def generate_header_string():
     str = \

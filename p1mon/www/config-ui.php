@@ -356,7 +356,7 @@ function makeSelectorHomeSelector($id) {
 
 function makeSelectorKWhSelector($id) {
     $configValue = config_read($id);
-    $val_10=$val_20=$val_40=$val_60=$val_80=$val_100=$val_1000=$val_2000='';
+    $val_10=$val_20=$val_40=$val_60=$val_80=$val_100=$val_1000=$val_2000=$val_4000=$val_8000='';
     
     if ($configValue == '10' )  { $val_10   = 'selected="selected"'; }
     if ($configValue == '20' )  { $val_20   = 'selected="selected"'; }
@@ -366,6 +366,8 @@ function makeSelectorKWhSelector($id) {
     if ($configValue == '100')  { $val_100  = 'selected="selected"'; }
     if ($configValue == '1000') { $val_1000 = 'selected="selected"'; }
     if ($configValue == '2000') { $val_2000 = 'selected="selected"'; }
+    if ($configValue == '4000') { $val_4000 = 'selected="selected"'; }
+    if ($configValue == '8000') { $val_8000 = 'selected="selected"'; }
 
     echo '<option ' . $val_10   . ' value="10"   >10 kWh</option>';
     echo '<option ' . $val_20   . ' value="20"   >20 kWh</option>';
@@ -375,6 +377,8 @@ function makeSelectorKWhSelector($id) {
     echo '<option ' . $val_100  . ' value="100"  >100 kWh</option>';
     echo '<option ' . $val_1000 . ' value="1000" >1000 kWh</option>';
     echo '<option ' . $val_2000 . ' value="2000" >2000 kWh</option>';
+    echo '<option ' . $val_4000 . ' value="4000" >4000 kWh</option>';
+    echo '<option ' . $val_8000 . ' value="8000" >8000 kWh</option>';
 }
 
 function makeSelectorKwSelector($id) {

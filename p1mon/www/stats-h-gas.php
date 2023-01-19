@@ -31,13 +31,15 @@ if ( checkDisplayIsActive(20) == false) { return; }
 var GverbrData      = [];
 var Granges         = [];
 var Gaverages       = [];
+var GDegreeDays     = [];
+
 var seriesOptions   = [];
 var recordsLoaded   = 0;
 var initloadtimer;
 var Gselected       = 0;
 // var GselectText     = ["12 uur","1 dag","1 week","1 maand"];
 var GselectText     = ["12 uur","1 dag","3 dagen","5 dagen"] // #PARAMETER
-var GseriesVisibilty= [true,true];
+var GseriesVisibilty= [true,true,true,true];
 var mins            = 1;
 var secs            = mins * 60;
 var currentSeconds  = 0;
@@ -49,16 +51,18 @@ var maxDataText     = ['MAX. data','MIN. data']
 var maxDataCount    = [ 26034, 744 ]
 var maxrecords      = maxDataCount[1];
 
-function readJsonApiHistoryHour( cnt ){ 
+function readJsonApiHistoryHour( cnt ){
+    //console.log( "readJsonApiHistoryHour()" )
     $.getScript( "/api/v1/powergas/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
       try {
         var jsondata  = JSON.parse(data); 
         recordsLoaded = jsondata.length;
 
         //empty the array.
-        GverbrData.length = 0; 
-        Granges.length    = 0;
-        Gaverages.length  = 0;
+        GverbrData.length  = 0;
+        Granges.length     = 0;
+        Gaverages.length   = 0;
+        GDegreeDays.length = 0;
 
         for (var j = jsondata.length; j > 0; j--){ 
             //continue;
@@ -67,8 +71,9 @@ function readJsonApiHistoryHour( cnt ){
             item[1]  = item[1] * 1000; // highchart likes millisecs.
             GverbrData.push( [item[1], item[10] ]   );
             //GverbrData.push( [item[1], 10 ]   );
-            Granges.push   ( [item[1], null, null ] );
-            Gaverages.push ( [item[1], null ]       );
+            Granges.push     ( [item[1], null, null ] );
+            Gaverages.push   ( [item[1], null ]       );
+            GDegreeDays.push ( [item[1], null ]       );
         } 
 
         readJsonApiWeatherHistoryHour( cnt ) 
@@ -79,6 +84,7 @@ function readJsonApiHistoryHour( cnt ){
 }
 
 function readJsonApiWeatherHistoryHour( cnt ){ 
+    //console.log( "readJsonApiWeatherHistoryHour" )
     $.getScript( "/api/v1/weather/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
       try {
         var jsondata = JSON.parse(data); 
@@ -93,11 +99,12 @@ function readJsonApiWeatherHistoryHour( cnt ){
                 //console.log( "k=" + k + " item[1]=" + item[1] * 1000  );
                 if ( GverbrData[k][0] == item[1] * 1000 ) {
                     //continue;
-                    //console.log( "timestamp komt overeen, range waarde =" + item[4] + " k=" + k);
+                    //console.log( "timestamp komt overeen, range waarde =" + item[4] + " k=" + k + "DG=" + item[19]);
                     //if ( k == 2 ) continue; //DEBUG
-                    Granges[k][1]   = item[4]
-                    Granges[k][2]   = item[6]
-                    Gaverages[k][1] = item[5]
+                    Granges[k][1]     = item[4]
+                    Granges[k][2]     = item[6]
+                    Gaverages[k][1]   = item[5]
+                    GDegreeDays[k][1] = item[19]
                     break;
                 }
                 
@@ -105,7 +112,8 @@ function readJsonApiWeatherHistoryHour( cnt ){
         }  
         //var t1 = performance.now();
         //console.log("Call to process took " + (t1 - t0) + " milliseconds.")
-        updateData();
+
+        updateData()
       } catch(err) {
         console.log( err )
       }
@@ -122,10 +130,10 @@ function createGasChart() {
         },
         noData: {
             style: { 
-            fontFamily: 'robotomedium',   
-                fontWeight: 'bold',     
+            fontFamily: 'robotomedium',
+                fontWeight: 'bold',
                 fontSize: '25px',
-                color: '#10D0E7'        
+                color: '#10D0E7'
         }
     },
     chart: {
@@ -167,7 +175,7 @@ function createGasChart() {
         ]
     },   
     xAxis: {
-        type: 'datetime', 
+        type: 'datetime',
         /*
         minTickInterval:        3600000, 
         range:           60   * 3600000,
@@ -199,31 +207,50 @@ function createGasChart() {
   yAxis: [
     { // gas axis
         tickAmount: 7,
-        offset: 50,
+        opposite: false,
+        offset: 0,
         labels: {
-        useHTML: true,
+        //useHTML: true,
         format: '{value} m<sup>3</sup>',
             style: {
-            color: '#507ABF'
+            color: '#507ABF',
             },
         }
-        },
-        { // temp axis
-            tickAmount: 7,
-            opposite: false,
-            gridLineDashStyle: 'longdash',
-            gridLineColor: '#6E797C',
-            gridLineWidth: 1,
-            labels: {
-                format: '{value}°C',
-                    style: {
-                    color: '#384042'
-                    }
-                },
-            title: {
-                text: null, 
+    },
+    { // temp axis
+        tickAmount: 7,
+        opposite: true,
+        gridLineDashStyle: 'longdash',
+        gridLineColor: '#6E797C',
+        gridLineWidth: 1,
+        labels: {
+            format: '{value}°C',
+                style: {
+                color: '#384042',
+                
+                }
             },
-        }],
+        title: {
+            text: null, 
+        },
+    },
+    { // degree days
+        tickAmount: 7,
+        opposite: true,
+        gridLineDashStyle: 'longdash',
+        gridLineColor: '#6E797C',
+        gridLineWidth: 1,
+        labels: {
+            format: '{value} gd',
+                style: {
+                color: '#384042'
+                }
+            },
+        title: {
+            text: null, 
+        },
+    }
+    ],
         tooltip: {
             useHTML: true,
             style: {
@@ -238,29 +265,41 @@ function createGasChart() {
             // find timestamp and add data points
             for (var i=0,  tot=GverbrData.length; i < tot; i++) {
                 if ( GverbrData[i][0] == d[0].key ) { //found time and dataset
-                    var var_verbruikt_gas   = GverbrData[i][1];
-                    var var_min_temp        = Granges[i][1];
-                    var var_max_temp        = Granges[i][2];
-                    var var_avg_temp        = Gaverages[i][1]
+                    var var_verbruikt_gas = GverbrData[i][1];
+                    var var_min_temp      = Granges[i][1];
+                    var var_max_temp      = Granges[i][2];
+                    var var_avg_temp      = Gaverages[i][1]
+                    var var_degreedays    = GDegreeDays[i][1]
+                    
                     /*
                     console.log ( GverbrData[i][1] )
                     console.log ( Granges[i][1]    )
                     console.log ( Granges[i][2]    )
                     console.log ( Gaverages[i][1]  )
+                    console.log ( GDegreeDays[i][1])
                     */
                     break; 
                 }
             }
         
+
             var verbruikt_gas="verborgen";
             if ( $('#GasChart').highcharts().series[0].visible === true ){ // Gas
                 verbruikt_gas = var_verbruikt_gas.toFixed(3)+" m<sup>3</sup>";
             }
             s += '<br/><span style="color: #507ABF">gas verbruikt: </span>'+verbruikt_gas;
             
-            var max_temp = 'verborgen';
-            var avg_temp = 'verborgen';
-            var min_temp = 'verborgen';
+            var degreedays = 'verborgen of niet bekend';
+            if ( $('#GasChart').highcharts().series[3].visible === true ){ // Gas
+                if ( var_degreedays != null ) {
+                    degreedays = var_degreedays.toFixed(3)+" graaddagen";
+                }
+            }
+            s += '<br/><span style="color: #450F3F">graaddagen: </span>' + degreedays;
+
+            var max_temp        = 'verborgen';
+            var avg_temp        = 'verborgen';
+            var min_temp        = 'verborgen';
 
             if ( $('#GasChart').highcharts().series[1].visible === true && $('#GasChart').highcharts().series[0].visible === true ){
                 try {
@@ -280,9 +319,9 @@ function createGasChart() {
 
             var max_temp_color = '#FF0000';
             var min_temp_color = '#0088FF';
-            s += '<br/><span style="color: '+max_temp_color+'">maximum temperatuur: </span>'+max_temp;
-            s += '<br/><span style="color: #384042">gemiddelde temperatuur: </span>'+avg_temp;
-            s += '<br/><span style="color: '+min_temp_color+'">minimum temperatuur: </span>'   +min_temp;
+            s += '<br/><span style="color: '+max_temp_color+'">maximum temperatuur: </span>'+ max_temp;
+            s += '<br/><span style="color: #384042">gemiddelde temperatuur: </span>'+ avg_temp;
+            s += '<br/><span style="color: '+min_temp_color+'">minimum temperatuur: </span>'+ min_temp;
             return s;
     },
     backgroundColor: '#F5F5F5',
@@ -428,7 +467,24 @@ function createGasChart() {
         lineWidth: 1,
         lineColor: '#ff0000'
       }
-    }],
+    },
+    {
+      yAxis: 2,
+      visible: GseriesVisibilty[3],
+      showInNavigator: false,
+      name: 'graaddagen',
+      data: GDegreeDays,
+      type: 'spline',
+      zIndex: 2,
+      color: '#450f3f',
+      lineWidth: 1,
+      marker: {
+        fillColor: 'white',
+        lineWidth: 1,
+        lineColor: '#384042'
+      }
+    }
+    ],
     plotOptions: {
       series: {
         showInNavigator: true,
@@ -441,6 +497,9 @@ function createGasChart() {
             if ( this.index === 1 ) {
               toLocalStorage('stat-h-gas-temp-visible',!this.visible); // #PARAMETER
             }
+            if ( this.index === 3 ) {
+              toLocalStorage('stat-h-gas-graaddagen-visible',!this.visible); // #PARAMETER
+            }
           }
         }
       }
@@ -450,8 +509,9 @@ function createGasChart() {
   setHCButtonText( $('#GasChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
 }
 
+
 function updateData() {
-    // console.log("updateData()");
+    //console.log("updateData()");
     if (recordsLoaded !== 0 ) {
       hideStuff('loading-data');
     }
@@ -460,13 +520,16 @@ function updateData() {
         chart.series[0].setData( GverbrData );
         chart.series[1].setData( Gaverages );
         chart.series[2].setData( Granges );
+        chart.series[3].setData( GDegreeDays );
+        //chart.redraw();
     }
 }
+
 
 function DataLoop() {
     currentMinutes = Math.floor(secs / 60);
     currentSeconds = secs % 60;
-    if(currentSeconds <= 9) { currentSeconds = "0" + currentSeconds; }
+    if(currentSeconds <= 9) { currentSeconds = "0" + currentSeconds; } 
     secs--;
     document.getElementById("timerText").innerHTML = zeroPad(currentMinutes,2) + ":" + zeroPad(currentSeconds,2);
     if(secs < 0 ) { 
@@ -474,17 +537,22 @@ function DataLoop() {
         secs = mins * 60;
         currentSeconds = 0;
         currentMinutes = 0;
+        //console.log("DataLoop()")
         colorFader("#timerText","#0C7DAD");
         readJsonApiHistoryHour( maxrecords );
     }
-    setTimeout('DataLoop()',1000);
+    setTimeout('DataLoop()',3000);
 }
+
 
 $(function() {
     toLocalStorage('stats-menu-gas',window.location.pathname);
+
     GseriesVisibilty[0] = JSON.parse(getLocalStorage('stat-h-gas-visible'));
     GseriesVisibilty[1] = JSON.parse(getLocalStorage('stat-h-gas-temp-visible'));
-    Gselected = parseInt(getLocalStorage('stat-h-select-gas-index'),10);
+    GseriesVisibilty[3] = JSON.parse(getLocalStorage('stat-h-gas-graaddagen-visible'));
+
+    Gselected           = parseInt(getLocalStorage('stat-h-select-gas-index'),10);
 
     maxDataIsOn = JSON.parse(getLocalStorage('stat-h-gas-max-data-on'));           // #PARAMETER
     //console.log( "maxDataIsON(1)=" + maxDataIsOn )

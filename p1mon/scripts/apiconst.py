@@ -207,9 +207,10 @@ JSON_API_HUMIDITY_H         = 'HUMIDITY_HIGH'                        # Weather h
 JSON_API_WND_SPD_L          = 'WIND_SPEED_LOW'                       # Weather lowest wind speed in meter/sec
 JSON_API_WND_SPD_A          = 'WIND_SPEED_AVERAGE'                   # Weather average wind speed in meter/sec
 JSON_API_WND_SPD_H          = 'WIND_SPEED_HIGH'                      # Weather highest wind speed in meter/sec
-JSON_API_WND_DGRS_L         = 'WIND_DEGREES_LOW'                     # Weather lowest wind degrees (meteorological) 
-JSON_API_WND_DGRS_A         = 'WIND_DEGREES_HUMIDITY_AVERAGE'        # Weather lowest wind degrees (meteorological) 
-JSON_API_WND_DGRS_H         = 'WIND_DEGREES_HIGH'                    # Weather lowest wind degrees (meteorological) 
+JSON_API_WND_DGRS_L         = 'WIND_DEGREES_LOW'                     # Weather lowest wind degrees (meteorological)
+JSON_API_WND_DGRS_A         = 'WIND_DEGREES_HUMIDITY_AVERAGE'        # Weather lowest wind degrees (meteorological)
+JSON_API_WND_DGRS_H         = 'WIND_DEGREES_HIGH'                    # Weather lowest wind degrees (meteorological)
+JSON_DGR_DYS                = 'DEGREE_DAYS'                          # A degree day is a unit of account for the simple inclusion of (varying) temperature in calculations of energy consumption.
 JSON_API_CNFG_ID            = 'CONFIGURATION_ID'                     # unique record ID for config.
 JSON_API_CNFG_PRMTR         = 'PARAMETER'                            # configuration value.
 JSON_API_CNFG_LABEL         = 'LABEL'                                # label (name) of the configuration item.
@@ -335,9 +336,10 @@ EXPL_API_HUMIDITY_H         = 'Weather highest relative humidity.'
 EXPL_API_WND_SPD_L          = 'Weather lowest wind speed in meter/sec.'
 EXPL_API_WND_SPD_A          = 'Weather average wind speed in meter/sec.'
 EXPL_API_WND_SPD_H          = 'Weather highest wind speed in meter/sec.'
-EXPL_API_WND_DGRS_L         = 'Weather smallest number of wind degrees (meteorological).' 
-EXPL_API_WND_DGRS_A         = 'Weather average number of wind degrees (meteorological).' 
-EXPL_API_WND_DGRS_H         = 'Weather highest number of wind degrees (meteorological).' 
+EXPL_API_WND_DGRS_L         = 'Weather smallest number of wind degrees (meteorological).'
+EXPL_API_WND_DGRS_A         = 'Weather average number of wind degrees (meteorological).'
+EXPL_API_WND_DGRS_H         = 'Weather highest number of wind degrees (meteorological).'
+EXPL_API_DGR_DYS            = 'A degree day is a unit of account for the simple inclusion of (varying) temperature in calculations of energy consumption.'
 EXPL_API_CNFG_ID            = 'Unique record ID for config.'
 EXPL_API_CNFG_PRMTR         = 'Configuration value.'
 EXPL_API_CNFG_LABEL         = 'Label (name) of the configuration item.'
@@ -890,7 +892,7 @@ HELP_ROUTE_POWER_GAS_DAY_MONTH_YEAR_JSON = {
 # SQL AS Reference
 # select TIMESTAMP, cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), CITY_ID, CITY, TEMPERATURE_MIN, TEMPERATURE_AVG, TEMPERATURE_MAX, 
 # PRESSURE_MIN, PRESSURE_AVG, PRESSURE_MAX, HUMIDITY_MIN, HUMIDITY_AVG, HUMIDITY_MAX, WIND_SPEED_MIN, WIND_SPEED_AVG, WIND_SPEED_MAX, 
-# WIND_DEGREE_MIN, WIND_DEGREE_AVG, WIND_DEGREE_MAX from
+# WIND_DEGREE_MIN, WIND_DEGREE_AVG, WIND_DEGREE_MAX, DEGREE_DAYS from
 HELP_ROUTE_WEATHER_DAY_MONTH_YEAR_JSON = {
     "api_version"       : 1,
     "api_status"        : API_STATUS_PRODUCTION,
@@ -991,6 +993,11 @@ HELP_ROUTE_WEATHER_DAY_MONTH_YEAR_JSON = {
          { 
            "name" : JSON_API_WND_DGRS_H,
            "description" : EXPL_API_WND_DGRS_H,
+           "type": TYPE_JSON_NUMBER_INTEGER
+         },
+         { 
+           "name" : JSON_DGR_DYS,
+           "description" : EXPL_API_DGR_DYS,
            "type": TYPE_JSON_NUMBER_INTEGER
          }
     ]

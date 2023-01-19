@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1UpgradeAide.py
+
 import argparse
 import const
 import crontab_lib
@@ -17,14 +18,15 @@ import pwd
 import random
 import string
 import sqlite_lib
+import sqldb
 import sys
 import subprocess
 import shutil
-import tempfile
 import time
 import util
 import usb_drive_lib
 import wifi_lib
+import process_lib
 
 prgname = 'P1UpgradeAide'
 
@@ -61,11 +63,6 @@ def Main( argv ):
     msg = "Start van programma met process id " + str(my_pid) + " en als user -> " + pwd.getpwuid( os.getuid() ).pw_name
     flog.info( msg )
     write_status_to_file( msg )
-    
-    #crontab_lib.save_to_file( destination_pathfile='/tmp/crontab.txt', flog=flog )
-    #crontab_lib.restore_from_file( source_pathfile='/tmp/crontab.txt', flog=flog )
-
-    #sys.exit()
 
     parser = argparse.ArgumentParser(description="wegschrijven en lezen van data van externe USB drive/stick voor upgrades.",)
     parser.add_argument('-s', '--save',
@@ -137,9 +134,7 @@ def restore( args=None ):
             flog.info ( inspect.stack()[0][3] + " geen folder gevonden op de drive. gestopt" )
             sys.exit( 0 )
 
-
         flog.info ( inspect.stack()[0][3] + ": USB path " + str ( base_usb_pathfile ) + " gevonden." )
-
 
         # change the restore folder to busy
         # this is import to make sure we run this only once.
@@ -171,6 +166,9 @@ def restore( args=None ):
                 flog.info ( inspect.stack()[0][3] + ": bestand " + str( source_file_name ) + " gekopieerd naar " + destination_file_ram )
             except Exception as e:
                  flog.warning ( inspect.stack()[0][3] + ": database bestand " + str( source_file_name ) + " naar ram probleem -> " + str(e) )
+
+        # step 1.1 restore the socat config, when enabled.
+        socat_restore()
 
         # step 2 copy wifi config files
         try:
@@ -319,6 +317,10 @@ def restore( args=None ):
         except Exception as e:
             flog.warning( inspect.stack()[0][3] +": probleem met eigen gemaakte webpagina's -> " + str(e) )
 
+ 
+
+
+
 
         # change the restore folder to done status.
         rename_pathfile = base_usb_pathfile.rpartition('.')[0] + AIDE_EXT_DONE
@@ -352,7 +354,6 @@ def restore( args=None ):
                 _p_status = p.wait( timeout=30 )
             except Exception as _e:
                 raise Exception( "Reboot niet gelukt, voer deze met de hand uit." )
-                pass
 
     except Exception as e:
         flog.error( str(e) )
@@ -527,8 +528,8 @@ def save( ):
         except Exception as e:
             flog.error( "Wifi configuratie niet te kopiëren (" + wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH + ") ->" + str(e) )
             write_status_to_file( str(e) )
-            raise Exception( str(e) )
 
+            #raise Exception( str(e) )
 
         # step 5 copy dhcp config file
         destination_file = restore_path_dhcp + "/" + pathlib.PurePath( network_lib.DHCPCONFIG ).name 
@@ -749,6 +750,35 @@ def mount():
 ######################
 
 #############################################
+# socat install                             #
+# only run after the DB config file is      #
+# copied to the ram.                        #
+#############################################
+def socat_restore():
+    flog.info( inspect.stack()[0][3] + ": socat activering gestart." )
+    config_db = sqldb.configDB()
+    # open van config database
+    try: 
+        config_db.init( const.FILE_DB_CONFIG, const.DB_CONFIG_TAB )
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": Verwerking gefaald en gestopt!" ) 
+        return
+
+    try:
+        _id, socat_is_active, _label = config_db.strget( 200, flog )
+        if ( int(socat_is_active) == 1):
+            flog.info( inspect.stack()[0][3] + ": socat is actief, service wordt geinstalleerd." )
+            cmd = '/p1mon/scripts/pythonlaunch.sh P1SocatConfig.py --enable'
+            flog.debug ( inspect.stack()[0][3] + ": cmd =" + cmd )
+            proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
+            _stdout, _stderr  = proc.communicate( timeout=30 )
+            returncode = int( proc.wait() )
+            #print ( stdout, stderr)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": socat activering gefaald." + str(e) )
+        return
+
+#############################################
 # remove a file                             #
 #############################################
 def remove_file( pathfile=None, flog=None ):
@@ -825,11 +855,14 @@ def save_letsencrypt( destination_pathfile=None, flog=None ):
 
         flog.debug ( "cmd =" + cmd )
         proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
-        stdout, stderr  = proc.communicate( timeout=30 )
+        _stdout, _stderr  = proc.communicate( timeout=30 )
         returncode = int( proc.wait() )
         #print ( stdout, stderr)
         if returncode != 0:
-            raise Exception( 'copy van ' + folder + ' gefaald.' )
+           # raise Exception( 'copy van ' + folder + ' gefaald.' ) # change in 1.8.0
+           msg = 'copy van ' + folder + ' gefaald.  Dit kan op een probleem duiden.'
+           write_status_to_file( msg )
+           flog.error( msg )
 
         msg = "Lets Encrypt folder " + str( folder) + " gekopieerd."
         write_status_to_file( msg )
@@ -897,7 +930,16 @@ def copy_and_compress( source_pathfile=None, destination_pathfile=None, flog=Non
 def set_file_permissions( filepath=None, permissions=None, flog=None ):
     flog.debug ( "filepath = " + filepath + " permissions = " + permissions )
     cmd = '/usr/bin/sudo chmod ' + permissions + ' ' + filepath
-    if os.system( cmd ) > 0:
+   
+    #if os.system( cmd ) > 0:
+    #     flog.warning( inspect.stack()[0][3] + ": file eigenaarschap fout. " + filepath )
+    r = process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+        )
+    if ( r[2] ) > 0:
         flog.warning( inspect.stack()[0][3] + ": file eigenaarschap fout. " + filepath )
 
 ##########################################

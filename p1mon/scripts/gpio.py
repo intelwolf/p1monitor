@@ -5,6 +5,7 @@ from gpiozero   import LED, Button
 from sqldb      import  rtStatusDb,configDB
 #from logger     import fileLogger,logging
 
+
 class gpioDigtalInput():
        
     def init( self, db_config_id , config_db , flog ):

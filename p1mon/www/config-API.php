@@ -93,7 +93,6 @@ var token      = 'API token';
 var timestamp  = 'Timestamp';
 var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
 
-
     function readJsonStatus(){ 
         $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
         try {

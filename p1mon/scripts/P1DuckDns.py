@@ -1,4 +1,6 @@
-#!/usr/bin/python3
+
+# run manual with ./pythonlaunch.sh P1DuckDns.py
+
 import argparse
 import base64
 import const
@@ -10,11 +12,12 @@ import pwd
 import sqldb
 import signal
 import sys
+import process_lib
 
 # programme name.
 prgname = 'P1DuckDns'
 
-config_db                   = sqldb.configDB()
+config_db = sqldb.configDB()
 
 def Main( argv ): 
 
@@ -79,8 +82,17 @@ def Main( argv ):
         try:
             flog.debug(inspect.stack()[0][3]+": Parameters token=" + duckdns_token + " dns_name="  + dynamic_dns )
 
-            cmd = 'echo url="https://www.duckdns.org/update?domains=' + dynamic_dns + '&token=' + duckdns_token + '&ip=" | curl -s -k -o ' +  const.FILE_DUCKDNS_STATUS + ' -K -' 
-            if os.system( cmd ) > 0:
+            cmd = 'echo url="https://www.duckdns.org/update?domains=' + dynamic_dns + '&token=' + duckdns_token + '&ip=" | curl -s -k -o ' +  const.FILE_DUCKDNS_STATUS + ' -K -'
+            flog.debug (inspect.stack()[0][3]+": cmd = " + str(cmd ) )
+            #if os.system( cmd ) > 0:
+            #    flog.error(inspect.stack()[0][3]+" update gefaald")
+            r = process_lib.run_process( 
+                        cms_str = cmd,
+                        use_shell=True,
+                        give_return_value=True,
+                        flog=flog 
+             )
+            if r[2] > 0:
                 flog.error(inspect.stack()[0][3]+" update gefaald")
 
         except Exception as e:

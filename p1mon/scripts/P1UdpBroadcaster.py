@@ -1,45 +1,54 @@
-#!/usr/bin/python3
-# from 01-08-2018 all new development will be done with Pyhton 3.x
-import argparse
-import base64
+# run manual with ./pythonlaunch.sh P1UdpBroadcaster.py
+
+#import argparse
+#import base64
 import const
 import inspect
+import logger
 import json
 import signal
 import socket
 import systemid
+import sys
+import sqldb
 import time
 import os
+import util
 
-from logger import *
-from os import listdir, chmod
-from os.path import isfile,join
-from sqldb import configDB,rtStatusDb
-from util import *
-from time import sleep
-from systemid import getSystemId
+#from logger import *
+#from os import listdir, chmod
+#from os.path import isfile,join
+#from sqldb import configDB,rtStatusDb
+#from util import *
+#from time import sleep
+#from systemid import getSystemId
 
 prgname         = 'P1UdpBroadcaster'
-config_db       = configDB()
-rt_status_db    = rtStatusDb()
+
+config_db       = sqldb.configDB()
+rt_status_db    = sqldb.rtStatusDb()
+
 host_address    =  ( '<broadcast>', const.UDP_BASIC_API_PORT )
 udpsocket       = socket.socket( socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP )
+
 udpsocket.setsockopt( socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
 program_is_active = -1
+
 system_id = systemid.getSystemId()
 
 def Main(argv): 
     flog.info("Start van programma.")
    
-    # open van status database      
-    try:    
+    # open van status database
+    try:
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
         flog.critical(inspect.stack()[0][3]+": Database niet te openen(1)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.debug(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
-    # open van config database      
+    # open van config database
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
     except Exception as e:
@@ -59,7 +68,7 @@ def Main(argv):
     while True:
        
         if isProgramActive() == False: 
-            sleep ( 10 )
+            time.sleep ( 10 )
             continue
 
         try:
@@ -83,7 +92,7 @@ def Main(argv):
             flog.error(inspect.stack()[0][3]+": Fout melding:"+str(e.args[0]))
        
         flog.debug(inspect.stack()[0][3]+": Wacht " + str(loop_timeout) + " seconden.")
-        sleep ( loop_timeout )
+        time.sleep ( loop_timeout )
 
 
 def isProgramActive():
@@ -103,7 +112,7 @@ def isProgramActive():
         return True
 
 
-def saveExit(signum, frame):   
+def saveExit( signum, frame ):
         signal.signal(signal.SIGINT, original_sigint)
         flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
         sys.exit(0)
@@ -113,15 +122,14 @@ if __name__ == "__main__":
     try:
         os.umask( 0o002 )
         logfile = const.DIR_FILELOG+prgname+".log" 
-        setFile2user(logfile,'p1mon')
-        flog = fileLogger(logfile,prgname)    
-        #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        util.setFile2user(logfile,'p1mon')
+        flog = logger.fileLogger( logfile,prgname )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:
         print ("critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(10) #  error: no logging check file rights
 
-    original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
-    Main(sys.argv[1:])     
+    original_sigint = signal.getsignal( signal.SIGINT )
+    signal.signal( signal.SIGINT, saveExit )
+    Main( sys.argv[1:] )

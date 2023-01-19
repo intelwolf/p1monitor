@@ -161,9 +161,9 @@ $arr = array (
     'Le contrôle de version vérifie automatiquement périodiquement si une nouvelle version est disponible. Cette option est désactivée par défaut pour des raisons de confidentialité. Si l&apos;option est activée, votre adresse IP publique sera partagée avec ztatz.nl. Nous ne faisons rien avec l&apos;adresse IP et nous la supprimons périodiquement.'
     ),
 /* 034 */   array(
-    'De UDP broadcast verstuurt ongeveer elke 10 seconden een JSON netwerkbericht (UDP broadcast op poort 40721).',
-    'The UDP broadcast sends a network JSON message (UDP broadcast on port 40721) approximately every 10 seconds.',
-    'La diffusion UDP envoie un message JSON réseau (diffusion UDP sur le port 40721) environ toutes les 10 secondes.'
+    'De UDP broadcast verstuurt periodiek (5 tot 10) seconden een JSON netwerkbericht (UDP broadcast op poort 40721).',
+    'The UDP broadcast sends a network JSON message (UDP broadcast on port 40721) approximately every 5 or 10 seconds.',
+    'La diffusion UDP envoie un message réseau JSON (diffusion UDP sur le port 40721) environ toutes les 5 ou 10 secondes.'
     ),
 /* 035 */   array(
     'Systeem ID is een unieke code van de P1-monitor. Deze code wordt gebruik om onderscheid te maken tussen verschillende P1-monitor systemen. De code wordt bijvoorbeeld gebruik in back-up en in Dropbox data bestanden.',
@@ -1209,8 +1209,70 @@ $arr = array (
     'Pour ceux qui traitent de grandes quantités d&apos;énergie.'
     ),
 /* 315 */ array(
-    '','',''
+    'Controleer niet of de patch door ztatz.nl is gemaakt. Doe dit alleen als u zeker weet dat de patch afkomstig is van een vertrouwde bron',
+    'Do not check whether the patch is made by ztatz.nl. Only do this if you are sure the patch is from a trusted source.',
+    'Ne vérifiez pas si le patch est fabriqué par ztatz.nl. Ne le faites que si vous êtes sûr que le correctif provient d&apos;une source fiable.'
     ),
+/* 316 */ array(
+    'Upload een patch en voer deze automatische uit.',
+    'Upload a patch and run it automatically.',
+    'Téléchargez un correctif et exécutez-le automatiquement.'
+    ),
+/* 317 */ array(
+    'Met de patch optie kunnen officiële ztatz.nl patches worden geïnstalleerd.',
+    'With the patch option official ztatz.nl patches can be installed.',
+    'Avec l&apos;option de correctif, les correctifs officiels de ztatz.nl peuvent être installés'
+    ),
+/* 318 */ array(
+    'socat configuratie','socat configuration','socat de configuration'
+),
+/* 319 */ array(
+    'IP adres','IP address','Adresse IP'
+),
+/* 320 */ array(
+    'IP poort','IP port','Port IP'
+),
+/* 321 */ array(
+    'socat is een manier om over het netwerk seriële data te ontvangen. Het apparaat dat aangesloten wordt op de P1 poort en de data overstuurd wordt niet door de P1 monitor geleverd. De P1 monitor ondersteund het ontvangen van de data. Je dient een apparaat te installeren die deze mogelijkheid biedt. Bij het activeren van de socat optie worden de andere seriële instellingen genegeerd. ',
+    'socat is a way to receive serial data over the network. The device that connects to the P1 port and sends the data across is not supplied by the P1 monitor. The P1 monitor supports receiving the data. You must install a device that provides this capability. When activating the socat option, the other serial settings are ignored. ',
+    'socat est un moyen de recevoir des données série sur le réseau. Le dispositif qui se connecte au port P1 et envoie les données n&apos;est pas fourni par le moniteur P1. Le moniteur P1 prend en charge la réception des données. Vous devez installer un dispositif qui offre cette capacité. Lorsque vous activez l&apos;option socat, les autres paramètres série sont ignorés.'
+),
+/* 322 */ array(
+    'IP adres van het remote socat apparaat.','IP address of the remote socat device.','Adresse IP du périphérique socat distant.'
+),
+/* 323 */ array(
+    'IP poort van het remote socat apparaat.','IP port of remote socat device.','Port IP du périphérique socat distant. '
+),
+/* 324 */ array(
+    'Laatste succesvolle start','Last successful start','Dernier départ réussi'
+),
+/* 325 */ array(
+    'Een graaddag is een rekeneenheid om de (variërende) temperatuur op een eenvoudige manier mee te kunnen nemen in berekeningen, met name in berekeningen over energieverbruik. Een graaddag is relatief ten opzichte van een referentietemperatuur, meestal die waarbij geen verwarming meer nodig is (typisch 18 graden Celsius).  De P1 monitor gebruikt de gemiddelde temperatuur die via de weer API wordt opgehaald. De weer API moet worden geactiveerd om de graaddagen te kunnen berekenen.',
+    'A degree day is a unit of account to easily include (varying) temperature in calculations, especially in calculations about energy consumption. A degree day is relative to a reference temperature, usually that at which no more heating is required (typically 18 degrees Celsius).  The P1 monitor uses the average temperature retrieved via the weather API. The weather API must be activated to calculate degree days.',
+    'Un degré-jour est une unité de compte permettant d&apos;inclure facilement la température (variable) dans les calculs, notamment dans les calculs de consommation d&apos;énergie. Un degré-jour est relatif à une température de référence, généralement celle à laquelle aucun chauffage n&apos;est plus nécessaire (généralement 18 degrés Celsius).  Le moniteur P1 utilise la température moyenne récupérée via l&apos;API météo. L&apos;API météo doit être activée pour calculer les degrés-jours.'
+),
+/* 326 */ array(
+    'herstel graaddagen','recovery degree days','degrés-jours de récupération'
+),
+/* 327 */ array(
+    'referentie kamertemperatuur','room temperature reference','référence à la température ambiante'
+),
+/* 328 */ array(
+    'Via historische weerdata worden de graaddagen berekent. Dit overschrijft eerder gemaakte graaddagen waarden. De op dat moment ingestelde referentie kamertemperatuur wordt daarbij gebruikt. Er wordt maximaal 1096 historisch dagen verwerkt.',
+    'Grade days are calculated via historical weather data. This overwrites previously created degree days values. The currently set reference room temperature is used. A maximum of 1096 historical days is processed.',
+    'Les degrés-jours sont calculés à partir des données météorologiques historiques. Cela écrase les valeurs de degrés-jours précédemment créées. La température ambiante de référence actuellement définie est utilisée. Un maximum de 1096 jours historiques est traité.'
+),
+/* 329 */ array(
+    'De gemiddelde kamertemperatuur als referentietemperatuur (0-99 graden Celsius). Er wordt gebruik gemaakt van gewogen graaddagen. Hierbij worden de graaddagen vermenigvuldigd een weegfactor. april t/m september: 0,8 , maart en oktober: 1,0 en november t/m februari: 1,1.',
+    'The average room temperature as the reference temperature (0-99 degrees Celsius). Weighted degree days are used. The degree days are multiplied by a weighting factor. April through September: 0.8 , March and October: 1.0 and November through February: 1.1.',
+    'La température moyenne de la pièce comme température de référence (0-99 degrés Celsius). On utilise des degrés-jours pondérés. Les degrés-jours sont multipliés par un facteur de pondération. D&apos;avril à septembre : 0,8 , de mars à octobre : 1,0 et de novembre à février : 1.1'
+),
+/* 330 */ array(
+    '','',''
+),
+/* 331 */ array(
+    '','',''
+),
 
 );
 

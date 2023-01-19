@@ -5,12 +5,11 @@ import util
 import string
 import sys
 import subprocess
-import cpuinfo
+import system_info_lib
 
 #from logger        import *
 from Crypto.Cipher  import AES
 from Crypto.Hash    import SHA256
-from cpuinfo import getCpuInfo
 
 AES_MODE    = AES.MODE_CBC
 MAGIC_SEED  = 'ab64e67aac269d'
@@ -27,7 +26,7 @@ def p1Decrypt(cipher_text, seed=MAGIC_SEED):
       idx_right = int(str_raw[-16:])
       str_return = str_raw[:-16].rstrip() # remove space counter
       for _i in range(0, idx_right):
-      	str_return += ' '
+        str_return += ' '
       # make sure we only return printable chars when decription goes south.
       filtered_string = ''.join( filter(lambda x: x in string.printable, str_return) )
       return (filtered_string)
@@ -48,7 +47,7 @@ def p1Encrypt(plain_text, seed=MAGIC_SEED):
       return ''
 
 def p1CryptoGetKey(seed=MAGIC_SEED):
-    result = getCpuInfo() # get cpu specific id to generate crypto key
+    result = system_info_lib.get_cpu_info() # get cpu specific id to generate crypto key
     hash_in = seed
     hash_in = hash_in + result['Serial'] + seed
     hash = SHA256.new(hash_in.encode('utf-8'))

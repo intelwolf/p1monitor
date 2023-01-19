@@ -119,11 +119,9 @@ if ( isset($_POST["fs_rb_v"]) ) {
 }
 
 
-
-
 if ( isset( $_POST["email_test_button"] ) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
-    writeSemaphoreFile( 'email_test' );
+    if ( updateConfigDb("update config set parameter = '1' where ID = 187") )$err_cnt += 1;
 }
 
 

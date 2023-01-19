@@ -237,6 +237,11 @@ function readJsonApiPhaseInformationFromStatus(){
                 L1Caculated = L1Wproduction / L1V
             }
         }
+
+        if ( L1Wconsumption == L1Wproduction ) {
+            $('#L1Watt').highcharts().yAxis[0].setTitle({text: ""}); // er wordt niets verbruikt of geleverd
+        }
+
         // L1 Amperage
         $('#L1Amperage').highcharts().series[0].points[0].update( parseInt( L1A ), true, true, true );
         // L1 Voltage
@@ -269,6 +274,11 @@ function readJsonApiPhaseInformationFromStatus(){
                 L2Caculated = L2Wproduction / L2V
             }
         }
+
+        if ( L2Wconsumption == L2Wproduction ) {
+            $('#L2Watt').highcharts().yAxis[0].setTitle({text: ""}); // er wordt niets verbruikt of geleverd
+        }
+
         // L2 Amperage
         $('#L2Amperage').highcharts().series[0].points[0].update( parseInt( L2A ), true, true, true );
         // L2 Voltage
@@ -301,6 +311,11 @@ function readJsonApiPhaseInformationFromStatus(){
                 L3Caculated = L3Wproduction / L3V
             }
         }
+
+        if ( L3Wconsumption == L3Wproduction ) {
+            $('#L3Watt').highcharts().yAxis[0].setTitle({text: ""}); // er wordt niets verbruikt of geleverd
+        }
+
         // L3 Amperage
         $('#L3Amperage').highcharts().series[0].points[0].update( parseInt( L3A ), true, true, true );
         // L3 Voltage

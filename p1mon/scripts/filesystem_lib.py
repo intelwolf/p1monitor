@@ -7,6 +7,10 @@ import math
 import psutil
 import os
 import subprocess
+import random
+import string
+import tempfile
+import process_lib
 
 FILEPATH_SIZE = {
     'space_total' : 0,
@@ -18,13 +22,67 @@ FILEPATH_SIZE = {
 }
 
 
+def create_folder( filepath=None , flog=None ):
+    try :
+        cmd = "/usr/bin/sudo mkdir -p " + filepath
+        process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog
+        )
+    except Exception as e:
+         raise Exception ( "folder fout. " + str(e) )
+
+##########################################################
+# generate a tempory file name in the default tmp folder #
+########################################################## 
+def generate_temp_filename() -> str:
+    random_string = ''.join( random.choices(string.ascii_uppercase + string.digits, k=16) )
+    return os.path.join( tempfile.gettempdir(), random_string )
+
+
+#################################################
+# remove a folder and content after the timeout #
+# in seconds                                    #
+#################################################
+def rm_folder_with_delay( filepath=None, timeout=3600, flog=None ):
+        cmd = "/bin/sleep " + str(timeout) +" && /usr/bin/sudo /bin/rm --recursive --force " + filepath + " &"
+        #os.system( cmd )
+        process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog,
+            timeout = None
+        )
+
+
+
 ################################################
 # remove a file after the seconds parameter    #
 # time has pased                               #
 ################################################
-def rm_with_delay( filepath=None, timeout=3600 ):
-        cmd_str = "/bin/sleep " + str(timeout) +" && /usr/bin/sudo /bin/rm --force " + filepath + " &"
-        os.system( cmd_str )
+def rm_with_delay( filepath=None, timeout=3600, flog=None ):
+        cmd = "/bin/sleep " + str(timeout) +" && /usr/bin/sudo /bin/rm --force " + filepath + " &"
+        #os.system( cmd )
+        process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog,
+            timeout = None
+        )
+
+
+###############################################
+# get the file permissions via octal notation #
+# example '644' as rw+r+r                     #
+###############################################
+def get_file_permissions( filepath=None ) -> string:
+    mask = oct(os.stat(filepath).st_mode)[-3:]
+    return str(mask)
+
 
 ###############################################
 # set the file permissions via octal notation #
@@ -65,7 +123,6 @@ def expand_rootfs():
         #print ("error ", str(_e))
         pass
 
-
 ################################################
 # sync filesytem buffers to device             #
 ################################################
@@ -80,14 +137,13 @@ def file_system_sync():
         #print ("error ", str(_e))
         pass
 
-
 ################################################################
 # move a file to the destination and set the rights to 644 and #
 # ownership to root:root                                       #
 # the copy flag does a copy and not a move                     #
 # OS user must have SUDO priviliges                            #
 ################################################################
-def move_file_for_root_user( source_filepath=None, destination_filepath=None , permissions='644', copyflag=False ):
+def move_file_for_root_user( source_filepath=None, destination_filepath=None , permissions='644', copyflag=False, flog=None ):
 
     #print ( source_filepath, destination_filepath , permissions )
 
@@ -100,19 +156,42 @@ def move_file_for_root_user( source_filepath=None, destination_filepath=None , p
         cmd = '/usr/bin/sudo cp -f ' + source_filepath + ' ' + destination_filepath
 
     #print ( cmd )
-    if os.system( cmd ) > 0:
-        raise Exception ( "verplaatsen van file error " + source_filepath  )
+    #if os.system( cmd ) > 0:
+    #    raise Exception ( "verplaatsen van file error " + source_filepath  )
+    r = process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+    )
+    if r[2] > 0:
+         raise Exception ( "verplaatsen van file error " + source_filepath  )
 
     cmd = '/usr/bin/sudo chmod ' + permissions + ' ' + destination_filepath
     #print( cmd )
-    if os.system( cmd ) > 0:
-        raise Exception ( "file eigenaarschap fout. " + destination_filepath )
+    #if os.system( cmd ) > 0:
+    #    raise Exception ( "file eigenaarschap fout. " + destination_filepath )
+    r = process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+    )
+    if r[2] > 0:
+         raise Exception ( "file eigenaarschap fout. " + destination_filepath )
 
     cmd = '/usr/bin/sudo chown root:root ' + destination_filepath
     #print( cmd )
-    if os.system( cmd ) > 0:
+    #if os.system( cmd ) > 0:
+    #    raise Exception ( "file rechten fout. " + destination_filepath )
+    r = process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+    )
+    if r[2] > 0:
         raise Exception ( "file rechten fout. " + destination_filepath )
-
 
 ######################################################
 # get the size of used filepath values are retured   #

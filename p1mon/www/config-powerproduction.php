@@ -34,7 +34,7 @@ if ( isset($_POST["fs_rb_kwhmeter_reset"]) ) {
     if ( $_POST[ "fs_rb_kwhmeter_reset" ] == '1' ) {
         # remove status file
         unlink( $file_name );
-        writeSemaphoreFile('powerproduction_counter_reset');
+        if ( updateConfigDb("update config set parameter = '1' where ID = 186") ) $err_cnt += 1;
         $showStatusOutput = 1;
         ##echo "<br>action=" . $showStatusOutput . "<br>";
     }
@@ -100,9 +100,6 @@ if( isset($_POST["gpio_kwhmeter"]) ) { //ok
     #echo "<br>";
     #echo $int . "<br>";
     #echo $configValue  . "<br>";
-    if ( $int !=  $configValue ) { // great load only do when there is a change
-        writeSemaphoreFile( 'kwhmeter_gpio' ); 
-    }
     if ( updateConfigDb( "update config set parameter = '" . (string)$int . "' where ID = 126") )  $err_cnt += 1;
 }
 
@@ -195,7 +192,6 @@ $(function () {
     centerPosition('#counter_status');
     LoadData();
 });
-
 
 </script>
 
@@ -315,9 +311,9 @@ $(function () {
     </div>
 
     <!-- start block -->
-    <div id="counter_status" class="pos-45" style="display: none" >
+    <div id="counter_status" class="pos-45" style="display: none">
         <div class='close_button-2' id="assist_logging_close">
-            <i class="color-select fas fa-times-circle" data-fa-transform="grow-6"" aria-hidden="true"></i>
+            <i class="color-select fas fa-times-circle" data-fa-transform="grow-6"></i>
         </div>
     <div class="frame-4-top">
         <span class="text-15">Meterstand reset logging</span>

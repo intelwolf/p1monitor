@@ -1,17 +1,17 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1DropBoxAuth.py
+
 import argparse
-#from logging import error
-import base64
 import const
 import crypto3
 import dropbox_lib
-import dropbox
 import inspect
 import logger
 import os
 import pwd
 import sqldb
 import sys
+import filesystem_lib
+import util
 
 prgname   = 'P1DropBoxAuth'
 config_db = sqldb.configDB()
@@ -26,6 +26,7 @@ def Main(argv):
 
     flog.info( "Start van programma met process id " + str(my_pid) )
     flog.info( inspect.stack()[0][3] + ": wordt uitgevoerd als user -> " + pwd.getpwuid( os.getuid() ).pw_name )
+
 
     parser = argparse.ArgumentParser( add_help=False ) # suppress default UK help text
     parser = argparse.ArgumentParser( description = "-t <token> ,-u (geef authenticatie url) of -d wis tijdelijke bestand." )
@@ -78,8 +79,6 @@ def Main(argv):
             config_db.strset( access_token_crypt,  47,  flog )
             config_db.strset( refresh_token_crypt, 170, flog )
 
-            #TODO webpagina error weergevena als het mis gaat.
-            # Web redirect weer terugbouwen zonder tussen stap.
             print ( 'OK' )
         except Exception as e:
             flog.critical( inspect.stack()[0][3] + ": authenticatie gefaald melding:"+str(e.args[0])+ ". Is het authenticatie token al niet een keer gebruikt?")
@@ -117,6 +116,18 @@ if __name__ == "__main__":
         flog.setLevel( logger.logging.INFO )
         # never set this on
         flog.consoleOutputOn( False )
+
+        # try to set rights, this may fail when run by www-data
+        # that is not a problem
+        try:
+            filesystem_lib.set_file_permissions( filepath=logfile, permissions='664' )
+        except:
+            pass
+        try:
+            filesystem_lib.set_file_owners( filepath=logfile )
+        except:
+            pass
+
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(10) #  error: no logging check file rights

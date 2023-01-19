@@ -1,29 +1,30 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1SmtpCopy.py
+
 import argparse
 import base64
 import const
 import crypto3
-import email
+#import email
 import inspect
+import logger
+import makeLocalTimeString
 import ssl
 import smtplib
 import sys
+import sqldb
 import os
+import util
+import quote_lib
 
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from sqldb import configDB,rtStatusDb
-from logger import fileLogger,logging
-from util import setFile2user,getUtcTime
-from smtplib import SMTPAuthenticationError
-from makeLocalTimeString import makeLocalTimeString
-from getQuote import getQuote
 
-prgname         = 'P1SmtpCopy'
-config_db       = configDB()
-rt_status_db    = rtStatusDb()
+prgname      = 'P1SmtpCopy'
+
+config_db    = sqldb.configDB()
+rt_status_db = sqldb.rtStatusDb()
 
 # remarks
 # Gmail requires that you connect to port 465 if using SMTP_SSL(), and to port 587 when using .starttls()
@@ -48,9 +49,9 @@ smtp_para = {
 
 def Main(argv): 
     flog.info("Start van programma.")
-    global smtp_para  
+    global smtp_para
 
-    # open van status database      
+    # open van status database
     try:    
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
@@ -58,7 +59,7 @@ def Main(argv):
         sys.exit(1)
     flog.debug(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
-    # open van config database      
+    # open van config database
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
     except Exception as e:
@@ -108,9 +109,9 @@ def Main(argv):
 
     # send a test mail with default value
     if args.testmail != None:
-        smtp_para['messagetext'] = "Dit is een test mail van de P1 monitor en mag genegeert worden. De mail is op " +  makeLocalTimeString() + " verzonden." + \
-        "\n\n" + getQuote() + "\n\nBezoek https://www.ztatz.nl voor meer informatie over de P1 monitor." 
-        smtp_para['subject']     = "P1 monitor test email van " + makeLocalTimeString() + "."
+        smtp_para['messagetext'] = "Dit is een test mail van de P1 monitor en mag genegeert worden. De mail is op " +  makeLocalTimeString.makeLocalTimeString() + " verzonden." + \
+        "\n\n" + quote_lib.get_quote() + "\n\nBezoek https://www.ztatz.nl voor meer informatie over de P1 monitor." 
+        smtp_para['subject']     = "P1 monitor test email van " + makeLocalTimeString.makeLocalTimeString() + "."
 
     if args.mailuser != None:
         smtp_para['mailuser'] = args.mailuser
@@ -285,7 +286,7 @@ def sendSmtpMail( mode='ssl' ):
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL( smtp_para['mailserver'], int( smtp_para['mailserverport_ssl'] ), context=context , timeout= int( smtp_para['timeout']) ) as server:
                 server.login( smtp_para['mailuser'], smtp_para['mailuserpassword'] )
-                if flog.getLevel() == logging.DEBUG:
+                if flog.getLevel() == logger.logging.DEBUG:
                     server.set_debuglevel(2)
                 sendMessage( server )
 
@@ -293,7 +294,7 @@ def sendSmtpMail( mode='ssl' ):
             flog.info(inspect.stack()[0][3]+": email security mode gebruikt is STARTTLS") 
             context = ssl.create_default_context()
             server = smtplib.SMTP( smtp_para['mailserver'], int( smtp_para['mailserverport_starttls'] ) , timeout= int( smtp_para['timeout'] ) )
-            if flog.getLevel() == logging.DEBUG:
+            if flog.getLevel() == logger.logging.DEBUG:
                 server.set_debuglevel(2)
             server.starttls( context=context ) # Secure the connection
             server.login( smtp_para['mailuser'], smtp_para['mailuserpassword'] )
@@ -302,7 +303,7 @@ def sendSmtpMail( mode='ssl' ):
         elif mode == 'plaintext':
             flog.info(inspect.stack()[0][3]+": email security mode gebruikt is PLAINTEXT (onveilig).") 
             server = smtplib.SMTP( smtp_para['mailserver'], int( smtp_para['mailserverport_plaintext']), timeout= int( smtp_para['timeout'] ) )
-            if flog.getLevel() == logging.DEBUG:
+            if flog.getLevel() == logger.logging.DEBUG:
                 server.set_debuglevel(2)
             server.login( smtp_para['mailuser'], smtp_para['mailuserpassword'] )
             sendMessage( server )
@@ -332,11 +333,11 @@ def sendSmtpMail( mode='ssl' ):
 #-------------------------------
 if __name__ == "__main__":
     try:
-        logfile = const.DIR_FILELOG + prgname + ".log" 
-        setFile2user( logfile,'p1mon' )
-        flog = fileLogger( logfile,prgname )
+        logfile = const.DIR_FILELOG + prgname + ".log"
+        util.setFile2user( logfile,'p1mon' )
+        flog = logger.fileLogger( logfile,prgname )
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:" + str( e.args[0] ) )

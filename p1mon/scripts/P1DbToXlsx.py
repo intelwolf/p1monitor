@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1DbToXlsx.py
+
 import argparse
 import const
 import datetime
@@ -7,18 +8,18 @@ import inspect
 import logger
 import os
 import pathlib
-import pwd
-import pytz
+#import pwd
+#import pytz
 import random
 import string
 import sqlite_lib
 import sys
-import subprocess
+#import subprocess
 import time
 import util
 import xlsxwriter
 
-prgname = 'P1DbToXlxs'
+prgname = 'P1DbToXlsx'
 
 XLSX_SUFFIX = '.xlsx'
 

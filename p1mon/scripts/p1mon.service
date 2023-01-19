@@ -13,4 +13,4 @@ User=p1mon
 Type=forking
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target shutdown.target reboot.target halt.target

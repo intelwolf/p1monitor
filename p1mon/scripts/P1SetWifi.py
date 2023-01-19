@@ -1,27 +1,28 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1SetWifi.py
+
 import base64
 import const
 import crypto3
 import sys
 import inspect
 import network_lib
-import getopt
+#import getopt
+import logger
 import subprocess
 import argparse
 import util
 import time
 import os
+import sqldb
+import process_lib
 
-from util import setFile2user
-from logger import fileLogger,logging
-from sqldb  import configDB,rtStatusDb
+prgname                     = 'P1SetWifi'
+SERVICE                     = '/usr/sbin/service'
+WPA_SUPPLICANT_CONFIG_FILE  = '/etc/wpa_supplicant/wpa_supplicant.conf'
+WPA_SUPPLICANT_CONFIG       = '/etc/wpa_supplicant/'
 
-prgname = 'P1SetWifi'
-SERVICE = '/usr/sbin/service'
-WPA_SUPPLICANT_CONFIG_FILE = '/etc/wpa_supplicant/wpa_supplicant.conf'
-WPA_SUPPLICANT_CONFIG      = '/etc/wpa_supplicant/'
-config_db     = configDB()
-rt_status_db  = rtStatusDb()
+config_db     = sqldb.configDB()
+rt_status_db  = sqldb.rtStatusDb()
 
 def setWpaSupplicantConfigFileRights():
     cmd_str = "/usr/bin/sudo chmod o+w " + WPA_SUPPLICANT_CONFIG +"; /usr/bin/sudo /usr/bin/touch " + WPA_SUPPLICANT_CONFIG_FILE + " ;/usr/bin/sudo /bin/chmod 660 "+WPA_SUPPLICANT_CONFIG_FILE+";/usr/bin/sudo /bin/chown p1mon:p1mon "+WPA_SUPPLICANT_CONFIG_FILE
@@ -36,12 +37,18 @@ def setWpaSupplicantConfigFileRights():
 
 def writeWpaSupplicantConfig(essid, psk):
 
-    #print lines 
+    #print lines
     try:
-        os.system('/usr/bin/sudo rm '+ WPA_SUPPLICANT_CONFIG_FILE )
+        #os.system('/usr/bin/sudo rm '+ WPA_SUPPLICANT_CONFIG_FILE ) 1.8.0 upgrade
+        process_lib.run_process( 
+            cms_str='/usr/bin/sudo rm '+ WPA_SUPPLICANT_CONFIG_FILE,
+            use_shell=True,
+            give_return_value=True, 
+            flog=flog 
+        )
+
         # set file rights temporary to write file
         setWpaSupplicantConfigFileRights()
-       
 
         fp = open(WPA_SUPPLICANT_CONFIG_FILE, 'w')
         fp.write('###############################\n')
@@ -82,11 +89,10 @@ def stopWifi():
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": wifi gestopt fout, melding:"+str(e.args))
 
-
 def Main(argv): 
     global config_db
     flog.info("Start van programma.")
-     
+
     parser = argparse.ArgumentParser(description="Set het wpa wachtwoord voor een essid ESSID (\"MIJN WIFI\")")
     parser.add_argument('-e', '--essid', required=False)
     parser.add_argument('-k', '--key',   required=False)
@@ -112,7 +118,6 @@ def Main(argv):
             flog.critical(inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_STATUS+") melding:"+str(e.args[0]))
             sys.exit(1)
         flog.info(inspect.stack()[0][3]+": database tabel: "+const.DB_STATUS_TAB+" succesvol geopend.")
-        
 
         sqlstr = "select id, parameter from "+const.DB_CONFIG_TAB+" where id >=11 and id <=12 order by id asc"
         sqlstr=" ".join(sqlstr.split())
@@ -137,7 +142,11 @@ def Main(argv):
     # change wpa_supplicant file
     writeWpaSupplicantConfig( essid, key )
     reconfigureWifi()
-    
+
+    #flog.info( inspect.stack()[0][3]+": wlan0 wordt herstart.")
+    #network_lib.restart_network_device( device='wlan0', flog=flog )
+    #time.sleep( 10 )
+
     sec_count = 0
     flog.debug(inspect.stack()[0][3]+": start van ip actief controle.")
     while (sec_count < 180):
@@ -157,12 +166,12 @@ def Main(argv):
 if __name__ == "__main__":
     try:
         os.umask( 0o002 )
-        logfile = const.DIR_FILELOG+prgname+".log" 
-        setFile2user(logfile,'p1mon')
-        flog = fileLogger(logfile,prgname)    
+        logfile = const.DIR_FILELOG+prgname + ".log"
+        util.setFile2user( logfile,'p1mon')
+        flog = logger.fileLogger( logfile,prgname )
         #### aanpassen bij productie
-        flog.setLevel(logging.INFO)
-        flog.consoleOutputOn(True) 
+        flog.setLevel( logger.logging.INFO )
+        flog.consoleOutputOn( True ) 
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(1)

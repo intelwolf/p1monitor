@@ -1,49 +1,42 @@
-#!/usr/bin/python3
+# run manual with ./pythonlaunch.sh P1PowerProductionS0.py
+
 import const
+import datetime
 import inspect
+import gpio
 import os
-import shutil
 import signal
-import socket
+import logger
+import sqldb
+import multiprocessing
 import sys
 import random
 import time
-import datetime
 import sqldb
-import threading
-import multiprocessing
-import subprocess
-
-from multiprocessing import Process, Queue
-from threading import Timer
-from datetime import datetime, timedelta, timezone
-from logger import fileLogger,logging
-from sqldb import configDB, rtStatusDb, powerProductionDB
-from time import sleep
-from util import fileExist,setFile2user, mkLocalTimeString
-from gpio import gpioDigtalInput
-from random import randrange
-from utiltimestamp import utiltimestamp
-from listOfPidByName import listOfPidByName
+import process_lib
+import util
 
 # programme name.
 prgname = 'P1PowerProductionS0'
 
-rt_status_db            = rtStatusDb()
-config_db               = configDB()
-power_production_db     = powerProductionDB()
-gpioPowerS0Puls         = gpioDigtalInput()
-timestamp               = mkLocalTimeString() 
+rt_status_db            = sqldb.rtStatusDb()
+config_db               = sqldb.configDB()
+power_production_db     = sqldb.powerProductionDB()
+
+gpioPowerS0Puls         = gpio.gpioDigtalInput()
+
+timestamp               = util.mkLocalTimeString() 
+
 #timestamp_buffer_list   = []
 prg_is_active           = True
 S0_POWERSOURCE          = 1
-mp_queue_1              = Queue()
+mp_queue_1              = multiprocessing.Queue()
 
 QUEUE_CMD_START  = "START"
 
 def Main(argv): 
     global timestamp 
-    
+
     my_pid = os.getpid()
     flog.info("Start van programma met process id " + str(my_pid) )
 
@@ -119,9 +112,9 @@ def Main(argv):
 
 
 def setFileFlags():
-    setFile2user( const.FILE_DB_POWERPRODUCTION, 'p1mon' )
+    util.setFile2user( const.FILE_DB_POWERPRODUCTION, 'p1mon' )
     _head,tail = os.path.split( const.FILE_DB_POWERPRODUCTION )
-    setFile2user( const.DIR_FILEDISK+tail,'p1mon' )
+    util.setFile2user( const.DIR_FILEDISK+tail,'p1mon' )
 
 ########################################################
 # inserts or replaces a record for the given           #
@@ -193,7 +186,7 @@ def replaceRecordForAPeriod( timestamp, period ):
 # ######################################################
 def deleteRecords():
 
-    timestamp = mkLocalTimeString()
+    timestamp = util.mkLocalTimeString()
 
     try:
         sql_del_str = "delete from " + const.DB_POWERPRODUCTION_TAB  + \
@@ -201,11 +194,12 @@ def deleteRecords():
         str( sqldb.INDEX_MINUTE ) + \
         " and POWER_SOURCE_ID = " + \
         str( S0_POWERSOURCE ) + \
-        " and timestamp < '" + str( datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - timedelta(days=31)) + "'"
+        " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=31)) + "'"
         flog.debug( inspect.stack()[0][3] + ": wissen van minuten. sql=" + sql_del_str ) 
         power_production_db.excute( sql_del_str )
     except Exception as e:
         flog.warning (inspect.stack()[0][3]+": wissen van oude minuten records gefaald: " + str(e) )
+
 
     try:
         sql_del_str = "delete from " + const.DB_POWERPRODUCTION_TAB  + \
@@ -213,7 +207,7 @@ def deleteRecords():
         str( sqldb.INDEX_HOUR ) + \
         " and POWER_SOURCE_ID = " + \
         str( S0_POWERSOURCE ) + \
-        " and timestamp < '" + str( datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - timedelta(days=1096)) + "'"
+        " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096)) + "'"
         flog.debug( inspect.stack()[0][3] + ": wissen van uren. sql=" + sql_del_str ) 
         power_production_db.excute( sql_del_str )
     except Exception as e:
@@ -225,7 +219,7 @@ def deleteRecords():
         str( sqldb.INDEX_DAY ) + \
         " and POWER_SOURCE_ID = " + \
         str( S0_POWERSOURCE ) + \
-        " and timestamp < '" + str( datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - timedelta(days=1096)) + "'"
+        " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096)) + "'"
         flog.debug( inspect.stack()[0][3] + ": wissen van dagen. sql=" + sql_del_str ) 
         power_production_db.excute( sql_del_str )
     except Exception as e:
@@ -237,15 +231,15 @@ def deleteRecords():
 # functie is run as a seperate process                 #
 ########################################################
 def checkAndInsertMinuteRecord():
-    dt = datetime.now()
-    timestamp = datetime.strftime( dt , "%Y-%m-%d %H:%M:00")
+    dt = datetime.datetime.now()
+    timestamp = datetime.datetime.strftime( dt , "%Y-%m-%d %H:%M:00")
 
     #print ("# " + str( dt.second  ) )
     try:
         if dt.second > 30: #limit the work load
             
             flog.debug( inspect.stack()[0][3]+": leeg record aanmaken om een data gap te voorkomen." )
-            timetamp_minus_one_minute = datetime.strftime( dt - timedelta( minutes=1 ), "%Y-%m-%d %H:%M:00")
+            timetamp_minus_one_minute = datetime.datetime.strftime( dt - datetime.timedelta( minutes=1 ), "%Y-%m-%d %H:%M:00")
             #print (" timetamp_minus_one_minute = " + str(timetamp_minus_one_minute) )
             rec = power_production_db.get_timestamp_record( timetamp_minus_one_minute, sqldb.INDEX_MINUTE, S0_POWERSOURCE )
             #print (" record minus one = " + str(rec) )
@@ -310,7 +304,7 @@ def backgroundDaemon():
 # starting of deamon background process               #
 #######################################################
 def startBackgroundDeamon():
-    p = Process( target=backgroundDaemon )
+    p = multiprocessing.Process( target=backgroundDaemon )
     p.daemon=True
     p.start()
     p.join(timeout=0)
@@ -359,7 +353,7 @@ def addMissingRecords():
         flog.debug( inspect.stack()[0][3] + ": gestopt geen ontbrekende records." ) 
         return
 
-    flog.info( inspect.stack()[0][3] + ": gestart. process id = " + str(os.getpid()) )
+    #flog.info( inspect.stack()[0][3] + ": gestart. process id = " + str(os.getpid()) )
 
     # build a set of records that are in the database
     if missing_records_count > 0:
@@ -402,8 +396,8 @@ def addMissingRecords():
         #all_possible_timestamps.append( str( dt_tmp ) )
         all_possible_timestamps_set.add ( str( dt_tmp ) )
         #all_possible_timestamps.add( str(dt_tmp)  )
-        dt_tmp = dt_tmp + timedelta( minutes=1 )
-        if datetime.strftime( dt_tmp, "%Y-%m-%d %H:%M:%S") > max_timestamp:
+        dt_tmp = dt_tmp + datetime.timedelta( minutes=1 )
+        if datetime.datetime.strftime( dt_tmp, "%Y-%m-%d %H:%M:%S") > max_timestamp:
             #all_possible_timestamps.pop() # remove current timestamp
             flog.debug( inspect.stack()[0][3] + " all_possible_timestamps_set gestopt op timestamp = " + str( dt_tmp) )
             break
@@ -444,7 +438,7 @@ def addMissingRecords():
     for ts_possible_timestamp in all_possible_timestamps:
 
         # first find the previous record
-        ts_previous = datetime.strptime( ts_possible_timestamp, "%Y-%m-%d %H:%M:%S")- timedelta( minutes=1 )
+        ts_previous = datetime.strptime( ts_possible_timestamp, "%Y-%m-%d %H:%M:%S")- datetime.timedelta( minutes=1 )
         rec = power_production_db.get_timestamp_record( str(ts_previous), sqldb.INDEX_MINUTE, S0_POWERSOURCE )
 
         try:
@@ -599,7 +593,7 @@ def waitForPuls():
         flog.debug(inspect.stack()[0][3]+": Start van verwerken van S0 pulsen, verwerking is actief.")
 
         rt_status_db.timestamp( 109, flog ) # set timestamp of puls detected
-        timestamp = mkLocalTimeString()
+        timestamp = util.mkLocalTimeString()
 
         #flog.debug( inspect.stack()[0][3]+": S0 puls gedetecteerd." )
         _id, puls_value_per_kwh, _label = config_db.strget( 127, flog )
@@ -625,6 +619,7 @@ def waitForPuls():
         try:
             # warning, the puls must be off to update the gpio pin.
             gpioPowerS0Puls.check_pin_from_db()
+            #flog.warning( inspect.stack()[0][3] + "## loop check"  ) 
         except:
             pass
 
@@ -641,15 +636,26 @@ def pulsSimulator(probility = 0.2 ):
 ########################################################
 def backupData():
     flog.debug( inspect.stack()[0][3] + ": Gestart" )
-    os.system("/p1mon/scripts/./P1DbCopy.py --powerproduction2disk --forcecopy")
+    #os.system("/p1mon/scripts/./P1DbCopy.py --powerproduction2disk --forcecopy")
+    process_lib.run_process( 
+        cms_str='/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --powerproduction2disk --forcecopy',
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+        )
 
 ########################################################
 # copy from ram to (flash)disk if the file does not    #
 # exist.                                               #
 ########################################################
 def DiskRestore():
-   #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
-   os.system("/p1mon/scripts/P1DbCopy.py --powerproduction2ram")
+   #os.system("/p1mon/scripts/P1DbCopy.py --powerproduction2ram")
+   process_lib.run_process(
+        cms_str='/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --powerproduction2ram',
+        use_shell=True,
+        give_return_value=False,
+        flog=flog 
+        )
 
 def saveExit(signum, frame):
     flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
@@ -669,14 +675,14 @@ if __name__ == "__main__":
     global process_bg 
     try:
         os.umask( 0o002 )
-        flog = fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
+        flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
         #### aanpassen bij productie
-        flog.setLevel( logging.INFO )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True ) 
     except Exception as e:
         print ("critical geen logging mogelijke, gestopt.:"+str(e.args[0]))
         sys.exit(1)
     
     original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
-    Main(sys.argv[1:])           
+    signal.signal( signal.SIGINT, saveExit )
+    Main(sys.argv[1:])

@@ -1,7 +1,8 @@
 #!/bin/bash
 
-## Fill in name of program here.
 PROG="p1mon"
+PYTHONENV="/p1mon/p1monenv"
+MY_PYTHON="python3"
 PRG_PATH="/p1mon/scripts/"
 PID_PATH="/p1mon/mnt/ramdisk/"
 LOG_PATH="/var/log/p1monitor/"
@@ -14,7 +15,6 @@ DBX_ROOT="/p1mon/mnt/ramdisk/dbx/"
 DBX_DATA="/data" 
 DBX_BACKUP="/backup"
 STATUS_FILE="p1mon*status"
-USB_LOCK="LCK*ttyUSB0"
 PRG1="P1SerReader.py"
 PRG2="P1Db.py"
 PRG3="P1Watchdog.py"
@@ -24,33 +24,35 @@ PRG6="P1UdpDaemon.py"
 PRG7="P1DropBoxDeamon.py"
 PRG8="P1UdpBroadcaster.py"
 PRG9="gunicorn"
-PRG9_PATH="/home/p1mon/.local/bin/"
-PRG9_ALIAS="P1Api"
-PRG9_PARAMETERS=" --timeout 900 --bind localhost:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 2 P1Api:app --log-level warning"
-PRG10="P1UpgradeAssist.py --restore"
+PRG9_PATH="/p1mon/p1monenv/bin/"
+PRG9_ALIAS="P1Api.py"
+PRG9_PARAMETERS="--timeout 900 --bind localhost:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 2 P1Api:app --log-level warning"
+PRG10="P1UpgradeAssist.py"
 PRG11="logspacecleaner.sh"
-PRG12="P1Watermeter.py" #//TODO aanpassen
+PRG12="P1Watermeter.py"
 PRG13="P1MQTT.py"
 PRG14="P1GPIO.py"
 PRG15="P1PowerProductionS0.py"
 PRG16="P1WatermeterV2.py"
 PRG17="P1SolarEdgeReader.py"
-PRG18="P1NetworkConfig.py"
+PRG18="niet meer in gebruik"
 PRG19="P1UpgradeAide.py"
 PRG20="P1Notifier.py"
 P1FILE="p1msg.txt"
 
+# make a symbolic link for old /etc/nginx/sites-enabled/p1mon_80 config files added in version 2.0.0
+sudo ln -s /run/php/php-fpm.sock /run/php/php7.3-fpm.sock  2>/dev/null # /dev/null to be silent when link allready exits.
 
 ## reset rechten wegens dev werk en kopie acties.
-#sudo /bin/chmod 775  $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE  &>/dev/null
-#sudo /bin/chown p1mon:p1mon $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE &>/dev/null
-#cd /p1mon/scripts
+sudo /bin/chmod 775  $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE  &>/dev/null
+sudo /bin/chown p1mon:p1mon $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE &>/dev/null
+
 cd $PRG_PATH
 sudo chmod 754 P1*.py*;sudo chown p1mon:p1mon P1*.py
 sudo chmod 754 *.sh;sudo chown p1mon:p1mon *.sh 
 sudo chmod 660 *_lib.py
 
- # make p1monitor log folder (new from june 2019)
+# make p1monitor log folder (new from june 2019)
 sudo mkdir -p p1monitor $LOG_PATH
 sudo /bin/chown p1mon:p1mon $LOG_PATH $WWW_DOWLOAD_PATH $EXPORT_PATH $RAMDISK
 sudo /bin/chmod 775 $LOG_PATH 
@@ -64,51 +66,68 @@ sudo /bin/chmod 664 *.log
 # script clean when gets full. Should never happen ;)
 sudo $PRG_PATH$PRG11
 
+# setup the python enviroment
+cd $PYTHONENV
+source bin/activate
+cd $PRG_PATH
+
+
 start() {
 
     # Upgrade Aide check if there is data on an USB drive
     # restore and enlarge the SDHC when there is data on
     # the drive.
-    $PRG_PATH$PRG19 --restore --reboot
-
-    # make sure we have an valid /etc/dhcpcd.conf file
-    $PRG_PATH$PRG18 --defaultdhcpconfig
-    echo "2 seconden wachttijd"
-    sleep 2
+    #$PRG_PATH$PRG19 --restore --reboot
+    eval "$MY_PYTHON $PRG19 --restore --reboot"
+    echo "[*] $PRG19 gestart."
 
     # disable power save van de wifi.
-    echo "Wifi power save wordt uitgezet."
+    echo "[*] Wifi power save wordt uitgezet."
     sudo /sbin/iw dev wlan0 set power_save off
     /sbin/iw wlan0 get power_save
-    echo "Wifi power save is uitgezet."
+    echo "[*] Wifi power save is uitgezet."
 
     #upgrade assist start
     echo "Upgrade assist wordt gestart."
-    $PRG_PATH$PRG10
-    # note the watchdog does the import from /p1mon/data 
+    eval "$MY_PYTHON $PRG10 --restore"
+    echo "[*] $PRG10 gestart."
+    #$PRG_PATH$PRG10
 
+    # note the watchdog does the import from /p1mon/data 
     # failsave stop of processed that may stil be running
-    echo "failsave stop voor dat de processen weer worden gestart."
+    echo "[*] failsave stop voor dat de processen weer worden gestart."
     stop
-    echo "2 seconden wachttijd"
+    echo "[*] 2 seconden wachttijd"
     sleep 2
 
     # set sticky bit for C program to run als p1mon 
-    sudo /bin/chmod +s /p1mon/scripts/p1monExec
-    # remove status file als dat bestaat
+    # sudo /bin/chmod +s /p1mon/scripts/p1monExec # verwijderd in versie 2.0.0
+    # remove status file(s) if they exists.
     sudo /bin/rm $RAMDISK$STATUS_FILE &>/dev/null 
-    #sudo nice --adjustment=-15 su -c p1mon $PRG_PATH$PRG1 &>/dev/null &
-    sudo nice --adjustment=-15 sudo -i -u p1mon $PRG_PATH$PRG1 &>/dev/null &
-    echo "$PRG1 gestart."
-    echo "5 seconden wachttijd"
-    # tijd zodat de serial db bij het starten gedefragmenteerd kan worden
-    sleep 5
 
-    # DB start
+    #sudo nice --adjustment=-15 su -c p1mon $PRG_PATH$PRG1 &>/dev/null &
+    #sudo nice --adjustment=-15 sudo -i -u p1mon $PRG_PATH$PRG1 &>/dev/null &
+    #eval sudo nice --adjustment=-15 sudo -i -u p1mon $MY_PYTHON $PRG1
+
+    # Start P1 port reader.
+    eval "$MY_PYTHON $PRG1 2>&1 >/dev/null &"
+    pid=$! # last command pid
+    #echo "running "$pid
+    sleep 5 # give some time to start the process
+    sudo renice -n -15 -p $pid >/dev/null # make sure the serial processing has an higer priorty
+    echo "[*] $PRG1 process prioriteit verhoogd."
+    #echo "running "$pid
+    echo "[*] $PRG1 gestart."
+    # tijd zodat de serial db bij het starten gedefragmenteerd kan worden
+    echo "[*] 3 seconden wachttijd"
+    sleep 3
+
+    # start the database process
     $PRG_PATH$PRG2 &>/dev/null &
-    echo "$PRG2 gestart."
-    echo "5 seconden wachttijd"
-    sleep 5
+    eval "$MY_PYTHON $PRG2 2>&1 >/dev/null &"
+    echo "[*] $PRG2 gestart."
+    echo "[*] 3 seconden wachttijd"
+    sleep 3
 
     # DropBoxDaemon start
     # make folders if not available (thank you -p switch)
@@ -117,151 +136,150 @@ start() {
     sudo find  $DBX_ROOT -type d -exec chmod 774 {} +
     sudo /bin/chmod 774 $DBX_ROOT
     sudo /bin/chown p1mon:p1mon $DBX_ROOT $DBX_ROOT$DBX_DATA $DBX_ROOT$DBX_BACKUP
-    $PRG_PATH$PRG7 &>/dev/null &
-    echo "$PRG7 gestart."
+    eval "$MY_PYTHON $PRG7 2>&1 >/dev/null &"
+    #$PRG_PATH$PRG7 &>/dev/null &
+    echo "[*] $PRG7 gestart."
 
     # Watchdog start
-    $PRG_PATH$PRG3 2>&1 >/dev/null &
-    echo "$PRG3 gestart."
+    #$PRG_PATH$PRG3 2>&1 >/dev/null &
+    eval "$MY_PYTHON $PRG3 2>&1 >/dev/null &"
+    echo "[*] $PRG3 gestart."
 
     # run weather once to make sure we have the weather database, fixes import issues.
-    $PRG_PATH$PRG5 2>&1 >/dev/null & 
+    eval "$MY_PYTHON $PRG5 --getweather 2>&1 >/dev/null &"
+    echo "[*] $PRG5 -getweather gestart."
+    echo "[*] 2 seconden wachttijd"
+    sleep 2
+
+    # run weather once to recover graaddagen when not set
+    # when set do nothing. use UI to force the recalculating
+    eval "$MY_PYTHON $PRG5 --recover 2>&1 >/dev/null &"
+    echo "[*] $PRG5 --recover gestart."
 
     # UDP deamon start
-    $PRG_PATH$PRG6 &>/dev/null &
-    echo "$PRG6 gestart."
+    #$PRG_PATH$PRG6 &>/dev/null &
+    eval "$MY_PYTHON $PRG6 2>&1 >/dev/null &"
+    echo "[*] $PRG6 gestart."
 
     # UDP broadcast start
     $PRG_PATH$PRG8 &>/dev/null &
-    echo "$PRG8 gestart."
+    eval "$MY_PYTHON $PRG8 2>&1 >/dev/null &"
+    echo "[*] $PRG8 gestart."
 
     # API start
     cd $PRG_PATH
-    $PRG9_PATH$PRG9$PRG9_PARAMETERS 2>&1 >/dev/null &
-    echo "$PRG9_ALIAS gestart."
-
-    # MQTT start (done by wachtdog process )
-    #$PRG_PATH$PRG13 &>/dev/null &
-    #echo "$PRG13 gestart."
+    # $PRG9_PATH$PRG9$PRG9_PARAMETERS 2>&1 >/dev/null &
+    eval "$PRG9_PATH$PRG9 $PRG9_PARAMETERS 2>&1 >/dev/null &"
+    echo "[*] $PRG9_ALIAS gestart."
 
     # GPIO start
-    $PRG_PATH$PRG14 &>/dev/null &
-    echo "$PRG14 gestart."
-
+    #$PRG_PATH$PRG14 &>/dev/null &
+    eval "$MY_PYTHON $PRG14 2>&1 >/dev/null &"
+    echo "[*] $PRG14 gestart."
+ 
     # Notifier start
-    $PRG_PATH$PRG20 2>&1 >/dev/null &
-    echo "$PRG20 gestart."
-
+    #$PRG_PATH$PRG20 2>&1 >/dev/null &
+    eval "$MY_PYTHON $PRG20 2>&1 >/dev/null &"
+    echo "[*] $PRG20 gestart."
 
 }
 
-#function is_script_running() {
-#    if [ $( ps -ef| grep $1 | grep -v grep | wc -l ) -gt 0 ]
-#    then
-#      echo " $1 already running"
-#      echo "1"
-#    else
-#      echo " $1 is not running"
-#      echo "0"
-#    fi
-#}
 
 function process_kill() {
-    PID=$( pidof -x $1 )
-    if [ -z "$PID" ]
-    then
-        echo "Geen pid gevonden voor proces $1, proces is niet actief."
-    else
-        echo "Killing pid(s) "$PID" proces naam is "$1
-        sudo kill -s SIGINT $PID 1>&2 >/dev/null
-        if [ "$2" ]; then
-            echo "timeout is "$2" seconden."
-            sleep $2
-        else
-            sleep 3
-            echo "timeout is 3 seconden."
-        fi
+    pids=$( ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' )
+    pidslist=$( ps -ef | grep $1 |grep -v grep | awk '{ printf("%d ",$2) }')
 
-        PID=$( pidof -x $1 )
-        if [ -z "$PID" ]
+    # do a normal kill
+    if [ -z "${pids}" ]
+    then
+        echo "[*] Geen pid gevonden voor proces $1, proces is niet actief."
+        return
+    else
+        echo "[*] Killing pid(s) "$pidslist" proces naam is "$1
+        ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' | xargs sudo kill -s SIGINT
+    fi
+
+    if [ ! -z "$2" ]
+    then
+        echo "[*] Wacht "$2" seconden tot "$1" met pid(s) $pidslist gestopt is."
+        sleep $2 #wait $2 sec for next test
+    fi
+
+    #pids=$( ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' )
+    pids=$( ps -ef | grep $1 |grep -v grep | awk '{ printf("%d ",$2) }' )
+    if [ -z "${pids}" ]
+    then
+       return
+     else
+        # failsave kill
+        pids=$( ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' )
+        if [ -z "${pids}" ]
         then
-            echo "Er lopen geen processen meer met de naam "$1
-            echo "--------------------------------------------"
-        else 
-            echo "Failsave kill gestart, dit is niet normaal voor proces "$1
-            echo "------------------------------------------------------------"
-            # reread processes, to make sure we have the right one
-            PID=$( pidof -x $1 )
-            sudo kill -s SIGINT $PID 1>&2 >/dev/null
-            echo "timeout is $2 seconden"
-            sleep 2
-            echo "sudo killall "$1" wordt uitgevoerd."
-            sudo killall $1
+            echo "[*] Er lopen geen processen meer met de naam "$1
+            echo "[*] --------------------------------------------"
+        else
+            echo "[*] Failsave kill gestart, dit is niet normaal voor proces "$1
+            echo "[*] ------------------------------------------------------------"
+            ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' | xargs sudo kill -s SIGKILL
         fi
     fi
 }
 
 stop() {
 
-    echo "Processen worden gestopt, even geduld aub."
+    echo "[*] Processen worden gestopt, even geduld aub."
 
     # Notifier stop
-    process_kill $PRG20 2
+    process_kill $PRG20 3
 
     # Serial interface stop
-    process_kill $PRG1
+    process_kill $PRG1 3
 
     # GPIO stop
-    process_kill $PRG14
-
-    # API stop
-    process_kill $PRG9
+    process_kill $PRG14 3
 
     # UDP broadcast stop
-    process_kill $PRG8
+    process_kill $PRG8 3
 
     # Dropbox stop
-    process_kill $PRG7
+    process_kill $PRG7 3
 
     # Udp Sender stop
-    process_kill $PRG6
+    process_kill $PRG6 4
 
-     # DB stop
-    process_kill $PRG2
+    # DB stop
+    process_kill $PRG2 12 
 
     # Watchdog stop
-    process_kill $PRG3
-    
-    #######################################################
-    # door de watchdog gestarte processen stoppen na het  #
-    # stoppen van de watchdog                             #
-    #######################################################
+    process_kill $PRG3 2
 
     # Powerproduction stop
-    process_kill $PRG15 5
+    process_kill $PRG15 4
 
     # P1WatermeterV2
-    process_kill $PRG16 5
+    process_kill $PRG16 4
 
     # P1SolarEdge 
-    process_kill $PRG17 5
+    process_kill $PRG17 3
 
     # MQTT stop
-    process_kill $PRG13 5
+    process_kill $PRG13 3
 
-    
+    # API stop
+    process_kill $PRG9_PATH$PRG9 3
 
 }
 
 cleardb() {
+  echo "[*] wissen van database gestart."
   # database files worden hernoemd en niet gewist als noodmaatregel.
   # in ram zullen ze verdwijnen op disk blijven ze bestaan.
-  echo  "database files worden hernoemd met .bak extentie"
+  echo "[*] database files worden hernoemd met .bak extentie"
   # geef de bestaande db bestanden een bak extentie.
-  echo "Backup maken van data folder "${DATADISK}
+  echo "[*] Backup maken van data folder "${DATADISK}
   cd $DATADISK &>/dev/null
   /usr/bin/rename --verbose --force "s/db$/db.bak/g" *
-  echo "verwijderen van de ramdisk folder "${RAMDISK} 
+  echo "[*] verwijderen van de ramdisk folder "${RAMDISK} 
   cd $RAMDISK &>/dev/null
   rm --force --verbose *.db
   cd $PRG_PATH &>/dev/null
@@ -269,7 +287,6 @@ cleardb() {
 
 case "$1" in
     start)
-		#initScripts # no longer needed
         start
         exit 0
     ;;
@@ -285,13 +302,12 @@ case "$1" in
     ;;
     cleardatabase)
         stop
-        echo "wissen van database gestart."
         cleardb
         start
         exit 0
     ;;
     **)
-        echo "Usage: $0 {start|stop|restart|cleardatabase}" 
+        echo "[*] Usage: $0 {start|stop|restart|cleardatabase}" 
         exit 1
     ;;
 esac

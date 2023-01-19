@@ -25,7 +25,6 @@ if( $localip == False ){
         }
 }
 
-
 $err_cnt = -1;
 // tarieven E aanpassen
 if( isset($_POST["verbr_piek"]) || isset($_POST["verbr_dal"]) || isset($_POST["gelvr_piek"]) || isset($_POST["gelvr_dal"]) || isset($_POST["e_vastrecht"]) )
@@ -124,7 +123,7 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                                 <label class="text-8" for="verbr_dal">laag/dal</label>                         
                             </div>
                             <div class="float-right">
-                                <input class="input-1 color-verbr color-input-back" id="verbr_piek" name="verbr_piek" type="text" value="<?php echo config_read(2);?>">        
+                                <input class="input-1 color-verbr color-input-back" id="verbr_piek" name="verbr_piek" type="text" value="<?php echo config_read(2);?>">
                                 <p class="p-1"></p>
                                 <input class="input-1 color-verbr color-input-back" id="verbr_dal"  name="verbr_dal"  type="text" value="<?php echo config_read(1);?>">
                             </div>

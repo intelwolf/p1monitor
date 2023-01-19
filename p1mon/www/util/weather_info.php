@@ -48,8 +48,8 @@ echo <<<"END"
                 </div>
                 
                 <script>
-                var weaterData = [];
-                var tempDirection = 0;
+                var weaterData      = [];
+                var tempDirection   = 0;
                 var globalWeatherTimer;
                 var tempAnimationTimer;
                 
@@ -107,6 +107,7 @@ echo <<<"END"
                     return false;
                 } 
                 
+                /*
                 function tempertatureAnimation() {
                     
                     clearInterval(tempAnimationTimer);
@@ -138,26 +139,30 @@ echo <<<"END"
                         if (hasClassAndReplace("fa-thermometer-empty","fa-thermometer-full")){return;}
                         }
                 }
-                
+                */
+
                 function processJsonWeatherData(){
-                    
+
                     if ( weaterData[0][4] < 0 ) { 
                          $( '#wth_temp_text').html(weaterData[0][4].toFixed(1) );
                     } else {
                          $( '#wth_temp_text').html('&nbsp;'+weaterData[0][4].toFixed(1) );
                     } 
-                    
+
                     tempDirection = 0;
                     if ( weaterData[0][4] > weaterData[1][4] ) { tempDirection =  1 } // temperature is rising
                     if ( weaterData[0][4] < weaterData[1][4] ) { tempDirection = -1 } // temperature is falling
 
+                    
                     if ( tempDirection == 0 ) { 
                         //clearInterval(tempAnimationTimer);
                         $('#wth_detail_temperature').text('ongewijzigd');
-                        tempertatureAnimation();
+                        //tempertatureAnimation();
                     } else {
-                        tempertatureAnimation();
+                        //tempertatureAnimation();
                     }
+                    
+
                     $('#wth_humidity_text').text( weaterData[0][8]+'%' );
                     $('#wth_wind_speed_text').text( wind_speed_2_beaufort( weaterData[0][9]*3.6 ) );
                     $('#wth_detail_wind_speed').text( (weaterData[0][9]*3.6).toFixed(1) );
@@ -186,14 +191,14 @@ echo <<<"END"
                     }
 
                     $('#wth_detail_condition').text( weaterData[0][5] );
-                    
+
                     if ( tempDirection == 1) { 
                         $('#wth_detail_temperature').text('stijgt');
                     }
                     if ( tempDirection == -1) { 
                         $('#wth_detail_temperature').text('daalt');
                     }
-                    
+
                     $('#wth_condition_icon').removeClass();
                     $('#wth_condition_icon').addClass( "owf owf-lg owf-"+weaterData[12] );
                     $('#weather').removeClass('display-none');
