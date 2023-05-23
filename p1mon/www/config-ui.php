@@ -154,6 +154,15 @@ if ( isset($_POST["ui_w2kw"]) ) {
 }
 
 
+if ( isset($_POST["ui_peak_kw_hide"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["ui_peak_kw_hide"] == '1' ) {
+        if ( updateConfigDb("update config set parameter = '1' where ID = 206") )$err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 206") )$err_cnt += 1;
+    }
+}
+
 
 if ( isset($_POST["verbruik_list_main"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -196,7 +205,6 @@ if ( isset($_POST["ui_language"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["ui_language"])."' where ID = 148"))$err_cnt += 1;
 }
-
 
 if ( isset($_POST["levering_list_kwh"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -273,7 +281,6 @@ if ( isset($_POST["verwarming_uit_label"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '". $input . "' where ID = 122") ) $err_cnt += 1;
 }
-
 
 if ( isset($_POST["phase_v_max"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -575,7 +582,6 @@ function makeSelectorAmpere( $id ) {
                             <span class="text-15"><?php echo strIdx( 174 );?></span>
                         </div>
                         <div class="frame-4-bot">
-                            
                             <div> 
                                 <!-- left side -->
                                 <div class="float-left">
@@ -679,7 +685,7 @@ function makeSelectorAmpere( $id ) {
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
                                 <label class="text-10" title="<?php echo strIdx(307);?>"><?php echo strIdx( 306 );?></label>
                             </div>
-                            <div class="float-left pad-1">    
+                            <div class="float-left pad-1">
                                 <select class="select-5 color-select color-input-back cursor-pointer" name="levering_list">
                                     <?php makeSelectorKwSelector(23);?>
                                 </select>
@@ -731,14 +737,11 @@ function makeSelectorAmpere( $id ) {
                             <span class="text-15"><?php echo strIdx( 176 );?></span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left">                
-                                <!-- <i class="text-10 fas fa-home pad-7"></i> -->
-
+                            <div class="float-left">
                                 <span class="fa-layers text-10">
                                     <i class="fas fa-desktop pad-7"></i>
                                     <i class="fas fa-pen-square pad-7" data-fa-transform="shrink-8 up-1 right-1"></i>
                                 </span>
-
                             </div>
                             <div class="float-left pad-1">
                                 <select class="select-4 color-select color-input-back cursor-pointer" name="custom_ui_list">
@@ -746,7 +749,6 @@ function makeSelectorAmpere( $id ) {
                                 </select>
                             </div>
                         </div>
-
                         <p></p>
                         <div class="frame-4-top">
                             <span class="text-15">taal / language / langue</span>
@@ -773,45 +775,121 @@ function makeSelectorAmpere( $id ) {
                             <span class="text-15"><?php echo strIdx( 177 );?></span>
                         </div>
                         <div class="frame-4-bot">
-                        <div> 
-                                <!-- left side -->
-                                <div class="float-left">
-                                    <div class="text-10"><?php echo strIdx( 205 );?></div>
-                                    <div class="text-10"><?php echo strIdx( 206 );?></div>
-                                    <div class="text-10"><?php echo strIdx( 207 );?></div>
-                                    <div class="text-10"><?php echo strIdx( 256 );?></div>
-                                    <div class="text-10"><?php echo strIdx( 257 );?></div>
-                                    <div class="text-10" title="<?php echo strIdx(314);?>"><?php echo strIdx( 313 );?></div>
-                                </div>
-                                <!-- right side -->
-                                <div class="float-right">
-                                    <div>
+                            <div class="rTable"> 
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-10 width-320">
+                                        <?php echo strIdx( 205 );?>
+                                    </div>
+                                    <div class="rTableCell float-right">
                                         <input class="cursor-pointer" name="voorspelling" type="radio" value="1" <?php if ( config_read(59) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="voorspelling" type="radio" value="0" <?php if ( config_read(59) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
-                                    <div>
+                                </div>
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-10 width-320">
+                                        <?php echo strIdx( 206 );?>
+                                    </div>
+                                    <div class="rTableCell float-right">
                                         <input class="cursor-pointer" name="drie_fasen" type="radio" value="1" <?php if ( config_read(61) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="drie_fasen" type="radio" value="0" <?php if ( config_read(61) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
-                                    <div>
+                                </div>
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-10 width-320">
+                                        <?php echo strIdx( 207 );?>
+                                    </div>
+                                    <div class="rTableCell float-right">
                                         <input class="cursor-pointer" name="ui_header" type="radio" value="1" <?php if ( config_read(134) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="ui_header" type="radio" value="0" <?php if ( config_read(134) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
-                                    <div>
+                                </div>
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-10 width-320">
+                                        <?php echo strIdx( 256 );?>
+                                    </div>
+                                    <div class="rTableCell float-right">
                                         <input class="cursor-pointer" name="ui_water_hide" type="radio" value="1" <?php if ( config_read( 157 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="ui_water_hide" type="radio" value="0" <?php if ( config_read( 157 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
-                                    <div>
+                                </div>
+                                <div class="rTableRow">
+                                    <div class="rTableCell text-10 width-320">
+                                        <?php echo strIdx( 257 );?>
+                                    </div>
+                                    <div class="rTableCell float-right">
                                         <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="1" <?php if ( config_read( 158 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="0" <?php if ( config_read( 158 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
-                                    <div title="<?php echo strIdx(314);?>">
+                                </div>
+                                <div class="rTableRow" title="<?php echo strIdx( 314 );?>">
+                                    <div class="rTableCell text-10 width-320">
+                                        <?php echo strIdx( 313 );?>
+                                    </div>
+                                    <div class="rTableCell float-right">
                                         <input class="cursor-pointer" name="ui_w2kw" type="radio" value="1" <?php if ( config_read( 180 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="ui_w2kw" type="radio" value="0" <?php if ( config_read( 180 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
+                                <div class="rTableRow" title="<?php echo strIdx( 334 );?>">
+                                    <div class="rTableCell text-10 width-320">
+                                        <?php echo strIdx( 333 );?>
+                                    </div>
+                                    <div class="rTableCell float-right">
+                                        <input class="cursor-pointer" name="ui_peak_kw_hide" type="radio" value="1" <?php if ( config_read( 206 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="ui_peak_kw_hide" type="radio" value="0" <?php if ( config_read( 206 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        <!--
+                        <div class="frame-4-bot">
+                        <div> 
+                          
+                            <div class="float-left">
+                                <div class="text-10"><?php echo strIdx( 205 );?></div>
+                                <div class="text-10"><?php echo strIdx( 206 );?></div>
+                                <div class="text-10"><?php echo strIdx( 207 );?></div>
+                                <div class="text-10"><?php echo strIdx( 256 );?></div>
+                                <div class="text-10"><?php echo strIdx( 257 );?></div>
+                                <div class="text-10" title="<?php echo strIdx( 314 );?>"><?php echo strIdx( 313 );?></div>
+                                <div class="text-10" title="<?php echo strIdx( 334 );?>"><?php echo strIdx( 333 );?></div>
+                            </div>
+                            
+                            <div class="float-right">
+                                <div>
+                                    <input class="cursor-pointer" name="voorspelling" type="radio" value="1" <?php if ( config_read(59) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="voorspelling" type="radio" value="0" <?php if ( config_read(59) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
+                                <div>
+                                    <input class="cursor-pointer" name="drie_fasen" type="radio" value="1" <?php if ( config_read(61) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="drie_fasen" type="radio" value="0" <?php if ( config_read(61) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
+                                <div>
+                                    <input class="cursor-pointer" name="ui_header" type="radio" value="1" <?php if ( config_read(134) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="ui_header" type="radio" value="0" <?php if ( config_read(134) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
+                                <div>
+                                    <input class="cursor-pointer" name="ui_water_hide" type="radio" value="1" <?php if ( config_read( 157 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="ui_water_hide" type="radio" value="0" <?php if ( config_read( 157 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
+                                <div>
+                                    <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="1" <?php if ( config_read( 158 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="0" <?php if ( config_read( 158 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
+                                <div title="<?php echo strIdx(314);?>">
+                                    <input class="cursor-pointer" name="ui_w2kw" type="radio" value="1" <?php if ( config_read( 180 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="ui_w2kw" type="radio" value="0" <?php if ( config_read( 180 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
+                                <div title="<?php echo strIdx(314);?>">
+                                    <input class="cursor-pointer" name="ui_peak_kw_hide" type="radio" value="1" <?php if ( config_read( 206 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" name="ui_peak_kw_hide" type="radio" value="0" <?php if ( config_read( 206 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                </div>
+                            </div>
+                            </div>
+                           
+                        </div>
+                        -->
 
                         <p></p>
                         <div class="frame-4-top">

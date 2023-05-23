@@ -13,6 +13,7 @@ import os
 import pwd
 import subprocess
 import sqldb
+import sqldb_pricing
 import sys
 import systemid
 import time
@@ -20,6 +21,7 @@ import crypto3
 import util
 import listOfPidByName
 import process_lib
+
 
 #from datetime import datetime, timedelta
 #from util import setFile2user
@@ -47,6 +49,8 @@ fase_db                     = sqldb.PhaseDB()
 fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
 power_production_db         = sqldb.powerProductionDB()
 power_production_solar_db   = sqldb.powerProductionSolarDB()
+price_db                    = sqldb_pricing.PricingDb()
+
 no_status_messages    = False   # dont write to the status file. 
 
 statusdata = {
@@ -252,9 +256,10 @@ def Main(argv):
                 processImportDataSet( const.DB_E_HISTORIE, e_db_history_min, zf, fname, 'replace into e_history*' )
 
             ############################################
-            # this is fix from version 0.9.19 > to fix the typo in "finacieel" text
+            # the OR is fix from version 0.9.19 > to fix the typo in "finacieel" text
             elif tail.startswith( const.DB_FINANCIEEL ) or tail.startswith("finacieel"):
-                processImportDataSet( const.DB_FINANCIEEL, e_db_financieel_dag, zf, fname, 'replace into e_financieel*' )
+                #processImportDataSet( const.DB_FINANCIEEL, e_db_financieel_dag, zf, fname, 'replace into e_financieel*' )
+                processImportDataSet( const.DB_FINANCIEEL, e_db_financieel_dag, zf, fname, 'replace into*' )
 
             ############################################
             elif tail.startswith( const.DB_CONFIG ):

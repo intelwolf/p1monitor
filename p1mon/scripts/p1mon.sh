@@ -1,10 +1,12 @@
 #!/bin/bash
 
 PROG="p1mon"
+PHP_SESSIONS="/run/php/sessions"
 PYTHONENV="/p1mon/p1monenv"
 MY_PYTHON="python3"
 PRG_PATH="/p1mon/scripts/"
 PID_PATH="/p1mon/mnt/ramdisk/"
+DB_PATH="/p1mon/mnt/ramdisk/"
 LOG_PATH="/var/log/p1monitor/"
 LOCK_PATH="/var/lock/"
 WWW_DOWLOAD_PATH="/p1mon/www/download"
@@ -15,9 +17,9 @@ DBX_ROOT="/p1mon/mnt/ramdisk/dbx/"
 DBX_DATA="/data" 
 DBX_BACKUP="/backup"
 STATUS_FILE="p1mon*status"
-PRG1="P1SerReader.py"
-PRG2="P1Db.py"
-PRG3="P1Watchdog.py"
+PRG1="P1SerReader"  #P1SerReader.py"
+PRG2="P1Db"         #P1Db.py
+PRG3="P1Watchdog"   #"P1Watchdog.py"
 PRG4="*.log*"
 PRG5="P1Weather.py"
 PRG6="P1UdpDaemon.py"
@@ -51,12 +53,20 @@ cd $PRG_PATH
 sudo chmod 754 P1*.py*;sudo chown p1mon:p1mon P1*.py
 sudo chmod 754 *.sh;sudo chown p1mon:p1mon *.sh 
 sudo chmod 660 *_lib.py
+## set de bash stub scripts
+sudo ls P1*|grep -v py|xargs -n 1 chmod 750
 
 # make p1monitor log folder (new from june 2019)
 sudo mkdir -p p1monitor $LOG_PATH
 sudo /bin/chown p1mon:p1mon $LOG_PATH $WWW_DOWLOAD_PATH $EXPORT_PATH $RAMDISK
 sudo /bin/chmod 775 $LOG_PATH 
 sudo /bin/chmod 770 $WWW_DOWLOAD_PATH $EXPORT_PATH
+
+#PHP sessions path, PHP will not create this directory structure automatically
+echo "[*] PHP folder $PHP_SESSIONS wordt aangemaakt."
+sudo /usr/bin/mkdir -p $PHP_SESSIONS
+sudo /usr/bin/chmod 733 $PHP_SESSIONS
+sudo /usr/bin/chmod +t $PHP_SESSIONS
 
 cd $LOG_PATH
 sudo /bin/chown p1mon:p1mon *.log
@@ -70,7 +80,6 @@ sudo $PRG_PATH$PRG11
 cd $PYTHONENV
 source bin/activate
 cd $PRG_PATH
-
 
 start() {
 
@@ -105,16 +114,14 @@ start() {
     # remove status file(s) if they exists.
     sudo /bin/rm $RAMDISK$STATUS_FILE &>/dev/null 
 
-    #sudo nice --adjustment=-15 su -c p1mon $PRG_PATH$PRG1 &>/dev/null &
-    #sudo nice --adjustment=-15 sudo -i -u p1mon $PRG_PATH$PRG1 &>/dev/null &
-    #eval sudo nice --adjustment=-15 sudo -i -u p1mon $MY_PYTHON $PRG1
-
     # Start P1 port reader.
-    eval "$MY_PYTHON $PRG1 2>&1 >/dev/null &"
+    $PRG_PATH$PRG1 2>&1 >/dev/null &
+    #eval "$MY_PYTHON $PRG1 2>&1 >/dev/null &"
     pid=$! # last command pid
     #echo "running "$pid
     sleep 5 # give some time to start the process
-    sudo renice -n -15 -p $pid >/dev/null # make sure the serial processing has an higer priorty
+    #sudo renice -n -15 -p $pid >/dev/null 
+    sudo renice -n -15 $(pgrep -P $pid) >/dev/null # make sure the serial processing has an higer priorty
     echo "[*] $PRG1 process prioriteit verhoogd."
     #echo "running "$pid
     echo "[*] $PRG1 gestart."
@@ -123,8 +130,8 @@ start() {
     sleep 3
 
     # start the database process
-    $PRG_PATH$PRG2 &>/dev/null &
-    eval "$MY_PYTHON $PRG2 2>&1 >/dev/null &"
+    $PRG_PATH$PRG2 2>&1 >/dev/null &
+    #eval "$MY_PYTHON $PRG2 2>&1 >/dev/null &"
     echo "[*] $PRG2 gestart."
     echo "[*] 3 seconden wachttijd"
     sleep 3
@@ -141,8 +148,8 @@ start() {
     echo "[*] $PRG7 gestart."
 
     # Watchdog start
-    #$PRG_PATH$PRG3 2>&1 >/dev/null &
-    eval "$MY_PYTHON $PRG3 2>&1 >/dev/null &"
+    $PRG_PATH$PRG3 2>&1 >/dev/null &
+    #eval "$MY_PYTHON $PRG3 2>&1 >/dev/null &"
     echo "[*] $PRG3 gestart."
 
     # run weather once to make sure we have the weather database, fixes import issues.
@@ -181,6 +188,12 @@ start() {
     #$PRG_PATH$PRG20 2>&1 >/dev/null &
     eval "$MY_PYTHON $PRG20 2>&1 >/dev/null &"
     echo "[*] $PRG20 gestart."
+
+    # set database rechten
+    echo "[*] file rechten database bestanden aanpassen."
+    sleep 3
+    sudo  /bin/chmod 664 $DB_PATH*.db
+    echo "[*] file rechten database bestanden correct gezet."
 
 }
 

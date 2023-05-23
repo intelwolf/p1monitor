@@ -815,7 +815,7 @@ $arr = array (
     'max. fase meters','max. phase meters','compteurs de phase max.'
     ),
 /* 201 */ array(
-    'verwarming IN alternatief','heating input alternative','chauffage en alternative'
+    'verwarming in alternatief','heating input alternative','chauffage en alternative'
     ),
 /* 202 */ array(
     'verwarming uit alternatief','heating output alternative','alternatif de sortie de chauffage'
@@ -1268,12 +1268,28 @@ $arr = array (
     'La température moyenne de la pièce comme température de référence (0-99 degrés Celsius). On utilise des degrés-jours pondérés. Les degrés-jours sont multipliés par un facteur de pondération. D&apos;avril à septembre : 0,8 , de mars à octobre : 1,0 et de novembre à février : 1.1'
 ),
 /* 330 */ array(
-    '','',''
+    'vandaag','today','aujourd&apos;hui'
 ),
 /* 331 */ array(
+    'gisteren','yesterday','d&apos;hier'
+),
+/* 332 */ array(
+    'morgen','tomorrow','demain'
+),
+/* 333 */ array(
+    'verbergen van kW piek gegevens','conceal kW peak data','masquage kW données de pointe'
+),
+/* 334 */ array(
+    'Niet alle slimme meters ondersteunen deze optie. Het P1 telegram moet de codes 1-0:1.4.0 en 1-0:1.6.0 bevatten.',
+    'Not all smart meters support this option. The P1 telegram must contain codes 1-0:1.4.0 and 1-0:1.6.0.',
+    'Tous les compteurs intelligents ne prennent pas en charge cette option. Le télégramme P1 doit contenir les codes 1-0:1.4.0 et 1-0:1.6.0.'
+),
+/* 335 */ array(
     '','',''
 ),
-
+/* 336 */ array(
+    '','',''
+),
 );
 
 

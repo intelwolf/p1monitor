@@ -57,6 +57,7 @@ p1_status_record = {
 # 1.8.2 Meterstand piek/dag voor verbruikte energie      #
 # 2.8.1 Meterstand dal/nacht voor teruggeleverde energie #
 # 2.8.2 Meterstand piek/dag voor teruggeleverde energie  #
+# 1.6.0 
 ##########################################################
 p1_data_base_record = {
     'verbrk_kwh_181'            : const.NOT_SET,
@@ -73,6 +74,10 @@ p1_data_base_record = {
     'lc_180'                    : const.NOT_SET,    # kWh consumed 
     'lc_280'                    : const.NOT_SET,    # kWh produced
     'ls_9070'                   : const.NOT_SET,    # total amps R,S,T (L1,L2,L3)
+    'peak_quarter_hour_140'     : const.NOT_SET,    # peak value in kwH of the past/current quarter-hour (when available in the telegram).
+    'peak_quarter_hour_140_ts'  : '',               # timestamp of peak value in kwH of the past/current quarter-hour, not set by the telegram but by the program. 
+    'peak_month_peak_160'       : const.NOT_SET,    # highest monthly peak in kW of the current month (when when available in the telegram).
+    'peak_month_peak_160_ts'    : ''                # timepstamp of highest monthly peak in kW of the current month (when when available in the telegram).
 }   
 
 #############################################

@@ -2,6 +2,7 @@
 
 import const
 import datetime
+import filesystem_lib
 import inspect
 import gpio
 import logger
@@ -58,7 +59,7 @@ def Main(argv):
 
     DiskRestore()
     
-     # open van config database      
+     # open van config database
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
     except Exception as e:
@@ -81,6 +82,8 @@ def Main(argv):
         flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_WATERMETERV2_TAB + " succesvol geopend." )
+
+    filesystem_lib.set_file_permissions( filepath=const.FILE_DB_WATERMETERV2, permissions="664" )
 
     # database defrag 
     watermeter_db.defrag()

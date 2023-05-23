@@ -9,12 +9,9 @@ import const
 import datetime
 import inspect
 import json
-#import logger
 import shutil
 import string
 import os
-#import sys
-#import statistics
 import systemid
 import time
 import util
@@ -185,19 +182,19 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
                 data_set['gas_verbr_m3_2421'] = util.cleanDigitStr( buf_tmp[1] )
                 status['gas_present_in_serial_data'] = True
 
-            elif buf[0] == '1-0:1.8.1': 
+            elif buf[0] == '1-0:1.8.1':
                 content = buf[1].split('*') 
                 data_set['verbrk_kwh_181'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:1.8.2': 
+            elif buf[0] == '1-0:1.8.2':
                 content = buf[1].split('*') 
                 data_set['verbrk_kwh_182'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:2.8.1': 
+            elif buf[0] == '1-0:2.8.1':
                 content = buf[1].split('*') 
                 data_set['gelvr_kwh_281'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:2.8.2': 
+            elif buf[0] == '1-0:2.8.2':
                 content = buf[1].split('*') 
                 data_set['gelvr_kwh_282'] = util.cleanDigitStr(content[0])
 
@@ -213,59 +210,71 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
                 content = buf[1].split(')')
                 tarief_code=util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:21.7.0': 
+            elif buf[0] == '1-0:21.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['consumption_L1_kW'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:41.7.0': 
+            elif buf[0] == '1-0:41.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['consumption_L2_kW'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:61.7.0': 
+            elif buf[0] == '1-0:61.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['consumption_L3_kW'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:22.7.0': 
+            elif buf[0] == '1-0:22.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['production_L1_kW'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:42.7.0': 
+            elif buf[0] == '1-0:42.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['production_L2_kW'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:62.7.0': 
+            elif buf[0] == '1-0:62.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['production_L3_kW'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:32.7.0': 
+            elif buf[0] == '1-0:32.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['L1_V'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:52.7.0': 
+            elif buf[0] == '1-0:52.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['L2_V'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:72.7.0': 
+            elif buf[0] == '1-0:72.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['L3_V'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:31.7.0': 
+            elif buf[0] == '1-0:31.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['L1_A'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:51.7.0': 
+            elif buf[0] == '1-0:51.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['L2_A'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '1-0:71.7.0': 
+            elif buf[0] == '1-0:71.7.0':
                 content = buf[1].split('*')
                 phase_db_rec['L3_A'] = util.cleanDigitStr(content[0])
 
-            elif buf[0] == '0-0:1.0.0': 
+            elif buf[0] == '0-0:1.0.0':
                 #print ( buf[1] )
                 content = buf[1].split(')')
                 #print ( content )
                 timestamp_telegram = util.cleanDigitStr(content[0])
+
+            elif buf[0] == '1-0:1.4.0':
+                content = buf[1].split('*')
+                data_set['peak_quarter_hour_140'] = util.cleanDigitStr(content[0])
+            
+            elif buf[0] == '1-0:1.6.0':
+                content = buf[1].split('*')
+                data_set['peak_month_peak_160_ts'] = util.cleanDigitStr(content[0])
+                content = buf[2].split('*')
+                data_set['peak_month_peak_160'] = util.cleanDigitStr(content[0])
+                #print( data_set['peak_month_peak_160_ts'] )
+                #print( data_set['peak_month_peak_160'] )
 
             # specific codes for large users
             if status['large_consumption_user'] == True:
@@ -676,8 +685,52 @@ def instert_db_gas_value( data_set=None, status=None, statusdb=None, flog=None )
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": gas per uur fout -> "+str(e))
 
+
 #############################################################
-# set the status database with the max kWh values for       #
+# set the status database with peak values                  #
+#############################################################
+def set_peak_kw_value(data_set=None, dbstatus=None, flog=None ):
+    
+    try:
+        
+        # 1.4.0. update
+        if float(data_set['peak_quarter_hour_140']) != const.NOT_SET: #only do updates if once set, not every smart meter supplies the 1.4.0. code
+            _id, value, _label, _security = dbstatus.strget( 32, flog ) 
+            if value != str(data_set['peak_quarter_hour_140']) :
+                #print("1.4.0 update")
+                dbstatus.strset( str(data_set['peak_quarter_hour_140']) ,32 ,flog )
+                dbstatus.strset( str(util.mkLocalTimeString()) ,33 ,flog )            # 'peak_quarter_hour_140_ts' 
+
+        #1.6.0 updates
+        if float(data_set['peak_month_peak_160']) != const.NOT_SET:
+            _id, value, _label, _security = dbstatus.strget( 34, flog )
+            _id, timestamp, _label, _security = dbstatus.strget( 35, flog )
+            #print ("#1",  value )
+            #print ("#2",  timestamp )
+            #print ("#3",  str(data_set['peak_month_peak_160_ts']))
+
+            if value != str(data_set['peak_month_peak_160']) or timestamp != telegram_timestr_conversion( p1_telgram=str(data_set['peak_month_peak_160_ts'])):
+                #print("1.6.0 update")
+                dbstatus.strset( str(data_set['peak_month_peak_160']) ,34 ,flog )
+                dbstatus.strset( telegram_timestr_conversion( p1_telgram=str(data_set['peak_month_peak_160_ts']), flog=flog ) ,35 ,flog )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": peak waarde update gefaald. Melding = "+str(e.args[0]) )
+
+
+############################################################
+# make standard timestring from P1 telegram timestring     #
+############################################################
+def telegram_timestr_conversion( p1_telgram=None, flog=None ) -> str:
+    try:
+        return p1_telgram[0:4] + "-" + p1_telgram[4:6] + "-" + p1_telgram[6:8] + " " + p1_telgram[8:10] + ":" + p1_telgram[10:12] + ":" + p1_telgram[12:14]
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": tijd conversie gefaald. Melding="+str(e.args[0]) )
+        return ""
+
+ 
+#############################################################
+# set the status database with the max kWh values           #
 #############################################################
 def max_kWh_day_value(data_set=None, dbstatus=None, dbserial=None, flog=None ):
     

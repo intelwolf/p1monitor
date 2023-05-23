@@ -537,23 +537,23 @@ def getWeatherFromApi( api_id, api_key):
     try: 
         result['timestamp'] = output['dt']
     except Exception as e:
-        flog.warning (inspect.stack()[0][3]+": timestamp data niet beschikaar in api.")      
+        flog.warning (inspect.stack()[0][3]+": timestamp data niet beschikaar in api.")
     try: 
         result['city_id'] = output['id']
     except Exception as e:
-        flog.warning (inspect.stack()[0][3]+": stad id data niet beschikaar in api.")       
+        flog.warning (inspect.stack()[0][3]+": stad id data niet beschikaar in api.")
     try: 
         result['city']  = output['name']
     except Exception as e:
-        flog.warning (inspect.stack()[0][3]+": city naam data niet beschikaar in api.")  
+        flog.warning (inspect.stack()[0][3]+": city naam data niet beschikaar in api.")
     try: 
         result['temperature'] = output['main']['temp']
     except Exception as e:
-        flog.warning (inspect.stack()[0][3]+": temperatuur data niet beschikaar in api.")  
+        flog.warning (inspect.stack()[0][3]+": temperatuur data niet beschikaar in api.")
     try: 
         result['description'] = output['weather'][0]['description']
     except Exception as e:
-        flog.warning (inspect.stack()[0][3]+": beschrijving weer data niet beschikaar in api.")  
+        flog.warning (inspect.stack()[0][3]+": beschrijving weer data niet beschikaar in api.")
     try: 
         result['weather_icon'] = output['weather'][0]['icon']
     except Exception as e:

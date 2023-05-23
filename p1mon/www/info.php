@@ -12,23 +12,23 @@ if ( checkDisplayIsActive(22) == false) { return; }
 $sw_off  = strIdx( 193 );
 $sw_on   = strIdx( 192 );
 
-
 ?> 
 <!doctype html>
 <html lang="nl">
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor informatie</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
 <script src="./js/highstock-link/modules/solid-gauge.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
 
@@ -47,6 +47,7 @@ var showWatermeterInfo               = <?php if ( config_read( 102 ) == 1 ) { ec
 var showProductionPowerS0Info        = <?php if ( config_read( 129 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 var showProductionPowerSolarEdgeInfo = <?php if ( config_read( 147 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 var p1TelegramMaxSpeedIsOn           = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
+var showDynamicsPricingInfo          = <?php if ( config_read( 204 ) > 0  ) { echo "true;"; } else { echo "false;"; } echo"\n";?>
 
 function PlaySound() {
     if ( soundIsOn === true ) {
@@ -412,6 +413,10 @@ function readJsonApiStatus(){
                     $('#pr11v').text(jsonarr[j][1]);
                     $('#pr11t').text(jsonarr[j][2]);
                     break;
+                case 129:
+                    $('#db25v').text(jsonarr[j][1]);
+                    $('#db25t').text(jsonarr[j][2]);
+                    break;
                 default:
                     break;
             }
@@ -516,6 +521,7 @@ function createChartCpuTemperature() {
     series: [{
         animation: true,
         dataLabels: {
+            useHTML: true,
             format: '{point.y:.2f}°C',
             borderColor: '#384042',
             padding: 4,
@@ -589,6 +595,7 @@ function createChartCpuLoad() {
     series: [{
         animation: true,
         dataLabels: {
+            useHTML: true,
             format: '{point.y:.1f} %',
             borderColor: '#384042',
             padding: 4,
@@ -662,6 +669,7 @@ function createChartRamdiskLoad() {
     series: [{
         animation: true,
         dataLabels: {
+            useHTML: true,
             format: '{point.y:.1f} %',
             borderColor: '#384042',
             padding: 4,
@@ -735,6 +743,7 @@ function createChartRamLoad() {
     series: [{
         animation: true,
         dataLabels: {
+            useHTML: true,
             format: '{point.y:.1f} %',
             borderColor: '#384042',
             padding: 4,
@@ -823,7 +832,7 @@ $(function () {
                  <div class="frame-2-top">
                     <span class="text-2">database</span>
                 </div>
-                  <div class="frame-2-bot">        
+                  <div class="frame-2-bot">
                      <div id="db1t" class="text-9"></div><div id="db1v" class="text-9"></div><br>
                      <div id="db2t" class="text-9"></div><div id="db2v" class="text-9"></div><br>
                      <div id="db3t" class="text-9"></div><div id="db3v" class="text-9"></div><br>
@@ -858,12 +867,15 @@ $(function () {
                     <div id="powerProductionSolarEdge">
                         <div id="db24t" class="text-9"></div><div id="db24v" class="text-9"></div><br>
                     </div>
+                    <div id="dynamicsPricing">
+                        <div id="db25t" class="text-9"></div><div id="db25v" class="text-9"></div><br>
+                    </div>
                  </div>
                  <br>
                  <div class="frame-2-top">
                     <span class="text-2">processen</span>
                 </div>
-                  <div class="frame-2-bot">        
+                  <div class="frame-2-bot">
                      <div id="pr1t" class="text-9"></div><div id="pr1v" class="text-9"></div><br>
                      <div id="pr2t" class="text-9"></div><div id="pr2v" class="text-9"></div><br>
                      <div id="pr3t" class="text-9"></div><div id="pr3v" class="text-9"></div><br>
@@ -1028,6 +1040,10 @@ if ( showProductionPowerS0Info == false ){
 
 if ( showProductionPowerSolarEdgeInfo == false ){
     $('#powerProductionSolarEdge').hide();
+}
+
+if ( showDynamicsPricingInfo == false ){
+    $('#dynamicsPricing').hide();
 }
 
 </script>

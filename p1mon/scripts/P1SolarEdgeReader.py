@@ -3,6 +3,7 @@
 import const
 import datetime
 import datetime_delta_lib
+import filesystem_lib
 import inspect
 import logger
 import os
@@ -64,6 +65,8 @@ def Main( argv ):
         flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
+
+    filesystem_lib.set_file_permissions(filepath=const.FILE_DB_POWERPRODUCTION, permissions="664" )
 
     # power_production_solar_db.excute("delete from powerproduction_solar where power_source_id=1 and TIMEPERIOD_ID = 41 and TIMESTAMP > '2010-03-13 14:00:00';")
 

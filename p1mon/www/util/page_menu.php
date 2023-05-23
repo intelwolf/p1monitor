@@ -18,22 +18,22 @@ function page_menu($id) {
             $m1 = "menu-active";
             break;
         case 2: /* opties /setup */
-            $m2= "menu-active";        
+            $m2= "menu-active";
             break;   
         case 3: /* info/status  */
-            $m3= "menu-active";        
+            $m3= "menu-active";
             break;  
         case 4: /* grafiek kosten  */
-            $m4= "menu-active";        
+            $m4= "menu-active";
             break; 
         case 5: /* gas verbruik  */
-           $m5= "menu-active";        
+           $m5= "menu-active";
             break;   
         case 6: /* actuele verbruik  */
-            $m6= "menu-active";        
+            $m6= "menu-active";
             break;
         case 7: /* verwarming  */
-            $m7= "menu-active";        
+            $m7= "menu-active";
             break;
         case 8: /* meterstanden */
             $m8= "menu-active";

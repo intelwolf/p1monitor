@@ -1,10 +1,13 @@
 #!/bin/bash
 # script om bestanden de juiste rechten te geven
-echo "[*] Script folder aanpassen"
+echo "[*] Scripts folder aanpassen"
 cd /p1mon/scripts 
 chmod 754 *.py*;chown p1mon:p1mon *.py*;ls -l *.py*
 #chmod 774 p1mon;chown p1mon:p1mon *
 chmod 754 *.sh
+echo "[*] Bash python start scripts aanpassen"
+ls P1*|grep -v py
+ls P1*|grep -v py|xargs -n 1 chmod 750
 echo "[*] www folders aanpassen."
 find /p1mon/www -type d -exec chmod 775 {} +
 echo  "[*] www bestanden aanpassen"

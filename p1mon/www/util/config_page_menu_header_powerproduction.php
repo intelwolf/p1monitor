@@ -13,7 +13,7 @@ switch ( $id ) {
         break;
     default:
     /* default value so always a menu is available */
-    $m0="menu-active";        
+    $m0="menu-active";
 }
 echo <<< EOT
 <div>

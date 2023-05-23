@@ -15,7 +15,7 @@ function page_header() {
     //$month =12;
 
     if ($day >= 24 and $day <= 26 and $month == 12) { // xmas launch date
-        $xmas = '<div class="pos-38 content-wrapper"><img alt="Happy Christmas" src="/img/xmas.png" height="45"></div>';
+        $xmas = '<div class="pos-38 content-wrapper"><img alt="Happy Christmas from securitybrother" src="/img/xmas.png" height="45"></div>';
     }
     
     if  ( strlen( readStatusDb(66)) > 0 ) {
@@ -27,7 +27,7 @@ function page_header() {
 echo <<< EOT
 <div class="top-wrapper">
     <div class="content-wrapper">
-        <img class="pos-1" alt="ztatz logo" src="./img/p1mon-logo.svg" width="50" height="45">
+        <img class="pos-1" alt="The P1-monitor logo is shown here." src="./img/p1mon-logo.svg" width="50" height="45">
         <span class="text-1">P1-monitor</span>
         $newversion
         $xmas

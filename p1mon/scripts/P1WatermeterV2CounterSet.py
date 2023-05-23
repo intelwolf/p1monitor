@@ -3,6 +3,7 @@
 import const
 import inspect
 import datetime
+import filesystem_lib
 import logger
 import os
 import sys
@@ -72,6 +73,8 @@ def Main(argv):
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_WATERMETERV2_TAB + " succesvol geopend." )
 
     writeLineToStatusFile("Gestart")
+
+    filesystem_lib.set_file_permissions( filepath=const.FILE_DB_WATERMETERV2, permissions="664" )
 
     # check if the database contains records.
     if watermeter_db.record_count() == 0: 

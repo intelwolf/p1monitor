@@ -319,6 +319,23 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '202','18'              ,'kamertemperatuur graaddagen berekening')")
         self.insert_rec( "insert or ignore into " + table + " values ( '203','0'               ,'vlag voor recover van graaddagen')")
 
+        # dynamic pricing 
+        # 0 means used fixed prices > 0 use one of the source for delevering the data.
+        # 1 = energyzero
+        # 2 = ???
+        # 3 = ???
+
+        #TODO 207,209,210 zijn nog vrij voor toekomstig gebruik nooit in productie gebruikt
+        self.insert_rec( "insert or ignore into " + table + " values ( '204','0'               ,'gebruik van vaste tarieven of dynamische tarieven.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '205','0.0212'          ,'flexible kosten per kWh inkoop.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '206','1'               ,'UI piek kw verbergen (1/0)')")
+        
+        #self.insert_rec( "insert or ignore into " + table + " values ( '207','0'               ,'flexible kosten per kWh Opslag duurzame energie (ODE).')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '208','0.851'            ,'flexible kosten per gas inkoop.')")
+        #self.insert_rec( "insert or ignore into " + table + " values ( '209','0'               ,'flexible kosten per gas belasting.')")
+        #self.insert_rec( "insert or ignore into " + table + " values ( '210','0'               ,'flexible kosten per gas Opslag duurzame energie (ODE).')")
+
+
         # you need an account on www.noip.com before this can be used
         #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")
         #self.insert_rec("insert or ignore into " + table + " values ( '151',''                 ,'no-ip account name')")
@@ -352,6 +369,8 @@ class configDB():
         
         #setFile2user(filename,'p1mon')  
         #update config set PARAMETER='0.3', LABEL='Versie:' where ID ='1';
+
+
 
     def close_db(self):
         if self.con:
@@ -527,17 +546,10 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into "+table+\
         " values ( '31','0','RAM geheugen belasting:',0)")
 
-        self.insert_rec("insert or ignore into "+table+\
-        " values ( '32','','',0)")
-
-        self.insert_rec("insert or ignore into "+table+\
-        " values ( '33','','',0)")
-
-        self.insert_rec("insert or ignore into "+table+\
-        " values ( '34','','',0)")
-
-        self.insert_rec("insert or ignore into "+table+\
-        " values ( '35','','',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '32','','Kw waarde 1.4.0 P1 telegram:',0)")
+        self.insert_rec("insert or ignore into "+ table + " values ( '33','onbekend','Tijdstip laatste update 1.4.0 P1 telegram:',0)")
+        self.insert_rec("insert or ignore into "+ table + " values ( '34','','Kw waarde 1.6.0 P1 telegram:',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '35','onbekend','Tijdstip laatste update 1.6.0 P1 telegram:',0)")
 
         self.insert_rec("insert or ignore into "+table+\
         " values ( '36','','',0)")
@@ -777,6 +789,9 @@ class rtStatusDb():
         
         self.insert_rec("insert or ignore into " + table + " values ( '128','onbekend','Tijdstip SOCAT start:',0)")
 
+        self.insert_rec("insert or ignore into " + table + " values ( '129','onbekend','Tijdstip laaste update dynamische tarieven:',0)")
+
+
         # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"
         self.update_rec(sql_update)
@@ -788,6 +803,17 @@ class rtStatusDb():
         self.update_rec(sql_update)
         sql_update = "update status set label ='Tijdstip laatste verwerkte watermeterstand reset:' where id=91"
         self.update_rec(sql_update)
+
+        # reuse of no longer used id's
+        sql_update = "update status set label ='Kw waarde 1.4.0 P1 telegram:' where id=32"
+        self.update_rec(sql_update)
+        sql_update = "update status set label ='Tijdstip laatste update 1.4.0 P1 telegram:' where id=33"
+        self.update_rec(sql_update)
+        sql_update = "update status set label ='Kw waarde 1.6.0 P1 telegram:' where id=34"
+        self.update_rec(sql_update)
+        sql_update = "update status set label ='Tijdstip laatste update 1.6.0 P1 telegram:' where id=35"
+        self.update_rec(sql_update)
+
 
         self.close_db()
 

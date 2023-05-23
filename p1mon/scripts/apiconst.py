@@ -39,6 +39,9 @@ ROUTE_FINANCIAL_MONTH_HELP = ROUTE_FINANCIAL_MONTH + '/help'
 ROUTE_FINANCIAL_YEAR      = '/api/v1/financial/year'
 ROUTE_FINANCIAL_YEAR_HELP = ROUTE_FINANCIAL_YEAR + '/help'
 
+ROUTE_FINANCIAL_DYNAMIC_TARIFF      = '/api/v1/financial/dynamic_tariff'
+ROUTE_FINANCIAL_DYNAMIC_TARIFF_HELP = ROUTE_FINANCIAL_DYNAMIC_TARIFF + '/help'
+
 BASE_POWER_GAS           = 'powergas' # don't use in path in the code
 ROUTE_POWER_GAS_MIN      = '/api/v1/powergas/minute'
 ROUTE_POWER_GAS_MIN_HELP = ROUTE_POWER_GAS_MIN + '/help'
@@ -285,6 +288,8 @@ JSON_API_PROD_KWH_TOTAL_L   = 'PRODUCTION_KWH_LOW_TOTAL'             # total kWh
 JSON_API_PROD_KWH_TOTAL     = 'PRODUCTION_KWH_TOTAL'                 # total kWh during the period for the low and high tariff.
 JSON_API_PROD_W_PSEUDO      = 'PRODUCTION_PSEUDO_W'                  # total Watt calculated during the period, this is an simulated/approximated value.
 
+JSON_API_FNCL_DYN_TRFF_KWH  = 'DYNAMIC_TARIFF_KWH'                   # dynamic tariff kwh.
+JSON_API_FNCL_DYN_TRFF_GAS  = 'DYNAMIC_TARIFF_GAS'                   # dynamic tariff gas.
 
 
 #JSON field explained.
@@ -420,6 +425,9 @@ EXPL_API_PROD_KWH_TOTAL_L   = 'Total kWh during the period for the low tariff.'
 EXPL_API_PROD_KWH_TOTAL     = 'Total kWh during the period for the low and high tariff.'
 EXPL_API_PROD_W_PSEUDO      = 'Total Watt calculated during the period, this is an simulated/approximated value.'
 
+EXPL_API_FNCL_DYN_TRFF_KWH  = 'Dynamic tariff kwh.'
+EXPL_API_FNCL_DYN_TRFF_GAS  = 'Dynamic tariff gas.'
+
 #json types
 TYPE_JSON_STRING         = 'string'
 TYPE_JSON_INTEGER        = 'integer'
@@ -461,6 +469,43 @@ HELP_ROUTE_CATALOG_JSON = {
     "api_usage"         : "<ip>" + ROUTE_CATALOG + ',<ip>' + ROUTE_CATALOG_HELP,
     "fields"            : API_PARAMETER_NONE
 }
+
+
+# help data
+# SQL AS Reference
+# sqlstr = select TIMESTAMP, cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), PRICE_KWH REAL PRICE_GAS 
+#
+HELP_ROUTE_FINANCIAL_DYNAMIC_TARIFF_JSON = { 
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP,
+    "api_description"   : "The dynamic tariff values per hour. Data is added when available from the tariff supplier. Data is ordered on timestamp.",
+    "api_usage"         : "<ip>" + ROUTE_FINANCIAL_DYNAMIC_TARIFF+ '?'+ API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2023-04-02 10:50:55 or ' + API_PARAMETER_RANGETIMESTAMP + '=2023-04-02, <ip>' + ROUTE_FINANCIAL_DYNAMIC_TARIFF_HELP,
+    "fields": [
+        {
+           "name" : JSON_TS_LCL,
+           "description" : EXPL_TS_LCL,
+           "type": TYPE_JSON_STRING
+        },
+        { 
+           "name" : JSON_TS_LCL_UTC,
+           "description" : EXPL_TS_LCL_UTC,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_FNCL_DYN_TRFF_KWH,
+           "description" : EXPL_API_FNCL_DYN_TRFF_KWH,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_FNCL_DYN_TRFF_GAS,
+           "description" : EXPL_API_FNCL_DYN_TRFF_GAS,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        }
+    ]
+}
+
+
 
 # help data
 # SQL AS Reference

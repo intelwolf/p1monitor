@@ -13,15 +13,17 @@ include_once '/p1mon/www/util/fullscreen.php';
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor Home</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
+
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
@@ -47,6 +49,7 @@ var phaseCategories         = [ 'L1', 'L2', 'L3' ]
 var p1TelegramMaxSpeedIsOn  = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hideWaterUi             = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hideGaSUi               = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+var hidePeakKw              = <?php if ( config_read( 206 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 
 
 function readJsonApiWaterHistoryDay( cnt ){ 
@@ -198,6 +201,24 @@ function readJsonApiStatus(){
                 continue;
             }
             
+            if ( jsondata[j][0] == 32 ) {
+                $('#P_Q_kw').text( padXX( jsondata[j][1], 3, 3 ) );
+                continue;
+            }
+            if ( jsondata[j][0] == 33 ) {
+                $('#P_Q_timestamp').text(jsondata[j][1] );
+                continue;
+            }
+
+            if ( jsondata[j][0] == 34 ) {
+                $('#P_M_kw').text( padXX( jsondata[j][1], 3, 3 ) );
+                continue;
+            }
+            if ( jsondata[j][0] == 35 ) {
+                $('#P_M_timestamp').text(jsondata[j][1] );
+                continue;
+            }
+
             if ( jsondata[j][0] == 74 ) { 
                 consumptionPowerPhase[0] = parseFloat( jsondata[j][1] )
                 continue;
@@ -238,6 +259,7 @@ function readJsonApiStatus(){
                 var lowProductionTimestamp = jsondata[j][1].substring( 11 );
                 continue;
             }
+            
 
          }
 
@@ -347,6 +369,7 @@ function createChartPhaseProduction(){
         plotOptions: {
             column: {
                 dataLabels: {
+                    useHTML: true,
                     enabled: true,
                     format: '{y} kW',
                     color: '#6E797C',
@@ -400,6 +423,7 @@ function createChartPhaseConsuming(){
         plotOptions: {
             column: {
                 dataLabels: {
+                    useHTML: true,
                     enabled: true,
                     format: '{y} kW',
                     color: '#6E797C',
@@ -441,7 +465,7 @@ function createChartVerbruik(){
                 borderWidth: 2,
                 outerRadius: '109%'
             }]
-        },      
+        },
         yAxis: {
             min: 0,
             max: wattageMaxValueConsumption, // dynamic
@@ -481,9 +505,10 @@ function createChartVerbruik(){
                     radius: 8,
                     borderWidth: 1,
                     backgroundColor: '#384042',
-                    borderColor: '#F5F5F5'        
+                    borderColor: '#F5F5F5'
                 },
                 dataLabels: {
+                    useHTML: true,
                     format: '{point.y:.3f}',
                     borderColor: '#384042',
                     padding: 4,
@@ -496,7 +521,7 @@ function createChartVerbruik(){
                         color: "#6e797c"
                     }
                 },
-                wrap: false  
+                wrap: false
             }
         },
         series: [{
@@ -535,20 +560,19 @@ function createChartGeleverd(){
         tooltip: { enabled: false },
         pane: {
             startAngle: -150,
-            endAngle: 150,        
+            endAngle: 150,
             background: [{
                 backgroundColor: '#F5F5F5',
                 borderWidth: 2,
                 outerRadius: '109%'
             }]
-        },      
+        },
         yAxis: {
             min: 0,
             max: wattageMaxValueProduction, // dynamic
             labels: {
                 distance: -27
             },
-      
             minorTickInterval: 'auto',
             minorTickWidth: 11,
             minorTickLength: 18,
@@ -571,7 +595,7 @@ function createChartGeleverd(){
             gauge: {
                 dial: {
                     radius: '70%',
-                    backgroundColor: '#384042',        
+                    backgroundColor: '#384042',
                     borderWidth: 1,
                     baseWidth: 15,
                     topWidth: 1,
@@ -582,9 +606,10 @@ function createChartGeleverd(){
                     radius: 8,
                     borderWidth: 1,
                     backgroundColor: '#384042',
-                    borderColor: '#F5F5F5'        
+                    borderColor: '#F5F5F5'
                 },
-                dataLabels: {           
+                dataLabels: {
+                    useHTML: true,
                     format: '{point.y:.3f}',
                     borderColor: '#384042',
                     padding: 4,
@@ -627,7 +652,7 @@ function createChartVerbruikGrafiek() {
         },
         exporting: { enabled: false },
         credits: { enabled: false },
-        title: { text: null },     
+        title: { text: null },
         tooltip: {
             useHTML: true,
             style: {
@@ -638,16 +663,16 @@ function createChartVerbruikGrafiek() {
                 var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
                 s += '<br/><span style="color: #F2BA0F;">Vermogen kW: </span>'+this.y.toFixed(3);
                 return s;
-            },                  
+            },
             backgroundColor: '#F5F5F5',
             borderColor: '#DCE1E3',
             crosshairs: [true, true],
             borderWidth: 1
         },  
-        xAxis: {           
+        xAxis: {
             type: 'datetime',
             lineColor: '#6E797C',
-            lineWidth: 1     
+            lineWidth: 1
         },
         yAxis: {
             gridLineColor: '#6E797C',
@@ -832,6 +857,7 @@ $(function () {
 
 <?php page_header();?>
 
+
 <div class="top-wrapper-2">
     <div class="content-wrapper pad-13">
         <!-- header 2 -->
@@ -840,14 +866,52 @@ $(function () {
         <?php weather_info(); ?>
     </div>
 </div>
+
 <div class="mid-section">
+
     <div class="left-wrapper">
         <?php page_menu(0); ?> 
         <div id="timerText" class="pos-8 color-timer"></div> 
         <?php fullscreen(); ?>
     </div> 
     
+    <!-- peak costs -->
+    <div class="mid-content-5 pad-41" id="peak_info" title="<?php echo strIdx( 334 );?>">
+        <div class="frame-2-top">
+            <span class="text-2">piek informatie</span>
+        </div>
+        <div class="frame-4-bot pad-12">
+
+            <div class="float-left pad-12">
+                <div class="frame-3-top width-260"> <!-- piek kwartier kader -->
+                    <label class="text-3">kwartier</label>
+                </div>
+                <div class="frame-2-bot width-260">
+                     <label class="text-4" id="P_Q_kw">0</label>
+                     <label class="text-4">kW</label>
+                     <label class="text-4" id="P_Q_timestamp"></label>
+                </div>
+            </div> 
+
+            <div class="float-left pad-12">
+                <div class="frame-3-top width-260"> <!-- piek maand kader -->
+                    <label class="text-3">maand</label>
+                </div>
+                <div class="frame-2-bot width-260">
+                    <label class="text-4" id="P_M_kw">0</label>
+                    <label class="text-4">kW</label>
+                    <label class="text-4" id="P_M_timestamp"></label>
+                </div>
+            </div> 
+    
+
+        </div>
+     
+    </div>
+    <!-- end peak costs -->
+
     <div class="mid-content">
+
     <!-- links -->
         <div class="frame-2-top">
             <span class="text-2">verbruik</span>
@@ -940,9 +1004,8 @@ $(function () {
                     <div id="actVermogenMeterGrafiekVerbruik" class="pos-4"></div>
                 </div>        
             </div>
-        </div>    
+        </div>
     </div>
-    
     <!-- rechts -->
     <div class="right-wrapper pad-1">
         <div class="frame-2-top">
@@ -1029,7 +1092,15 @@ $(function () {
         <!-- <div class="pos-46x" id="actVermogenFaseLevering"></div> -->
     </div>
 </div>
+
 <script>
+
+
+if ( hidePeakKw == true ){
+    $('#peak_info').hide();
+} else {
+    $('#peak_info').show();
+}
 
 if ( hideWaterUi == true ){
     $('#verbruikWaterDagDiv').hide();

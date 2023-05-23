@@ -29,15 +29,16 @@
 # Versie 1.6.0 Bug fixes. patch 1 lost een fout in /etc/dhcpcd.conf
 # versie 1.7.0 min max fase info toegevoegd en grootverbruikers meters.
 # versie 2.0.0 os upgrade naar Bulseye OS en introductie van Python virtuele omgevingen.
-# versie 2.1.0 os upgrade naar graaddagen en SOCAT toegevoegd.
+# versie 2.1.0 os upgrade, graaddagen en SOCAT toegevoegd.
+# versie 2.2.0 os upgrade, flexibele tarieven en piek waarde toegevoegd.
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "2.1.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "c"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
-P1_SERIAL_VERSION               = "20221105"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "2.2.0"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "a"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
+P1_SERIAL_VERSION               = "20230427"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'
@@ -90,6 +91,7 @@ DB_FINANCIEEL_DAG_TAB           ="e_financieel_dag"
 DB_FINANCIEEL_MAAND_TAB         ="e_financieel_maand"
 DB_FINANCIEEL_JAAR_TAB          ="e_financieel_jaar"
 DB_FINANCIEEL_DAG_VOORSPEL_TAB  ="e_financieel_voorspel_dag"
+DB_ENERGIEPRIJZEN_UUR_TAB       ="energieprijzen_uur"
 DB_WEATHER_TAB                  ="weer"
 DB_WEATHER_UUR_TAB              ="weer_history_uur"
 DB_WEATHER_DAG_TAB              ="weer_history_dag"
@@ -124,8 +126,6 @@ IMPORT_PREFIX                   ="p1mon-sql-import"
 FILE_DBX_AUTH_REDIRECT          ="dbx_auth_redirect.txt"
 
 FILE_DB_POWERPRODUCTION         ="/p1mon/mnt/ramdisk/05_powerproduction.db"
-#FILE_DB_POWERPRODUCTION_TMP     ="/p1mon/mnt/ramdisk/06_powerproduction_tmp.db"
-
 FILE_DB_PHASEINFORMATION        ="/p1mon/mnt/ramdisk/04_faseinformatie.db"
 FILE_DB_WATERMETER              ="/p1mon/mnt/ramdisk/03_watermeter.db"
 FILE_DB_WATERMETERV2            ="/p1mon/mnt/ramdisk/06_watermeter.db"

@@ -47,12 +47,13 @@ DEFAULT_SERIAL_PORTS = [ "/dev/ttyUSB0" , "/dev/ttyUSB1" ]
 DUMMY_1SEC_PROCCESSING  = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 DUMMY_3PHASE_DATA       = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 DUMMY_LARGE_CONSUMPTION = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_KWH_PEAK          = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 
 ###################################################################################
 # zet deze op p1_telegram_test_lib.NO_GAS_TEST om de test uit te zetten.          #
 # LETOP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                  #
 ###################################################################################
-#gas_test_mode=p1_telegram_test_lib.DUMMY_GAS_MODE_2421 
+#gas_test_mode=p1_telegram_test_lib.DUMMY_GAS_MODE_2421
 gas_test_mode=p1_telegram_test_lib.NO_GAS_TEST
 
 #Set COM port config
@@ -151,7 +152,7 @@ def main_prod():
     flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FASE_REALTIME_TAB + " succesvol geopend.")
 
     # only make object when tests are active
-    if DUMMY_3PHASE_DATA == True or gas_test_mode != p1_telegram_test_lib.NO_GAS_TEST or DUMMY_LARGE_CONSUMPTION == True:
+    if DUMMY_3PHASE_DATA == True or gas_test_mode != p1_telegram_test_lib.NO_GAS_TEST or DUMMY_LARGE_CONSUMPTION == True or DUMMY_KWH_PEAK == True:
         flog.warning(inspect.stack()[0][3]+": test functies geactiveerd ! " )
         p1_test = p1_telegram_test_lib.p1_telegram()
         p1_test.init( flog, statusdb=rt_status_db )
@@ -215,6 +216,14 @@ def main_prod():
         flog.warning(inspect.stack()[0][3]+": LARGE CONSUMPTION staat aan. Zet uit voor productie!")
         flog.warning(inspect.stack()[0][3]+" #### DUMMY LARGE CONSUMPTION STAAT AAN IS DIT CORRECT? ####")
 
+    # check for dummy grootverbruik data
+    if DUMMY_KWH_PEAK == True:
+        print("DUMMY KWH PEAK VERWERKING STAAT AAN?\r")
+        flog.warning(inspect.stack()[0][3]+" #############################################")
+        flog.warning(inspect.stack()[0][3]+": DUMMY KWH PEAK staat aan. Zet uit voor productie!")
+        flog.warning(inspect.stack()[0][3]+" #### DUMMY KWH PEAK STAAT AAN IS DIT CORRECT? ####")
+
+
     # read crc check settings from config
     p1_port_shared_lib.get_P1_crc( status=p1_status ,configdb=config_db, flog=flog )
 
@@ -261,6 +270,9 @@ def main_prod():
                     if gas_test_mode > 0:
                         #gasStubInstert(line)
                         p1_test.gas_stub_instert( line=line, serialbuffer=serial_buffer, gasmode=gas_test_mode )
+
+                    if DUMMY_KWH_PEAK == True:
+                        p1_test.kwh_peak_insert(line=line, serialbuffer=serial_buffer,)
 
                     #flog.info(inspect.stack()[0][3] + " step 0")
 
@@ -538,6 +550,9 @@ def update_data_set( data_set=None, status=None, phase_db_record=None, flog=None
 
         # dag waarden KWH verbruikt bijwerken
         p1_port_shared_lib.max_kWh_day_value( data_set=data_set, dbstatus=rt_status_db, dbserial=e_db_serial, flog=flog )
+
+        # peak values, these are not always supplied by all smartmeters.
+        p1_port_shared_lib.set_peak_kw_value( data_set=data_set, dbstatus=rt_status_db, flog=flog )
 
         #updateJsonData() 
         p1_port_shared_lib.update_json_data( jsondata=json_data, p1data=data_set )

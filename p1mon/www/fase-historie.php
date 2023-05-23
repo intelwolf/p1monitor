@@ -16,16 +16,17 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor historie fase</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
 <script src="./js/highstock-link/modules/solid-gauge.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
 
@@ -553,7 +554,7 @@ function setButtonVisbilty() {
                 <div class="float-left"       id="L3VoltGraph"></div>
             </div>
             <div id="loading-data" >
-                <img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128" />
+                <img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128">
             </div>
             <div id="loading-fasedata">
                    <?php echo strIdx( 91 );?>

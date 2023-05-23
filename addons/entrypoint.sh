@@ -39,9 +39,11 @@ if [ ! -f /var/tmp/.firstrun ]; then
 		crontab -l | { cat; cat ${CRONTAB}; } |crontab -
 	fi
         sudo chown -R p1mon:p1mon /p1mon/mnt /p1mon/data
-        sudo chmod g+w /p1mon/mnt/ramdisk /p1mon/data
 	touch /var/tmp/.firstrun
 fi
+
+echo "Restore file privileges"
+sudo chmod g+w /p1mon/mnt/ramdisk /p1mon/data
 
 echo "Starting cron"
 sudo service cron start

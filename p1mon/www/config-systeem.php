@@ -72,18 +72,23 @@ if ( isset($_POST['systemaction']) ) {
 
 }
 
-if ( isset($_POST["patchfilepath"]) ) { 
+if ( isset($_POST["patchfilepath"]) ) {
 
-    #remove old status file 
-    unlink('/p1mon/mnt/ramdisk/patch.status');
+    //echo ( "patchfilepath = ".$_POST["patchfilepath"] );
 
-    // set the upload path and file of the patchfile
-    if( updateConfigDb("update config set parameter = '" . $_POST["patchfilepath"] . "' where ID = 193"))$err_cnt += 1;
-    if ( isset($_POST["patch_run_mode"]) ) { 
-        if( updateConfigDb("update config set parameter = '" . $_POST["patch_run_mode"] . "' where ID = 194"))$err_cnt += 1;
+    if ($_POST["patchfilepath"] != '' ) {
+
+        #remove old status file 
+        unlink('/p1mon/mnt/ramdisk/patch.status');
+
+        // set the upload path and file of the patchfile
+        if( updateConfigDb("update config set parameter = '" . $_POST["patchfilepath"] . "' where ID = 193"))$err_cnt += 1;
+        if ( isset($_POST["patch_run_mode"]) ) { 
+            if( updateConfigDb("update config set parameter = '" . $_POST["patch_run_mode"] . "' where ID = 194"))$err_cnt += 1;
+        }
+        # shows the dialog
+        setcookie("patch_messages_show", "on", time() + 300); //5 min
     }
-    # shows the dialog
-    setcookie("patch_messages_show", "on", time()+300); //5 min
 }
 
 ?>
@@ -283,8 +288,6 @@ if ( isset($_POST["patchfilepath"]) ) {
 
 <script> 
 
-
-
 function readJsonApiConfigurationToStop( id ){
 
     $.getScript( "./api/v1/configuration/"+id, function( data, textStatus, jqxhr ) {
@@ -300,7 +303,6 @@ function readJsonApiConfigurationToStop( id ){
    
 
 }
-
 
 function readPatchStatusLogging(){ 
     $.get( "/txt/txt-patch-status.php", function( response, status, xhr ) {
@@ -322,7 +324,6 @@ function readPatchStatusLogging(){
     });
 }
 
-
 function getCookie(name) {
     var value = "; " + document.cookie;
     var parts = value.split("; " + name + "=");
@@ -338,6 +339,8 @@ $('#patch_status_message_close').click(function() {
 
 PatchMessagesShow=getCookie("patch_messages_show"); 
 
+console.log( PatchMessagesShow )
+
 $(function() {
     hideStuff('dump_dl_link')
     centerPosition('#cancel_bar');
@@ -347,7 +350,8 @@ $(function() {
         systemDump(sysdump_id);
     }
 
-    if ( PatchMessagesShow !== undefined ) {
+   //if ( PatchMessagesShow !== undefined ) {
+    if ( PatchMessagesShow === "on" ) {
         showStuff('patch_status_message');
         patchLogTimer = setInterval('updatePatchLogging();', 1000);
     }
@@ -468,7 +472,7 @@ $('#fr_button').click(function(event) {
 $('#fs_button').click(function(event) {
     action = "stop";
     setUpCancelBar("Onderbreek systeem stop");
-    event.preventDefault();    
+    event.preventDefault();
 });
 
 $('#cancel_bar').click(function() {

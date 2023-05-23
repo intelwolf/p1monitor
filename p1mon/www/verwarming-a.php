@@ -15,15 +15,16 @@ if ( checkDisplayIsActive(46) == false) { return; }
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor verwarming</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script>
@@ -119,7 +120,6 @@ function createChartIn() {
             startAngle: -120,
             endAngle: 120,
             size: 360,
-            
             background: [{
                     backgroundColor: '#F5F5F5',
                     borderWidth: 2,
@@ -146,12 +146,10 @@ function createChartIn() {
             minorTickPosition: 'inside',
             minorTickLength: 30,
             minorTickColor: '#F5F5F5',
-
             tickPosition: 'inside',
             tickLength: 35,
             tickColor: '#F5F5F5',
             tickInterval: 10,
-
             labels: {
                 rotation: 'auto',
                 distance: 10,
@@ -161,7 +159,6 @@ function createChartIn() {
                     fontSize:'15px'
                 }
             },
-            
             plotBands: [{
                 innerRadius: '80%',
                 outerRadius: '100%',
@@ -176,8 +173,7 @@ function createChartIn() {
                     ]
                 }
                 } 
-            ],    
-
+            ],
             pane: 0,
             title: {
                 text: '<span style="font-size:20px">' + ui_in_label + '<br></span>',
@@ -190,33 +186,34 @@ function createChartIn() {
         plotOptions: {
         gauge: {
             pivot: {
-            radius: 8,
-            borderWidth: 1,
-            backgroundColor: '#384042',
-            borderColor: '#F5F5F5'        
+                radius: 8,
+                borderWidth: 1,
+                backgroundColor: '#384042',
+                borderColor: '#F5F5F5'
             },
             dataLabels: {
-            format: '{point.y:.1f}°C',
-            borderColor: '#384042',
-            padding: 5,
-            borderRadius: 5,
-            verticalAlign: 'center',
-            y: 45,
-            x: 0,
-            style: {
-                fontWeight: 'bold',
-                fontSize: '40px',
-                color: "#6e797c"                        
-                }
+                useHTML: true,
+                format: '{point.y:.1f}°C',
+                borderColor: '#384042',
+                padding: 5,
+                borderRadius: 5,
+                verticalAlign: 'center',
+                y: 45,
+                x: 0,
+                style: {
+                    fontWeight: 'bold',
+                    fontSize: '40px',
+                    color: "#6e797c"
+                    }
             },
             dial: {
-            radius: '78%',
-            backgroundColor: '#384042',
-            borderWidth: 1,
-            baseWidth: 15,
-            topWidth: 1,
-            baseLength: '1%', // of radius
-            rearLength: '1%'
+                radius: '78%',
+                backgroundColor: '#384042',
+                borderWidth: 1,
+                baseWidth: 15,
+                topWidth: 1,
+                baseLength: '1%', // of radius
+                rearLength: '1%'
             },
         }
         },
@@ -338,6 +335,7 @@ function createChartOut() {
                     borderColor: '#F5F5F5'
                 },
                 dataLabels: {
+                    useHTML: true,
                     format: '{point.y:.1f}°C',
                     borderColor: '#384042',
                     padding: 5,

@@ -16,17 +16,19 @@ if ( checkDisplayIsActive(62) == false) { return; }
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor historie dag meterstanden</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
+
 <script>
 "use strict"; 
 // change items with the marker #PARAMETER
@@ -320,111 +322,111 @@ function createMeterReadingsChart() {
       }  
     },
     legend: {
-      symbolHeight: 12,
-      symbolWidth: 12,
-      symbolRadius: 3,
-      borderRadius: 5,
-      borderWidth: 1,
-      backgroundColor: '#DCE1E3',
-      symbolPadding: 3,
-      enabled: true,
-      align: 'right',
-      verticalAlign: 'top',
-      floating: true,
-      itemStyle: {
-        color: '#6E797C'
-      },
-      itemHoverStyle: {
-        color: '#10D0E7'
-      },
-      itemDistance: 5
+        y: -38,
+        symbolHeight: 12,
+        symbolWidth: 12,
+        symbolRadius: 3,
+        borderRadius: 5,
+        borderWidth: 1,
+        backgroundColor: '#DCE1E3',
+        symbolPadding: 3,
+        enabled: true,
+        align: 'right',
+        verticalAlign: 'top',
+        floating: true,
+        itemStyle: {
+            color: '#6E797C'
+        },
+        itemHoverStyle: {
+            color: '#10D0E7'
+        },
+        itemDistance: 5
     },
     series: [ 
     {
-      yAxis: 0,
-      visible: GseriesVisibilty[0],
-      showInNavigator: true,
-      name: 'dal verbruik',
-      type: 'spline',
-      color: '#CEA731',
-
-      data: consumptionKwhLow,
+        yAxis: 0,
+        visible: GseriesVisibilty[0],
+        showInNavigator: true,
+        name: 'dal verbruik',
+        type: 'spline',
+        color: '#CEA731',
+        data: consumptionKwhLow,
     },
     {
-     yAxis: 0,
-      visible: GseriesVisibilty[1],
-      showInNavigator: true,
-      name: 'piek verbruik',
-      type: 'spline',
-      color: '#FFC311',
-      data: consumptionKwhHigh,
+        yAxis: 0,
+        visible: GseriesVisibilty[1],
+        showInNavigator: true,
+        name: 'piek verbruik',
+        type: 'spline',
+        color: '#FFC311',
+        data: consumptionKwhHigh,
     },
     {
-      yAxis: 0,
-      dashStyle: 'ShortDashDotDot',
-      visible: GseriesVisibilty[2],
-      showInNavigator: true,
-      name: 'totaal verbruik',
-      type: 'spline',
-      color: '#E9B620',
-      data: consumptionKwhTotal,
+        yAxis: 0,
+        dashStyle: 'ShortDashDotDot',
+        visible: GseriesVisibilty[2],
+        showInNavigator: true,
+        name: 'totaal verbruik',
+        type: 'spline',
+        color: '#E9B620',
+        data: consumptionKwhTotal,
     },
     {
-      yAxis: 0,
-      visible: GseriesVisibilty[3],
-      showInNavigator: true,
-      name: 'netto dal geleverd',
-      type: 'spline',
-      color: '#7FAD1D',
-      data: productionKwhLow,
+        yAxis: 0,
+        visible: GseriesVisibilty[3],
+        showInNavigator: true,
+        name: 'netto dal geleverd',
+        type: 'spline',
+        color: '#7FAD1D',
+        data: productionKwhLow,
     },
     {
-      yAxis: 0,
-      visible: GseriesVisibilty[4],
-      showInNavigator: true,
-      name: 'netto piek geleverd',
-      type: 'spline',
-      color: '#98D023',
-      data: productionKwhHigh,
+        yAxis: 0,
+        visible: GseriesVisibilty[4],
+        showInNavigator: true,
+        name: 'netto piek geleverd',
+        type: 'spline',
+        color: '#98D023',
+        data: productionKwhHigh,
     },
     {
-      yAxis: 0,
-      dashStyle: 'ShortDashDotDot',
-      visible: GseriesVisibilty[5],
-      showInNavigator: true,
-      name: 'netto totaal geleverd',
-      type: 'spline',
-      color: '#8ABD20',
-      data: productionKwhTotal,
+        yAxis: 0,
+        dashStyle: 'ShortDashDotDot',
+        visible: GseriesVisibilty[5],
+        showInNavigator: true,
+        name: 'netto totaal geleverd',
+        type: 'spline',
+        color: '#8ABD20',
+        data: productionKwhTotal,
     },
     {
-      yAxis: 0,
-      visible: GseriesVisibilty[6],
-      showInNavigator: true,
-      name: 'bruto dal geleverd',
-      type: 'spline',
-      color: '#7FAD1D',
-      data: productionKwhLowGross,
-      zIndex: 0,
+        yAxis: 0,
+        visible: GseriesVisibilty[6],
+        showInNavigator: true,
+        name: 'bruto dal geleverd',
+        type: 'spline',
+        color: '#7FAD1D',
+        data: productionKwhLowGross,
+        zIndex: 0,
     },
     {
-      yAxis: 0,
-      visible: GseriesVisibilty[7],
-      showInNavigator: true,
-      name: 'bruto piek geleverd',
-      type: 'spline',
-      color: '#98D023',
-      data: productionKwhHighGross,
+        yAxis: 0,
+        visible: GseriesVisibilty[7],
+        showInNavigator: true,
+        name: 'bruto piek geleverd',
+        type: 'spline',
+        color: '#98D023',
+        data: productionKwhHighGross,
     },
     {
-      yAxis: 0,
-      dashStyle: 'ShortDashDotDot',
-      visible: GseriesVisibilty[8],
-      showInNavigator: true,
-      name: 'bruto totaal geleverd',
-      type: 'spline',
-      color: '#8ABD20',
-      data: productionKwhHighGross,
+        yAxis: 0,
+        dashStyle: 'ShortDashDotDot',
+        visible: GseriesVisibilty[8],
+        showInNavigator: true,
+        name: 'bruto totaal geleverd',
+        type: 'spline',
+        color: '#8ABD20',
+        data: productionKwhHighGross,
     }
     ],
     plotOptions: {
@@ -558,11 +560,11 @@ $(function() {
             <span class="text-2">meterstanden per dag</span>
         </div>
         <div class="frame-2-bot"> 
-        <div id="meterReadingChart" style="width:100%; height:480px;"></div>    
+        <div id="meterReadingChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128" /></div>   
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
 
 </body>
 </html>

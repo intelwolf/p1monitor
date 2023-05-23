@@ -434,6 +434,20 @@ select {
     /* width: 36px; */
   }
 
+.button-4 {
+    display: inline-block;
+    cursor: pointer;
+    margin: 5px 5px 0px 0px;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    background-color: #F5F5F5;
+    height: 36px;
+    color: #6E797C;
+  }
+
+
 .close_button {
     float: right;
     margin-top: -8px;
@@ -535,6 +549,15 @@ select {
     color: #450f3f;
 }
 
+.color-dynamic-price-kwh {
+    color: #ff6f49;
+}
+
+.color-dynamic-price-gas {
+    color: #cc5637;
+}
+
+cc5637
 
 .container {
     display: flex;
@@ -727,6 +750,21 @@ div#right-wrapper-config-right-4 {
     float: left;
 }
 
+.mid-content-4 {
+    background-color: #EDF0F1;
+    width: 905px;
+    margin: 0;
+    float: left;
+    padding-left: 6px;
+}
+
+.mid-content-5 {
+    background-color: #EDF0F1;
+    width: 908px;
+    margin: 0;
+    float: left;
+    padding-left: 6px;
+}
 
 
 .div-left {
@@ -1007,6 +1045,7 @@ div#right-wrapper-config-right-4 {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     font-weight: bold;
 }
+
 
 /* invoer veld */
 
@@ -1689,6 +1728,10 @@ a:hover {
     padding: 0px 0px 8px 0px;
 }
 
+.pad-41 {
+    padding-bottom: 5px;
+}
+
 
 .pos-1 {
     position: relative;
@@ -2197,6 +2240,10 @@ a:hover {
 
 .width-310 {
     width: 310px !important; 
+}
+
+.width-320 {
+    width: 320px !important; 
 }
 
 .width-430 {

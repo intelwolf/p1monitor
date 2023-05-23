@@ -1,13 +1,12 @@
-# run manual with ./pythonlaunch.sh P1SerTester.py
+# run manual with P1SerTester
 import sys
-#import getopt
 import argparse
 import time
 import serial
 import signal
 import time
 
-prgname = 'P1SerTester 4.0 (Python 3 version)'
+prgname = 'P1SerTester 5.0 (Python 3 version)'
 
 def saveExit(signum, frame):
     global ser1
@@ -70,11 +69,18 @@ def Main(argv):
     while True:
         
         if ser1.in_waiting > 1:
-            x = mkLocalTimeString() + ": " + ser1.readline().decode('utf-8')
 
-            print ( x )
-            fp.write(x)
-            fp.flush()
+            try:
+                x = mkLocalTimeString() + ": " + ser1.readline().decode('utf-8')
+                print ( x )
+                fp.write(x)
+                fp.flush()
+            except Exception as e:
+                err = mkLocalTimeString() + ": " + "fout -> " + str(e.args[0])
+                print ( err )
+                fp.write( err )
+                fp.flush()
+                time.sleep(1)
         else:
             time.sleep(0.5)
             

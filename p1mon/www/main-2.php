@@ -14,15 +14,16 @@ include_once  '/p1mon/www/util/fullscreen.php';
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor Home</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
@@ -49,6 +50,7 @@ var phaseCategories             = [ 'L1', 'L2', 'L3' ]
 var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?> 
 var hideWaterUi                 = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hideGaSUi                   = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+var hidePeakKw                  = <?php if ( config_read( 206 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 
 function readJsonApiWaterHistoryDay( cnt ){ 
     $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -160,6 +162,25 @@ $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
             //verbruikTotaal = verbruikTotaal + parseFloat( jsondata[j][1] );
             continue;
         }
+
+        if ( jsondata[j][0] == 32 ) {
+                $('#P_Q_kw').text( padXX( jsondata[j][1], 3, 3 ) );
+                continue;
+            }
+            if ( jsondata[j][0] == 33 ) {
+                $('#P_Q_timestamp').text(jsondata[j][1] );
+                continue;
+            }
+
+            if ( jsondata[j][0] == 34 ) {
+                $('#P_M_kw').text( padXX( jsondata[j][1], 3, 3 ) );
+                continue;
+            }
+            if ( jsondata[j][0] == 35 ) {
+                $('#P_M_timestamp').text(jsondata[j][1] );
+                continue;
+            }
+
         /*
         if ( jsondata[j][0] == 44 ) {
             $('#verbruikGasDag').text( padXX( jsondata[j][1] ,5, 3) );
@@ -266,6 +287,7 @@ function createChartPhaseConsuming(){
         plotOptions: {
             column: {
                 dataLabels: {
+                    useHTML: true,
                     enabled: true,
                     format: '{y} kW',
                     color: '#6E797C',
@@ -386,7 +408,6 @@ function createChartVerbruik(){
             labels: {
                 distance: -27
             },
-      
             minorTickInterval: 'auto',
             minorTickWidth: 11,
             minorTickLength: 18,
@@ -420,9 +441,10 @@ function createChartVerbruik(){
                     radius: 8,
                     borderWidth: 1,
                     backgroundColor: '#384042',
-                    borderColor: '#F5F5F5'        
+                    borderColor: '#F5F5F5'
                 },
                 dataLabels: {
+                    useHTML: true,
                     format: '{point.y:.3f}',
                     borderColor: '#384042',
                     padding: 4,
@@ -432,7 +454,7 @@ function createChartVerbruik(){
                     style: {
                         fontWeight: 'bold',
                         fontSize: '13px',
-                        color: "#6e797c"                        
+                        color: "#6e797c"
                     }
                 },
                 wrap: false  
@@ -443,9 +465,9 @@ function createChartVerbruik(){
                 fillColor: '#384042',
                 lineColor: '#384042'
                 
-            },    
+            },
             animation: {
-                duration: 1000  
+                duration: 1000
             },
             data: [{
                 color: '#384042',
@@ -458,8 +480,8 @@ function createChartVerbruik(){
 function createChartGasVerbruik(){
     $('#actGasMeterVerbruik').highcharts({
         chart: {
-        style: {
-            fontFamily: 'robotomedium'
+            style: {
+                fontFamily: 'robotomedium'
             },
             type: 'gauge',
             plotBackgroundColor: null,
@@ -473,7 +495,7 @@ function createChartGasVerbruik(){
         tooltip: { enabled: false },
         pane: {
             startAngle: -150,
-            endAngle: 150,        
+            endAngle: 150,
             background: [{
                 backgroundColor: '#F5F5F5',
                 borderWidth: 2,
@@ -519,10 +541,10 @@ function createChartGasVerbruik(){
                     radius: 8,
                     borderWidth: 1,
                     backgroundColor: '#384042',
-                    borderColor: '#F5F5F5'        
+                    borderColor: '#F5F5F5'
                 },
                 dataLabels: { 
-                    useHTML: true,          
+                    useHTML: true,
                     //format: '{point.y:.2f} m&#179;/u',
                     format: '{point.y:.3f}',
                     borderColor: '#384042',
@@ -545,7 +567,7 @@ function createChartGasVerbruik(){
                 lineColor: '#384042'
             },    
             animation: {
-                duration: 1000  
+                duration: 1000
             },
             data: [{
                 color: '#384042',
@@ -559,7 +581,7 @@ function createChartGasVerbruik(){
 function createChartVerbruikGrafiek() {    
     $('#actVermogenMeterGrafiekVerbruik').highcharts({
         chart: {
-            type: 'areaspline'     
+            type: 'areaspline'
         },
         legend: {
             enabled: false
@@ -774,6 +796,36 @@ $(function () {
         <?php fullscreen(); ?>
     </div> 
     
+     <!-- peak costs -->
+     <div class="mid-content-5 pad-41" id="peak_info" title="<?php echo strIdx( 334 );?>">
+        <div class="frame-2-top">
+            <span class="text-2">piek informatie</span>
+        </div>
+        <div class="frame-4-bot pad-12">
+            <div class="float-left pad-12">
+                <div class="frame-3-top width-260"> <!-- piek kwartier kader -->
+                    <label class="text-3">kwartier</label>
+                </div>
+                <div class="frame-2-bot width-260">
+                     <label class="text-4" id="P_Q_kw">0</label>
+                     <label class="text-4">kW</label>
+                     <label class="text-4" id="P_Q_timestamp"></label>
+                </div>
+            </div> 
+            <div class="float-left pad-12">
+                <div class="frame-3-top width-260"> <!-- piek maand kader -->
+                    <label class="text-3">maand</label>
+                </div>
+                <div class="frame-2-bot width-260">
+                    <label class="text-4" id="P_M_kw">0</label>
+                    <label class="text-4">kW</label>
+                    <label class="text-4" id="P_M_timestamp"></label>
+                </div>
+            </div> 
+        </div>
+    </div>
+    <!-- end peak costs -->
+
     <div class="mid-content">
     <!-- links -->
         <div class="frame-2-top">
@@ -914,6 +966,12 @@ $(function () {
 </div>
 <script>
 
+if ( hidePeakKw == true ){
+    $('#peak_info').hide();
+} else {
+    $('#peak_info').show();
+}
+
 if ( hideWaterUi == true ){
     $('#verbruikWaterDagDiv').hide();
     $('#watermeterDiv').hide();
@@ -921,7 +979,6 @@ if ( hideWaterUi == true ){
     $('#verbruikWaterDagDiv').show();
     $('#watermeterDiv').show();
 }
-
 
 if ( hideGaSUi == true ){
     $('#gasDiv').hide();

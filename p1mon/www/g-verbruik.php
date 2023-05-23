@@ -15,15 +15,16 @@ if ( checkDisplayIsActive(18) == false) { return; }
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor actueel gas verbruik</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css" />
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/highstock-link/modules/solid-gauge.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
@@ -297,21 +298,23 @@ function createDailytUseChart() {
         series: [{
             animation: true,
             dataLabels: {
-            format: "{point.y:000.1f}",
-            borderColor: null,
-            padding: 4,
-            borderRadius: 5,
-            verticalAlign: "center",
-            y: 0,
-            color: "#6E797C",
-            style: {
-                fontWeight: "bold",
-                fontSize: "45px"
+                useHTML: true,
+                format: "{point.y:000.1f}",
+                borderColor: null,
+                padding: 4,
+                borderRadius: 5,
+                verticalAlign: "center",
+                y: 0,
+                color: "#6E797C",
+                style: {
+                    fontWeight: "bold",
+                    fontSize: "45px"
+                }
+            },
+            data: [{
+                y: parseFloat( GDailyGasM3 )
             }
-        },
-        data: [{
-            y: parseFloat( GDailyGasM3 )
-        }]
+        ]
         }]
     });
 }
@@ -383,18 +386,19 @@ function creatCurrentUseChart() {  //DONE
         series: [{
             animation: true,
             dataLabels: {
-            format: "{point.y:0000f}",
-            borderColor: null,
-            //borderColor: '#384042',
-            padding: 4,
-            borderRadius: 5,
-            verticalAlign: "center",
-            y: 0,
-            color: "#6E797C",
-            style: {
-                fontWeight: "bold",
-                fontSize: "72px"
-            }
+                useHTML: true,
+                format: "{point.y:0000f}",
+                borderColor: null,
+                //borderColor: '#384042',
+                padding: 4,
+                borderRadius: 5,
+                verticalAlign: "center",
+                y: 0,
+                color: "#6E797C",
+                style: {
+                    fontWeight: "bold",
+                    fontSize: "72px"
+                }
             },
             data: [{
                 y: parseFloat( currentGasUsage )

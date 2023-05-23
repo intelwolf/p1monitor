@@ -15,6 +15,17 @@ include_once '/p1mon/www/util/pageclock.php';
 loginInit();
 passwordSessionLogoutCheck();
 
+function makeTariffProvider($id) {
+    $configValue = config_read($id);
+    $val_0=$val_1='';
+
+    if ($configValue == '0'  ) { $val_0  = 'selected="selected"'; } 
+    if ($configValue == '1'  ) { $val_1  = 'selected="selected"'; }
+
+    echo '<option ' . $val_0  . ' value="0"  >vaste tarieven</option>';
+    echo '<option ' . $val_1  . ' value="1"  >energyzero</option>';
+}
+
 $noInetCheck = isInternetIPAllowed();
 $localip     = validLocalIpAdress(getClientIP());
 //$localip        = False;
@@ -64,16 +75,40 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
     if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["vastrecht_water"], 5,999.99999,0) . "' where ID = 103") ) $err_cnt += 1;
 }
 
+if( isset($_POST["inkoop_kwh_kosten"]))
+{
+    if ( $err_cnt < 0 ) { $err_cnt=0; }
+    // update database
+    if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["inkoop_kwh_kosten"],5,999.99999,0) . "' where ID = 205") ) $err_cnt += 1;
+}
+
+if( isset($_POST["inkoop_gas_kosten"]))
+{
+    if ( $err_cnt < 0 ) { $err_cnt=0; }
+    // update database
+    if ( updateConfigDb( "update config set parameter = '" . checkFloat($_POST["inkoop_gas_kosten"],5,999.99999,0) . "' where ID = 208") ) $err_cnt += 1;
+}
+
+if( isset($_POST["tariff_provider"]))
+{
+    if ( $err_cnt < 0 ) { $err_cnt=0; }
+    // update database
+    if ( updateConfigDb( "update config set parameter = '" . preg_replace('/\D/', '', $_POST["tariff_provider"]) . "' where ID = 204") ) $err_cnt += 1;
+
+    $command = "/p1mon/scripts/P1DynamicPrices -g &";
+    exec( $command ,$arr_execoutput, $exec_ret_value );
+}
+
 ?>
 <!doctype html>
 <html lang="nl">
 <head>
 <meta name="robots" content="noindex">
 <title>Tarieven configuratie</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
@@ -107,7 +142,7 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                     <form name="formvalues" id="formvalues" method="POST">
                     <!--  tarieven E  start-->
                     <div class="frame-4-top">
-                        <span class="text-15">tarieven electricteit</span>
+                        <span class="text-15">vaste tarieven electricteit</span>
                     </div>
                     <div class="frame-4-bot">
                         <div class="float-left pos-32">
@@ -115,12 +150,12 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                                 <span class="text-3">verbruik</span>
                             </div>
                         <div class="frame-2-bot pos-11 margin-2"> 
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <i class="text-8 far fa-sun"></i>
                                 <label class="text-8" for="verbr_piek">hoog/piek</label>
                                 <p class="p-1"></p>
                                 <i class="text-8 far fa-moon"></i>
-                                <label class="text-8" for="verbr_dal">laag/dal</label>                         
+                                <label class="text-8" for="verbr_dal">laag/dal</label>
                             </div>
                             <div class="float-right">
                                 <input class="input-1 color-verbr color-input-back" id="verbr_piek" name="verbr_piek" type="text" value="<?php echo config_read(2);?>">
@@ -135,15 +170,15 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                             <span class="text-3">geleverd</span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <i class="text-8 far fa-sun"></i>
                                 <label class="text-8" for="gelvr_piek">hoog/piek</label>
                                 <p class="p-1"></p>
                                 <i class="text-8 far fa-moon"></i>
-                                <label class="text-8" for="gelvr_dal">laag/dal</label>                         
+                                <label class="text-8" for="gelvr_dal">laag/dal</label>
                             </div>
                             <div class="float-right">
-                                <input class="input-1 color-gelvr color-input-back" id="gelvr_piek" name="gelvr_piek" type="text" value="<?php echo config_read(4);?>">        
+                                <input class="input-1 color-gelvr color-input-back" id="gelvr_piek" name="gelvr_piek" type="text" value="<?php echo config_read(4);?>">
                                 <p class="p-1"></p>
                                 <input class="input-1 color-gelvr color-input-back" id="gelvr_dal"  name="gelvr_dal"  type="text" value="<?php echo config_read(3);?>">
                             </div>
@@ -155,12 +190,12 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                             <span class="text-3">vastrecht</span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <i class="text-8 fas fa-bolt"></i>
-                                <label class="text-8" for="gelvr_piek">per maand</label>    
+                                <label class="text-8" for="gelvr_piek">per maand</label>
                             </div>    
                             <div class="float-right">
-                                <input class="input-1 color-settings color-input-back" id="e_vastrecht" name="e_vastrecht" type="text" value="<?php echo config_read(5);?>">            
+                                <input class="input-1 color-settings color-input-back" id="e_vastrecht" name="e_vastrecht" type="text" value="<?php echo config_read(5);?>">
                             </div>
                         </div>
                     </div>        
@@ -170,7 +205,7 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                 <p></p>
                 <!--  tarieven gas start-->
                 <div class="frame-4-top">
-                    <span class="text-15">tarieven gas</span>
+                    <span class="text-15">vaste tarieven gas</span>
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left pos-32">
@@ -178,13 +213,13 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                             <span class="text-3">verbruik</span>
                         </div>
                         <div class="frame-2-bot pos-11 margin-2"> 
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <i class="text-8 fas fa-euro-sign"></i>
                                 <label class="text-8" for="verbr_gas">gas m<sup>3</sup></label>
-                                <p class="p-1"></p>            
+                                <p class="p-1"></p>
                             </div>
                             <div class="float-right">
-                                <input class="input-1 color-verbr-gas-front color-input-back" id="verbr_gas" name="verbr_gas" type="text" value="<?php echo config_read(15);?>">        
+                                <input class="input-1 color-verbr-gas-front color-input-back" id="verbr_gas" name="verbr_gas" type="text" value="<?php echo config_read(15);?>">
                             </div>
                         </div>
                     </div>
@@ -194,22 +229,22 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                             <span class="text-3">vastrecht</span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <i class="text-8 fab fa-gripfire"></i>
-                                <label class="text-8" for="vastrecht_gas">per maand</label>    
+                                <label class="text-8" for="vastrecht_gas">per maand</label>
                             </div>    
                             <div class="float-right">
-                                <input class="input-1 color-settings color-input-back" id="vastrecht_gas" name="vastrecht_gas" type="text" value="<?php echo config_read(16);?>">        
+                                <input class="input-1 color-settings color-input-back" id="vastrecht_gas" name="vastrecht_gas" type="text" value="<?php echo config_read(16);?>">
                             </div>
                         </div>
-                    </div>        
+                    </div>
                 </div>
                 <!--  tarieven gas end -->
 
                 <p></p>
                 <!--  tarieven water start-->
                 <div class="frame-4-top">
-                    <span class="text-15">tarieven water</span>
+                    <span class="text-15">vaste tarieven water</span>
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left pos-32">
@@ -217,13 +252,13 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                             <span class="text-3">verbruik</span>
                         </div>
                         <div class="frame-2-bot pos-11 margin-2"> 
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <i class="text-8 fas fa-euro-sign"></i>
                                 <label class="text-8" for="verbr_gas">water m<sup>3</sup></label>
-                                <p class="p-1"></p>            
+                                <p class="p-1"></p> 
                             </div>
                             <div class="float-right">
-                                <input class="input-1 color-verbr-gas-front color-input-back" id="verbr_water" name="verbr_water" type="text" value="<?php echo config_read( 104 );?>">        
+                                <input class="input-1 color-verbr-gas-front color-input-back" id="verbr_water" name="verbr_water" type="text" value="<?php echo config_read( 104 );?>">
                             </div>
                         </div>
                     </div>
@@ -235,17 +270,87 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                         <div class="frame-2-bot pos-11"> 
                             <div class="float-left">
                                 <i class="text-8 fas fa-tint"></i>
-                                <label class="text-8" for="vastrecht_gas">per maand</label>    
+                                <label class="text-8" for="vastrecht_gas">per maand</label>
                             </div>    
                             <div class="float-right">
-                                <input class="input-1 color-settings color-input-back" id="vastrecht_water" name="vastrecht_water" type="text" value="<?php echo config_read( 103 );?>">        
+                                <input class="input-1 color-settings color-input-back" id="vastrecht_water" name="vastrecht_water" type="text" value="<?php echo config_read( 103 );?>">
                             </div>
                         </div>
                     </div>        
                 </div>
+                <p></p>
                 <!--  tarieven water end -->
 
+                <!--  flexibele tarieven start -->
+                <div class="frame-4-top">
+                    <span class="text-15">flexibele tarieven</span>
+                </div>
+                <div class="frame-4-bot">
+                    <div class="float-left">
+                       
+                        <div class="frame-3-top">
+                            <span class="text-3">kWh kosten</span>
+                        </div>
+                        <div class="frame-2-bot pos-11"> 
+                            <div class="rTable"> 
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-80">
+                                        <i class="text-8 fas fa-euro-sign"></i>
+                                        <label class="text-10">inkoop</label>
+                                    </div>
+                                    <div class="rTableCell pad-12">
+                                        <input class="input-17 color-settings color-input-back" id="inkoop_kwh_kosten" name="inkoop_kwh_kosten" type="text" value="<?php echo config_read( 205 );?>">
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                        <p></p>
 
+                        <div class="frame-3-top">
+                            <span class="text-3">Gas kosten</span>
+                        </div>
+                        <div class="frame-2-bot pos-11"> 
+                            <div class="rTable"> 
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-80">
+                                        <i class="text-8 fas fa-euro-sign"></i>
+                                        <label class="text-10">inkoop</label>
+                                    </div>
+                                    <div class="rTableCell pad-12">
+                                        <input class="input-17 color-settings color-input-back" id="inkoop_gas_kosten" name="inkoop_gas_kosten" type="text" value="<?php echo config_read( 208 );?>">
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                        <p></p>
+
+                        <div class="frame-3-top">
+                            <span class="text-3">kosten selectie</span>
+                        </div>
+                        <div class="frame-2-bot pos-11"> 
+
+                        <div class="rTable"> 
+                            <div class="rTableRow" title="">
+                                <div class="rTableCell">
+                                    <label class="text-10">tariefverstrekker</label>
+                                </div>
+                                <div class="rTableCell pad-12">
+                                <select class="select-4 color-select color-input-back cursor-pointer" name="tariff_provider">
+                                    <?php makeTariffProvider(204);?>
+                                </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p></p>
+                </div>
+                
+
+                
+                </div>
+                <p></p>
+            
+                <!--  flexibele tarieven end -->
 
                 <p></p>
                 <!--  kosten start-->
@@ -254,21 +359,28 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left pos-40">
-                        <div class="frame-3-top">
-                            <span class="text-3">grens waarde kosten</span>
-                        </div>
-                        <div class="frame-2-bot pos-11 margin-2"> 
-                            <div class="float-left">                
-                                <i class="text-8 far fa-check-square"></i>
-                                <label class="text-8" for="verbr_gas">euro per maand</label>
-                                <p class="p-1"></p>            
-                            </div>
-                            <div class="float-right">
-                                <input class="input-1 color-verbr-gas-front color-input-back" id="max_cost" name="max_cost" type="text" value="<?php echo config_read(39);?>">        
+
+                    <div class="frame-3-top">
+                        <span class="text-3">kosten selectie</span>
+                    </div>
+                    <div class="frame-2-bot pos-11"> 
+                        <div class="rTable"> 
+                            <div class="rTableRow" title="">
+                                <div class="rTableCell">
+                                    <i class="text-8 far fa-check-square"></i>
+                                    <label class="text-8" for="verbr_gas">euro per maand</label>
+                                </div>
+                                <div class="rTableCell pad-12">
+                                    <input class="input-1 color-verbr-gas-front color-input-back" id="max_cost" name="max_cost" type="text" value="<?php echo config_read(39);?>">
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <p></p>
                 </div>
+                
+                </div>
+                
                 <!--  kosten end -->
 
                 <!-- placeholder variables for session termination -->
@@ -295,6 +407,42 @@ if( isset($_POST["verbr_water"]) || isset($_POST["vastrecht_water"]))
 $(function() {
     $("#formvalues").validate({
         rules: {
+            'inkoop_kwh_kosten': {
+                required: true,
+                number: true,
+                max: 999.99999,
+                min: -999.99999
+            },
+            'belasting_kwh_kosten': {
+                required: true,
+                number: true,
+                max: 999.99999,
+                min: -999.99999
+            },
+            'ODE_kwh_kosten': {
+                required: true,
+                number: true,
+                max: 999.99999,
+                min: -999.99999
+            },
+            'inkoop_gas_kosten': {
+                required: true,
+                number: true,
+                max: 999.99999,
+                min: -999.99999
+            },
+            'belasting_gas_kosten': {
+                required: true,
+                number: true,
+                max: 999.99999,
+                min: -999.99999
+            },
+            'ODE_gas_kosten': {
+                required: true,
+                number: true,
+                max: 999.99999,
+                min: -999.99999
+            },
             'verbr_piek': {
                 required: true,
                 number: true,
@@ -324,7 +472,7 @@ $(function() {
                 number: true,
                 max: 999.99999,
                 min: -999.99999
-            } ,
+            },
             'verbr_gas': {
                 required: true,
                 number: true,
@@ -358,7 +506,7 @@ $(function() {
         },
         invalidHandler: function(e, validator) { 
             var errors = validator.numberOfInvalids(); 
-            if (errors) {       
+            if (errors) {
                 showStuff('err_msg');
                   setTimeout( function() { hideStuff('err_msg');},5000);
              } 

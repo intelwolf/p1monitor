@@ -2,6 +2,7 @@
 
 import const
 import datetime
+import filesystem_lib
 import inspect
 import gpio
 import os
@@ -65,6 +66,8 @@ def Main(argv):
         flog.critical( inspect.stack()[0][3] + ": Database niet te openen(3)." + const.FILE_DB_POWERPRODUCTION + " melding:" + str(e.args[0]) )
         sys.exit(1)
     flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_TAB + " succesvol geopend." )
+
+    filesystem_lib.set_file_permissions(filepath=const.FILE_DB_POWERPRODUCTION, permissions="664" )
 
     # database defrag 
     power_production_db.defrag()

@@ -10,12 +10,14 @@ import json
 import logger
 import os
 import sqldb
+import sqldb_pricing
 import sys
 import api_phaseminmax_lib
 import api_solarpower_lib
 import api_catalog_lib
 import api_p1_port_lib
 import api_weather_history_lib
+import api_financial_lib
 
 from apiutil import p1_serializer, validate_timestamp, clean_timestamp_str, list_filter_to_str, validate_timestamp_by_length
 
@@ -35,6 +37,7 @@ watermeter_db               = sqldb.WatermeterDBV2()
 fase_db                     = sqldb.PhaseDB()
 power_production_db         = sqldb.powerProductionDB()
 fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
+price_db                    = sqldb_pricing.PricingDb()
 
 try:
     os.umask( 0o002 )
@@ -167,6 +170,13 @@ except Exception as e:
     sys.exit(1)
 flog.info( str(__name__) + ": database tabel " + const.DB_FASE_MINMAX_DAG_TAB + " succesvol geopend.")
 
+try:
+    price_db.init(const.FILE_DB_FINANCIEEL ,const.DB_ENERGIEPRIJZEN_UUR_TAB)
+except Exception as e:
+    flog.critical(inspect.stack()[0][3]+": Database niet te openen(15)." + const.FILE_DB_FINANCIEEL + ") melding:" + str(e.args[0]))
+    sys.exit(1)
+flog.info( str(__name__) + ": database tabel " + const.DB_ENERGIEPRIJZEN_UUR_TAB + " succesvol geopend.")
+
 
 #TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # ********************************************************************************************
@@ -236,6 +246,29 @@ app.add_route( apiconst.ROUTE_WEATHER_HOUR_HELP,  weather_history_help )
 app.add_route( apiconst.ROUTE_WEATHER_DAY_HELP,   weather_history_help )
 app.add_route( apiconst.ROUTE_WEATHER_MONTH_HELP, weather_history_help )
 app.add_route( apiconst.ROUTE_WEATHER_YEAR_HELP,  weather_history_help )
+
+# added/changed in version 2.2.0
+financial = api_financial_lib.Financial()
+financial.set_flog( flog )
+financial.set_database( e_db_financieel )
+app.add_route( apiconst.ROUTE_FINANCIAL_DAY,        financial )
+app.add_route( apiconst.ROUTE_FINANCIAL_MONTH,      financial )
+app.add_route( apiconst.ROUTE_FINANCIAL_YEAR,       financial )
+
+financial_help = api_financial_lib.FinancialHelp()
+financial_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_FINANCIAL_DAY_HELP,   financial_help )
+app.add_route( apiconst.ROUTE_FINANCIAL_MONTH_HELP, financial_help )
+app.add_route( apiconst.ROUTE_FINANCIAL_YEAR_HELP,  financial_help )
+
+financial_dynamic_tariff = api_financial_lib.FinancialDynamicTariff()
+financial_dynamic_tariff.set_flog( flog )
+financial_dynamic_tariff.set_database( e_db_financieel )
+app.add_route( apiconst.ROUTE_FINANCIAL_DYNAMIC_TARIFF, financial_dynamic_tariff )
+
+financial_dynamic_tariff_help = api_financial_lib.FinancialDynamicTariffHelp()
+financial_dynamic_tariff_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_FINANCIAL_DYNAMIC_TARIFF_HELP, financial_dynamic_tariff_help )
 
 
 
@@ -1515,6 +1548,7 @@ app.add_route( apiconst.ROUTE_POWER_GAS_MIN,        power_gas_history_min_resour
 app.add_route( apiconst.ROUTE_POWER_GAS_MIN_HELP,   power_gas_history_min_resource )
 
 
+"""
 class Financial( object ):
 
     sqlstr_base_regular = "select \
@@ -1538,7 +1572,7 @@ class Financial( object ):
     CAST( VERBR_WATER as INT ) from "
 
     def on_get(self, req, resp):
-        """Handles all GET requests."""
+        ## Handles all GET requests.
         
         flog.debug ( str(__name__) + " route " + req.path + " selected.")
         #print ( req.query_string )
@@ -1633,7 +1667,9 @@ class Financial( object ):
                     if value.lower() == 'on':
                         sqlstr = sqlstr_base_round
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query round aangezet." )
-                """"
+            
+
+        
                 if key == apiconst.API_PARAMETER_STARTTIMESTAMP:
                         # parse timestamp
                         value =  clean_timestamp_str( value )
@@ -1642,7 +1678,8 @@ class Financial( object ):
                             flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query starttime is " +str(value) )
 
             sqlstr = sqlstr +  v_starttime + v_sort + str(v_limit)
-            """
+        
+            
                 if key == apiconst.API_PARAMETER_STARTTIMESTAMP:
                     # clear range where clause, there can only be one.
                     v_rangetimestamp = '' 
@@ -1711,6 +1748,7 @@ class Financial( object ):
                
             resp.status = falcon.HTTP_200  # This is the default status
 
+
 financial_resource = Financial()
 app.add_route( apiconst.ROUTE_FINANCIAL_DAY,        financial_resource )
 app.add_route( apiconst.ROUTE_FINANCIAL_DAY_HELP,   financial_resource )
@@ -1718,7 +1756,7 @@ app.add_route( apiconst.ROUTE_FINANCIAL_MONTH,      financial_resource )
 app.add_route( apiconst.ROUTE_FINANCIAL_MONTH_HELP, financial_resource )
 app.add_route( apiconst.ROUTE_FINANCIAL_YEAR,       financial_resource )
 app.add_route( apiconst.ROUTE_FINANCIAL_YEAR_HELP,  financial_resource )
-
+"""
 
 class Status( object ):
 

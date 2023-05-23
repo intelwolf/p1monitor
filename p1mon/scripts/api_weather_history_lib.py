@@ -1,13 +1,10 @@
 import apiconst
 import apierror
 import apiutil
-#import const
-#import logging
 import json
 import falcon
 import inspect
-#import os
-#import solaredge_shared_lib
+
 
 from apiutil import p1_serializer, validate_timestamp, clean_timestamp_str, list_filter_to_str, validate_timestamp_by_length
 

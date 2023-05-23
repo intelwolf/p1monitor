@@ -38,13 +38,50 @@ class p1_telegram():
         self.statusdb                   = statusdb
         self.timestamp_last_gas_update  = 0
         self.dev_dummy_gas_value        = 0
+        self.kwh_1_4_0_value            = 0.01  # kwh
+        self.kwh_1_4_0_utc_timestamp    = 0  # in seconds
+        self.kwh_1_6_0_timestamp        = '20230102030405'
+        self.kwh_1_6_0_value            = 0.01  # kwh 
 
         try:
-            sqlstr = "select status from " + const.DB_STATUS_TAB + " where id =43"
+            sqlstr = "select status from " + const.DB_STATUS_TAB + " where id = 43"
             gas_dummy_val_rec=self.statusdb.select_rec(sqlstr)
             self.dev_dummy_gas_value=float(gas_dummy_val_rec[0][0])
         except Exception as e:
             flog.warning (inspect.stack()[0][3]+": oude gas waarde was niet te lezen in de configuratie database -> " + str( e.args[0] ) )
+    
+    ####################################################################
+    # 1-0:1.4.0(00.019*kW) is de piekwaarde van het actief kwartier,   # 
+    # dit loopt op en wordt automatisch gereset elke 15 min = 900 sec. #
+    ####################################################################
+    def kwh_peak_insert(self, line=None, serialbuffer=None ):
+
+        del serialbuffer[ len(serialbuffer)-1 ]
+
+        # process 1.4.0 value
+        epoch_seconds =  util.getUtcTime()
+        if ( self.kwh_1_4_0_utc_timestamp + 900 ) - epoch_seconds < 0:
+            self.kwh_1_4_0_utc_timestamp = epoch_seconds
+            self.kwh_1_4_0_value = random.uniform(0.01, 9.99)
+            
+            timestamp = util.mkLocalTimestamp()
+            if self.kwh_1_6_0_timestamp[4:6] != timestamp[4:6]:
+                self.kwh_1_6_0_value = self.kwh_1_4_0_value
+                self.kwh_1_6_0_timestamp = timestamp
+            else: 
+                if self.kwh_1_4_0_value > self.kwh_1_6_0_value:
+                    self.kwh_1_6_0_value = self.kwh_1_4_0_value
+                    self.kwh_1_6_0_timestamp = timestamp
+
+        line_1 = ''.join( filter(lambda x: x in string.printable, '1-0:1.4.0('+'{0:02.3f}'.format(self.kwh_1_4_0_value)+'*kW)\r\n')).rstrip()[0:1024]
+        serialbuffer.append( line_1 )
+        self.flog.warning(inspect.stack()[0][3]+": test piek kW kwartier regel toegevoegd aan telegram: " + line_1 )
+
+        line_2 = ''.join( filter(lambda x: x in string.printable, '1-0:1.6.0('+ self.kwh_1_6_0_timestamp + 'W)({0:02.3f}'.format(self.kwh_1_6_0_value)+'*kW)\r\n')).rstrip()[0:1024]
+        serialbuffer.append( line_2 )
+        self.flog.warning(inspect.stack()[0][3]+": test piek kW maand regel toegevoegd aan telegram: " + line_2 )
+
+        serialbuffer.append( line ) # append last line with !. 
 
 
     ####################################################

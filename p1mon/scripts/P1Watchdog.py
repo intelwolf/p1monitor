@@ -1,5 +1,4 @@
-# run manual with ./pythonlaunch.sh P1Watchdog.py
-
+# run manual with ./P1Watchdog
 import const
 import crypto3
 import crontab_lib
@@ -43,7 +42,6 @@ next_version_timestamp  = 0 # if this value is < than utc do retry fetch remote 
 next_duckdns_timestamp  = 0 # if this value is < than utc do retry to do an DuckDns update.
 auto_import_is_active   = False # used as flag to see if import is running
 msg_import_busy         = "SQL import loopt"
-
 
 def MainProg():
 
@@ -214,7 +212,8 @@ def MainProg():
                 stop_msg="stoppen (halt) van Rpi gereed.",
                 err_msg="stoppen (halt) van Rpi gefaald.",
                 timeout=180,
-                use_python_launcer=False
+                use_python_launcer=False,
+                ignore_running_processes=True
             )
 
             # reboot van de Rpi
@@ -226,7 +225,8 @@ def MainProg():
                 stop_msg="reboot van Rpi gereed.",
                 err_msg="reboot van Rpi gefaald.",
                 timeout=180,
-                use_python_launcer=False
+                use_python_launcer=False,
+                ignore_running_processes=True
             )
 
             # database wissen
@@ -333,9 +333,14 @@ def MainProg():
             ## check_and_clean_log_folder() 2.0.0 done by crontab
 
         # 900 sec processes (15 min)
-        if cnt%450== 0:
+        if cnt%450 == 0:
             # read data via de weather API
             update_weather_data()
+            #run_dynamic_pricing()
+
+        # 1800 sec processes (30 min)
+        if cnt%900 == 0:
+            run_dynamic_pricing()
 
         # elke 3600 sec acties
         if cnt%1800 == 0:
@@ -423,12 +428,74 @@ def socat():
     except Exception as e:
         flog.error( inspect.stack()[0][3] + " onverwachte fout: " + str( e ) )
 
+
 ###########################################################
 # general use trigger fuction to start other processes    #
 # TODO: refactor older functions to this general function #
 ###########################################################
 def trigger_function(
-    prg_name=None, 
+    prg_name=None,
+    prg_parameters="",
+    db_config_index=None,
+    db_config_parameter_index=None, # use this if the parameter is set in the database
+    start_msg="start message onbekend",
+    stop_msg="stop message onbekend",
+    err_msg="fout message onbekend",
+    timeout=30,
+    use_python_launcer=True,
+    ignore_running_processes=False
+    ):
+    try:
+        _id, needs_to_run_status, _label = config_db.strget( int(db_config_index), flog )
+        
+        if ignore_running_processes == False:
+            pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
+        else:
+            pid_list = [] # empty to ignore the processes already running
+
+        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+        if int( needs_to_run_status ) == 1 and len( pid_list ) == 0: # start process
+            flog.info( inspect.stack()[0][3] + " " + prg_name + " " + prg_parameters + " " + start_msg )
+
+            config_db.strset( '0', int(db_config_index), flog ) # reset run bit
+            
+            if use_python_launcer == True:
+                cmd_prefix = "/p1mon/scripts/pythonlaunch.sh "
+            else:
+                cmd_prefix = ""
+
+            if db_config_parameter_index != None:
+                _id, parameter_by_index, _label = config_db.strget( int(db_config_parameter_index), flog )
+            else:
+                parameter_by_index = ""
+
+            cmd = cmd_prefix + prg_name + " " +  parameter_by_index + " " + prg_parameters
+            flog.debug( inspect.stack()[0][3] + " cmd = " +  cmd )
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=timeout
+            )
+            if r[2] > 0:
+                flog.error(inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " + err_msg )
+            else:
+                flog.info(inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " +stop_msg )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " + err_msg + " onverwachte fout: " + str( e ) )
+        config_db.strset( '0', int(db_config_index), flog ) # reset run bit # fail save to stop
+
+
+"""
+###########################################################
+# general use trigger fuction to start other processes    #
+# TODO: refactor older functions to this general function #
+###########################################################
+def trigger_function(
+    prg_name=None,
     prg_parameters="",
     db_config_index=None,
     db_config_parameter_index=None, # use this if the parameter is set in the database
@@ -475,7 +542,7 @@ def trigger_function(
     except Exception as e:
         flog.error( inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " + err_msg + " onverwachte fout: " + str( e ) )
         config_db.strset( '0', int(db_config_index), flog ) # reset run bit # fail save to stop
-
+"""
 
 def check_and_set_samba_mode( setforced=False ):
 
@@ -503,6 +570,38 @@ def check_and_set_samba_mode( setforced=False ):
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + " SAMBA onverwachte fout: " + str( e ) )
+
+
+#############################################################
+# get the dynamic pricing when this is enabeld idx 204 > 1  #
+# means run and select the correct parameter.               #
+#############################################################
+def run_dynamic_pricing():
+    try:
+        prg_name = "/p1mon/scripts/P1DynamicPrices"
+
+        _id, get_run_status, _label = config_db.strget( 204, flog )
+
+        flog.debug( inspect.stack()[0][3] + ": needs_to_run_status =" + str(get_run_status) )
+        if int( get_run_status ) > 0:
+
+            prg_parameter = ""
+            if int(get_run_status) == 1:
+                prg_parameter = "--getapidata --energyzero"
+
+            flog.debug( inspect.stack()[0][3] + ": P1DynamicPrices gestart met parameters " + prg_parameter )
+            cmd = prg_name + " " + prg_parameter + " > /dev/null 2>&1 &"
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+
+
 
 
 def run_patch():

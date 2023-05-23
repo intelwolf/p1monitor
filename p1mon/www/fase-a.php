@@ -16,17 +16,18 @@ if ( checkDisplayIsActive(61) == false) { return; }
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor actueel fase</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css"/>
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
 <script src="./js/highstock-link/modules/solid-gauge.js"></script>
+<script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
 
@@ -35,7 +36,7 @@ if ( checkDisplayIsActive(61) == false) { return; }
 var maxAmperageFromConfig  = <?php echo config_read( 123 ) . ";\n"?>
 var maxWattFromConfig      = <?php echo config_read( 124 ) . ";\n"?>
 var useKw                  = <?php echo config_read( 180 ) . ";\n"?>
-var graphIdArray           =  [ 'L1Watt',    'L1Amperage', 'L1Voltage', 'L2Watt',    'L2Amperage', 'L2Voltage', 'L3Watt',    'L3Amperage', 'L3Voltage' ]
+var graphIdArray           = [ 'L1Watt',    'L1Amperage', 'L1Voltage', 'L2Watt',    'L2Amperage', 'L2Voltage', 'L3Watt',    'L3Amperage', 'L3Voltage' ]
 var buttonIdArray          = [ 'L1WButton', 'L1AButton',  'L1VButton', 'L2WButton', 'L2AButton',  'L2VButton', 'L3WButton', 'L3AButton',  'L3VButton' ]
 var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
 
@@ -131,7 +132,6 @@ function readJsonApiPhaseInformationFromStatus(){
             }
             if ( jsondata[j][0] == 103 ) {
                 L1V = jsondata[j][1];
-                //L1V = 0
                 continue;
             }
             if ( jsondata[j][0] == 104 ) {
@@ -390,7 +390,6 @@ function toggleButtonAndGraphView( graph, button ) {
 
 }
 
-
 function readGraphVisibilityFromBrowserMemory(){
 
     for ( var j=0;  j < graphIdArray.length; j++ ){ 
@@ -419,7 +418,7 @@ function readGraphVisibilityFromBrowserMemory(){
             <div class="content-wrapper pad-13">
                     <!-- header 2 --> 
                     <?php pageclock(); ?>
-                    <?php page_menu_header_fase( 0 ); ?>
+                    <?php page_menu_header_fase( 0 );?>
                     <?php weather_info(); ?>
             </div>
         </div>
@@ -430,22 +429,29 @@ function readGraphVisibilityFromBrowserMemory(){
                 <?php fullscreen(); ?>
             </div>
 
-            <div class="container" title="<?php echo strIdx(77);?>">
-               
-                <div class="pad-6">
-                    <div class="frame-5-top">
-                       <span class="text-2">L1</span>
-                        <div class="float-right">
-                            <button id="L1WButton" onclick="toggleButtonAndGraphView( graphIdArray[0], buttonIdArray[0] )" class="button-2 bold-font">W</button>
-                            <button id="L1AButton" onclick="toggleButtonAndGraphView( graphIdArray[1], buttonIdArray[1] )" class="button-2 bold-font">A</button>
-                            <button id="L1VButton" onclick="toggleButtonAndGraphView( graphIdArray[2], buttonIdArray[2] )" class="button-2 bold-font">V</button>
+            <div class="right-wrapper width-910" title="<?php echo strIdx(77);?>">
+                <div class="frame-5-top">
+                <span class="text-2">L1</span>
+                    <div class="float-right">
+                        <button id="L1WButton" onclick="toggleButtonAndGraphView( graphIdArray[0], buttonIdArray[0] )" class="button-2 bold-font">W</button>
+                        <button id="L1AButton" onclick="toggleButtonAndGraphView( graphIdArray[1], buttonIdArray[1] )" class="button-2 bold-font">A</button>
+                        <button id="L1VButton" onclick="toggleButtonAndGraphView( graphIdArray[2], buttonIdArray[2] )" class="button-2 bold-font">V</button>
+                    </div>
+                    <div class="frame-5-bot">
+                        <div class="rTable"> 
+                            <div class="rTableRow" title="">
+                                <div class="rTableCell width-290">
+                                    <div id="L1Watt" class="pad-38"></div>
+                                </div>
+                                <div class="rTableCell width-290">
+                                    <div id="L1Amperage"></div>
+                                    <div id="L1AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L1Calc">0 A</span></div>
+                                </div>
+                                <div class="rTableCell width-290">
+                                    <div id="L1Voltage"></div>
+                                </div>
+                            </div>
                         </div>
-                   </div>
-                    <div class="frame-5-bot"> 
-                        <div id="L1Watt" class="pad-38"></div>
-                        <div id="L1Amperage"></div>
-                        <div id="L1AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L1Calc">0 A</span></div>
-                        <div id="L1Voltage"></div>
                     </div>
                 </div>
 
@@ -458,15 +464,25 @@ function readGraphVisibilityFromBrowserMemory(){
                             <button id="L2VButton" onclick="toggleButtonAndGraphView( graphIdArray[5], buttonIdArray[5] )" class="button-2 bold-font">V</button>
                         </div>
                     </div>
-                    <div class="frame-5-bot"> 
-                        <div id="L2Watt" class="pad-38"></div>
-                        <div id="L2Amperage"></div>
-                        <div id="L2AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L2Calc">0 A</span></div>
-                        <div id="L2Voltage"></div>
+                    <div class="frame-5-bot">
+                        <div class="rTable"> 
+                            <div class="rTableRow" title="">
+                                <div class="rTableCell width-290">
+                                    <div id="L2Watt" class="pad-38"></div>
+                                </div>
+                                <div class="rTableCell width-290">
+                                    <div id="L2Amperage"></div>
+                                    <div id="L2AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L2Calc">0 A</span></div>
+                                </div>
+                                <div class="rTableCell width-290">
+                                    <div id="L2Voltage"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>  
+                </div>
 
-                 <div>
+                <div>
                     <div class="frame-5-top">
                         <span class="text-2">L3</span>
                         <div class="float-right">
@@ -476,15 +492,26 @@ function readGraphVisibilityFromBrowserMemory(){
                         </div>
                     </div>
                     <div class="frame-5-bot"> 
-                        <div id="L3Watt" class="pad-38"></div>
-                        <div id="L3Amperage"></div>
-                        <div id="L3AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L3Calc">0 A</span></div>
-                        <div id="L3Voltage"></div>
+                        <div class="rTableRow" title="">
+                            <div class="rTableCell width-290">
+                                <div id="L3Watt" class="pad-38"></div>
+                            </div>
+                            <div class="rTableCell width-290">
+                                <div id="L3Amperage"></div>
+                                <div id="L3AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L3Calc">0 A</span></div>
+                            </div>
+                            <div class="rTableCell width-290">
+                                <div id="L3Voltage"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>  
-            </div>
 
+                </div>
+
+            </div>
+            
         </div>
+
 <script>
 
     readGraphVisibilityFromBrowserMemory();
@@ -540,6 +567,7 @@ function readGraphVisibilityFromBrowserMemory(){
         plotOptions: {
             solidgauge: {
                 dataLabels: {
+                    useHTML: true,
                     y: 10,
                     borderWidth: 0,
                     useHTML: true,
@@ -563,19 +591,14 @@ function readGraphVisibilityFromBrowserMemory(){
                 }
             ],
             dataLabels: {
+                useHTML: true,
                 y: -30,
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
                     '<span style="font-size:25px">{point.y} A</span><br/>' +
                     '</div>',
-            },
-            /*
-            dataLabels: {
-                enabled: false
-            }
-            */
-            
+            }, 
         }],
         title: null,
         pane: {
@@ -589,7 +612,6 @@ function readGraphVisibilityFromBrowserMemory(){
                 outerRadius: '100%',
                 shape: 'arc'
             }
-            
         },
         yAxis: {
             min: 0,
@@ -597,8 +619,6 @@ function readGraphVisibilityFromBrowserMemory(){
             lineWidth: 0,
             tickWidth: 0,
             minorTickInterval: null,
-        
-            //tickAmount: 10,
             minTickInterval: 80,
             title: {
                 y: 26,
@@ -618,6 +638,7 @@ function readGraphVisibilityFromBrowserMemory(){
         plotOptions: {
             solidgauge: {
                 dataLabels: {
+                    useHTML: true,
                     y: 10,
                     borderWidth: 0,
                     useHTML: true,
@@ -626,111 +647,66 @@ function readGraphVisibilityFromBrowserMemory(){
         }
     };
 
-    var gaugeOptionsVoltage = 
-    {
-        plotOptions: {
-            gauge: {
-                pivot: {
-                    radius: 8,
-                    borderWidth: 1,
-                    backgroundColor: '#6E797C',
-                },
-                dial: {
-                    radius: '55%',
-                    backgroundColor: '#384042',
-                    borderWidth: 1,
-                    baseWidth: 15,
-                    topWidth: 1,
-                    baseLength: '1%', // of radius
-                    rearLength: '1%'
-                },
-            }
-        },
+    var gaugeOptionsVoltage = {
         chart: {
-            width: 260,
-            height: 190,
-            type: 'gauge',
-            plotBackgroundColor: null,
-            plotBackgroundImage: null,
-            plotBorderWidth: 0,
-            plotShadow: false,
-            //backgroundColor: '#ff0000',
+            type: 'solidgauge',
+            width:260,
+            height: 150,
+            margin: [0, 0, 0, 0]
         },
+        series: [{
+            data: [{
+                color: {
+                    linearGradient:  { x1: 0, x2: 0, y1: 0, y2: 1 },
+                    stops: [
+                    [0.042, '#55BF3B'], // green
+                    [0.5,   '#DDDF0D'], // yellow
+                    [0.958, '#DF5353']  // red
+                    ]
+                }
+            }
+            ],
+            dataLabels: {
+                useHTML: true,
+                y: -30,
+                color: '#6E797C',
+                borderWidth: 0,
+                format:
+                    '<div style="text-align:center">' +
+                    '<span style="font-size:25px">{point.y} V</span><br/>' +
+                    '</div>'
+            },
+        }],
         title: null,
         pane: {
-            center: ['53%', '75%'],
+            center: ['53%', '85%'],
+            size: '160%',
             startAngle: -90,
             endAngle: 90,
-            size: '150%',
-            background: [{
-                outerRadius: '0%',
-            }],
+            background: {
+                backgroundColor: '#F5F5F5',
+                innerRadius: '60%',
+                outerRadius: '100%',
+                shape: 'arc'
+            }
         },
-        // the value axis
         yAxis: {
-            min: 160,
-            max: 300,
-            minorTickWidth: 0,
+            min: 200, // 207 is minmal voltage
+            max: 260, // 253 is maximum voltage
+            lineWidth: 0,
             tickWidth: 0,
-            //tickAmount: 0,
-            //tickInterval: 0,
-            //showFirstLabel: true,
-            //showLastLabel: true,
-            title: null,
+            minorTickInterval: null,
+            minTickInterval: 80,
             labels: {
                 enabled: false
             },
-            plotBands: 
-            [  
-                {
-                    borderColor: '#DF5353',
-                    borderWidth: 1,
-                    innerRadius: '60%',
-                    outerRadius: '100%',
-                    from: 160,
-                    to: 206,
-                    color: '#DF5353' // red
-                }, {
-                    borderWidth: 1,
-                    borderColor: '#55BF3B',
-                    innerRadius: '60%',
-                    outerRadius: '100%',
-                    from: 207,
-                    to: 253,
-                    color: '#55BF3B' // green
-                }, {
-                    borderWidth: 1,
-                    borderColor: '#DF5353',
-                    innerRadius: '60%',
-                    outerRadius: '100%',
-                    from: 254,
-                    to: 300,
-                    color: '#DF5353' // red
-                }
-            ],
         },
         tooltip: {
             enabled: false
         },
-        series: [{
-            overshoot: 0,
-            data: [{
-                color: '#F2BA0F',
-                y: 0
-            }],
-            dataLabels: {
-                borderWidth: 0,
-                y: 60,
-                color: '#6E797C',
-                format:
-                    '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} V</span><br/>' +
-                    '</div>',
-            },
-        }]
-    }
+    };
 
-    var L1WattChart = Highcharts.chart( graphIdArray[0], Highcharts.merge( gaugeOptions, 
+    var L1WattChart = Highcharts.chart( graphIdArray[0], Highcharts.merge( gaugeOptions,
     {
         yAxis: {
             min: 0,
@@ -744,6 +720,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 }
             ],
             dataLabels: {
+                useHTML: true,
                 y: -30,
                 color: '#6E797C',
                 format:
@@ -809,6 +786,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 }
             ],
             dataLabels: {
+                useHTML: true,
                 y: -30,
                 color: '#6E797C',
                 format:
@@ -828,7 +806,7 @@ function readGraphVisibilityFromBrowserMemory(){
     }));
 
     
-    L1AmperageChart.renderer.text('0',35, 150)
+    L1AmperageChart.renderer.text('0',35, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -836,7 +814,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L2AmperageChart.renderer.text('0',35, 150)
+    L2AmperageChart.renderer.text('0',35, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -845,8 +823,7 @@ function readGraphVisibilityFromBrowserMemory(){
         .add();
 
   
-
-    L3AmperageChart.renderer.text('0',35, 150)
+    L3AmperageChart.renderer.text('0',35, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -878,16 +855,8 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L1VoltageChart.renderer.text('160',20, 150)
-        .css({
-            fontWeight: 'bold',
-            color: '#6E797C',
-            fontSize: '16px'
-        })
-        .add();
-        
-
-    L1VoltageChart.renderer.text('300',220, 150)
+   
+    L1VoltageChart.renderer.text('200',35, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -895,7 +864,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L2VoltageChart.renderer.text('160',20, 150)
+    L1VoltageChart.renderer.text('260',220, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -903,7 +872,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L2VoltageChart.renderer.text('300',220, 150)
+    L2VoltageChart.renderer.text('200',35, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -911,8 +880,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-
-    L3VoltageChart.renderer.text('160',20, 150)
+    L2VoltageChart.renderer.text('260',220, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -920,7 +888,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L3VoltageChart.renderer.text('300',220, 150)
+    L3VoltageChart.renderer.text('200',35, 145)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -928,6 +896,14 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
+    L3VoltageChart.renderer.text('260',220, 145)
+        .css({
+            fontWeight: 'bold',
+            color: '#6E797C',
+            fontSize: '16px'
+        })
+        .add();
+   
 </script>
 </body>
 </html>
