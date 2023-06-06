@@ -346,42 +346,81 @@ def Main( argv ):
 
     if os.path.exists ( const.FILE_DB_POWERPRODUCTION ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_POWERPRODUCTION )
-        record_cnt = record_cnt + power_production_solar_db.sql2file( const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
-        updateStatusPct(statusfile, 31, record_cnt)
-        flog.info(inspect.stack()[0][3]+": kWh Solar levering sql geëxporteerd.")
+        try:
+            record_cnt = record_cnt + power_production_solar_db.sql2file( const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
+            updateStatusPct(statusfile, 31, record_cnt)
+            flog.info(inspect.stack()[0][3]+": kWh Solar levering sql geëxporteerd.")
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_POWERPRODUCTION + " -> " + str(e) )  
 
     if os.path.exists ( const.FILE_DB_POWERPRODUCTION ):
-        record_cnt = record_cnt + power_production_db.sql2file(  const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
-        updateStatusPct(statusfile, 32, record_cnt)
-        flog.info(inspect.stack()[0][3]+": kWh(S0) levering sql geëxporteerd.")
+        try:
+            record_cnt = record_cnt + power_production_db.sql2file(  const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
+            updateStatusPct(statusfile, 32, record_cnt)
+            flog.info(inspect.stack()[0][3]+": kWh(S0) levering sql geëxporteerd.")
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_POWERPRODUCTION + " -> " + str(e) )  
 
     if os.path.exists ( const.FILE_DB_PHASEINFORMATION ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_PHASEINFORMATION )
-        record_cnt = record_cnt + fase_db.sql2file( const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode )
-        record_cnt = record_cnt + fase_db_min_max_dag.sql2file( const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode )
-        flog.info(inspect.stack()[0][3]+": fase data sql geëxporteerd.")
+        try:
+            record_cnt = record_cnt + fase_db.sql2file( const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode )
+            record_cnt = record_cnt + fase_db_min_max_dag.sql2file( const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode )
+            flog.info(inspect.stack()[0][3]+": fase data sql geëxporteerd.")
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_PHASEINFORMATION + " -> " + str(e) )
         updateStatusPct( statusfile, 33, record_cnt )
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_E_HISTORIE )
-    record_cnt = record_cnt + e_db_history_min.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
-    updateStatusPct(statusfile, 34, record_cnt)
-    record_cnt = record_cnt + e_db_history_uur.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
-    updateStatusPct(statusfile, 35, record_cnt)
-    record_cnt = record_cnt + e_db_history_dag.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
-    updateStatusPct(statusfile, 36, record_cnt)
-    record_cnt = record_cnt + e_db_history_maand.sql2file(const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
-    updateStatusPct(statusfile, 37, record_cnt)
-    record_cnt = record_cnt + e_db_history_jaar.sql2file( const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
-    flog.info(inspect.stack()[0][3]+": historie sql geëxporteerd.")
-    updateStatusPct(statusfile, 38, record_cnt)
+    try:
+        record_cnt = record_cnt + e_db_history_min.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        updateStatusPct(statusfile, 34, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+    
+    try:
+        record_cnt = record_cnt + e_db_history_uur.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        updateStatusPct(statusfile, 35, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+
+    try:
+        record_cnt = record_cnt + e_db_history_dag.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        updateStatusPct(statusfile, 36, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+
+    try:
+        record_cnt = record_cnt + e_db_history_maand.sql2file(const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        updateStatusPct(statusfile, 37, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+
+    try:
+        record_cnt = record_cnt + e_db_history_jaar.sql2file( const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        flog.info(inspect.stack()[0][3]+": historie sql geëxporteerd.")
+        updateStatusPct(statusfile, 38, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_FINANCIEEL )
-    record_cnt = record_cnt + e_db_financieel_dag.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
-    updateStatusPct(statusfile, 39, record_cnt)
-    record_cnt = record_cnt + e_db_financieel_maand.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
-    updateStatusPct(statusfile, 40, record_cnt)
-    record_cnt = record_cnt + e_db_financieel_jaar.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
-    updateStatusPct(statusfile, 41, record_cnt)
+    try:
+        record_cnt = record_cnt + e_db_financieel_dag.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
+        updateStatusPct(statusfile, 39, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_FINANCIEEL + " -> " + str(e) )
+
+    try:
+        record_cnt = record_cnt + e_db_financieel_maand.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
+        updateStatusPct(statusfile, 40, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_FINANCIEEL + " -> " + str(e) )
+
+    try:
+        record_cnt = record_cnt + e_db_financieel_jaar.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
+        updateStatusPct(statusfile, 41, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_FINANCIEEL + " -> " + str(e) )
 
     try:
         s2f = sqlite_lib.Sql2File()
@@ -395,39 +434,67 @@ def Main( argv ):
     updateStatusPct(statusfile, 43, record_cnt) 
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_CONFIG )
-    record_cnt = record_cnt + config_db.sql2file(const.DIR_EXPORT + const.DB_CONFIG + exportcode)
-    flog.info(inspect.stack()[0][3]+": configuratie sql geëxporteerd.")
-    updateStatusPct(statusfile, 44, record_cnt) 
+    try:
+        record_cnt = record_cnt + config_db.sql2file(const.DIR_EXPORT + const.DB_CONFIG + exportcode)
+        flog.info(inspect.stack()[0][3]+": configuratie sql geëxporteerd.")
+        updateStatusPct(statusfile, 44, record_cnt)
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_CONFIG + " -> " + str(e) )
 
     if os.path.exists ( const.FILE_DB_WEATHER ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WEER  )
-        record_cnt = record_cnt + weer_db.sql2file(const.DIR_EXPORT + const.DB_WEER + exportcode)
-        flog.info(inspect.stack()[0][3]+": weer sql geëxporteerd.")
-        updateStatusPct(statusfile, 45 ,record_cnt)
+        try:
+            record_cnt = record_cnt + weer_db.sql2file(const.DIR_EXPORT + const.DB_WEER + exportcode)
+            flog.info(inspect.stack()[0][3]+": weer sql geëxporteerd.")
+            updateStatusPct(statusfile, 45 ,record_cnt)
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER + " -> " + str(e) )
 
     if os.path.exists ( const.FILE_DB_WEATHER_HISTORIE ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WEER_HISTORY )
-        record_cnt = record_cnt + weer_history_db_uur.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-        updateStatusPct(statusfile, 50, record_cnt)
-        record_cnt = record_cnt + weer_history_db_dag.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-        updateStatusPct(statusfile, 52 ,record_cnt )
-        record_cnt = record_cnt + weer_history_db_maand.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-        updateStatusPct(statusfile, 54, record_cnt)
-        record_cnt = record_cnt + weer_history_db_jaar.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-        updateStatusPct(statusfile, 56 , record_cnt)
+        try:
+            record_cnt = record_cnt + weer_history_db_uur.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
+            updateStatusPct(statusfile, 50, record_cnt)
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
+        
+        try:
+            record_cnt = record_cnt + weer_history_db_dag.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
+            updateStatusPct(statusfile, 52 ,record_cnt )
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
+
+        try:
+            record_cnt = record_cnt + weer_history_db_maand.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
+            updateStatusPct(statusfile, 54, record_cnt)
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
+        
+        try:
+            record_cnt = record_cnt + weer_history_db_jaar.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
+            updateStatusPct(statusfile, 56 , record_cnt)
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
+
         flog.info(inspect.stack()[0][3]+": weer historie sql geëxporteerd.")
         updateStatusPct(statusfile, 58, record_cnt) 
 
     if os.path.exists ( const.FILE_DB_TEMPERATUUR_FILENAME ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_TEMPERATURE )
-        record_cnt = record_cnt + temperature_db.sql2file(const.DIR_EXPORT + const.DB_TEMPERATURE + exportcode )
-        flog.info(inspect.stack()[0][3]+": temperatuur sql geëxporteerd.")
-        updateStatusPct(statusfile, 60, record_cnt)
+        try:
+            record_cnt = record_cnt + temperature_db.sql2file(const.DIR_EXPORT + const.DB_TEMPERATURE + exportcode )
+            flog.info(inspect.stack()[0][3]+": temperatuur sql geëxporteerd.")
+            updateStatusPct(statusfile, 60, record_cnt)
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_TEMPERATURE + " -> " + str(e) )
 
     if os.path.exists ( const.FILE_DB_WATERMETERV2 ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WATERMETERV2 )
-        record_cnt = record_cnt + watermeter_db.sql2file( const.DIR_EXPORT + const.DB_WATERMETERV2 + exportcode )
-        updateStatusPct(statusfile, 70, record_cnt)
+        try:
+            record_cnt = record_cnt + watermeter_db.sql2file( const.DIR_EXPORT + const.DB_WATERMETERV2 + exportcode )
+            updateStatusPct(statusfile, 70, record_cnt)
+        except Exception as e:
+            flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WATERMETERV2 + " -> " + str(e) )
 
     # /p1mon/www/custom aan archief toevoegen
     # check of export file gereed is

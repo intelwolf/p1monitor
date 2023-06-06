@@ -66,7 +66,6 @@ echo "Setting ramdisk rights"
 sudo chown p1mon:p1mon /p1mon/mnt/ramdisk/*db
 
 echo "Writing cron"
-#sqlite3 /p1mon/mnt/ramdisk/config.db 'update config set parameter="1" where id=181'
 /p1mon/scripts/P1Scheduler.py 
 
 # On SIGTERM stop services 

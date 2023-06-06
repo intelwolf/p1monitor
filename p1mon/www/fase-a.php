@@ -39,7 +39,8 @@ var useKw                  = <?php echo config_read( 180 ) . ";\n"?>
 var graphIdArray           = [ 'L1Watt',    'L1Amperage', 'L1Voltage', 'L2Watt',    'L2Amperage', 'L2Voltage', 'L3Watt',    'L3Amperage', 'L3Voltage' ]
 var buttonIdArray          = [ 'L1WButton', 'L1AButton',  'L1VButton', 'L2WButton', 'L2AButton',  'L2VButton', 'L3WButton', 'L3AButton',  'L3VButton' ]
 var p1TelegramMaxSpeedIsOn = <?php if ( config_read( 155 ) == 1 ) { echo "true;"; } else { echo "false;"; } echo"\n";?> 
-
+var gaugeHeight            = 145
+var gaugeMinMaxYpos        = 140
 
 if ( useKw ) {
     var wattText = 'kW'
@@ -144,65 +145,6 @@ function readJsonApiPhaseInformationFromStatus(){
             }
         }
 
-
-    // DEBUG
-    
-    // 10 
-    /*
-    L1A = 1
-    L2A = 8
-    L3A = 16
-    */
-    // 16 
-    /*
-    L1A = 0
-    L2A = 15
-    L3A = 22
-    */
-
-    // 25
-    /*
-    L1A = 8
-    L2A = 20
-    L3A = 27
-    */
-
-    // 35
-    /*
-    L1A = 1
-    L2A = 17,5
-    L3A = 37
-    */
-
-    //40
-    /*
-    L1A = 2
-    L2A = 20
-    L3A = 43
-    */
-
-    //50
-    /*
-    L1A = 5
-    L2A = 25
-    L3A = 55
-    */
-
-    //63
-    /*
-    L1A = 6
-    L2A = 45
-    L3A = 77
-    */
-
-    //80
-    /*
-    L1A = 4
-    L2A = 70
-    L3A = 101
-    */
-
-
         /*
         console.log ( ' -------------- ' );
         console.log ( L1Wconsumption );
@@ -213,7 +155,7 @@ function readJsonApiPhaseInformationFromStatus(){
         console.log ( L3Wproduction );
         console.log ( ' ############### ' );
         */
-        
+
         // consumption and production adaption.
         // L1 Watt
         if ( L1Wconsumption > L1Wproduction ) {
@@ -221,6 +163,7 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L1Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
             $('#L1Watt').highcharts().series[0].points[0].update( parseFloat( L1Wconsumption ), true, true, true );
             $('#L1Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
+            $('#L1Amperage').highcharts().series[0].data[0].color = '#F2BA0F';
             if ( useKw ) {
                 L1Caculated = L1Wconsumption * 1000 / L1V
             }  else {
@@ -231,6 +174,7 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L1Watt').highcharts().yAxis[0].setTitle({text: "levering"});
             $('#L1Watt').highcharts().series[0].points[0].update( parseFloat( L1Wproduction ), true, true, true );
             $('#L1Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
+            $('#L1Amperage').highcharts().series[0].data[0].color = '#98D023';
             if ( useKw ) {
                 L1Caculated = L1Wproduction * 1000 / L1V
             }  else {
@@ -248,7 +192,10 @@ function readJsonApiPhaseInformationFromStatus(){
         
         $('#L1Voltage').highcharts().series[0].points[0].update( parseFloat( L1V ), true, true, true );
         if ( isNaN(L1Caculated) == false && L1V > 0) {
-            $("#L1Calc").text( L1Caculated.toFixed(2) + " A" )
+            //$("#L1Calc").text( L1Caculated.toFixed(2) + " A" )
+            L1AmperageChart.L1ATextCalc.attr({
+                text: '<div style="text-align:center"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i>' + L1Caculated.toFixed(2) + ' A</div>'
+            })
         }
         
         // consumption and production adaption.
@@ -258,6 +205,7 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L2Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
             $('#L2Watt').highcharts().series[0].points[0].update( parseFloat( L2Wconsumption ), true, true, true );
             $('#L2Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
+            $('#L2Amperage').highcharts().series[0].data[0].color = '#F2BA0F';
             if ( useKw ) {
                 L2Caculated = L2Wconsumption * 1000 / L2V
             }  else {
@@ -268,6 +216,7 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L2Watt').highcharts().yAxis[0].setTitle({text: "levering"});
             $('#L2Watt').highcharts().series[0].points[0].update( parseFloat( L2Wproduction ), true, true, true );
             $('#L2Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
+            $('#L2Amperage').highcharts().series[0].data[0].color = '#98D023';
             if ( useKw ) {
                 L2Caculated = L2Wproduction * 1000 / L2V
             }  else {
@@ -284,9 +233,12 @@ function readJsonApiPhaseInformationFromStatus(){
         // L2 Voltage
         $('#L2Voltage').highcharts().series[0].points[0].update( parseFloat( L2V ), true, true, true );
         if ( isNaN(L2Caculated) == false && L2V > 0) {
-            $("#L2Calc").text( L2Caculated.toFixed(2) + " A" )
+            //$("#L2Calc").text( L2Caculated.toFixed(2) + " A" )
+            L2AmperageChart.L2ATextCalc.attr({
+                text: '<div style="text-align:center"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i>' + L2Caculated.toFixed(2) + ' A</div>'
+            })
         }
-       
+     
 
         // consumption and production adaption.
         // L3 Watt
@@ -295,6 +247,7 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L3Watt').highcharts().yAxis[0].setTitle({text: "verbruik"});
             $('#L3Watt').highcharts().series[0].points[0].update( parseFloat( L3Wconsumption ), true, true, true );
             $('#L3Amperage').highcharts().yAxis[0].setTitle({text: "verbruik"});
+            $('#L3Amperage').highcharts().series[0].data[0].color = '#F2BA0F';
             if ( useKw ) {
                 L3Caculated = L3Wconsumption * 1000 / L3V
             }  else {
@@ -305,6 +258,7 @@ function readJsonApiPhaseInformationFromStatus(){
             $('#L3Watt').highcharts().yAxis[0].setTitle({text: "levering"});
             $('#L3Watt').highcharts().series[0].points[0].update( parseFloat( L3Wproduction ), true, true, true );
             $('#L3Amperage').highcharts().yAxis[0].setTitle({text: "levering"});
+            $('#L3Amperage').highcharts().series[0].data[0].color = '#98D023';
             if ( useKw ) {
                 L3Caculated = L3Wproduction * 1000 / L3V
             }  else {
@@ -321,7 +275,10 @@ function readJsonApiPhaseInformationFromStatus(){
         // L3 Voltage
         $('#L3Voltage').highcharts().series[0].points[0].update( parseFloat( L3V ), true, true, true );
         if ( isNaN(L3Caculated) == false && L3V > 0) {
-            $("#L3Calc").text( L3Caculated.toFixed(2) + " A" )
+            //$("#L3Calc").text( L3Caculated.toFixed(2) + " A" )
+            L3AmperageChart.L3ATextCalc.attr({
+                text: '<div style="text-align:center"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i>' + L3Caculated.toFixed(2) + ' A</div>'
+            })
         }
        
       } catch(err) {
@@ -352,6 +309,7 @@ $(function () {
     DataLoop(); 
 }); 
 
+/*
 function toggelCalculatedAmpValues() {
 
     if ( document.getElementById('L1Amperage').offsetParent === null ) {
@@ -371,6 +329,7 @@ function toggelCalculatedAmpValues() {
     }
 
 }
+*/
 
 function toggleButtonAndGraphView( graph, button ) {
     //console.log (  graph, button );
@@ -386,7 +345,7 @@ function toggleButtonAndGraphView( graph, button ) {
         toLocalStorage( 'phase-a-' + graph , true );
     }
 
-    toggelCalculatedAmpValues();
+    //toggelCalculatedAmpValues();
 
 }
 
@@ -404,7 +363,7 @@ function readGraphVisibilityFromBrowserMemory(){
             $( '#' + buttonIdArray[ j ] ).removeClass( 'color-menu' ); 
         }
     }
-    toggelCalculatedAmpValues();
+    //toggelCalculatedAmpValues();
 }
 
 </script>
@@ -430,32 +389,36 @@ function readGraphVisibilityFromBrowserMemory(){
             </div>
 
             <div class="right-wrapper width-910" title="<?php echo strIdx(77);?>">
+
                 <div class="frame-5-top">
-                <span class="text-2">L1</span>
+
+                    <span class="text-2">L1</span>
                     <div class="float-right">
                         <button id="L1WButton" onclick="toggleButtonAndGraphView( graphIdArray[0], buttonIdArray[0] )" class="button-2 bold-font">W</button>
                         <button id="L1AButton" onclick="toggleButtonAndGraphView( graphIdArray[1], buttonIdArray[1] )" class="button-2 bold-font">A</button>
                         <button id="L1VButton" onclick="toggleButtonAndGraphView( graphIdArray[2], buttonIdArray[2] )" class="button-2 bold-font">V</button>
                     </div>
-                    <div class="frame-5-bot">
-                        <div class="rTable"> 
-                            <div class="rTableRow" title="">
-                                <div class="rTableCell width-290">
-                                    <div id="L1Watt" class="pad-38"></div>
-                                </div>
-                                <div class="rTableCell width-290">
-                                    <div id="L1Amperage"></div>
-                                    <div id="L1AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L1Calc">0 A</span></div>
-                                </div>
-                                <div class="rTableCell width-290">
-                                    <div id="L1Voltage"></div>
-                                </div>
+                
+                </div>
+
+                <div class="frame-5-bot">
+                    <div class="rTable"> 
+                        <div class="rTableRow" title="">
+                            <div class="rTableCell width-290">
+                                <div id="L1Watt"></div>
+                            </div>
+                            <div class="rTableCell width-290">
+                                <div id="L1Amperage"></div>
+                            </div>
+                            <div class="rTableCell width-290">
+                                <div id="L1Voltage"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-
+                 
                 <div>
+
                     <div class="frame-5-top">
                         <span class="text-2">L2</span>
                         <div class="float-right">
@@ -464,15 +427,15 @@ function readGraphVisibilityFromBrowserMemory(){
                             <button id="L2VButton" onclick="toggleButtonAndGraphView( graphIdArray[5], buttonIdArray[5] )" class="button-2 bold-font">V</button>
                         </div>
                     </div>
+
                     <div class="frame-5-bot">
                         <div class="rTable"> 
                             <div class="rTableRow" title="">
                                 <div class="rTableCell width-290">
-                                    <div id="L2Watt" class="pad-38"></div>
+                                    <div id="L2Watt"></div>
                                 </div>
                                 <div class="rTableCell width-290">
                                     <div id="L2Amperage"></div>
-                                    <div id="L2AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L2Calc">0 A</span></div>
                                 </div>
                                 <div class="rTableCell width-290">
                                     <div id="L2Voltage"></div>
@@ -480,6 +443,8 @@ function readGraphVisibilityFromBrowserMemory(){
                             </div>
                         </div>
                     </div>
+
+
                 </div>
 
                 <div>
@@ -494,11 +459,10 @@ function readGraphVisibilityFromBrowserMemory(){
                     <div class="frame-5-bot"> 
                         <div class="rTableRow" title="">
                             <div class="rTableCell width-290">
-                                <div id="L3Watt" class="pad-38"></div>
+                                <div id="L3Watt"></div>
                             </div>
                             <div class="rTableCell width-290">
                                 <div id="L3Amperage"></div>
-                                <div id="L3AmperageCalc" title="<?php echo strIdx( 296 );?>" class="center text-32"><i class="fas fa-calculator" data-fa-transform="shrink-6 down-1"></i><span id="L3Calc">0 A</span></div>
                             </div>
                             <div class="rTableCell width-290">
                                 <div id="L3Voltage"></div>
@@ -520,7 +484,7 @@ function readGraphVisibilityFromBrowserMemory(){
         chart: {
             type: 'solidgauge',
             width:260,
-            height: 150,
+            height: gaugeHeight,
             margin: [0, 0, 0, 0]
         },
         title: null,
@@ -580,7 +544,7 @@ function readGraphVisibilityFromBrowserMemory(){
         chart: {
             type: 'solidgauge',
             width:260,
-            height: 150,
+            height: gaugeHeight,
             margin: [0, 0, 0, 0]
         },
         series: [{
@@ -592,7 +556,7 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -30,
+                y: -37,
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
@@ -651,7 +615,7 @@ function readGraphVisibilityFromBrowserMemory(){
         chart: {
             type: 'solidgauge',
             width:260,
-            height: 150,
+            height: gaugeHeight,
             margin: [0, 0, 0, 0]
         },
         series: [{
@@ -668,7 +632,7 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -30,
+                y: -37,
                 color: '#6E797C',
                 borderWidth: 0,
                 format:
@@ -721,7 +685,7 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -30,
+                y: -37,
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
@@ -754,7 +718,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 }
             ],
             dataLabels: {
-                y: -30,
+                y: -37,
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
@@ -787,7 +751,7 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -30,
+                y: -37,
                 color: '#6E797C',
                 format:
                     '<div style="text-align:center">' +
@@ -805,8 +769,40 @@ function readGraphVisibilityFromBrowserMemory(){
     {
     }));
 
-    
-    L1AmperageChart.renderer.text('0',35, 145)
+
+    // need to allow non standard tags to be processed
+    // by highchart
+    Highcharts.AST.allowedTags.push('fas');
+    Highcharts.AST.allowedTags.push('fa-calculator');
+    Highcharts.AST.allowedAttributes.push('data-fa-transform');
+
+    L1AmperageChart.L1ATextCalc = L1AmperageChart.renderer.text( "" ,92, gaugeMinMaxYpos - 2,true)
+        .css({
+            fontWeight: 'bold',
+            color: '#6E797C',
+            fontSize: '25px'
+        })
+        .add();
+
+    L2AmperageChart.L2ATextCalc = L2AmperageChart.renderer.text( "" ,92, gaugeMinMaxYpos - 2,true)
+        .css({
+            fontWeight: 'bold',
+            color: '#6E797C',
+            fontSize: '25px'
+        })
+        .add();
+
+    L3AmperageChart.L3ATextCalc = L3AmperageChart.renderer.text( "" ,92, gaugeMinMaxYpos - 2,true)
+        .css({
+            fontWeight: 'bold',
+            color: '#6E797C',
+            fontSize: '25px'
+        })
+        .add();
+
+
+
+    L1AmperageChart.renderer.text('0',35, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -814,7 +810,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L2AmperageChart.renderer.text('0',35, 145)
+    L2AmperageChart.renderer.text('0',35, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -823,7 +819,7 @@ function readGraphVisibilityFromBrowserMemory(){
         .add();
 
   
-    L3AmperageChart.renderer.text('0',35, 145)
+    L3AmperageChart.renderer.text('0',35, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -831,7 +827,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L1AmperageChart.renderer.text( maxAmperageFromConfig, 220, 145 )
+    L1AmperageChart.renderer.text( maxAmperageFromConfig, 220, gaugeMinMaxYpos )
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -839,7 +835,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
     
-    L2AmperageChart.renderer.text( maxAmperageFromConfig, 220, 145 )
+    L2AmperageChart.renderer.text( maxAmperageFromConfig, 220, gaugeMinMaxYpos )
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -847,7 +843,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
     
-    L3AmperageChart.renderer.text( maxAmperageFromConfig, 220, 145)
+    L3AmperageChart.renderer.text( maxAmperageFromConfig, 220, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -856,7 +852,7 @@ function readGraphVisibilityFromBrowserMemory(){
         .add();
 
    
-    L1VoltageChart.renderer.text('200',35, 145)
+    L1VoltageChart.renderer.text('200',35, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -864,7 +860,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L1VoltageChart.renderer.text('260',220, 145)
+    L1VoltageChart.renderer.text('260',220, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -872,7 +868,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L2VoltageChart.renderer.text('200',35, 145)
+    L2VoltageChart.renderer.text('200',35, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -880,7 +876,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L2VoltageChart.renderer.text('260',220, 145)
+    L2VoltageChart.renderer.text('260',220, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -888,7 +884,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L3VoltageChart.renderer.text('200',35, 145)
+    L3VoltageChart.renderer.text('200',35, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -896,7 +892,7 @@ function readGraphVisibilityFromBrowserMemory(){
         })
         .add();
 
-    L3VoltageChart.renderer.text('260',220, 145)
+    L3VoltageChart.renderer.text('260',220, gaugeMinMaxYpos)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
