@@ -333,7 +333,7 @@ function creatCurrentUseChart() {
                 [0.5, "#9ADB8A"], // medium green
                 [0.9, "#55BF3B"], // high green
             ],
-        lineWidth: 1,
+        lineWidth: 0,
         minorTickInterval: null,
         tickPixelInterval: 1000,
         tickWidth: 0,

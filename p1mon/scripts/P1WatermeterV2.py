@@ -17,18 +17,6 @@ import multiprocessing
 import process_lib
 import util
 
-#from multiprocessing import Process, Queue
-#from threading import Timer
-#from datetime import datetime, timedelta, timezone
-#from logger import fileLogger,logging
-#from sqldb import configDB, rtStatusDb, WatermeterDB, WatermeterDBV2
-#from time import sleep
-#from util import setFile2user, mkLocalTimeString
-#from gpio import gpioDigtalInput
-#from random import randrange
-#from utiltimestamp import utiltimestamp
-#from listOfPidByName import listOfPidByName
-
 # programme name.
 prgname = 'P1WatermeterV2'
 
@@ -97,7 +85,7 @@ def Main(argv):
         flog.warning( inspect.stack()[0][3] + ": GPIO pin voor watermeter niet te openen. " + str(e.args[0])  ) 
 
     setFileFlags()
-    deleteRecords() 
+    delete_records() 
     startBackgroundDeamon() 
 
     while True:
@@ -195,12 +183,12 @@ def replaceRecordForAPeriod( timestamp, period ):
 ########################################################
 # make remove / delete records from database           #
 # ######################################################
-def deleteRecords():
+def delete_records():
 
     timestamp = util.mkLocalTimeString()
 
     try:
-        sql_del_str = "delete from " + const.DB_WATERMETERV2_TAB  + \
+        sql_del_str = "delete from " + const.DB_WATERMETERV2_TAB + \
         " where TIMEPERIOD_ID = " + \
         str( sqldb.INDEX_MINUTE ) + \
         " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=31)) + "'"
@@ -219,6 +207,10 @@ def deleteRecords():
     except Exception as e:
         flog.warning (inspect.stack()[0][3]+": wissen van oude minuten records gefaald: " + str(e) )
 
+    
+    """ 
+    # removed in version 2.3.0
+    # new standard retention is minutes 31 days, hours 1096 days, days, months, years unlimted. 
     try:
         sql_del_str = "delete from " + const.DB_WATERMETERV2_TAB + \
         " where TIMEPERIOD_ID = " + \
@@ -228,6 +220,7 @@ def deleteRecords():
         watermeter_db.excute( sql_del_str )
     except Exception as e:
         flog.warning (inspect.stack()[0][3]+": wissen van oude minuten records gefaald: " + str(e) )
+    """
 
 ########################################################
 # make a minute record to prevent gaps in the data set #
@@ -275,9 +268,6 @@ def checkAndInsertMinuteRecord():
                 replaceRecordForAPeriod( timestamp, sqldb.INDEX_DAY )
                 replaceRecordForAPeriod( timestamp, sqldb.INDEX_MONTH )
                 replaceRecordForAPeriod( timestamp, sqldb.INDEX_YEAR )
-
-                # clean the database 
-                #deleteRecords()
 
             # check if there are any gaps in the database records
             mp_queue_1.put( QUEUE_CMD_START )
@@ -563,6 +553,9 @@ def waitForPuls():
         replaceRecordForAPeriod( timestamp, sqldb.INDEX_DAY )
         replaceRecordForAPeriod( timestamp, sqldb.INDEX_MONTH )
         replaceRecordForAPeriod( timestamp, sqldb.INDEX_YEAR )
+
+        # clean the database
+        delete_records()
 
     else:
         try:

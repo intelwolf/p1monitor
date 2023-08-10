@@ -96,86 +96,86 @@ function readJsonPhaseMinMax( cnt ){
 // change items with the marker #PARAMETER
 function createChart() {
     Highcharts.stockChart('ampChart', {
-    exporting: { enabled: false },
-    lang: {
-        noData: "Geen gegevens beschikbaar."
-    },
-    noData: {
-        style: { 
-        fontFamily: 'robotomedium',
-            fontWeight: 'bold',
-            fontSize: '25px',
-            color: '#10D0E7'
-    }
-    },
-    chart: {
-        style: {
-            fontFamily: 'robotomedium'
+        exporting: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
         },
-        backgroundColor: '#ffffff',
-        borderWidth: 0
-    },   
-    title: {
-        text: null
-    },  
-    navigator: {
+        noData: {
+            style: { 
+            fontFamily: 'robotomedium',
+                fontWeight: 'bold',
+                fontSize: '25px',
+                color: '#10D0E7'
+            }
+        },
+        chart: {
+            style: {
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
+            },
+            backgroundColor: '#ffffff',
+            borderWidth: 0
+        },
+        title: {
+            text: null
+        },  
+        navigator: {
+            xAxis: {
+                type: 'datetime',
+                dateTimeLabelFormats: {
+                    day: '%a.<br>%d %B<br/>%Y',
+                    month: '%B<br/>%Y',
+                    year: '%Y'
+                } 
+            },
+            enabled: true,
+            outlineColor: '#384042',
+            outlineWidth: 1,
+            handles: {
+                backgroundColor: '#384042',
+                borderColor: '#6E797C'
+            },
+        },
         xAxis: {
-            type: 'datetime',
+            type: 'datetime', 
+            minTickInterval: 24 *  3600000, 
             dateTimeLabelFormats: {
                 day: '%a.<br>%d %B<br/>%Y',
-                month: '%B<br/>%Y',
-                year: '%Y'
-            } 
-        },  
-        enabled: true,
-        outlineColor: '#384042',
-        outlineWidth: 1,
-        handles: {
-            backgroundColor: '#384042',
-            borderColor: '#6E797C'
-        },
-    },   
-    xAxis: {
-        type: 'datetime', 
-        minTickInterval: 24 *  3600000, 
-        dateTimeLabelFormats: {
-            day: '%a.<br>%d %B<br/>%Y',
-        },
-        lineColor: '#6E797C',
-        lineWidth: 1, 
-        events: {
-        setExtremes: function(e) {      
-            if(typeof(e.rangeSelectorButton)!== 'undefined') {
-                for (var j = 0;  j < GselectText.length; j++){    
-                    if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                        toLocalStorage( 'fase-uiterste-d-select-volt-index', j ); // #PARAMETER
-                        break;
+            },
+            lineColor: '#6E797C',
+            lineWidth: 1, 
+            events: {
+                setExtremes: function(e) { 
+                    if(typeof(e.rangeSelectorButton)!== 'undefined') {
+                        for (var j = 0;  j < GselectText.length; j++){    
+                            if ( GselectText[j] == e.rangeSelectorButton.text ) {
+                                toLocalStorage( 'fase-uiterste-d-select-volt-index', j ); // #PARAMETER
+                                break;
+                            }
+                        }
                     }
                 }
-            }
-        }
-    },
-    },
-    yAxis: [
-        {
-        //min: 0,
-        tickInterval: 5,
-        opposite: false,
-        gridLineDashStyle: 'longdash',
-        gridLineColor: '#6E797C',
-        gridLineWidth: 0.5,
-        labels: {
-            format: '{value} A',
+            },
+        },
+        yAxis: [{
+            //min: 0,
+            tickInterval: 5,
+            opposite: false,
+            gridLineDashStyle: 'longdash',
+            gridLineColor: '#6E797C',
+            gridLineWidth: 0.5,
+            labels: {
+                format: '{value} A',
                 style: {
-                color: '#384042'
+                    color: '#384042'
                 }
             },
-        title: {
-            text: null, 
-        },
-    }],
+            title: {
+                text: null, 
+            },
+        }],
     tooltip: {
-        useHTML: true,
+        useHTML: false,
         style: {
             padding: 3,
             color: '#6E797C'
@@ -228,40 +228,36 @@ function createChart() {
         borderColor: '#DCE1E3',
         crosshairs: [true, true],
         borderWidth: 1
-        },
-        rangeSelector: {
-            inputEnabled: false,
-            buttonSpacing: 5, 
-            selected : Gselected,
-            buttons: [
-            {
-                type: 'day',
-                count: 7,
-                text: GselectText[0]
-            },{
-                type: 'day',
-                count: 14,
-                text: GselectText[1]
-            },{
-                type: 'month',
-                count: 1,
-                text: GselectText[2]
-            }, {
-                type: 'month',
-                count: 2,
-                text: GselectText[3]
-            },
-            {
-                type: 'year',
-                count: 1,
-                text: GselectText[4]
-            },
-            {
-                type: 'year',
-                count: 3,
-                text: GselectText[5]
-            }
-        ],
+    },
+    rangeSelector: {
+        inputEnabled: false,
+        buttonSpacing: 5, 
+        selected : Gselected,
+        buttons: [{
+            type: 'day',
+            count: 7,
+            text: GselectText[0]
+        },{
+            type: 'day',
+            count: 14,
+            text: GselectText[1]
+        },{
+            type: 'month',
+            count: 1,
+            text: GselectText[2]
+        },{
+            type: 'month',
+            count: 2,
+            text: GselectText[3]
+        },{
+            type: 'year',
+            count: 1,
+            text: GselectText[4]
+        },{
+            type: 'year',
+            count: 3,
+            text: GselectText[5]
+        }],
         buttonTheme: { 
             r: 3,
             fill: '#F5F5F5',
@@ -269,106 +265,102 @@ function createChart() {
             'stroke-width': 1,
             width: 65,
             style: {
-            color: '#6E797C',
-            fontWeight: 'normal'
+                color: '#6E797C',
+                fontWeight: 'normal'
             },
             states: {
-            hover: {
-                fill: '#F5F5F5',
-                style: {
-                color: '#10D0E7'
+                hover: {
+                    fill: '#F5F5F5',
+                    style: {
+                        color: '#10D0E7'
+                    }
+                },
+                select: {
+                    fill: '#DCE1E3',
+                    stroke: '#DCE1E3',
+                    'stroke-width': 1,
+                    style: {
+                    color: '#384042',
+                        fontWeight: 'normal'
+                    }
                 }
-            },
-            select: {
-                fill: '#DCE1E3',
-                stroke: '#DCE1E3',
-                'stroke-width': 1,
-                style: {
-                color: '#384042',
-                fontWeight: 'normal'
-                }
-            }
             }
         }  
+    },
+    legend: {
+        y: -38,
+        symbolHeight: 12,
+        symbolWidth: 12,
+        symbolRadius: 3,
+        borderRadius: 5,
+        borderWidth: 1,
+        backgroundColor: '#DCE1E3',
+        symbolPadding: 3,
+        enabled: true,
+        align: 'right',
+        verticalAlign: 'top',
+        floating: true,
+        itemStyle: {
+            color: '#6E797C'
         },
-        legend: {
-            y: -38,
-            symbolHeight: 12,
-            symbolWidth: 12,
-            symbolRadius: 3,
-            borderRadius: 5,
-            borderWidth: 1,
-            backgroundColor: '#DCE1E3',
-            symbolPadding: 3,
-            enabled: true,
-            align: 'right',
-            verticalAlign: 'top',
-            floating: true,
-            itemStyle: {
-                color: '#6E797C'
-            },
-            itemHoverStyle: {
-                color: '#10D0E7'
-            },
-            itemDistance: 5
+        itemHoverStyle: {
+            color: '#10D0E7'
         },
-        series: [
-            {
-                showInNavigator: true,
-                yAxis: 0,
-                dashStyle: 'Solid',
-                visible: GseriesVisibilty[0],
-                name: GserieNames[0],
-                data: Grange_L1A,
-                type: 'areasplinerange',
-                lineWidth: 1,
-                color: L1_color,
-                fillOpacity: 0.33,
-            },
-            {
-                showInNavigator: true,
-                yAxis: 0,
-                dashStyle: 'ShortDot',
-                visible: GseriesVisibilty[1],
-                name: GserieNames[1],
-                data: Grange_L2A,
-                type: 'areasplinerange',
-                lineWidth: 1,
-                color: L2_color,
-                fillOpacity: 0.33,
-            },
-            {
-                showInNavigator: true,
-                yAxis: 0,
-                dashStyle: 'ShortDash',
-                visible: GseriesVisibilty[2],
-                name: GserieNames[2],
-                data: Grange_L3A,
-                type: 'areasplinerange',
-                lineWidth: 0.5,
-                color: L3_color,
-                fillOpacity: 0.33,
-            },
-        ],
-        plotOptions: {
-        series: {
-            softThreshold: true,
+        itemDistance: 5
+    },
+    series: [{
             showInNavigator: true,
-            events: {
-                legendItemClick: function () {
-                    // console.log('legendItemClick index='+this.index);
-                    if ( this.index === 0 ) {
-                        toLocalStorage('fase-uiterste-d-a-L1',!this.visible); // #PARAMETER
-                    }
-                    if ( this.index === 1 ) {
-                        toLocalStorage('fase-uiterste-d-a-L2',!this.visible); // #PARAMETER
-                    }
-                    if ( this.index === 2 ) {
-                        toLocalStorage('fase-uiterste-d-a-L3',!this.visible); // #PARAMETER
+            yAxis: 0,
+            dashStyle: 'Solid',
+            visible: GseriesVisibilty[0],
+            name: GserieNames[0],
+            data: Grange_L1A,
+            type: 'areasplinerange',
+            lineWidth: 1,
+            color: L1_color,
+            fillOpacity: 0.33,
+        },{
+            showInNavigator: true,
+            yAxis: 0,
+            dashStyle: 'ShortDot',
+            visible: GseriesVisibilty[1],
+            name: GserieNames[1],
+            data: Grange_L2A,
+            type: 'areasplinerange',
+            lineWidth: 1,
+            color: L2_color,
+            fillOpacity: 0.33,
+        },{
+            showInNavigator: true,
+            yAxis: 0,
+            dashStyle: 'ShortDash',
+            visible: GseriesVisibilty[2],
+            name: GserieNames[2],
+            data: Grange_L3A,
+            type: 'areasplinerange',
+            lineWidth: 0.5,
+            color: L3_color,
+            fillOpacity: 0.33,
+        }],
+        plotOptions: {
+            series: {
+                softThreshold: true,
+                showInNavigator: true,
+                events: {
+                    legendItemClick: function () {
+                        // console.log('legendItemClick index='+this.index);
+                        if ( this.index === 0 ) {
+                            toLocalStorage('fase-uiterste-d-a-L1',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 1 ) {
+                            toLocalStorage('fase-uiterste-d-a-L2',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 2 ) {
+                            toLocalStorage('fase-uiterste-d-a-L3',!this.visible); // #PARAMETER
+                        }
                     }
                 }
-            }
-        }  
+            } 
         },
     });
 }

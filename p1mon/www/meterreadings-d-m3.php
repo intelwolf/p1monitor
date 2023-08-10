@@ -91,239 +91,234 @@ function readJsonApiHistoryWaterDay( cnt ){
 
 // change items with the marker #PARAMETER
 function createMeterReadingsChart() {
-  Highcharts.stockChart('meterReadingChart', {
-  exporting: { enabled: false },
-  lang: {
-    noData: "Geen gegevens beschikbaar."
-  },
-  noData: {
-    style: { 
-      fontFamily: 'robotomedium',   
-        fontWeight: 'bold',     
-          fontSize: '25px',
-          color: '#10D0E7'        
-   }
-  },
-  chart: {
-    //ignoreHiddenSeries: false,
-    style: {
-      fontFamily: 'robotomedium'
-    },
-    backgroundColor: '#ffffff',
-    borderWidth: 0
-  },   
-  title: {
-            margin: 0,
-            text: 'placeholder', 
-            style: {
-                color: '#FFFFFF',
+    Highcharts.stockChart('meterReadingChart', {
+        exporting: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
+        },
+        noData: {
+            style: { 
+                fontFamily: 'robotomedium',
                 fontWeight: 'bold',
-                fontSize: "10px"
+                fontSize: '25px',
+                color: '#10D0E7'
             }
-  },
-  navigator: {
-    xAxis: {
-      minTickInterval:  1 * 24 * 3600000, 
-      maxRange:        25 * 365 * 24 * 3600000,
-      type: 'datetime',
-      dateTimeLabelFormats: {
-        day: '%a.<br>%d %B<br/>%Y',
-        month: '%B<br/>%Y',
-        year: '%Y'
-      }  
-    },  
-    enabled: true,
-    outlineColor: '#384042',
-    outlineWidth: 1,
-    handles: {
-      backgroundColor: '#384042',
-      borderColor: '#6E797C'
-    },
-    
-  },   
-  xAxis: {
-   type: 'datetime',
-   minTickInterval: 1   * 24 * 3600000, 
-   range:          5000 * 24 * 3600000,
-   minRange:       7  * 24 * 3600000,
-   maxRange:       61 * 24 * 3600000,
-   dateTimeLabelFormats: {
-     day: '%a.<br>%d %b<br/>%Y',
-     hour: '%a.<br>%H:%M',
-     year: '%Y'
-   },
-   lineColor: '#6E797C',
-   lineWidth: 1, 
-   events: {
-        setExtremes: function(e) {
-        if(typeof(e.rangeSelectorButton)!== 'undefined') {
-         for (var j = 0;  j < GselectText.length; j++){    
-           if ( GselectText[j] == e.rangeSelectorButton.text ) {
-             toLocalStorage('select-meterreadings-d-m3-index',j); // #PARAMETER
-             break;
-           }
-         }
-       }
-     }
-   },   
-  },
-  yAxis: [
-    { // gas axis & water
-        showEmpty: false,
-        tickAmount: 7,
-        opposite: false,
-        offset: null,
-        labels: {
-            useHTML: false,
-            format: '{value} m<sup>3</sup>',
-            style: {
-                color: '#507ABF',
-            },
         },
-        title: {
-        text: null, 
-        },
-    }
-    
-    
-  ],
-  tooltip: {
-       useHTML: false,
+    chart: {
+        //ignoreHiddenSeries: false,
         style: {
-            padding: 3,
-            color: '#6E797C'
+            fontFamily: 'robotomedium',
+            fontSize: '14px'
         },
-      formatter: function() {
-        
-        var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d', this.x) +'</b>';
-        var d = this.points;
-           
-        for (var i=0,  tot=d.length; i < tot; i++) {
-
-                if ( d[i].series.userOptions.name === 'gas verbruik' ) {
-                    s += '<br/><span style="color:#507ABF">Gas verbruik: </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
-                    //console.log( d[i].y )
-                }    
-                if ( d[i].series.userOptions.name === 'water verbruik' ) {
-                    s += '<br/><span style="color:#6699FF">Water verbruik: </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
-                    //console.log( d[i].y )
-                }  
+        backgroundColor: '#ffffff',
+        borderWidth: 0
+    },   
+    title: {
+        margin: 0,
+        text: 'placeholder', 
+        style: {
+            color: '#FFFFFF',
+            fontWeight: 'bold',
+            fontSize: "10px"
         }
-        //console.log (s)
-        return s;
-      },
-      backgroundColor: '#F5F5F5',
-      borderColor: '#DCE1E3',
-      crosshairs: [true, true],
-      borderWidth: 1
     },
-    rangeSelector: { // #PARAMETER
-      inputEnabled: false,
-       buttonSpacing: 5, 
-       selected : Gselected,
-       buttons: [{
-        type: 'day',
-        count: 7,
-        text: GselectText[0]
-       },{
-         type: 'month',
-         count: 1,
-         text: GselectText[1]
-       },{
-        type: 'year',
-        count: 1,
-        text: GselectText[2]
-       }, {
-        type: 'all',
-        //count: 3,
-        text: GselectText[3]
-       }],
-       buttonTheme: { 
-        r: 3,
-        fill: '#F5F5F5',
-        stroke: '#DCE1E3',
-        'stroke-width': 1,
-        width: 65,
-        style: {
-          color: '#6E797C',
-          fontWeight: 'normal'
+    navigator: {
+        xAxis: {
+            minTickInterval:  1 * 24 * 3600000, 
+            maxRange:        25 * 365 * 24 * 3600000,
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                day: '%a.<br>%d %B<br/>%Y',
+                month: '%B<br/>%Y',
+                year: '%Y'
+            } 
+        },  
+        enabled: true,
+        outlineColor: '#384042',
+        outlineWidth: 1,
+        handles: {
+            backgroundColor: '#384042',
+            borderColor: '#6E797C'
         },
-        states: {
-          hover: {
-            fill: '#F5F5F5',
-            style: {
-              color: '#10D0E7'
+    },   
+    xAxis: {
+        type: 'datetime',
+        minTickInterval: 1   * 24 * 3600000, 
+        range:          5000 * 24 * 3600000,
+        minRange:       7  * 24 * 3600000,
+        maxRange:       61 * 24 * 3600000,
+        dateTimeLabelFormats: {
+            day: '%a.<br>%d %b<br/>%Y',
+            hour: '%a.<br>%H:%M',
+            year: '%Y'
+        },
+        lineColor: '#6E797C',
+        lineWidth: 1, 
+        events: {
+            setExtremes: function(e) {
+                if(typeof(e.rangeSelectorButton)!== 'undefined') {
+                    for (var j = 0;  j < GselectText.length; j++){    
+                        if ( GselectText[j] == e.rangeSelectorButton.text ) {
+                            toLocalStorage('select-meterreadings-d-m3-index',j); // #PARAMETER
+                            break;
+                        }
+                    }
+                }
             }
-          },
-          select: {
-            fill: '#DCE1E3',
+        },
+    },
+    yAxis: [
+        { // gas axis & water
+            showEmpty: false,
+            tickAmount: 7,
+            opposite: false,
+            offset: null,
+            labels: {
+                useHTML: false,
+                format: '{value} m<sup>3</sup>',
+                style: {
+                    color: '#507ABF',
+                },
+            },
+            title: {
+            text: null, 
+            },
+        }],
+        tooltip: {
+            useHTML: false,
+                style: {
+                    padding: 3,
+                    color: '#6E797C'
+                },
+            formatter: function() {
+                var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d', this.x) +'</b>';
+                var d = this.points;
+                
+                for (var i=0,  tot=d.length; i < tot; i++) {
+                        if ( d[i].series.userOptions.name === 'gas verbruik' ) {
+                            s += '<br/><span style="color:#507ABF">Gas verbruik: </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
+                            //console.log( d[i].y )
+                        }    
+                        if ( d[i].series.userOptions.name === 'water verbruik' ) {
+                            s += '<br/><span style="color:#6699FF">Water verbruik: </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
+                            //console.log( d[i].y )
+                        }  
+                }
+                //console.log (s)
+                return s;
+            },
+            backgroundColor: '#F5F5F5',
+            borderColor: '#DCE1E3',
+            crosshairs: [true, true],
+            borderWidth: 1
+            },
+        rangeSelector: { // #PARAMETER
+        inputEnabled: false,
+        buttonSpacing: 5, 
+        selected : Gselected,
+        buttons: [{
+            type: 'day',
+            count: 7,
+            text: GselectText[0]
+        },{
+            type: 'month',
+            count: 1,
+            text: GselectText[1]
+        },{
+            type: 'year',
+            count: 1,
+            text: GselectText[2]
+        }, {
+            type: 'all',
+            //count: 3,
+            text: GselectText[3]
+        }],
+        buttonTheme: { 
+            r: 3,
+            fill: '#F5F5F5',
             stroke: '#DCE1E3',
             'stroke-width': 1,
+            width: 65,
             style: {
-              color: '#384042',
-              fontWeight: 'normal'
+            color: '#6E797C',
+            fontWeight: 'normal'
+            },
+            states: {
+            hover: {
+                fill: '#F5F5F5',
+                style: {
+                color: '#10D0E7'
+                }
+            },
+            select: {
+                fill: '#DCE1E3',
+                stroke: '#DCE1E3',
+                'stroke-width': 1,
+                style: {
+                color: '#384042',
+                fontWeight: 'normal'
+                }
             }
-          }
-        }
-      }  
-    },
-    legend: {
-        y: -38,
-        symbolHeight: 12,
-        symbolWidth: 12,
-        symbolRadius: 3,
-        borderRadius: 5,
-        borderWidth: 1,
-        backgroundColor: '#DCE1E3',
-        symbolPadding: 3,
-        enabled: true,
-        align: 'right',
-        verticalAlign: 'top',
-        floating: true,
-        itemStyle: {
-            color: '#6E797C'
+            }
+        }  
         },
-        itemHoverStyle: {
-            color: '#10D0E7'
+        legend: {
+            y: -38,
+            symbolHeight: 12,
+            symbolWidth: 12,
+            symbolRadius: 3,
+            borderRadius: 5,
+            borderWidth: 1,
+            backgroundColor: '#DCE1E3',
+            symbolPadding: 3,
+            enabled: true,
+            align: 'right',
+            verticalAlign: 'top',
+            floating: true,
+            itemStyle: {
+                color: '#6E797C'
+            },
+            itemHoverStyle: {
+                color: '#10D0E7'
+            },
+            itemDistance: 5
         },
-        itemDistance: 5
-    },
-    series: [ 
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[0],
-        showInNavigator: true,
-        name: 'gas verbruik',
-        type: 'spline',
-        color: '#507ABF',
-        data: consumptionKwhGas,
-        zIndex: 0,
-    },
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[1],
-        showInNavigator: true,
-        name: 'water verbruik',
-        type: 'spline',
-        color: '#6699FF',
-        data: consumptionWater,
-    },
-    ],
-    plotOptions: {
-      series: {
-        events: {
-          legendItemClick: function () {
-            //console.log('legendItemClick index='+this.index);
-            if ( this.index === 0 ) {
-              toLocalStorage('meterreadings-d-consumptionKwhGas',!this.visible); // #PARAMETER
+        series: [ 
+            {
+                yAxis: 0,
+                visible: GseriesVisibilty[0],
+                showInNavigator: true,
+                name: 'gas verbruik',
+                type: 'spline',
+                color: '#507ABF',
+                data: consumptionKwhGas,
+                zIndex: 0,
+            },
+            {
+                yAxis: 0,
+                visible: GseriesVisibilty[1],
+                showInNavigator: true,
+                name: 'water verbruik',
+                type: 'spline',
+                color: '#6699FF',
+                data: consumptionWater,
+            },
+        ],
+        plotOptions: {
+        series: {
+            events: {
+            legendItemClick: function () {
+                //console.log('legendItemClick index='+this.index);
+                if ( this.index === 0 ) {
+                    toLocalStorage('meterreadings-d-consumptionKwhGas',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 1 ) {
+                    toLocalStorage('meterreadings-d-consumptionWater',!this.visible); // #PARAMETER
+                }
             }
-            if ( this.index === 1 ) {
-              toLocalStorage('meterreadings-d-consumptionWater',!this.visible); // #PARAMETER
             }
-          }
         }
-      }
-    },
+        },
   });
   
 }

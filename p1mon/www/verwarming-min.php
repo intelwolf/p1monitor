@@ -53,7 +53,6 @@ var maxrecords      = 1441; // number of records to read
 var ui_in_label     = "<?php echo config_read( 121 ); ?>"; 
 var ui_uit_label    = "<?php echo config_read( 122 ); ?>";
 
-
 function setLabels() {
     if ( ui_in_label.length > 0 ) {
         GserieNames[0] = ui_in_label;
@@ -64,7 +63,6 @@ function setLabels() {
         GserieNames[3] = ui_uit_label +"(GEM.)";
     }
 }
-
 
 function readJsonIndoorTemperatureMin( cnt ){ 
     $.getScript( "./api/v1/indoor/temperature/minute?limit=" + cnt , function( data, textStatus, jqxhr ) {
@@ -92,187 +90,188 @@ function readJsonIndoorTemperatureMin( cnt ){
 
 // change items with the marker #PARAMETER
 function createChart() {
-  Highcharts.stockChart('tempChart', {
-  exporting: { enabled: false },
-  lang: {
-    noData: "Geen gegevens beschikbaar."
-  },
-  noData: {
-    style: { 
-      fontFamily: 'robotomedium',
-        fontWeight: 'bold',
-          fontSize: '25px',
-          color: '#10D0E7'
-   }
-  },
-  chart: {
-    style: {
-      fontFamily: 'robotomedium'
-    },
-    backgroundColor: '#ffffff',
-    borderWidth: 0
-  },   
-  title: {
-   text: null
-  },  
-  navigator: {
-    xAxis: {
-      type: 'datetime',
-      dateTimeLabelFormats: {
-        day: '%a.<br>%d %B<br/>%Y',
-        month: '%B<br/>%Y',
-        year: '%Y'
-      }  
-    },  
-    enabled: true,
-    outlineColor: '#384042',
-    outlineWidth: 1,
-    handles: {
-      backgroundColor: '#384042',
-      borderColor: '#6E797C'
-    },
-    series:[ 
-      {
-        color: '#507ABF'
-      }, 
-      {
-        color: '#384042'
-      }
-    ]
-  },   
-  xAxis: {
-   type: 'datetime', 
-   minTickInterval: 600000, 
-   dateTimeLabelFormats: {
-        day: '%a.<br>%d %B<br/>%Y',
-        hour: '%a.<br>%H:%M'
-    },
-   lineColor: '#6E797C',
-   lineWidth: 1,
-   events: {
-     setExtremes: function(e) {      
-       if(typeof(e.rangeSelectorButton)!== 'undefined') {
-         for (var j = 0;  j < GselectText.length; j++){    
-           if ( GselectText[j] == e.rangeSelectorButton.text ) {
-             toLocalStorage('verwarming-min-select-temperatuur-index',j); // #PARAMETER
-             break;
-           }
-         }
-       }
-     }
-   },    
-  },
-  yAxis: [
-    { // temp axis
-    tickAmount: 7,
-    opposite: false,
-    gridLineDashStyle: 'longdash',
-    gridLineColor: '#6E797C',
-    gridLineWidth: 1,
-    labels: {
-      format: '{value}°C',
-        style: {
-          color: '#384042'
-        }
-     },
-     title: {
-       text: null, 
-     },
-  }],
-  tooltip: {
-      useHTML: true,
-      style: {
-        padding: 3,
-        color: '#6E797C'
-      },
-      formatter: function() {
-        
-        var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M', this.x) +'</b>'; // parameter
-        var d = this.points;
-        
-        var in_temp_min  = 'verborgen';
-        var in_temp_max  = 'verborgen';
-        var in_temp_avg  = 'verborgen';
-        var out_temp_min = 'verborgen';
-        var out_temp_max = 'verborgen';
-        var out_temp_avg = 'verborgen';
-        var in_header    = '';
-        var out_header   = '';
-        var delta_header = '';
-
-        var max_temp_color = '#FF0000';
-        var min_temp_color = '#0088FF';
-
-        for (var i = 0; i < d.length; i++) { 
-
-          if (d[i].series.name == GserieNames[0] && d[i].series.visible == true) {
-            in_temp_max = d[i].point.high;
-            in_temp_min = d[i].point.low;
-            if ( in_header == '') {
-              in_header = "<br/><br/><span>Temperatuur " + GserieNames[0] + ":</span>"
-              s += in_header;
+    Highcharts.stockChart('tempChart', {
+        exporting: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
+        },
+        noData: {
+            style: { 
+            fontFamily: 'robotomedium',
+                fontWeight: 'bold',
+                fontSize: '25px',
+                color: '#10D0E7'
             }
-            s += '<br/><span style="color: #FF0000">Maximum: </span>'+in_temp_max.toFixed(1)+"°C";;
-            s += '<br/><span style="color: #FF6666">Minimum: </span>'+in_temp_min.toFixed(1)+"°C";
-          }
+        },
+        chart: {
+            style: {
+            fontFamily: 'robotomedium',
+            fontSize: '14px'
+            },
+            backgroundColor: '#ffffff',
+            borderWidth: 0
+        },
+        title: {
+            text: null
+        },
+        navigator: {
+            xAxis: {
+                type: 'datetime',
+                dateTimeLabelFormats: {
+                    day: '%a.<br>%d %B<br/>%Y',
+                    month: '%B<br/>%Y',
+                    year: '%Y'
+                }
+            },
+            enabled: true,
+            outlineColor: '#384042',
+            outlineWidth: 1,
+            handles: {
+                backgroundColor: '#384042',
+                borderColor: '#6E797C'
+            },
+            series:[ 
+                {
+                    color: '#507ABF'
+                },
+                {
+                    color: '#384042'
+                }
+            ]
+        },   
+        xAxis: {
+            type: 'datetime', 
+            minTickInterval: 600000, 
+            dateTimeLabelFormats: {
+                day: '%a.<br>%d %B<br/>%Y',
+                hour: '%a.<br>%H:%M'
+            },
+            lineColor: '#6E797C',
+            lineWidth: 1,
+            events: {
+                setExtremes: function(e) {
+                    if(typeof(e.rangeSelectorButton)!== 'undefined') {
+                        for (var j = 0;  j < GselectText.length; j++){    
+                            if ( GselectText[j] == e.rangeSelectorButton.text ) {
+                                toLocalStorage('verwarming-min-select-temperatuur-index',j); // #PARAMETER
+                                break;
+                            }
+                        }
+                    }
+                }
+            },
+        },
+        yAxis: [
+            { // temp axis
+                tickAmount: 7,
+                opposite: false,
+                gridLineDashStyle: 'longdash',
+                gridLineColor: '#6E797C',
+                gridLineWidth: 1,
+                labels: {
+                format: '{value}°C',
+                    style: {
+                    color: '#384042'
+                    }
+                },
+                title: {
+                    text: null, 
+                },
+        }],
+        tooltip: {
+            useHTML: false,
+            style: {
+                padding: 3,
+                color: '#6E797C'
+            },
+            formatter: function() {
+                
+                var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M', this.x) +'</b>'; // parameter
+                var d = this.points;
+                
+                var in_temp_min  = 'verborgen';
+                var in_temp_max  = 'verborgen';
+                var in_temp_avg  = 'verborgen';
+                var out_temp_min = 'verborgen';
+                var out_temp_max = 'verborgen';
+                var out_temp_avg = 'verborgen';
+                var in_header    = '';
+                var out_header   = '';
+                var delta_header = '';
 
-           if (d[i].series.name == GserieNames[1] && d[i].series.visible == true) {
-            in_temp_avg = d[i].point.y;
-            if ( in_header == '') {
-              in_header = "<br/><br/><span>Temperatuur " + GserieNames[1] + ":</span>"
-              s += in_header;
-            }
-            s += '<br/><span style="color: #ff3333">Gemiddelde: </span>'+in_temp_avg.toFixed(1)+"°C";
-          }
+                var max_temp_color = '#FF0000';
+                var min_temp_color = '#0088FF';
 
-          if (d[i].series.name == GserieNames[2] && d[i].series.visible == true) {
-            out_temp_max = d[i].point.high;
-            out_temp_min = d[i].point.low;
-            if ( out_header == '') {
-              out_header = "<br/><br/><span>Temperatuur " + GserieNames[2] + ":</span>"
-              s += out_header;
-            }
-            s += '<br/><span style="color: #0000FF">Maximum: </span>'+out_temp_max.toFixed(1)+"°C";
-            s += '<br/><span style="color: #0088FF">Minimum: </span>'+out_temp_min.toFixed(1)+"°C";
-          }
+                for (var i = 0; i < d.length; i++) { 
 
-          if (d[i].series.name == GserieNames[3] && d[i].series.visible == true) {
-            out_temp_avg = d[i].point.y;
-            if ( out_header == '') {
-              out_header = "<br/><br/><span>Temperatuur " + GserieNames[3] + ":</span>"
-              s += out_header;
-            }
-            s += '<br/><span style="color: #3333ff">Gemiddelde: </span>'+out_temp_avg.toFixed(1)+"°C";
-          }
-        }
+                if (d[i].series.name == GserieNames[0] && d[i].series.visible == true) {
+                    in_temp_max = d[i].point.high;
+                    in_temp_min = d[i].point.low;
+                    if ( in_header == '') {
+                    in_header = "<br/><br/><span>Temperatuur " + GserieNames[0] + ":</span>"
+                    s += in_header;
+                    }
+                    s += '<br/><span style="color: #FF0000">Maximum: </span>'+in_temp_max.toFixed(1)+"°C";;
+                    s += '<br/><span style="color: #FF6666">Minimum: </span>'+in_temp_min.toFixed(1)+"°C";
+                }
 
-        if (in_temp_avg != 'verborgen' && out_temp_avg != 'verborgen') {
-          if ( delta_header == '') {
-            delta_header= "<br/><br/><span>Verschil temperatuur:</span>"
-            s += delta_header;
-          }
-          s += '<br/><span style="color: #3333ff">Gemiddelde ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_avg - out_temp_avg).toFixed(1)+"°C";
-        }
+                if (d[i].series.name == GserieNames[1] && d[i].series.visible == true) {
+                    in_temp_avg = d[i].point.y;
+                    if ( in_header == '') {
+                    in_header = "<br/><br/><span>Temperatuur " + GserieNames[1] + ":</span>"
+                    s += in_header;
+                    }
+                    s += '<br/><span style="color: #ff3333">Gemiddelde: </span>'+in_temp_avg.toFixed(1)+"°C";
+                }
 
-        if (in_temp_max != 'verborgen' && out_temp_min != 'verborgen') {
-          if ( delta_header == '') {
-            delta_header = "<br/><br/><span>Verschil temperatuur:</span>"
-            s += delta_header;
-          }
-          s += '<br/><span style="color: #3333ff">Max ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_max - out_temp_min).toFixed(1)+"°C";
-        }
-        return s;
-      },
-      backgroundColor: '#F5F5F5',
-      borderColor: '#DCE1E3',
-      crosshairs: [true, true],
-      borderWidth: 1
-    },
-    rangeSelector: {
-      inputEnabled: false,
-       buttonSpacing: 5, 
-       selected : Gselected,
-       buttons: [
+                if (d[i].series.name == GserieNames[2] && d[i].series.visible == true) {
+                    out_temp_max = d[i].point.high;
+                    out_temp_min = d[i].point.low;
+                    if ( out_header == '') {
+                    out_header = "<br/><br/><span>Temperatuur " + GserieNames[2] + ":</span>"
+                    s += out_header;
+                    }
+                    s += '<br/><span style="color: #0000FF">Maximum: </span>'+out_temp_max.toFixed(1)+"°C";
+                    s += '<br/><span style="color: #0088FF">Minimum: </span>'+out_temp_min.toFixed(1)+"°C";
+                }
+
+                if (d[i].series.name == GserieNames[3] && d[i].series.visible == true) {
+                    out_temp_avg = d[i].point.y;
+                    if ( out_header == '') {
+                    out_header = "<br/><br/><span>Temperatuur " + GserieNames[3] + ":</span>"
+                    s += out_header;
+                    }
+                    s += '<br/><span style="color: #3333ff">Gemiddelde: </span>'+out_temp_avg.toFixed(1)+"°C";
+                }
+                }
+
+                if (in_temp_avg != 'verborgen' && out_temp_avg != 'verborgen') {
+                if ( delta_header == '') {
+                    delta_header= "<br/><br/><span>Verschil temperatuur:</span>"
+                    s += delta_header;
+                }
+                s += '<br/><span style="color: #3333ff">Gemiddelde ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_avg - out_temp_avg).toFixed(1)+"°C";
+                }
+
+                if (in_temp_max != 'verborgen' && out_temp_min != 'verborgen') {
+                if ( delta_header == '') {
+                    delta_header = "<br/><br/><span>Verschil temperatuur:</span>"
+                    s += delta_header;
+                }
+                s += '<br/><span style="color: #3333ff">Max ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_max - out_temp_min).toFixed(1)+"°C";
+                }
+                return s;
+            },
+            backgroundColor: '#F5F5F5',
+            borderColor: '#DCE1E3',
+            crosshairs: [true, true],
+            borderWidth: 1
+        },
+        rangeSelector: {
+            inputEnabled: false,
+            buttonSpacing: 5, 
+            selected : Gselected,
+            buttons: [
                 {
                     type: 'hour',
                     count: 0.25,
@@ -294,147 +293,147 @@ function createChart() {
                     count: 24,
                     text: GselectText[4]
                 }],
-       buttonTheme: { 
-        r: 3,
-        fill: '#F5F5F5',
-        stroke: '#DCE1E3',
-        'stroke-width': 1,
-        width: 65,
-        style: {
-          color: '#6E797C',
-          fontWeight: 'normal'
+                buttonTheme: {
+                    r: 3,
+                    fill: '#F5F5F5',
+                    stroke: '#DCE1E3',
+                    'stroke-width': 1,
+                    width: 65,
+                    style: {
+                    color: '#6E797C',
+                    fontWeight: 'normal'
+                    },
+                    states: {
+                    hover: {
+                        fill: '#F5F5F5',
+                        style: {
+                            color: '#10D0E7'
+                        }
+                    },
+                    select: {
+                        fill: '#DCE1E3',
+                        stroke: '#DCE1E3',
+                        'stroke-width': 1,
+                        style: {
+                            color: '#384042',
+                        fontWeight: 'normal'
+                        }
+                    }
+                    }
+                }
+            },
+        legend: {
+            y: -38,
+            symbolHeight: 12,
+            symbolWidth: 12,
+            symbolRadius: 3,
+            borderRadius: 5,
+            borderWidth: 1,
+            backgroundColor: '#DCE1E3',
+            symbolPadding: 3,
+            enabled: true,
+            align: 'right',
+            verticalAlign: 'top',
+            floating: true,
+            itemStyle: {
+                color: '#6E797C'
+            },
+            itemHoverStyle: {
+                color: '#10D0E7'
+            },
+            itemDistance: 5
         },
-        states: {
-          hover: {
-            fill: '#F5F5F5',
-            style: {
-              color: '#10D0E7'
+        series: [{
+            showInNavigator: true,
+            yAxis: 0,
+            dashStyle: 'ShortDot',
+            visible: GseriesVisibilty[0],
+            name: GserieNames[0],
+            data: GrangeIn,
+            type: 'areasplinerange',
+            lineWidth: 1,
+            color: '#FF0000',
+            negativeColor: '#0088FF',
+            fillOpacity: 0.3,
+            zIndex: 1,
+            marker: {
+                fillColor: 'white',
+                lineWidth: 1,
+                lineColor: '#ff0000'
+                }
+            },
+            {
+                visible: GseriesVisibilty[1],
+                showInNavigator: true,
+                name: GserieNames[1],
+                data: GrangeInAvg,
+                type: 'spline',
+                zIndex: 2,
+                color: '#FF0000',
+                lineWidth: 1,
+                marker: {
+                    fillColor: 'white',
+                    lineWidth: 1,
+                    lineColor: '#384042'
+                }
+            },
+            {
+                dashStyle: 'ShortDot',
+                visible: GseriesVisibilty[2],
+                showInNavigator: true,
+                name: GserieNames[2],
+                data: GrangeOut,
+                type: 'areasplinerange',
+                lineWidth: 1,
+                color: '#0000FF',
+                negativeColor: '#0088FF',
+                fillOpacity: 0.3,
+                zIndex: 3,
+                marker: {
+                    fillColor: 'white',
+                    lineWidth: 1,
+                    lineColor: '#ff0000'
+                }
+            },
+            {
+                visible: GseriesVisibilty[3],
+                showInNavigator: true,
+                name: GserieNames[3],
+                data: GrangeOutAvg,
+                type: 'spline',
+                zIndex: 3,
+                color: '#0000FF',
+                lineWidth: 1,
+                marker: {
+                    fillColor: 'white',
+                    lineWidth: 1,
+                    lineColor: '#384042'
+                } 
             }
-          },
-          select: {
-            fill: '#DCE1E3',
-            stroke: '#DCE1E3',
-            'stroke-width': 1,
-            style: {
-              color: '#384042',
-              fontWeight: 'normal'
-            }
-          }
-        }
-      }  
-    },
-    legend: {
-        y: -38,
-        symbolHeight: 12,
-        symbolWidth: 12,
-        symbolRadius: 3,
-        borderRadius: 5,
-        borderWidth: 1,
-        backgroundColor: '#DCE1E3',
-        symbolPadding: 3,
-        enabled: true,
-        align: 'right',
-        verticalAlign: 'top',
-        floating: true,
-        itemStyle: {
-            color: '#6E797C'
+        ],
+        plotOptions: {
+            series: {
+                showInNavigator: true,
+                events: {
+                    legendItemClick: function () {
+                        // console.log('legendItemClick index='+this.index);
+                        if ( this.index === 0 ) {
+                        toLocalStorage('verwarming-min-in-visible',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 1 ) {
+                        toLocalStorage('verwarming-min-in-gem-visible',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 2 ) {
+                        toLocalStorage('verwarming-min-uit-visible',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 3 ) {
+                        toLocalStorage('verwarming-min-uit-gem-visible',!this.visible); // #PARAMETER
+                        }
+                    }
+                }
+            }  
         },
-        itemHoverStyle: {
-            color: '#10D0E7'
-        },
-        itemDistance: 5
-    },
-    series: [{
-      showInNavigator: true,
-      yAxis: 0,
-      dashStyle: 'ShortDot',
-      visible: GseriesVisibilty[0],
-      name: GserieNames[0],
-      data: GrangeIn,
-      type: 'areasplinerange',
-      lineWidth: 1,
-      color: '#FF0000',
-      negativeColor: '#0088FF',
-      fillOpacity: 0.3,
-      zIndex: 1,
-      marker: {
-        fillColor: 'white',
-        lineWidth: 1,
-        lineColor: '#ff0000'
-        } 
-      },
-      {
-      visible: GseriesVisibilty[1],
-      showInNavigator: true,
-      name: GserieNames[1],
-      data: GrangeInAvg,
-      type: 'spline',
-      zIndex: 2,
-      color: '#FF0000',
-      lineWidth: 1,
-      marker: {
-        fillColor: 'white',
-        lineWidth: 1,
-        lineColor: '#384042'
-        }
-      },
-      {
-      dashStyle: 'ShortDot',
-      visible: GseriesVisibilty[2],
-      showInNavigator: true,
-      name: GserieNames[2],
-      data: GrangeOut,
-      type: 'areasplinerange',
-      lineWidth: 1,
-      color: '#0000FF',
-      negativeColor: '#0088FF',
-      fillOpacity: 0.3,
-      zIndex: 3,
-      marker: {
-        fillColor: 'white',
-        lineWidth: 1,
-        lineColor: '#ff0000'
-        }
-      },
-      {
-      visible: GseriesVisibilty[3],
-      showInNavigator: true,
-      name: GserieNames[3],
-      data: GrangeOutAvg,
-      type: 'spline',
-      zIndex: 3,
-      color: '#0000FF',
-      lineWidth: 1,
-      marker: {
-        fillColor: 'white',
-        lineWidth: 1,
-        lineColor: '#384042'
-      } 
-    }
-    ],
-    plotOptions: {
-      series: {
-        showInNavigator: true,
-        events: {
-          legendItemClick: function () {
-            // console.log('legendItemClick index='+this.index);
-            if ( this.index === 0 ) {
-              toLocalStorage('verwarming-min-in-visible',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 1 ) {
-              toLocalStorage('verwarming-min-in-gem-visible',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 2 ) {
-              toLocalStorage('verwarming-min-uit-visible',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 3 ) {
-              toLocalStorage('verwarming-min-uit-gem-visible',!this.visible); // #PARAMETER
-            }
-          }
-        }
-      }  
-    },
-  });
+    });
 }
 
 function updateData() {

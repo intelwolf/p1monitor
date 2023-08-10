@@ -57,7 +57,7 @@ p1_status_record = {
 # 1.8.2 Meterstand piek/dag voor verbruikte energie      #
 # 2.8.1 Meterstand dal/nacht voor teruggeleverde energie #
 # 2.8.2 Meterstand piek/dag voor teruggeleverde energie  #
-# 1.6.0 
+# 1.6.0                                                  #
 ##########################################################
 p1_data_base_record = {
     'verbrk_kwh_181'            : const.NOT_SET,

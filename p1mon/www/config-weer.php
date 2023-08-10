@@ -25,12 +25,28 @@ if( $localip == False ){
         }
 }
 
-$sw_off  = strIdx( 193 );
-$sw_on   = strIdx( 192 );
+$sw_off   = strIdx( 193 );
+$sw_on    = strIdx( 192 );
+$lang_idx = config_read( 203 );
+$lang     = 'nl';
 
 $err_cnt = -1;
 $err_str = '';
 $weather_api = array( "city_id"=>"" );
+
+# set language string
+switch ( $lang_idx ) {
+    case 0:
+        $lang = 'nl';
+        break;
+    case 1:
+        $lang = 'en';
+        break;
+    case 2:
+        $lang = 'fr';
+        break;
+}
+
 
 if ( isset($_POST["API_key"]) ) { 
     #echo "<br>processing</br>\n";
@@ -73,7 +89,6 @@ if ( isset($_POST["API_key"]) ) {
         getJsonGetWeatherData(); // setting the weather id from the city name.
 }
 
-
 # set id by city idm by name is skipped.
 if ( isset($_POST["stad_id"]) ) {
     if ( strlen(trim($_POST["stad_id"])) > 0 ) {
@@ -86,8 +101,6 @@ if ( isset($_POST["stad_id"]) ) {
     }
 }
 
-
-
 if ( isset($_POST["graaddagen_recover"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["graaddagen_recover"] == '1' ) {
@@ -96,7 +109,6 @@ if ( isset($_POST["graaddagen_recover"]) ) {
         if ( updateConfigDb("update config set parameter = '0' where ID = 203")) $err_cnt += 1;
     }
 }
-
 
 if( isset($_POST["roomtemperature"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -107,7 +119,7 @@ function setCityNameByID( $city_id ) {
     #echo "setCityNameByID id ". $city_id ."<br>";
     
     $api_key = decodeString(13, 'weatherapikey');
-    $url = 'http://api.openweathermap.org/data/2.5/weather?id=' . strval($city_id) .'&units=metric&lang=nl&appid=' . $api_key;
+    $url = 'https://api.openweathermap.org/data/2.5/weather?id=' . strval($city_id) .'&units=metric&lang='. $lang. '&appid=' . $api_key;
     $json = @file_get_contents( $url );
    
     # something fishy with the json
@@ -127,56 +139,55 @@ function setCityNameByID( $city_id ) {
     }
     
     # update database 
-    #$command = '/p1mon/scripts/P1Weather.py &'; 
-    $command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
+    #$command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
+    $command = '/p1mon/scripts/P1Weather --getweather &';
     exec( $command ,$arr_execoutput, $exec_ret_value );
     return true;
 }
 
 
 function getJsonGetWeatherData() {
-        global $weather_api;
-        //$api_key = decodePassword(13);
-    
+    global $weather_api;
+    //$api_key = decodePassword(13);
+
     #echo "<br> stad="+config_read(14)."<br>";
 
     # only set the ID by name when city ID is not set.
     if ( isset($_POST["stad_id"]) ) {
         if ( strlen(trim($_POST["stad_id"])) > 0 ) {
-            echo "stad id gezet 1  niet door stads naam<br>";
+            #echo "stad id gezet 1  niet door stads naam<br>";
             return;
         }
     }
 
-        $api_key = decodeString( 13, 'weatherapikey');
-        
-        $url = 'http://api.openweathermap.org/data/2.5/weather?q='.config_read(14).'&units=metric&lang=nl&appid='.$api_key; 
-        #echo '<br>'.$url.'<br>';
-        $json = @file_get_contents($url);
-        //echo "json length = ". strlen($json). '<br>';
-        #echo $json;
-        
-        # something fishy with the json
-        if ( strlen($json) < 10 ) {
-                $weather_api['w_city']='';
-                return false;
+    $api_key = decodeString( 13, 'weatherapikey');
+
+    $url = 'https://api.openweathermap.org/data/2.5/weather?q='.config_read(14).'&units=metric&lang='.$lang.'&appid='.$api_key; 
+    #echo '<br>'.$url.'<br>';
+    $json = @file_get_contents($url);
+    //echo "json length = ". strlen($json). '<br>';
+    #echo $json;
+    
+    # something fishy with the json
+    if ( strlen($json) < 10 ) {
+            $weather_api['w_city']='';
+            return false;
     }
-    
-        $main_array = json_decode($json,true);
-        #print_r($main_array);
-        $weather_api['city_id']=$main_array['id'];
-    
-    
-        if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '',$weather_api['city_id'])."' where ID = 25") ){
-                updateConfigDb("update config set parameter = '0' where ID = 25");
-                return false; # could not update ID
+
+    $main_array = json_decode($json,true);
+    #print_r($main_array);
+    $weather_api['city_id']=$main_array['id'];
+
+    if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '',$weather_api['city_id'])."' where ID = 25") ){
+            updateConfigDb("update config set parameter = '0' where ID = 25");
+            return false; # could not update ID
     }
-    
-        # update database 
-        #$command = '/p1mon/scripts/P1Weather.py &'; 
-        $command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
-        exec($command ,$arr_execoutput, $exec_ret_value );
-        return true;
+
+    # update database 
+    #$command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
+    $command = '/p1mon/scripts/P1Weather --getweather &';
+    exec($command ,$arr_execoutput, $exec_ret_value );
+    return true;
 }
 
 # to get updated status info.

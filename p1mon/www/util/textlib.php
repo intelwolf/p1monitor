@@ -110,22 +110,22 @@ $arr = array (
 /* 023 */   array(
     'Dit is de 1.8.1 waarde ook wel laag/dal/nacht/tarief 1 genoemd (Nederland).',
     'This is the 1.8.1 value, also referred to as low / off-peak / night / rate 1 (Netherlands).',
-    'Il s&apos;agit de la valeur 1.8.1, également appelée faible / heures creuses / nuit / tarif 1 (Pays-Bas).'
+    "Il s'agit de la valeur 1.8.1, également appelée faible / heures creuses / nuit / tarif 1 (Pays-Bas)."
     ),
 /* 024 */   array(
     'Dit is de 1.8.2 waarde ook wel hoog/piek/dag/tarief 2 genoemd (Nederland).',
     'This is the 1.8.2 value also referred to as high / peak / day / tariff 2 (Netherlands).',
-    'Il s&apos;agit de la valeur 1.8.2 également appelée haut / pic / jour / tarif 2 (Pays-Bas).'
+    "Il s'agit de la valeur 1.8.2 également appelée haut / pic / jour / tarif 2 (Pays-Bas)."
     ),
 /* 025 */   array(
     'Dit is de 2.8.1 waarde ook wel laag,dal/nacht/tarief 1 genoemd (Nederland).',
     'This is the 2.8.1 value, also called low, off-peak / night / rate 1 (Netherlands).',
-    'Il s&apos;agit de la valeur 2.8.1, également appelée faible, heures creuses / nuit / tarif 1 (Pays-Bas).'
+    "Il s'agit de la valeur 2.8.1, également appelée faible, heures creuses / nuit / tarif 1 (Pays-Bas)."
     ),
 /* 026 */   array(
     'Dit is de 2.8.2 waarde ook wel hoog/piek/dag/tarief 2 genoemd (Nederland).',
     'This is the 2.8.2 value also called high / peak / day / tariff 2 (Netherlands).',
-    'Il s&apos;agit de la valeur 2.8.2 également appelée haute / pointe / jour / tarif 2 (Pays-Bas).'
+    "Il s'agit de la valeur 2.8.2 également appelée haute / pointe / jour / tarif 2 (Pays-Bas)."
     ),
 /* 027 */   array(
     'Het gas telegramcodenummer is het nummer van de gasmeting, normaal is dit een gasmeting met het nummer 0-1 zoals bij de codes 0-1:24.2.1, 0-1:24.3.0 of 0-1:24.2.3. Deze optie stelt het nummer achter het streepje in. Bijvoorbeeld een 2 wordt dan 0-2:24.2.1',
@@ -1285,13 +1285,112 @@ $arr = array (
     'Tous les compteurs intelligents ne prennent pas en charge cette option. Le télégramme P1 doit contenir les codes 1-0:1.4.0 et 1-0:1.6.0.'
 ),
 /* 335 */ array(
-    '','',''
+    'graaddagen','degree days','degrés-jours'
 ),
 /* 336 */ array(
+    'gas','gas','gaz'
+),
+/* 337 */ array(
+    'maximum temperatuur','maximum temperature','température maximale'
+),
+/* 338 */ array(
+    'gemiddelde temperatuur','average temperature','température moyenne'
+),
+/* 339 */ array(
+    'minimum temperatuur','minimum temperature','température minimale'
+),
+/* 340 */ array(
+    'verborgen','concealed','caché'
+),
+/* 341 */ array(
+    'verborgen of niet bekend','concealed or unknown','caché ou inconnu'
+),
+/* 342 */ array(
+    'gas verbruikt','gas consumed','gaz consommé'
+),
+/* 343 */ array(
+    'actueel','current','actuel'
+),
+/* 344 */ array(
+    'historie','history','l&apos;histoire'
+),
+/* 345 */ array(
+    'tijdstip','time','l&apos;heure'
+),
+/* 346 */ array(
+    'locatie','location','localisation'
+),
+/* 347 */ array(
+    'windrichting','wind direction','direction du vent'
+),
+/* 348 */ array(
+    'weer conditie','weather condition','conditions météo'
+),
+/* 349 */ array(
+    'windsnelheid','wind speed','vitesse du vent'
+),
+/* 350 */ array(
+    'stijgt','rises','augmente'
+),
+/* 351 */ array(
+    'daalt','drops','gouttes'
+),
+/* 352 */ array(
+    'ongewijzigd','unchanged','inchangé'
+),
+/* 353 */ array(
+    'verbruik & levering','consumption & production','consommation & production'
+),
+/* 354 */ array(
+    'verbruik','consumption','consommation'
+),
+/* 355 */ array(
+    'piek informatie','peak information','informations sur les pics'
+),
+/* 356 */ array(
+    'kwartier','quarter','trimestre'
+),
+/* 357 */ array(
+    'meterstand','meter reading','relevé de compteur'
+),
+/* 358 */ array(
+    'totaal vandaag','total for today','total aujourd&apos;hui'
+),
+/* 359 */ array(
+    'verbruikt','consumed','consomme'
+),
+/* 360 */ array(
+    'geleverd','delivered','livrée'
+),
+/* 361 */ array(
+    'vermogen','power','énergie'
+),
+/* 362 */ array(
+    'elektrisch verbruik','electrical consumption','consommation électrique'
+),
+/* 363 */ array(
+    'Liter','Liter','Litres'
+),
+/* 364 */ array(
+    'gas verbruik','gas consumption','consommation de gaz'
+),
+/* 365 */ array(
+    'voorspelling actief','forecast active','prévisions actives'
+),
+/* 366 */ array(
+    'Als de gaswaarde voor het huidig uur nog niet bekend is dan wordt de volgende waarde geschat.',
+    'If the gas value for the current hour is not yet known then the next value is estimated.',
+    "Si la valeur du gaz pour l'heure en cours n'est pas encore connue, la valeur suivante est estimée."
+),
+/* 367 */ array(
+    'gas verbruikt per uur','gas consumed per hour','gaz consommé par heure'
+),
+/* 368 */ array(
     '','',''
 ),
-);
 
+
+);
 
 
     $language_index = languageIndex();
@@ -1306,7 +1405,7 @@ $arr = array (
 
 function languageIndex() {
 
-    $language_index = config_read(148 );
+    $language_index = config_read( 148 );
      
     if(!isset($language_index) ) {
         $language_index = 0; // FAILSAVE does the job for index numbers to high

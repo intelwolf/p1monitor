@@ -13,16 +13,7 @@ import sqldb
 import subprocess
 import listOfPidByName
 
-#from multiprocessing import Process, Queue
-#from threading import Timer
-#from datetime import datetime, timedelta, timezone
-#from logger import fileLogger,logging
-#from sqldb import configDB, rtStatusDb, WatermeterDB, WatermeterDBV2
-#from time import sleep
-#from util import fileExist,setFile2user, getUtcTime, mkLocalTimeString
-#from utiltimestamp import utiltimestamp
 from dateutil.relativedelta import *
-#from listOfPidByName import listOfPidByName
 
 # programme name.
 prgname = 'P1WatermeterV2CounterSet'

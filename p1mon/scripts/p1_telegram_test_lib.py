@@ -100,7 +100,7 @@ class p1_telegram():
 
             #dev_dummy_gas_value = dev_dummy_gas_value + random.uniform(0, 0.0005) #0.0005
             if util.getUtcTime() - self.timestamp_last_gas_update > DUMMY_GAS_TIME_ELAPSED:
-                self.dev_dummy_gas_value = self.dev_dummy_gas_value + random.uniform(0.0, 0.4)  #only update after elapsed time
+                self.dev_dummy_gas_value = self.dev_dummy_gas_value + random.uniform(0.0, 0.1)  #only update after elapsed time
                 self.timestamp_last_gas_update = util.getUtcTime()
 
             self.flog.debug(inspect.stack()[0][3]+": gas dummy string toevoegen.")

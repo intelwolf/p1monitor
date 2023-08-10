@@ -834,6 +834,10 @@ div#right-wrapper-config-right-4 {
 }
 
 
+.div-relative {
+    position: relative;
+}
+
 .text-1 {
     color: #ffffff;
     font-size: 1.4em;
@@ -1039,7 +1043,8 @@ div#right-wrapper-config-right-4 {
 .text-32 {
     position: relative;
     left: -1px;
-    top: -15px;
+    /* top: -15px; */
+    top: -28px;
     color: #6E797C;
     font-size: 26px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;

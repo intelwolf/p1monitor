@@ -38,12 +38,6 @@ weer_db                     = sqldb.currentWeatherDB()
 weer_history_db_uur         = sqldb.historyWeatherDB()
 temperature_db              = sqldb.temperatureDB()
 temperature_db              = sqldb.temperatureDB()
-#V1 of the watermeter database, we keep supporting this for older software versions that import data
-watermeter_db_uur           = sqldb.WatermeterDB()
-watermeter_db_dag           = sqldb.WatermeterDB()
-watermeter_db_maand         = sqldb.WatermeterDB()
-watermeter_db_jaar          = sqldb.WatermeterDB()
-#V2 of the watermeter database
 watermeter_db               = sqldb.WatermeterDBV2()
 fase_db                     = sqldb.PhaseDB()
 fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
@@ -167,7 +161,7 @@ def Main(argv):
     dbIntegrityCheck( weer_db,             const.FILE_DB_WEATHER )
     dbIntegrityCheck( weer_history_db_uur, const.FILE_DB_WEATHER_HISTORIE )
     dbIntegrityCheck( temperature_db,      const.FILE_DB_TEMPERATUUR_FILENAME )
-    dbIntegrityCheck( watermeter_db_uur,   const.FILE_DB_WATERMETER )
+    #dbIntegrityCheck( watermeter_db_uur,   const.FILE_DB_WATERMETER )
     dbIntegrityCheck( watermeter_db,       const.FILE_DB_WATERMETERV2 )
     dbIntegrityCheck( fase_db,             const.FILE_DB_PHASEINFORMATION )
     dbIntegrityCheck( power_production_db, const.FILE_DB_POWERPRODUCTION )
@@ -243,8 +237,8 @@ def Main(argv):
                 processImportDataSet( const.DB_WATERMETERV2 , watermeter_db, zf, fname, 'replace into watermeter*' )
     
             ###########################################
-            elif tail.startswith( const.DB_WATERMETER ):
-                processImportDataSet(  const.DB_WATERMETER  , watermeter_db_uur, zf, fname, 'replace into watermeter*' )
+            #elif tail.startswith( const.DB_WATERMETER ):
+            #    processImportDataSet(  const.DB_WATERMETER  , watermeter_db_uur, zf, fname, 'replace into watermeter*' )
 
             ############################################
             elif tail.startswith( const.DB_TEMPERATURE ):
@@ -293,21 +287,6 @@ def Main(argv):
     config_db.strset( '1', 168, flog ) # set wachtdog flag.
     time.sleep ( 5 ) # give some time to proces 
     msgToInfoLogAndStatusFile( 'Netwerkinstellingen doorgeven aan Watchdog process.' )
-
-    # waterbase V1 to V2 database conversion
-    # set de normale verwerking van de water datbase uit.
-    # doe de conversie
-    msgToInfoLogAndStatusFile( "watermeting conversie van oude naar nieuwe database gestart." )
-    # os.system("/p1mon/scripts/P1WatermeterDbV1toV2.py")
-    cmd = "/p1mon/scripts/pythonlaunch.sh P1WatermeterDbV1toV2.py" # 1.8.0 upgrade
-    process_lib.run_process( 
-        cms_str = cmd,
-        use_shell=True,
-        give_return_value=False,
-        flog=flog 
-    )
-
-    msgToInfoLogAndStatusFile( "watermeting conversie van oude naar nieuwe database gereed." )
 
     # lees systeem ID uit en zet deze in de config database. 
     # versleuteld om dat deze data in een back-up bestand terecht kan komen.
@@ -660,6 +639,7 @@ def openDatabases():
         
     msgToInfoLogAndStatusFile( "database " + const.DB_TEMPERATUUR_TAB + " succesvol geopend." )
 
+    """
     # open van watermeter databases (oud nodig voor import.)
     try:
         watermeter_db_uur.init( const.FILE_DB_WATERMETER, const.DB_WATERMETER_UUR_TAB, flog )
@@ -670,6 +650,7 @@ def openDatabases():
         stop( 9 )
         
     msgToInfoLogAndStatusFile( "database " + const.DB_WATERMETER_UUR_TAB + " succesvol geopend." )
+    
 
     try:
         watermeter_db_dag.init( const.FILE_DB_WATERMETER ,const.DB_WATERMETER_DAG_TAB , flog )
@@ -700,6 +681,7 @@ def openDatabases():
         stop( 12 )
 
     msgToInfoLogAndStatusFile( "database " + const.DB_WATERMETER_JAAR_TAB + " succesvol geopend." )
+    """
 
     # open van watermeter V2 database 
     try:    

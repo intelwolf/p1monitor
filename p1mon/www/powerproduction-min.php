@@ -80,7 +80,8 @@ function createKwhChart() {
         chart: {
             marginTop: 46, // make room for the wide legend
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             renderTo: 'container',
@@ -246,7 +247,7 @@ function createKwhChart() {
             }
             ],
             tooltip: {
-                useHTML: true,
+                useHTML: false,
                     style: {
                         padding: 3,
                         color: '#6E797C'

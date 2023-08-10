@@ -84,6 +84,7 @@ if ( isset($_POST["import"]) ) {
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/crc32.js"></script>
 <script src="./js/download2.js"></script>
 <script src="/fine-uploader/fine-uploader.min.js"></script>
 <script type="text/template" id="qq-template">
@@ -275,6 +276,8 @@ var sqlImportFilename = '';
 var sqlExportChecking = false;
 var initloadtimer;
 
+var tmp_scroll_crc32_hash = -1;
+
 sqlImportIsActive=getCookie("sqlImportIsActive"); 
 
 $(function() {
@@ -334,9 +337,9 @@ function showExcelList() {
 
 
 function LoadData() {
-    
+
     clearTimeout(initloadtimer);
-    
+
     readAideLogging();
 
     if (sqlExportChecking === true)
@@ -429,21 +432,27 @@ function startSqlExport(exp_id, command){
     });
 }
 
-function readSqlImportStatusLogging(){ 
+
+
+
+
+function readSqlImportStatusLogging(){
     $.get( "/txt/txt-sql-import-status.php", function( response, status, xhr ) {
         
         if ( status == "error" ) {
-            $("#scroll_window").html('SQL import log data niet beschikbaar.');
+            $("#scroll_window").html('Data niet beschikbaar.');
         }
-        
-        if ( response.length > 0 ) {
-            //console.log("update =" + response.length )
-            $('#scroll_window').html( response );
 
+        tmp_local_hash = crc32( response );
+        if ( tmp_local_hash != tmp_scroll_crc32_hash ) {
+            tmp_scroll_crc32_hash = tmp_local_hash;
+            $('#scroll_window').html( response );
             // keep scroll window scrolled down.
-             $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
+            $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
         } else {
-            $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+            if ( response.length < 1 ) {
+                $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+            }
         }
 
     });
@@ -455,13 +464,18 @@ function readAideLogging(){
         if ( status == "error" ) {
             $("#scroll_window_2").html('Upgrade data niet beschikbaar.');
         }
-        if ( response.length > 0 ) {
+
+        tmp_local_hash = crc32( response );
+        if ( tmp_local_hash != tmp_scroll_crc32_hash ) {
+            tmp_scroll_crc32_hash = tmp_local_hash;
             $('#scroll_window_2').html( response );
             
             // keep scroll window scrolled down.
-            $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
+            $('#scroll_window_2').scrollTop($('#scroll_window_2')[0].scrollHeight);
         } else {
-            $('#scroll_window_2').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+            if ( response.length < 1 ) {
+                $('#scroll_window_2').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+            }
         }
     }); 
 }

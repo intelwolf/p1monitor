@@ -4,6 +4,7 @@ import apiconst
 import const
 import data_struct_lib
 import day_values_lib
+import filesystem_lib
 import inspect
 import logger
 from PyCRC.CRC16 import CRC16
@@ -18,6 +19,7 @@ import p1_port_shared_lib
 import p1_telegram_test_lib
 import phase_shared_lib
 import socat_lib
+import sqlite_lib
 import time
 import util
 
@@ -80,6 +82,7 @@ p1_status['day_night_mode']         = 0  # default NL, 1 is Belgium
 
 day_values = day_values_lib.dayMinMaxkW()
 
+
 def main_prod():
 
     flog.info("Start van programma.")
@@ -96,17 +99,14 @@ def main_prod():
     # last data from persistent memory (disk)
     p1_port_shared_lib.disk_restore_from_disk_to_ram( flog=flog )
 
-    # open van seriele database
+    # openen van seriële database
+    sso_serial = sqlite_lib.SqlSafeOpen()
     try:
-        e_db_serial.init(const.FILE_DB_E_FILENAME ,const.DB_SERIAL_TAB)
+        sso_serial.open( db_class=e_db_serial, db_pathfile=const.FILE_DB_E_FILENAME, db_table=const.DB_SERIAL_TAB, flog=flog )
     except Exception as e:
-        flog.critical(inspect.stack()[0][3]+" database niet te openen(1)."+const.FILE_DB_E_FILENAME+") melding:"+str(e.args[0]))
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(1) " +str(e.args[0]) )
         sys.exit(1)
-    flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_SERIAL_TAB+" succesvol geopend.")
-
-    # defrag van database
-    e_db_serial.defrag()
-    flog.info(inspect.stack()[0][3]+": database bestand "+const.DB_SERIAL_TAB+" gedefragmenteerd.")
+    flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_SERIAL_TAB + " succesvol geopend." )
 
     # open van status database
     try:    

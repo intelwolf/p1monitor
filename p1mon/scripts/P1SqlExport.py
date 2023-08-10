@@ -658,7 +658,7 @@ def set_db_file_permissions( flog=None ):
             flog.info( inspect.stack()[0][3] + ": file rechten zetten voor file " + str(name) + " met rechten 664")
             filesystem_lib.set_file_permissions( filepath=name, permissions='664')
         except Exception as e:
-            flog.warning( inspect.stack()[0][3] + ": fiel rechten probleem met database file " + str(name) + ". melding:" + str(e.args[0]))
+            flog.warning( inspect.stack()[0][3] + ": file rechten probleem met database file " + str(name) + ". melding:" + str(e.args[0]))
    
 
 

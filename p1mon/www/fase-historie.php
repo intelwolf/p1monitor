@@ -568,10 +568,11 @@ function setButtonVisbilty() {
   
     var areaSplineOptions = {
         chart: {
+            style: {
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
+            },
             type: 'areaspline',
-            //type: 'area',
-            //type: 'spline',
-            // type: 'line',
             width: 904,
             height: 200
         },

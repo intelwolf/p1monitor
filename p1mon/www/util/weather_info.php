@@ -1,11 +1,22 @@
 <?php
 function weather_info(){
 
-// only show when API key is set.
-if ( strlen(config_read(13)) < 31 ) {
-    return;
-}
+    // only show when API key is set.
+    if ( strlen(config_read(13)) < 31 ) {
+        return;
+    }
 
+    $text_timestamp         = ucfirst(strIdx( 345 ));
+    $text_location          = ucfirst(strIdx( 346 ));
+    $text_wind_direction    = ucfirst(strIdx( 347 ));
+    $text_weer_conditie     = ucfirst(strIdx( 348 ));
+    $text_temperature       = ucfirst(strIdx( 139 ));
+    $text_wind_speed        = ucfirst(strIdx( 349 ));
+    $text_unknown           = strIdx( 269 );
+    $text_rises             = strIdx( 350 );
+    $text_drops             = strIdx( 351 );
+    $text_unchanged         = strIdx( 352 );
+    
 echo <<<"END"
                 <!-- start weather part -->
                 <link type="text/css" rel="stylesheet" href="./font/owfont-master/css/owfont-regular.css">
@@ -39,12 +50,12 @@ echo <<<"END"
                 </div>
                 
                 <div class="cursor-pointer" id="weather_detail" onclick=hide_weather_detail(); > 
-                    <div>Tijdstip:&nbsp;<span id="wth_detail_timestamp"></span></div>
-                    <div>Locatie:&nbsp;<span id="wth_detail_location"></span></div>
-                    <div>Windrichting:&nbsp;<span id="wth_detail_wind_deg"></span></div>
-                    <div>Weer conditie:&nbsp;<span id="wth_detail_condition"></span></div>
-                    <div>Temperatuur:&nbsp;<span id="wth_detail_temperature"></span></div>
-                    <div>Windsnelheid:&nbsp;<span id="wth_detail_wind_speed"></span><span class="text-17">&nbsp;km/u</span></div>
+                    <div>$text_timestamp:&nbsp;<span id="wth_detail_timestamp"></span></div>
+                    <div>$text_location:&nbsp;<span id="wth_detail_location"></span></div>
+                    <div>$text_wind_direction:&nbsp;<span id="wth_detail_wind_deg"></span></div>
+                    <div>$text_weer_conditie:&nbsp;<span id="wth_detail_condition"></span></div>
+                    <div>$text_temperature:&nbsp;<span id="wth_detail_temperature"></span></div>
+                    <div>$text_wind_speed:&nbsp;<span id="wth_detail_wind_speed"></span><span class="text-17">&nbsp;km/u</span></div>
                 </div>
                 
                 <script>
@@ -153,16 +164,14 @@ echo <<<"END"
                     if ( weaterData[0][4] > weaterData[1][4] ) { tempDirection =  1 } // temperature is rising
                     if ( weaterData[0][4] < weaterData[1][4] ) { tempDirection = -1 } // temperature is falling
 
-                    
                     if ( tempDirection == 0 ) { 
                         //clearInterval(tempAnimationTimer);
-                        $('#wth_detail_temperature').text('ongewijzigd');
+                        $('#wth_detail_temperature').text( '$text_unchanged' );
                         //tempertatureAnimation();
                     } else {
                         //tempertatureAnimation();
                     }
                     
-
                     $('#wth_humidity_text').text( weaterData[0][8]+'%' );
                     $('#wth_wind_speed_text').text( wind_speed_2_beaufort( weaterData[0][9]*3.6 ) );
                     $('#wth_detail_wind_speed').text( (weaterData[0][9]*3.6).toFixed(1) );
@@ -186,17 +195,17 @@ echo <<<"END"
                         document.getElementById("wth_wind_deg_arrow").setAttribute("data-fa-transform", rotation_value );
                         $('#wth_wind_deg_arrow').show();
                     }  else {
-                        $('#wth_detail_wind_deg').text( "onbekend" );
+                        $('#wth_detail_wind_deg').text( '$text_unknown' );
                         $('#wth_wind_deg_arrow').hide();
                     }
 
                     $('#wth_detail_condition').text( weaterData[0][5] );
 
                     if ( tempDirection == 1) { 
-                        $('#wth_detail_temperature').text('stijgt');
+                        $('#wth_detail_temperature').text( '$text_rises' );
                     }
                     if ( tempDirection == -1) { 
-                        $('#wth_detail_temperature').text('daalt');
+                        $('#wth_detail_temperature').text( '$text_drops' );
                     }
 
                     $('#wth_condition_icon').removeClass();

@@ -52,7 +52,6 @@ var maxDataText     = ['MAX. data','MIN. data']
 var maxDataCount    = [ 1096, 366 ]
 var maxrecords      = maxDataCount[1];
 
-
 function readJsonApiHistoryDay( cnt ){ 
     $.getScript( "/api/v1/powergas/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
       try {
@@ -112,7 +111,8 @@ function createKwhChart() {
     Highcharts.stockChart('KwhChart', {
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             renderTo: 'container',
@@ -189,8 +189,6 @@ function createKwhChart() {
                         }
                     }
                 },
-
-
                 {
                     type: 'day',   // #PARAMETER
                     count: 7,      // #PARAMETER
@@ -300,7 +298,7 @@ function createKwhChart() {
                 }
             ],
             tooltip: {
-                useHTML: true,
+                useHTML: false,
                 style: {
                     padding: 3,
                     color: '#6E797C'

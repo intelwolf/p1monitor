@@ -19,9 +19,9 @@ DBX_BACKUP="/backup"
 STATUS_FILE="p1mon*status"
 PRG1="P1SerReader"  #P1SerReader.py"
 PRG2="P1Db"         #P1Db.py
-PRG3="P1Watchdog"   #"P1Watchdog.py"
+PRG3="P1Watchdog"   #P1Watchdog.py"
 PRG4="*.log*"
-PRG5="P1Weather.py"
+PRG5="P1Weather"    #P1Weather.py
 PRG6="P1UdpDaemon.py"
 PRG7="P1DropBoxDeamon.py"
 PRG8="P1UdpBroadcaster.py"
@@ -29,7 +29,7 @@ PRG9="gunicorn"
 PRG9_PATH="/p1mon/p1monenv/bin/"
 PRG9_ALIAS="P1Api.py"
 PRG9_PARAMETERS="--timeout 900 --bind localhost:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 2 P1Api:app --log-level warning"
-PRG10="P1UpgradeAssist.py"
+PRG10="niet meer in gebruik"
 PRG11="logspacecleaner.sh"
 PRG12="P1Watermeter.py"
 PRG13="P1MQTT.py"
@@ -96,10 +96,10 @@ start() {
     /sbin/iw wlan0 get power_save
     echo "[*] Wifi power save is uitgezet."
 
-    #upgrade assist start
-    echo "Upgrade assist wordt gestart."
-    eval "$MY_PYTHON $PRG10 --restore"
-    echo "[*] $PRG10 gestart."
+    #upgrade assist start (vervallen vanaf versie 2.3.0)
+    #echo "Upgrade assist wordt gestart."
+    #eval "$MY_PYTHON $PRG10 --restore"
+    #echo "[*] $PRG10 gestart."
     #$PRG_PATH$PRG10
 
     # note the watchdog does the import from /p1mon/data 
@@ -153,14 +153,16 @@ start() {
     echo "[*] $PRG3 gestart."
 
     # run weather once to make sure we have the weather database, fixes import issues.
-    eval "$MY_PYTHON $PRG5 --getweather 2>&1 >/dev/null &"
+    #eval "$MY_PYTHON $PRG5 --getweather 2>&1 >/dev/null &"
+    $PRG_PATH$PRG5 --getweather 2>&1 >/dev/null &
     echo "[*] $PRG5 -getweather gestart."
     echo "[*] 2 seconden wachttijd"
     sleep 2
 
     # run weather once to recover graaddagen when not set
     # when set do nothing. use UI to force the recalculating
-    eval "$MY_PYTHON $PRG5 --recover 2>&1 >/dev/null &"
+    # eval "$MY_PYTHON $PRG5 --recover 2>&1 >/dev/null &"
+    $PRG_PATH$PRG5 --recover 2>&1 >/dev/null &
     echo "[*] $PRG5 --recover gestart."
 
     # UDP deamon start
@@ -194,6 +196,7 @@ start() {
     sleep 3
     sudo  /bin/chmod 664 $DB_PATH*.db
     echo "[*] file rechten database bestanden correct gezet."
+    echo "[*] start gereed."
 
 }
 
@@ -280,6 +283,12 @@ stop() {
 
     # API stop
     process_kill $PRG9_PATH$PRG9 3
+
+    # schrijf cache naar disk/flash
+    sync
+    echo "[*] 10 seconden wachttijd, zodat data veilig naar disk wordt gekopierd."
+    sleep 10
+    echo "[*] stop gereed."
 
 }
 

@@ -152,7 +152,7 @@ def MainProg():
             ## check P1PowerProductionS0 run or stop
             checkPowerProductionS0Run()
             ## checkWaterMeter run or stop
-            checkWaterMeter()
+            check_water_meter_run()
             ## P1MQTT run or stop
             checkMQTTRun()
             ## P1MQTT run or stop
@@ -263,23 +263,25 @@ def MainProg():
 
             # watermeter reset.
             trigger_function( 
-                prg_name="P1WatermeterV2CounterSet.py", 
+                prg_name="P1WatermeterV2CounterSet",
                 prg_parameters="&",
                 db_config_index=185,
                 start_msg="reset van watermeterstand gestart.",
                 stop_msg="reset van watermeterstand gestopt.",
                 err_msg="reset van watermeterstand gestart gefaald.",
-                timeout=500
+                timeout=500,
+                use_python_launcer=False
              )
 
-            # Graaddagen rest.
+            # Weather update.
             trigger_function( 
-                prg_name="P1Weather.py", 
+                prg_name="P1Weather", 
                 prg_parameters="--recoverforced &",
                 db_config_index=203,
-                start_msg="Graagdagen herstellen gestart.",
-                stop_msg="Graagdagen herstellengereed.",
-                err_msg="Graagdagen herstellen gefaald.",
+                start_msg="Weer informatie gestart.",
+                stop_msg="Weer informatie gereed.",
+                err_msg="Weer informatie gefaald.",
+                use_python_launcer=False
             )
 
             socat()
@@ -602,14 +604,15 @@ def run_dynamic_pricing():
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
 
-
-
 def run_patch():
     try:
+
         prg_name = "P1Patcher.py"
         _id, needs_to_run_status, _label = config_db.strget( 194, flog )
-        flog.debug( inspect.stack()[0][3] + ": needs_to_run_status =" +str(needs_to_run_status) )
-        if int( needs_to_run_status ) > 0:
+        pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
+        flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( needs_to_run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
+
+        if int( needs_to_run_status ) > 0 and len( pid_list ) < 1:
             flog.info( inspect.stack()[0][3] + ": P1Patcher.py gestart." )
             cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " > /dev/null 2>&1 &"
             flog.debug( inspect.stack()[0][3] + ": cmd =" +str(cmd) )
@@ -640,7 +643,7 @@ def update_weather_data():
         # check if API key is set.
         _id, api_key, _label = config_db.strget( 13, flog )
         if len( api_key ) > 31: # possible valid API key
-            cmd = "/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather"
+            cmd = "/p1mon/scripts/P1Weather --getweather"
             process_lib.run_process( 
                 cms_str = cmd,
                 use_shell=True,
@@ -1464,21 +1467,22 @@ def checkMQTTRun(): #180ok
 # checks if the watermeter script must run or must be  #
 # stopped                                              #
 ########################################################
-def checkWaterMeter(): #180ok
+def check_water_meter_run(): #180ok
     try:
         #flog.setLevel( logger.logging.DEBUG )
-        prg_name = "P1WatermeterV2.py" 
+        prg_name = "P1WatermeterV2"
        
         _id, run_status, _label = config_db.strget( 96, flog )
         pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
-        flog.debug(inspect.stack()[0][3] + ": checkWaterMeter want to run status is = " + str(run_status) + " aantal gevonden PID = " + str(len(pid_list) ) )
+        flog.debug(inspect.stack()[0][3] + ": check_water_meter_run want to run status is = " + str(run_status) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
         if int(run_status) == 1 and len( pid_list) == 0: # start process
             flog.info(inspect.stack()[0][3] + ": " + prg_name + " wordt gestart." )
             #if os.system('/p1mon/scripts/' + prg_name + ' 2>&1 >/dev/null &') > 0:
             #    flog.error(inspect.stack()[0][3] + prg_name + " start gefaald." )
 
-            cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " 2>&1 >/dev/null &" # 1.8.0 upgrade
+            #cmd = "/p1mon/scripts/pythonlaunch.sh " + prg_name + " 2>&1 >/dev/null &" # 1.8.0 upgrade
+            cmd = "/p1mon/scripts/" + prg_name + " 2>&1 >/dev/null &" # 2.3.0 upgrade
             process_lib.run_process( 
                 cms_str = cmd,
                 use_shell=True,

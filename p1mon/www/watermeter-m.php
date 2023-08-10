@@ -74,7 +74,8 @@ function createWaterUsageChart() {
     Highcharts.stockChart('WaterUsageChart', {
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             renderTo: 'container',
@@ -236,7 +237,7 @@ function createWaterUsageChart() {
                 }]
             },
             tooltip: {
-            useHTML: true,
+            useHTML: false,
                 style: {
                     padding: 3,
                     color: '#6E797C'

@@ -7,12 +7,14 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
+
 ?> 
 <!doctype html>
 <html lang="nl">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor Home</title>
+<title>P1monitor <?php echo strIdx( 343 )?> 1</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -29,6 +31,7 @@ include_once '/p1mon/www/util/fullscreen.php';
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
 
 <script>
+
 var sqlData             = []; 
 var verbrData10sec      = [];
 var gelvrData10sec      = [];
@@ -40,7 +43,7 @@ var gelvrKosten         = 0;
 var wattageMaxValueConsumption  = <?php echo config_read(52); ?>;
 var wattageMaxValueProduction   = <?php echo config_read(53); ?>;
 var showPhaseInformation        = <?php echo config_read(61); ?>;
-var faseVerbrTitle = 'fase<br>verdeling'
+//var faseVerbrTitle = 'fase<br>verdeling'
 var consumptionPowerPhase   = [ [0],[0],[0] ];
 var productionPowerPhase    = [ [0],[0],[0] ];
 var watermeterRecords       = 1
@@ -51,6 +54,7 @@ var hideWaterUi             = <?php if ( config_read( 157 ) == 1 ) { echo "true;
 var hideGaSUi               = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hidePeakKw              = <?php if ( config_read( 206 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 
+const power_text = "<?php echo strIdx( 361 );?>"
 
 function readJsonApiWaterHistoryDay( cnt ){ 
     $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -259,7 +263,6 @@ function readJsonApiStatus(){
                 var lowProductionTimestamp = jsondata[j][1].substring( 11 );
                 continue;
             }
-            
 
          }
 
@@ -338,7 +341,7 @@ function createChartPhaseProduction(){
         chart: {
             margin: [0, 20, 0, 30],
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
             },
             type: 'column',
             inverted: true,
@@ -371,7 +374,7 @@ function createChartPhaseProduction(){
                 dataLabels: {
                     useHTML: true,
                     enabled: true,
-                    format: '{y} kW',
+                    format: '{y:.3f} kW',
                     color: '#6E797C',
                 }
             },
@@ -441,11 +444,12 @@ function createChartPhaseConsuming(){
     });
 }
 
-function createChartVerbruik(){
+function createChartGaugeVerbruik(){
     $('#actVermogenMeterVerbruik').highcharts({
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             type: 'gauge',
             plotBackgroundColor: null,
@@ -467,6 +471,7 @@ function createChartVerbruik(){
             }]
         },
         yAxis: {
+            lineWidth: 0,
             min: 0,
             max: wattageMaxValueConsumption, // dynamic
             labels: {
@@ -477,7 +482,6 @@ function createChartVerbruik(){
             minorTickLength: 18,
             minorTickPosition: 'inside',
             minorTickColor: '#F2BA0F',
-            
             tickPixelInterval: 50,
             tickWidth: 11,
             tickPosition: 'inside',
@@ -493,7 +497,7 @@ function createChartVerbruik(){
         plotOptions: {
             gauge: {
                 dial: {
-                    radius: '70%',
+                    radius: '68%',
                     backgroundColor: '#384042',
                     borderWidth: 1,
                     baseWidth: 15,
@@ -529,11 +533,6 @@ function createChartVerbruik(){
                 fillColor: '#384042',
                 lineColor: '#384042'
             },
-            /*
-            animation: {
-                duration: 1000
-            },
-            */
             data: [{
                 color: '#384042',
                 y: gaugeDataVerbruik
@@ -542,11 +541,12 @@ function createChartVerbruik(){
     });
 }
 
-function createChartGeleverd(){
+function createChartGaugeGeleverd(){
     $('#actVermogenMeterGeleverd').highcharts({
         chart: {
         style: {
-            fontFamily: 'robotomedium'
+            fontFamily: 'robotomedium',
+            fontSize: '14px'
             },
             type: 'gauge',
             plotBackgroundColor: null,
@@ -568,6 +568,7 @@ function createChartGeleverd(){
             }]
         },
         yAxis: {
+            lineWidth: 0,
             min: 0,
             max: wattageMaxValueProduction, // dynamic
             labels: {
@@ -578,7 +579,6 @@ function createChartGeleverd(){
             minorTickLength: 18,
             minorTickPosition: 'inside',
             minorTickColor: '#98D023',
-
             tickPixelInterval: 50,
             tickWidth: 11,
             tickPosition: 'inside',
@@ -594,7 +594,7 @@ function createChartGeleverd(){
         plotOptions: {
             gauge: {
                 dial: {
-                    radius: '70%',
+                    radius: '68%',
                     backgroundColor: '#384042',
                     borderWidth: 1,
                     baseWidth: 15,
@@ -645,7 +645,11 @@ function createChartGeleverd(){
 function createChartVerbruikGrafiek() {
     $('#actVermogenMeterGrafiekVerbruik').highcharts({
         chart: {
-            type: 'areaspline'
+            type: 'areaspline',
+            style: {
+                fontFamily: 'robotomedium',
+                //fontSize: '14px'
+            },
         },
         legend: {
             enabled: false
@@ -661,7 +665,7 @@ function createChartVerbruikGrafiek() {
              },
             formatter: function() {
                 var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
-                s += '<br/><span style="color: #F2BA0F;">Vermogen kW: </span>'+this.y.toFixed(3);
+                s += '<br/><span style="color: #F2BA0F;">'+ power_text +' kW: </span>'+this.y.toFixed(3);
                 return s;
             },
             backgroundColor: '#F5F5F5',
@@ -701,10 +705,14 @@ function createChartVerbruikGrafiek() {
     });
 }
 
-function createChartGeleverdGrafiek() {    
+function createChartGeleverdGrafiek() {
     $('#actVermogenMeterGrafiekGeleverd').highcharts({
         chart: {
-            type: 'areaspline'
+            type: 'areaspline',
+            style: {
+                fontFamily: 'robotomedium',
+                //fontSize: '14px'
+            },
         },
         legend: {
             enabled: false
@@ -720,10 +728,9 @@ function createChartGeleverdGrafiek() {
              },
             formatter: function() {
                 var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
-                s += '<br/><span style="color: #98D023;">vermogen kW: </span>'+this.y.toFixed(3);
+                s += '<br/><span style="color: #98D023;">' + power_text + ' kW: </span>'+this.y.toFixed(3);
                 return s;
             },
-                          
             backgroundColor: '#F5F5F5',
             borderColor: '#DCE1E3',
             crosshairs: [true, true],
@@ -831,17 +838,19 @@ function setDynamicTitles() {
 
 $(function () {
     toLocalStorage('main-menu',window.location.pathname);
-    createChartVerbruik();
-    createChartGeleverd();
+    createChartGaugeVerbruik();
+    createChartGaugeGeleverd();
     createChartVerbruikGrafiek();
     createChartGeleverdGrafiek();
     createChartPhaseConsuming();
     createChartPhaseProduction();
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     setDynamicTitles();
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     // initial load
@@ -856,7 +865,6 @@ $(function () {
 <body>
 
 <?php page_header();?>
-
 
 <div class="top-wrapper-2">
     <div class="content-wrapper pad-13">
@@ -878,13 +886,13 @@ $(function () {
     <!-- peak costs -->
     <div class="mid-content-5 pad-41" id="peak_info" title="<?php echo strIdx( 334 );?>">
         <div class="frame-2-top">
-            <span class="text-2">piek informatie</span>
+            <span class="text-2"><?php echo strIdx( 355 );?></span>
         </div>
         <div class="frame-4-bot pad-12">
 
             <div class="float-left pad-12">
                 <div class="frame-3-top width-260"> <!-- piek kwartier kader -->
-                    <label class="text-3">kwartier</label>
+                    <label class="text-3"><?php echo strIdx( 356 );?></label>
                 </div>
                 <div class="frame-2-bot width-260">
                      <label class="text-4" id="P_Q_kw">0</label>
@@ -895,7 +903,7 @@ $(function () {
 
             <div class="float-left pad-12">
                 <div class="frame-3-top width-260"> <!-- piek maand kader -->
-                    <label class="text-3">maand</label>
+                    <label class="text-3"><?php echo strIdx( 131 );?></label>
                 </div>
                 <div class="frame-2-bot width-260">
                     <label class="text-4" id="P_M_kw">0</label>
@@ -914,14 +922,14 @@ $(function () {
 
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">verbruik</span>
+            <span class="text-2"><?php echo strIdx( 354 );?></span>
         </div>
         <div class="frame-2b-bot"> 
             <div class="pos-2"  id="actVermogenMeterVerbruik"></div>
             <div class="pos-46" id="actVermogenFaseVerbruik"></div>
             <div class="pos-47 pad-2">
                 <div class="frame-3-top">
-                <span id="verbruikPiekHeader" class="text-3">meterstand</span>
+                <span id="verbruikPiekHeader" class="text-3"><?php echo strIdx( 357 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="meterstand_piek_verbruik_totaal" title="fout niet gezet.">
@@ -951,7 +959,7 @@ $(function () {
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
-                <span id="verbruikDalHeader" class="text-3">vandaag</span>
+                <span id="verbruikDalHeader" class="text-3"><?php echo strIdx( 330 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <!-- <i id="verbruikPiekI" class="pad-6 text-4 far fa-sun"> -->
@@ -979,7 +987,7 @@ $(function () {
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
-                <span class="text-3">totaal vandaag</span>
+                <span class="text-3"><?php echo strIdx( 358 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div title="<?php echo strIdx( 41 );?>">
@@ -988,7 +996,7 @@ $(function () {
                             <i class="text-4 fab fa-gripfire"></i>&nbsp;<span id="verbruikGasDag" class="text-4"></span><span class="text-4"> m<sup>3</sup></span><br>
                         </div>      
                         <div id="verbruikWaterDagDiv">
-                            <i class="text-4 fas fa-tint"></i>&nbsp;<span id="verbruikWaterDag" class="text-4">000000000</span><span class="text-4"> Liter</span><br>
+                            <i class="text-4 fas fa-tint"></i>&nbsp;<span id="verbruikWaterDag" class="text-4">000000000</span><span class="text-4"> <?php echo strIdx( 363 );?></span><br>
                         </div>
                     </div>
                     <div title="<?php echo strIdx( 42 );?>">
@@ -998,7 +1006,7 @@ $(function () {
             </div>        
             <div class="pos-48">
                 <div class="frame-3-top">
-                <span class="text-3">kW verbruikt</span>
+                <span class="text-3">kW <?php echo strIdx( 359 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="actVermogenMeterGrafiekVerbruik" class="pos-4"></div>
@@ -1009,14 +1017,14 @@ $(function () {
     <!-- rechts -->
     <div class="right-wrapper pad-1">
         <div class="frame-2-top">
-            <span class="text-2">geleverd</span>
+            <span class="text-2"><?php echo strIdx( 360 );?></span>
         </div>
         <div class="frame-2b-bot"> 
             <div class="pos-2" id="actVermogenMeterGeleverd"></div>
             <div class="pos-46" id="actVermogenFaseLevering"></div>
             <div class="pos-47 pad-2">
                 <div class="frame-3-top">
-                <span id="geleverdPiekHeader" class="text-3">meterstand</span>
+                <span id="geleverdPiekHeader" class="text-3"><?php echo strIdx( 357 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="meterstand_piek_geleverd_totaal" title="fout niet gezet.">
@@ -1040,7 +1048,7 @@ $(function () {
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
-                <span id="geleverdDalHeader" class="text-3">vandaag</span>
+                <span id="geleverdDalHeader" class="text-3"><?php echo strIdx( 330 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="meterstand_piek_geleverd_dag" title="fout niet gezet.">
@@ -1069,7 +1077,7 @@ $(function () {
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
-                      <span class="text-3">totaal vandaag</span>
+                      <span class="text-3"><?php echo strIdx( 358 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                 <div title="<?php echo strIdx( 45 );?>">
@@ -1082,7 +1090,7 @@ $(function () {
             </div>
             <div class="pos-48">
                 <div class="frame-3-top">
-                <span class="text-3">kW geleverd</span>
+                <span class="text-3">kW <?php echo strIdx( 360 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="actVermogenMeterGrafiekGeleverd" class="pos-4"></div>

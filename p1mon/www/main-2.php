@@ -1,19 +1,20 @@
 <?php 
-include_once  '/p1mon/www/util/p1mon-util.php';
-include_once  '/p1mon/www/util/page_header.php'; 
-include_once  '/p1mon/www/util/page_menu.php';
-include_once  '/p1mon/www/util/page_menu_header_main.php';
+include_once '/p1mon/www/util/p1mon-util.php';
+include_once '/p1mon/www/util/page_header.php'; 
+include_once '/p1mon/www/util/page_menu.php';
+include_once '/p1mon/www/util/page_menu_header_main.php';
 include_once '/p1mon/www/util/weather_info.php';
-include_once  '/p1mon/www/util/pageclock.php';
-include_once  '/p1mon/www/util/textlib.php';
-include_once  '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 ?> 
 <!doctype html>
 <html lang="nl">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor Home</title>
+<title>P1monitor <?php echo strIdx( 343 )?> 2</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -42,7 +43,7 @@ var wattageMaxValueConsumption  = <?php echo config_read(52); ?>;
 var gasMaxValuePConsumption     = <?php echo config_read(54); ?>;
 var predictionInOn              = <?php echo config_read(59); ?>;
 var showPhaseInformation        = <?php echo config_read(61); ?>;
-var faseVerbrTitle              = 'fase<br>verdeling'
+//var faseVerbrTitle              = 'fase<br>verdeling'
 var consumptionPowerPhase       = [ [0],[0],[0] ];
 var watermeterRecords           = 1
 
@@ -51,6 +52,10 @@ var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "t
 var hideWaterUi                 = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hideGaSUi                   = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hidePeakKw                  = <?php if ( config_read( 206 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+
+const power_text                = "<?php echo strIdx( 361 );?>"
+const gas_consumend_text        = "<?php echo strIdx( 367 );?>"
+
 
 function readJsonApiWaterHistoryDay( cnt ){ 
     $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -289,7 +294,7 @@ function createChartPhaseConsuming(){
                 dataLabels: {
                     useHTML: true,
                     enabled: true,
-                    format: '{y} kW',
+                    format: '{y:.3f} kW',
                     color: '#6E797C',
                 }
             },
@@ -356,17 +361,8 @@ function readJsonApiHistoryHour( cnt ){
                     hideStuff('gasVoorspelling');
             }
 
-        /*
-        $("#actGasMeterGrafiekVerbruikt").highcharts().series[0].update({
-            pointStart: GdataHourGas[0][0],
-            data: GdataHourGas
-        }, true);
-        //$('#actGasMeterGrafiekVerbruikt').highcharts().update();
-        $("#actGasMeterGrafiekVerbruikt").highcharts().redraw();
-        */
         $("#actGasMeterGrafiekVerbruikt").highcharts().series[0].setData( GdataHourGas )
 
-        
         var point = $('#actGasMeterVerbruik').highcharts().series[0].points[0];
         point.update(gaugeDataGasVerbruik, true, true, true);
 
@@ -376,11 +372,12 @@ function readJsonApiHistoryHour( cnt ){
    });
 }
 
-function createChartVerbruik(){
+function createChartGaugeVerbruikKwh(){
     $('#actVermogenMeterVerbruik').highcharts({
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             type: 'gauge',
             plotBackgroundColor: null,
@@ -403,6 +400,7 @@ function createChartVerbruik(){
             }]
         },      
         yAxis: {
+            lineWidth: 0,
             min: 0,
             max: wattageMaxValueConsumption, // dynamic
             labels: {
@@ -429,7 +427,7 @@ function createChartVerbruik(){
         plotOptions: {
             gauge: {
                 dial: {
-                    radius: '70%',
+                    radius: '68%',
                     backgroundColor: '#384042',
                     borderWidth: 1,
                     baseWidth: 15,
@@ -477,11 +475,12 @@ function createChartVerbruik(){
     });
 }
 
-function createChartGasVerbruik(){
+function createChartGaugeGasVerbruik(){
     $('#actGasMeterVerbruik').highcharts({
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             type: 'gauge',
             plotBackgroundColor: null,
@@ -501,9 +500,9 @@ function createChartGasVerbruik(){
                 borderWidth: 2,
                 outerRadius: '109%'
             }]
-        },  
-         
+        },
         yAxis: {
+            lineWidth: 0,
             max: gasMaxValuePConsumption, // dynamic
             labels: {
                 distance: -27
@@ -529,7 +528,7 @@ function createChartGasVerbruik(){
         plotOptions: {
             gauge: {
                 dial: {
-                    radius: '70%',
+                    radius: '68%',
                     backgroundColor: '#384042',
                     borderWidth: 1,
                     baseWidth: 15,
@@ -578,10 +577,14 @@ function createChartGasVerbruik(){
     });
 }
 
-function createChartVerbruikGrafiek() {    
+function createChartVerbruikGrafiek() {
     $('#actVermogenMeterGrafiekVerbruik').highcharts({
         chart: {
-            type: 'areaspline'
+            type: 'areaspline',
+            style: {
+                fontFamily: 'robotomedium',
+                //fontSize: '14px'
+            },
         },
         legend: {
             enabled: false
@@ -597,9 +600,9 @@ function createChartVerbruikGrafiek() {
              },
             formatter: function() {
                 var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
-                s += '<br/><span style="color: #F2BA0F;">Vermogen kW: </span>'+this.y.toFixed(3);
+                s += '<br/><span style="color: #F2BA0F;">' + power_text + ' kW: </span>'+this.y.toFixed(3);
                 return s;
-            },                  
+            },
             backgroundColor: '#F5F5F5',
             borderColor: '#DCE1E3',
             crosshairs: [true, true],
@@ -640,7 +643,11 @@ function createChartVerbruikGrafiek() {
 function createChartVerbruikGasGrafiek() {    
     $('#actGasMeterGrafiekVerbruikt').highcharts({
         chart: {
-            type: 'areaspline'     
+            type: 'areaspline',
+            style: {
+                fontFamily: 'robotomedium',
+                //fontSize: '14px'
+            },
         },
         legend: {
             enabled: false
@@ -656,7 +663,7 @@ function createChartVerbruikGasGrafiek() {
              },
             formatter: function() {
                 var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
-                s += '<br/><span style="color: #507ABF;">m<sup>3</sup> gas verbruikt per uur: </span>'+this.y.toFixed(3);
+                s += '<br/><span style="color: #507ABF;">m<sup>3</sup> ' + gas_consumend_text + ': </span>'+this.y.toFixed(3);
                 return s;
             },
                           
@@ -759,15 +766,16 @@ function setDynamicTitles() {
 
 $(function () {
     toLocalStorage('main-menu',window.location.pathname);
-    createChartVerbruik();
-    createChartGasVerbruik();
+    createChartGaugeVerbruikKwh();
+    createChartGaugeGasVerbruik();
     createChartVerbruikGrafiek();
     createChartVerbruikGasGrafiek();
     createChartPhaseConsuming();
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
     setDynamicTitles();
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
@@ -799,12 +807,12 @@ $(function () {
      <!-- peak costs -->
      <div class="mid-content-5 pad-41" id="peak_info" title="<?php echo strIdx( 334 );?>">
         <div class="frame-2-top">
-            <span class="text-2">piek informatie</span>
+            <span class="text-2"><?php echo strIdx( 355 );?></span>
         </div>
         <div class="frame-4-bot pad-12">
             <div class="float-left pad-12">
                 <div class="frame-3-top width-260"> <!-- piek kwartier kader -->
-                    <label class="text-3">kwartier</label>
+                    <label class="text-3"><?php echo strIdx( 356 );?></label>
                 </div>
                 <div class="frame-2-bot width-260">
                      <label class="text-4" id="P_Q_kw">0</label>
@@ -814,7 +822,7 @@ $(function () {
             </div> 
             <div class="float-left pad-12">
                 <div class="frame-3-top width-260"> <!-- piek maand kader -->
-                    <label class="text-3">maand</label>
+                    <label class="text-3"><?php echo strIdx( 131 );?></label>
                 </div>
                 <div class="frame-2-bot width-260">
                     <label class="text-4" id="P_M_kw">0</label>
@@ -829,14 +837,14 @@ $(function () {
     <div class="mid-content">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">elektrisch verbruik</span>
+            <span class="text-2"><?php echo strIdx( 362 );?></span>
         </div>
         <div class="frame-2b-bot"> 
             <div class="pos-2" id="actVermogenMeterVerbruik"></div>    
             <div class="pos-46" id="actVermogenFaseVerbruik"></div>
             <div class="pos-47 pad-2">
                 <div class="frame-3-top">
-                <span id="verbruikPiekHeader" class="text-3">meterstand</span>
+                <span id="verbruikPiekHeader" class="text-3"><?php echo strIdx( 357 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="meterstand_piek_verbruik_totaal" title="fout niet gezet.">
@@ -859,7 +867,7 @@ $(function () {
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
-                <span id="verbruikDalHeader" class="text-3">vandaag</span>
+                <span id="verbruikDalHeader" class="text-3"><?php echo strIdx( 330 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                         <div id="meterstand_piek_verbruik_dag" title="fout niet gezet.">
@@ -884,18 +892,16 @@ $(function () {
                         <span><i class="pad-6 text-4 fas fa-arrow-circle-down">&nbsp;</i></span><span id="lowKWConsumption" class="text-4"></span>
                     </div>
 
-
-
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
-                <span class="text-3">totaal vandaag</span>
+                <span class="text-3"><?php echo strIdx( 358 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                 <div title="<?php echo strIdx( 41 );?>">
                     <i class="pad-6 text-4 fa fa-bolt"></i>&nbsp;<span id="verbruikDalEnPiekKW" class="text-4 pad-6"></span><br>
                     <div id="verbruikWaterDagDiv">
-                        <i class="text-4 fas fa-tint"></i>&nbsp;<span id="verbruikWaterDag" class="text-4">000000000</span><span class="text-4"> Liter</span><br>
+                        <i class="text-4 fas fa-tint"></i>&nbsp;<span id="verbruikWaterDag" class="text-4">000000000</span><span class="text-4"> <?php echo strIdx( 363 );?></span><br>
                     </div>
                 </div>
                 <div title="<?php echo strIdx( 47 );?>">
@@ -906,25 +912,25 @@ $(function () {
 
             <div class="pos-48">
                 <div class="frame-3-top">
-                <span class="text-3">kW verbruikt</span>
+                <span class="text-3">kW <?php echo strIdx( 359 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="actVermogenMeterGrafiekVerbruik" class="pos-4"></div>
-                </div>        
+                </div>
             </div>
-        </div>    
+        </div>
     </div>
     
     <!-- rechts -->
     <div id="gasDiv" class="right-wrapper pad-1">
         <div class="frame-2-top">
-            <span class="text-2">gas verbruik</span>
+            <span class="text-2"><?php echo strIdx( 364 );?></span> 
         </div>
         <div class="frame-2b-bot"> 
             <div class="pos-2" id="actGasMeterVerbruik"></div>    
             <div class="pos-3 pad-2">
                 <div class="frame-3-top">
-                <span id="verbruikGasHeader" class="text-3">meterstand</span>
+                <span id="verbruikGasHeader" class="text-3"><?php echo strIdx( 357 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                 <div title="<?php echo strIdx( 38 );?>">
@@ -933,7 +939,7 @@ $(function () {
                 </div>
                 <div class="pad-14"></div>
                 <div class="frame-3-top">
-                <span id="geleverdDalHeader" class="text-3">vandaag</span>
+                <span id="geleverdDalHeader" class="text-3"><?php echo strIdx( 358 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div title="<?php echo strIdx( 41 );?>">
@@ -946,22 +952,22 @@ $(function () {
                 <div class="pad-14"></div>
                 <div id="gasVoorspelling" style="display: none">
                     <div class="frame-3-top">
-                    <span class="text-24 color-contrast-1">voorspelling actief</span>
+                    <span class="text-24 color-contrast-1"><?php echo strIdx( 365 );?></span> 
                     </div>
                     <div class="frame-2-bot"> 
-                        <i class="text-23 color-warning fab fa-gripfire"></i>&nbsp;<span class="text-4">Als de gaswaarde voor het huidig uur nog niet bekend is dan wordt de volgende waarde geschat.</span><br>
+                        <i class="text-23 color-warning fab fa-gripfire"></i>&nbsp;<span class="text-4 pad-12"><?php echo strIdx( 366 );?></span><br>
                     </div>
                 </div>
             </div>
             <div class="pos-49">
                 <div class="frame-3-top">
-                <span class="text-3">gas verbruikt</span>
+                <span class="text-3"><?php echo strIdx( 342 );?></span>
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="actGasMeterGrafiekVerbruikt" class="pos-4"></div>
-                </div>        
+                </div>
             </div>
-        </div>    
+        </div> 
     </div>
 </div>
 <script>

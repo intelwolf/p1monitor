@@ -3,6 +3,9 @@
 ########################################
 import sqlite3
 import inspect
+import filesystem_lib
+import time
+
 #import sys
 
 sqlite_table_colum_info = {
@@ -116,6 +119,33 @@ def _format_db_field(field_index, field_type_list, value):
     return ""
 
 
+ 
+class SqlSafeOpen():
+
+    ###########################################
+    # init the class                          #
+    ###########################################
+    def open( self, db_class=None, db_pathfile=None, db_table=None, defrag_on=True, flog=None ):
+        try:
+            db_class.init(db_pathfile , db_table )
+            if defrag_on == True:
+                db_class.defrag() 
+            #return db_class # all is well 
+        except Exception as e:
+            try:
+                flog.warning( __class__.__name__  + " database niet te openen " + str(db_pathfile) + " tabel " + str(db_table) + " melding:" + str(e.args[0]) )
+                flog.warning( __class__.__name__  + " database bestand wordt verwijderd, data verlies is waarschijnlijk.")
+                filesystem_lib.rm_with_delay( filepath=db_pathfile, timeout=0, flog=flog )
+                filesystem_lib.file_system_sync()
+                time.sleep( 1 ) # time to remove file and create a new empty database file. 
+                db_class.init(db_pathfile , db_table )
+            except Exception as e:
+                raise Exception("fout" + str(db_pathfile) + " tabel " + str(db_table) + " melding:" + str(e.args[0]) )
+            
+        #return db_class #all is well, but we lost some records :( 
+        
+
+
 class SqliteUtil():
 
     ###########################################
@@ -151,7 +181,6 @@ class SqliteUtil():
         if sort_column_str != None:
             sql_str = sql_str + " order by " + sort_column_str
         return sql_str
-
 
     ###########################################
     # table info                              #

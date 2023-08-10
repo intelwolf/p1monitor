@@ -15,7 +15,7 @@ from colorama import Fore, Back, Style, init
 init() # part of colorama
 
 TMP_BASE                = "/tmp/"
-PRG_NAME                = "Patch manager V1.0"
+PRG_NAME                = "Patch manager V2.0"
 
 HELP_TEXT = \
 "\
@@ -120,7 +120,6 @@ def menu_make_patch_file():
         )
         menu_entry_index = terminal_menu.show()
 
-
         if menu_entry_index+1 == 6:
             return
 
@@ -179,12 +178,18 @@ def menu_make_patch_file():
             print_line_mgs( status ="OK", msg="zip bestand " + patch_unsigned_filepath + " wordt aangemaakt.", colorama_color=Fore.GREEN )
 
             # do this trick with cd so we don't include the complete path. 
-            cmd = "cd /tmp; zip -r -9 " + patch_unsigned_filepath  + " ./" + patch_source_folder.replace(TMP_BASE,"" ).strip("/")
+            #cmd = "cd /tmp; zip -r -9 " + patch_unsigned_filepath  + " ./" + patch_source_folder.replace(TMP_BASE,"" ).strip("/")
+            #cmd = "cd /tmp; zip -r -9 " + patch_unsigned_filepath + "  " + patch_source_folder.replace(TMP_BASE,"" ).strip("/")
+            #cmd = "cd /tmp; zip -r -9 " + patch_unsigned_filepath + " /" + patch_source_folder # .replace(TMP_BASE,"" ).strip("/")
+
+            # working cd into the folder with files to add
+            # zip -r -9 /tmp/patchfilename  *
+            cmd = "cd " + patch_source_folder + "; zip -r -9 " + patch_unsigned_filepath + " *"
+
             print_line_mgs( status ="OK", msg="commando: " + cmd + " gestart.", colorama_color=Fore.GREEN )
 
             proc = subprocess.Popen( [cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
             try:
-               
                 stdout, _stderr  = proc.communicate()
                 returncode = int( proc.wait(timeout=60) )
                 #raise Exception( "TEST" )

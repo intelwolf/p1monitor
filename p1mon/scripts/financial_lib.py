@@ -31,11 +31,12 @@ class Cost2Database():
         'verbr_water' : 0.0,
     }
 
-    
+    #rt_status_db.timestamp( 127,flog ) # set timestamp of cost processed day
 
-    def init( self, financial_db=None, kwh_gas_db=None, watermeter_db=None, config_db=None, flog=None ):
+    def init( self, financial_db=None, kwh_gas_db=None, watermeter_db=None, config_db=None, status_db=None, flog=None ):
         self.flog                   = flog
         self.config_db              = config_db
+        self.status_db              = status_db
         self.financial_db           = financial_db
         self.kwh_gas_db             = kwh_gas_db
         self.watermeter_db          = watermeter_db
@@ -69,12 +70,14 @@ class Cost2Database():
         """
      
         self._update_finacial_db_day( timestamp=timestamp, data=day_cost )
-        self._update_finacial_db( timestamp=timestamp, period='month' ) #TODO
-        self._update_finacial_db( timestamp=timestamp, period='year' ) #TODO
+        self._update_finacial_db( timestamp=timestamp, period='month' ) 
+        self._update_finacial_db( timestamp=timestamp, period='year' )
 
         # clean up, for the next run.
         day_cost.clear()
         self.prices_dict.clear()
+
+        self.status_db.timestamp( 127,self.flog ) # set timestamp of cost processed day
 
         #sys.exit()
  

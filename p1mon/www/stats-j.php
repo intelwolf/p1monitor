@@ -106,7 +106,8 @@ function createKwhChart() {
     Highcharts.stockChart('KwhChart', {
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             renderTo: 'container',
@@ -270,10 +271,10 @@ function createKwhChart() {
                 }
             ],
             tooltip: {
-                useHTML: true,
+                useHTML: false,
                 style: {
                     padding: 3,
-                    color: '#6E797C'
+                    color: '#6E797C',
                 },
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%Y', this.x) +'</b>';

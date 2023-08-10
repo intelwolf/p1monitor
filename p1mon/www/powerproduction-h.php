@@ -50,13 +50,11 @@ var maxDataText     = ['MAX. data','MIN. data']
 var maxDataCount    = [ 26034, 744 ]
 var maxrecords      = maxDataCount[1];
 
-
 var max_temp_color    = '#FF0000';
 var avg_temp_color    = '#384042';
 var min_temp_color    = '#0088FF';
 var high_tariff_color = '#98D023';
 var low_tariff_color  = '#7FAD1D';
-
 
 function readJsonApiHistoryPowerHour( cnt ){ 
     $.getScript( "/api/v1/powerproduction/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -117,7 +115,8 @@ function createKwhChart() {
     Highcharts.stockChart('KwhChart', {
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             renderTo: 'container',
@@ -308,7 +307,7 @@ function createKwhChart() {
                 }
             ],
             tooltip: {
-                useHTML: true,
+                useHTML: false,
                 style: {
                     padding: 3,
                     color: '#6E797C'

@@ -28,6 +28,7 @@ if ( checkDisplayIsActive(21) == false) { return; }
 <script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/highchart-options.js"></script>
 
 <script> 
 var GpiekDataVerbr  = [];
@@ -56,6 +57,8 @@ var maxDataIsOn     = false
 var maxDataText     = ['MAX. data','MIN. data']
 var maxDataCount    = [ 36000, 366 ]
 var maxrecords      = maxDataCount[1];
+
+const HC_local_timestamp  ='%B, %Y';
 
 function readJsonApiConfig( id ){ 
     $.getScript( "/api/v1/configuration/" + id, function( data, textStatus, jqxhr ) {
@@ -154,7 +157,8 @@ function createCostChart() {
     chart: {
         marginTop: 46,
         style: {
-            fontFamily: 'robotomedium'
+            fontFamily: 'robotomedium',
+            fontSize: '14px'
         },
         backgroundColor: '#ffffff',
         renderTo: 'container',
@@ -231,7 +235,6 @@ function createCostChart() {
             buttonSpacing: 5, 
             selected : Gselected,
             buttons: [
-
             {
                 text: "-",
                 events: {
@@ -251,8 +254,6 @@ function createCostChart() {
                     }
                 }
             },
-
-
             {
                 type: 'month',  // #PARAMETER
                 count: 6,
@@ -298,262 +299,76 @@ function createCostChart() {
                     }
                 }
             }  
-            },
-            xAxis: {
-                events: {
-                    setExtremes: function(e) {      
-                        if(typeof(e.rangeSelectorButton)!== 'undefined') {
-                            for (var j = 0;  j < GselectText.length; j++){    
-                                if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                                    toLocalStorage('kosten-m-select-index',j+1); // PARAMETER
-                                    break;
-                                }
+        },
+        xAxis: {
+            events: {
+                setExtremes: function(e) {      
+                    if(typeof(e.rangeSelectorButton)!== 'undefined') {
+                        for (var j = 0;  j < GselectText.length; j++){    
+                            if ( GselectText[j] == e.rangeSelectorButton.text ) {
+                                toLocalStorage('kosten-m-select-index',j+1); // PARAMETER
+                                break;
                             }
                         }
                     }
-                },   
-                minTickInterval:       30 * 24 * 3600000, 
-                range:           60  * 30 * 24 * 3600000,
-                minRange:        6   * 30 * 24 * 3600000,
+                }
+            },   
+            minTickInterval:       30 * 24 * 3600000, 
+            range:           60  * 30 * 24 * 3600000,
+            minRange:        6   * 30 * 24 * 3600000,
+            maxRange:        120 * 30 * 24 * 3600000,
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                day: '%a.<br>%d %B<br/>%Y'
+            },
+            lineColor: '#6E797C',
+            lineWidth: 1
+        },
+        yAxis: {
+            zIndex: 0,
+            gridLineColor: '#6E797C',
+            gridLineDashStyle: 'longdash',
+            lineWidth: 0,
+            offset: 0,
+            opposite: false,
+            labels: {
+                //useHTML: true,
+                format: '€ {value}',
+                style: {
+                    color: '#6E797C'
+                }
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#6E797C'
+            }]
+        },
+ 
+        navigator: {
+            xAxis: {
+                min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
+                minTickInterval:       30 * 24 * 3600000,  
                 maxRange:        120 * 30 * 24 * 3600000,
                 type: 'datetime',
                 dateTimeLabelFormats: {
-                    day: '%a.<br>%d %B<br/>%Y'
-                },
-                lineColor: '#6E797C',
-                lineWidth: 1
-            },
-            yAxis: {
-                zIndex: 0,
-                gridLineColor: '#6E797C',
-                gridLineDashStyle: 'longdash',
-                lineWidth: 0,
-                offset: 0,
-                opposite: false,
-                labels: {
-                    //useHTML: true,
-                    format: '€ {value}',
-                    style: {
-                        color: '#6E797C'
-                    }
-                },
-                plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#6E797C'
-                }]
-            },
-           tooltip: {
-            useHTML: true,
-            zIndex: 1,
-            style: {
-                padding: 0,
-                color: '#6E797C',
-            },
-           
-            formatter: function() {
-
-                var s = '<b>'+ Highcharts.dateFormat('%B, %Y', this.x) +'</b>'; //PARAMETER
-                var d = this.points;
-                var piekVerbruikt=dalVerbruikt=piekGeleverd=dalGeleverd=gasVerbruikt=waterVerbruikt=0;
-
-                for (var i=0,  tot=d.length; i < tot; i++) {
-                    //console.log (d[i].series.userOptions.id);
-
-                    if  ( d[i].series.userOptions.id === 'piek_ver') {
-                        piekVerbruikt = d[i].y;
-                    }
-                    if  ( d[i].series.userOptions.id === 'dal_ver') {
-                        dalVerbruikt = d[i].y;
-                    }
-                    if  ( d[i].series.userOptions.id === 'piek_gel') {
-                        piekGeleverd = d[i].y;
-                    }
-                    if  ( d[i].series.userOptions.id === 'dal_gel') {
-                        dalGeleverd = d[i].y;
-                    }
-                    if  ( d[i].series.userOptions.id === 'gas_ver') {
-                        gasVerbruikt = d[i].y;
-                    }
-                    if  ( d[i].series.userOptions.id === 'water_ver') {
-                        waterVerbruikt = d[i].y;
-                    }
-                }
-
-                /*
-                console.log ('piekVerbruikt='+piekVerbruikt);
-                console.log ('dalVerbruikt='+dalVerbruikt);
-                console.log ('piekGeleverd='+piekGeleverd);
-                console.log ('dalGeleverd='+dalGeleverd);
-                console.log ('gasVerbruikt='+gasVerbruikt);
-                console.log ('waterVerbruikt='+waterVerbruikt);
-                console.log ('----------------------------\n');
-                */
-
-                var index = null;
-                for (var i=0,  tot=GpiekDataVerbr.length; i < tot; i++) {
-                    if ( GpiekDataVerbr[i][0] === d[0].key ) {
-                            index = i;
-                            //console.log('index='+i);
-                            break;
-                        }
-                }
-
-                var KWhVerbruikt     = 'onbekend';
-                var kWhLevering      = 'onbekend';
-                var GasM3Verbruikt   = 'onbekend';
-                var WaterM3Verbruikt = 'onbekend';
-
-                if ( GExtraData[index][2] !== -1 ) { KWhVerbruikt     = GExtraData[index][2].toFixed(2); }
-                if ( GExtraData[index][3] !== -1 ) { kWhLevering      = GExtraData[index][3].toFixed(2); }
-                if ( GExtraData[index][4] !== -1 ) { GasM3Verbruikt   = GExtraData[index][4].toFixed(3); }
-                if ( GExtraData[index][5] !== -1 ) { WaterM3Verbruikt = (GExtraData[index][5] / 1000 ).toFixed(3); }
-
-                var pv1=pv2=dv1=dv2=pg1=pg2=dg1=dg2=pt1=pt2=dt1=dt2=gas1=gas2=net1=net2=gasm21=gasm22=verbrkwh1=verbrkwh2=levrkwh1=levrkwh2=water1=water2=water21=water22='';
-                var totVerbruikt = 0;
-                var totGeleverd  = 0;
-                
-                totVerbruikt = parseFloat( piekVerbruikt )+ parseFloat( dalVerbruikt ) + parseFloat( gasVerbruikt ) + parseFloat( waterVerbruikt );
-                totGeleverd  = parseFloat( piekGeleverd ) + parseFloat( dalGeleverd );
-                totaalNetto  = parseFloat( totVerbruikt ) + parseFloat( totGeleverd );
-
-                //console.log(totVerbruikt);
-                //console.log(totGeleverd);
-                //console.log(totaalNetto);
-
-                if ( $('#CostChartVerbr').highcharts().series[0].visible === true ) {    
-                    pv1 = '<span style="color: #FFC311;">Piek kosten verbruik:</span><br/>';
-                    pv2 = '&nbsp;&euro;&nbsp;'+piekVerbruikt.toFixed(2)+'<br/>';
-                }
-                if ( $('#CostChartVerbr').highcharts().series[1].visible === true ) {
-                    dv1 = '<span style="color: #CEA731;">Dal kosten verbruik:</span><br/>';
-                    dv2 = '&nbsp;&euro;&nbsp;'+dalVerbruikt.toFixed(2)+'<br/>';
-                }
-
-                if ( $('#CostChartVerbr').highcharts().series[4].visible === true ) {
-                    gas1 = '<span style="color: #507ABF;">Gas kosten verbruik:</span><br/>';
-                    if ( GasM3Verbruikt !== 'onbekend' ) {
-                        gas2 = '&nbsp;&euro;&nbsp;'+gasVerbruikt.toFixed(2) + '&nbsp;(' + GasM3Verbruikt + ' m&#179;)' + '<br/>';
-                    } else {
-                        gas2 = '&nbsp;&euro;&nbsp;'+gasVerbruikt.toFixed(2) + '&nbsp;(' + GasM3Verbruikt + ' )' + '<br/>';
-                    }
-                }
-
-                if ( $('#CostChartVerbr').highcharts().series[5].visible === true ) {
-                    water1  = '<span style="color: #6699ff;">Water kosten verbruik:</span><br/>';
-                    if ( WaterM3Verbruikt !== 'onbekend' ) {
-                        water2  = '&nbsp;&euro;&nbsp;' + waterVerbruikt.toFixed(2) + '&nbsp;(' + WaterM3Verbruikt + ' m&#179;)' + '<br/>';
-                    } else {
-                        water2  = '&nbsp;&euro;&nbsp;' + waterVerbruikt.toFixed(2) + '&nbsp;(' + WaterM3Verbruikt + ' )' + '<br/>';
-                    }
-                }
-
-                if ( $('#CostChartVerbr').highcharts().series[2].visible === true ) {
-                    pg1 = '<span style="color: #98D023;">Piek kosten geleverd:</span><br/>';
-                    pg2 = '&nbsp;&euro;&nbsp;'+piekGeleverd.toFixed(2)+'<br/>';
-                }
-                if ( $('#CostChartVerbr').highcharts().series[3].visible === true ) {
-                    dg1 = '<span style="color: #7FAD1D; ">Dal kosten geleverd:</span><br/>';
-                    dg2 = '&nbsp;&euro;&nbsp;'+dalGeleverd.toFixed(2)+'<br/>';
-                }
-
-                if ( $('#CostChartVerbr').highcharts().series[0].visible === true && $('#CostChartVerbr').highcharts().series[1].visible === true) {
-                    pt1 = '<span style="color: #6E797C;"><b>Totaal verbruikt:</b></span><br/>';
-                    pt2 = '&nbsp;&euro;&nbsp;'+totVerbruikt.toFixed(2)+'<br/>';
-                    verbrkwh1 = '<br/>kWh verbruik:'
-                    if ( KWhVerbruikt !== 'onbekend' ) {
-                        verbrkwh2 = '<br/>'+KWhVerbruikt+' kWh'
-                    } else {
-                        verbrkwh2 = '<br/>'+KWhVerbruikt
-                    }
-                }
-                
-                if ( $('#CostChartVerbr').highcharts().series[2].visible === true && $('#CostChartVerbr').highcharts().series[3].visible === true ) {
-                    dt1= '<span style="color: #6E797C;"><b>Totaal geleverd:</b></span><br/>';
-                    dt2= '&nbsp;&euro;&nbsp;'+totGeleverd.toFixed(2)+'<br/>';
-                    levrkwh1 = '<br/>kWh levering:';
-                    if ( KWhVerbruikt !== 'onbekend' ) {
-                        levrkwh2 = '<br/>' + kWhLevering +' kWh';
-                    } else {
-                        levrkwh2 = '<br/>' + kWhLevering
-                    }
-                }
-
-                if ( $('#CostChartVerbr').highcharts().series[7].visible === true ) {
-                    // adjust text if we we have to pay or get money back
-                    if (totaalNetto >= 0) {
-                        net1 = '<span style="color: #6E797C;"><b>Netto kosten:</b></span><br/>';
-                    } else {
-                        totaalNetto = Math.abs(totaalNetto) // no minus numbers
-                        net1 = '<span style="color: #6E797C;"><b>Netto opbrengsten:</b></span><br/>';
-                    }
-                    net2 = '&nbsp;&euro;&nbsp;'+totaalNetto.toFixed(2)+'<br/>';
-                }
-
-
-                s += '<div style="width: 260px; z-index: 0">';
-                s += '<div class="float-left">';
-                s += pv1;
-                s += dv1;
-                s += gas1;
-                s += water1;
-                s += pt1;
-                s += dg1;
-                s += pg1;
-                s += dt1;
-                s += net1;
-                s += verbrkwh1;
-                s += levrkwh1;
-                s += '</div>';
-                    
-                s += '<div class="float-right">';
-                s += pv2;
-                s += dv2;
-                s += gas2;
-                s += water2;
-                s += pt2;
-                s += dg2;
-                s += pg2;
-                s += dt2;
-                s += net2;
-                s += verbrkwh2;
-                s += levrkwh2;
-                s += '</div>';
-                s += '</div>';
-
-                //console.log(s);
-                return s;
-                },
-
-                backgroundColor: '#F5F5F5',
-                borderColor: '#DCE1E3',
-                crosshairs: [true, true],
-                borderWidth: 1
-            },
-            navigator: {
-                xAxis: {
-                    min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
-                    minTickInterval:       30 * 24 * 3600000,  
-                    maxRange:        120 * 30 * 24 * 3600000,
-                    type: 'datetime',
-                    dateTimeLabelFormats: {
-                        day: '%B<br/>%Y',
-                        month: '%B<br/>%Y',
-                        year: '%Y'
-                    }
-                },
-                enabled: true,
-                outlineColor: '#384042',
-                outlineWidth: 1,
-                handles: {
-                    backgroundColor: '#384042',
-                    borderColor: '#6E797C'
-                },
-                series: {
-                    color: '#10D0E7'
+                    day: '%B<br/>%Y',
+                    month: '%B<br/>%Y',
+                    year: '%Y'
                 }
             },
-            series: [ 
+            enabled: true,
+            outlineColor: '#384042',
+            outlineWidth: 1,
+            handles: {
+                backgroundColor: '#384042',
+                borderColor: '#6E797C'
+            },
+            series: {
+                color: '#10D0E7'
+            }
+        },
+        series: [ 
             {
                 id: 'piek_ver',
                 visible: GseriesVisibilty[0],
@@ -630,18 +445,18 @@ function createCostChart() {
                     }
                 }
             }
-            ],
-            lang: {
-                noData: "Geen gegevens beschikbaar."
-            },
-            noData: {
-                style: { 
-                    fontFamily: 'robotomedium',   
-                    fontWeight: 'bold',     
-                    fontSize: '25px',
-                    color: '#10D0E7'        
-                }
+        ],
+        lang: {
+            noData: "Geen gegevens beschikbaar."
+        },
+        noData: {
+            style: { 
+                fontFamily: 'robotomedium',
+                fontWeight: 'bold',
+                fontSize: '25px',
+                color: '#10D0E7'
             }
+        }
   });
 
   // can only set text when chart is made.
@@ -699,8 +514,13 @@ function DataLoop() {
     }
     // make chart only once and when we have data.
     if (recordsLoaded !== 0 &&  $('#CostChartVerbr').highcharts() == null) {
-      hideStuff('loading-data');
-      createCostChart();
+        hideStuff('loading-data');
+        createCostChart();
+
+       // load shared options
+       var initOptions = $('#CostChartVerbr').highcharts().options
+        optionsNew = Highcharts.merge(initOptions, HC_costToolTip);
+        $('#CostChartVerbr').highcharts(optionsNew);
     }
     setTimeout('DataLoop()',1000);
 }

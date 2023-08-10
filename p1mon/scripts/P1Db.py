@@ -204,7 +204,8 @@ def Main():
         financial_db=e_db_financieel_dag, 
         kwh_gas_db=e_db_history_min, 
         watermeter_db=watermeter_db, 
-        config_db=config_db, 
+        config_db=config_db,
+        status_db=rt_status_db,
         flog=flog )
 
     pauze_tijd_hoofdloop = 1
@@ -476,6 +477,9 @@ def cleanDb():
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": verwijderen uur recs,delete gefaald. Melding="+str(e.args[0]))
 
+    # removed in version 2.3.0
+    # new standard retention is minutes 31 days, hours 1096 days, days, months, years unlimted.
+    """
     # dagen records verwijderen
     sql_del_str = "delete from "+const.DB_HISTORIE_DAG_TAB+" where timestamp <  '"+\
     str(datetime.datetime.strptime(timestr,"%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096))+"'"
@@ -484,7 +488,8 @@ def cleanDb():
         e_db_history_dag.del_rec(sql_del_str)     
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": verwijderen dag recs,delete gefaald. Melding="+str(e.args[0]))
-
+    """
+    
 def backupFile(filename):
     try:
         file_sec_delta = util.file_delta_timestamp(filename ,const.DIR_FILEDISK)

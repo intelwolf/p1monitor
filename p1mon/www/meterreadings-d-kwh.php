@@ -54,7 +54,6 @@ var secs                = mins * 60;
 var currentSeconds      = 0;
 var currentMinutes      = 0;
 
-
 function readJsonApiHistoryDay(){ 
     $.getScript( "/api/v1/powergas/day", function( data, textStatus, jqxhr ) {
       try {
@@ -117,28 +116,29 @@ function readJsonApiHistoryPowerDay(){
 
 // change items with the marker #PARAMETER
 function createMeterReadingsChart() {
-  Highcharts.stockChart('meterReadingChart', {
-  exporting: { enabled: false },
-  lang: {
-    noData: "Geen gegevens beschikbaar."
-  },
-  noData: {
-    style: { 
-      fontFamily: 'robotomedium',   
-        fontWeight: 'bold',     
-          fontSize: '25px',
-          color: '#10D0E7'        
-   }
-  },
-  chart: {
-    //ignoreHiddenSeries: false,
-    style: {
-      fontFamily: 'robotomedium'
-    },
-    backgroundColor: '#ffffff',
-    borderWidth: 0
-  },   
-  title: {
+    Highcharts.stockChart('meterReadingChart', {
+        exporting: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
+        },
+        noData: {
+            style: { 
+                fontFamily: 'robotomedium',   
+                fontWeight: 'bold',     
+                fontSize: '25px',
+                color: '#10D0E7'        
+            }
+        },
+        chart: {
+            //ignoreHiddenSeries: false,
+            style: {
+            fontFamily: 'robotomedium',
+            fontSize: '14px'
+            },
+            backgroundColor: '#ffffff',
+            borderWidth: 0
+        },   
+        title: {
             margin: 35,
             text: 'placeholder', 
             style: {
@@ -146,180 +146,179 @@ function createMeterReadingsChart() {
                 fontWeight: 'bold',
                 fontSize: "10px"
             }
-  },
-  navigator: {
-    xAxis: {
-      minTickInterval:  1 * 24 * 3600000, 
-      maxRange:        25 * 365 * 24 * 3600000,
-      type: 'datetime',
-      dateTimeLabelFormats: {
-        day: '%a.<br>%d %B<br/>%Y',
-        month: '%B<br/>%Y',
-        year: '%Y'
-      }  
-    },  
-    enabled: true,
-    outlineColor: '#384042',
-    outlineWidth: 1,
-    handles: {
-      backgroundColor: '#384042',
-      borderColor: '#6E797C'
-    },
-    
-  },   
-  xAxis: {
-   type: 'datetime',
-   minTickInterval: 1   * 24 * 3600000, 
-   range:          5000 * 24 * 3600000,
-   minRange:       7  * 24 * 3600000,
-   maxRange:       61 * 24 * 3600000,
-   dateTimeLabelFormats: {
-     day: '%a.<br>%d %b<br/>%Y',
-     hour: '%a.<br>%H:%M',
-     year: '%Y'
-   },
-   lineColor: '#6E797C',
-   lineWidth: 1, 
-   events: {
-        setExtremes: function(e) {
-        if(typeof(e.rangeSelectorButton)!== 'undefined') {
-         for (var j = 0;  j < GselectText.length; j++){    
-           if ( GselectText[j] == e.rangeSelectorButton.text ) {
-             toLocalStorage('select-meterreadings-d-kwh-index',j); // #PARAMETER
-             break;
-           }
-         }
-       }
-     }
-   },   
-  },
-  yAxis: [
-    { // kWh axis
-        showEmpty: false,
-        tickAmount: 7,
-        opposite: false,
-        offset: null,
-        gridLineDashStyle: 'longdash',
-        gridLineColor: '#6E797C',
-        gridLineWidth: 1,
-        labels: {
-            format: '{value} kWh',
-                style: {
-                    color: '#6E797C',
-                },
+        },
+        navigator: {
+            xAxis: {
+                minTickInterval:  1 * 24 * 3600000, 
+                maxRange:        25 * 365 * 24 * 3600000,
+                type: 'datetime',
+                dateTimeLabelFormats: {
+                    day: '%a.<br>%d %B<br/>%Y',
+                    month: '%B<br/>%Y',
+                    year: '%Y'
+                }
+            },  
+            enabled: true,
+            outlineColor: '#384042',
+            outlineWidth: 1,
+            handles: {
+            backgroundColor: '#384042',
+            borderColor: '#6E797C'
             },
-        title: {
-        text: null, 
         },
-    },
-  ],
-  tooltip: {
-       useHTML: false,
-        style: {
-            padding: 3,
-            color: '#6E797C'
+        xAxis: {
+            type: 'datetime',
+            minTickInterval: 1   * 24 * 3600000, 
+            range:          5000 * 24 * 3600000,
+            minRange:       7  * 24 * 3600000,
+            maxRange:       61 * 24 * 3600000,
+            dateTimeLabelFormats: {
+                day: '%a.<br>%d %b<br/>%Y',
+                hour: '%a.<br>%H:%M',
+                year: '%Y'
+            },
+            lineColor: '#6E797C',
+            lineWidth: 1, 
+            events: {
+                setExtremes: function(e) {
+                    if(typeof(e.rangeSelectorButton)!== 'undefined') {
+                        for (var j = 0;  j < GselectText.length; j++) {
+                        if ( GselectText[j] == e.rangeSelectorButton.text ) {
+                            toLocalStorage('select-meterreadings-d-kwh-index',j); // #PARAMETER
+                            break;
+                        }
+                        }
+                    }
+                }
+            }, 
         },
-      formatter: function() {
-        
-        var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d', this.x) +'</b>';
-        var d = this.points;
-           
-        for (var i=0,  tot=d.length; i < tot; i++) {
-                    
-                if ( d[i].series.userOptions.name === 'dal verbruik' ) {
-                    s += '<br/><span style="color:#CEA731">Dal verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
-                        //console.log( d[i].y )
-                }
-                if ( d[i].series.userOptions.name === 'piek verbruik' ) {
-                    s += '<br/><span style="color:#FFC311">Piek verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }
-                if ( d[i].series.userOptions.name === 'totaal verbruik' ) {
-                    s += '<br/><span style="color:#6E797C">Totaal verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }
-                if ( d[i].series.userOptions.name === 'netto dal geleverd' ) {
-                    s += '<br/><span style="color:#7FAD1D">Netto dal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }   
-                if ( d[i].series.userOptions.name === 'netto piek geleverd' ) {
-                    s += '<br/><span style="color:#98D023">Netto piek geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }
-                if ( d[i].series.userOptions.name === 'netto totaal geleverd' ) {
-                    s += '<br/><span style="color:#6E797C">Netto totaal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }
-                if ( d[i].series.userOptions.name === 'bruto dal geleverd' ) {
-                    s += '<br/><span style="color:#7FAD1D">Bruto dal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }    
-                if ( d[i].series.userOptions.name === 'bruto piek geleverd' ) {
-                    s += '<br/><span style="color:#98D023">Bruto piek geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }
-                if ( d[i].series.userOptions.name === 'bruto totaal geleverd' ) {
-                    s += '<br/><span style="color:#6E797C">Bruto totaal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                    //console.log( d[i].y )
-                }
+    yAxis: [
+        { // kWh axis
+            showEmpty: false,
+            tickAmount: 7,
+            opposite: false,
+            offset: null,
+            gridLineDashStyle: 'longdash',
+            gridLineColor: '#6E797C',
+            gridLineWidth: 1,
+            labels: {
+                format: '{value} kWh',
+                    style: {
+                        color: '#6E797C',
+                    },
+                },
+            title: {
+            text: null, 
+            },
         }
-        //console.log (s)
-        return s;
-      },
-      backgroundColor: '#F5F5F5',
-      borderColor: '#DCE1E3',
-      crosshairs: [true, true],
-      borderWidth: 1
+    ],
+    tooltip: {
+        useHTML: false,
+            style: {
+                padding: 3,
+                color: '#6E797C'
+            },
+        formatter: function() {
+            
+            var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d', this.x) +'</b>';
+            var d = this.points;
+            
+            for (var i=0,  tot=d.length; i < tot; i++) {
+                        
+                    if ( d[i].series.userOptions.name === 'dal verbruik' ) {
+                        s += '<br/><span style="color:#CEA731">Dal verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
+                            //console.log( d[i].y )
+                    }
+                    if ( d[i].series.userOptions.name === 'piek verbruik' ) {
+                        s += '<br/><span style="color:#FFC311">Piek verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }
+                    if ( d[i].series.userOptions.name === 'totaal verbruik' ) {
+                        s += '<br/><span style="color:#6E797C">Totaal verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }
+                    if ( d[i].series.userOptions.name === 'netto dal geleverd' ) {
+                        s += '<br/><span style="color:#7FAD1D">Netto dal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }   
+                    if ( d[i].series.userOptions.name === 'netto piek geleverd' ) {
+                        s += '<br/><span style="color:#98D023">Netto piek geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }
+                    if ( d[i].series.userOptions.name === 'netto totaal geleverd' ) {
+                        s += '<br/><span style="color:#6E797C">Netto totaal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }
+                    if ( d[i].series.userOptions.name === 'bruto dal geleverd' ) {
+                        s += '<br/><span style="color:#7FAD1D">Bruto dal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }    
+                    if ( d[i].series.userOptions.name === 'bruto piek geleverd' ) {
+                        s += '<br/><span style="color:#98D023">Bruto piek geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }
+                    if ( d[i].series.userOptions.name === 'bruto totaal geleverd' ) {
+                        s += '<br/><span style="color:#6E797C">Bruto totaal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                        //console.log( d[i].y )
+                    }
+            }
+            //console.log (s)
+            return s;
+        },
+        backgroundColor: '#F5F5F5',
+        borderColor: '#DCE1E3',
+        crosshairs: [true, true],
+        borderWidth: 1
     },
     rangeSelector: { // #PARAMETER
-      inputEnabled: false,
-       buttonSpacing: 5, 
-       selected : Gselected,
-       buttons: [{
-        type: 'day',
-        count: 7,
-        text: GselectText[0]
-       },{
-         type: 'month',
-         count: 1,
-         text: GselectText[1]
-       },{
-        type: 'year',
-        count: 1,
-        text: GselectText[2]
-       }, {
-        type: 'all',
-        //count: 3,
-        text: GselectText[3]
-       }],
-       buttonTheme: { 
-        r: 3,
-        fill: '#F5F5F5',
-        stroke: '#DCE1E3',
-        'stroke-width': 1,
-        width: 65,
-        style: {
-          color: '#6E797C',
-          fontWeight: 'normal'
-        },
-        states: {
-          hover: {
+        inputEnabled: false,
+        buttonSpacing: 5, 
+        selected : Gselected,
+        buttons: [{
+            type: 'day',
+            count: 7,
+            text: GselectText[0]
+        },{
+            type: 'month',
+            count: 1,
+            text: GselectText[1]
+        },{
+            type: 'year',
+            count: 1,
+            text: GselectText[2]
+        }, {
+            type: 'all',
+            //count: 3,
+            text: GselectText[3]
+        }],
+        buttonTheme: { 
+            r: 3,
             fill: '#F5F5F5',
-            style: {
-              color: '#10D0E7'
-            }
-          },
-          select: {
-            fill: '#DCE1E3',
             stroke: '#DCE1E3',
             'stroke-width': 1,
+            width: 65,
             style: {
-              color: '#384042',
-              fontWeight: 'normal'
+            color: '#6E797C',
+            fontWeight: 'normal'
+            },
+            states: {
+                hover: {
+                    fill: '#F5F5F5',
+                    style: {
+                        color: '#10D0E7'
+                    }
+                },
+                select: {
+                    fill: '#DCE1E3',
+                    stroke: '#DCE1E3',
+                    'stroke-width': 1,
+                    style: {
+                        color: '#384042',
+                    fontWeight: 'normal'
+                    }
+                }
             }
-          }
-        }
-      }  
+        }  
     },
     legend: {
         y: -38,
@@ -342,131 +341,129 @@ function createMeterReadingsChart() {
         },
         itemDistance: 5
     },
-    series: [ 
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[0],
-        showInNavigator: true,
-        name: 'dal verbruik',
-        type: 'spline',
-        color: '#CEA731',
-        data: consumptionKwhLow,
-    },
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[1],
-        showInNavigator: true,
-        name: 'piek verbruik',
-        type: 'spline',
-        color: '#FFC311',
-        data: consumptionKwhHigh,
-    },
-    {
-        yAxis: 0,
-        dashStyle: 'ShortDashDotDot',
-        visible: GseriesVisibilty[2],
-        showInNavigator: true,
-        name: 'totaal verbruik',
-        type: 'spline',
-        color: '#E9B620',
-        data: consumptionKwhTotal,
-    },
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[3],
-        showInNavigator: true,
-        name: 'netto dal geleverd',
-        type: 'spline',
-        color: '#7FAD1D',
-        data: productionKwhLow,
-    },
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[4],
-        showInNavigator: true,
-        name: 'netto piek geleverd',
-        type: 'spline',
-        color: '#98D023',
-        data: productionKwhHigh,
-    },
-    {
-        yAxis: 0,
-        dashStyle: 'ShortDashDotDot',
-        visible: GseriesVisibilty[5],
-        showInNavigator: true,
-        name: 'netto totaal geleverd',
-        type: 'spline',
-        color: '#8ABD20',
-        data: productionKwhTotal,
-    },
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[6],
-        showInNavigator: true,
-        name: 'bruto dal geleverd',
-        type: 'spline',
-        color: '#7FAD1D',
-        data: productionKwhLowGross,
-        zIndex: 0,
-    },
-    {
-        yAxis: 0,
-        visible: GseriesVisibilty[7],
-        showInNavigator: true,
-        name: 'bruto piek geleverd',
-        type: 'spline',
-        color: '#98D023',
-        data: productionKwhHighGross,
-    },
-    {
-        yAxis: 0,
-        dashStyle: 'ShortDashDotDot',
-        visible: GseriesVisibilty[8],
-        showInNavigator: true,
-        name: 'bruto totaal geleverd',
-        type: 'spline',
-        color: '#8ABD20',
-        data: productionKwhHighGross,
-    }
-    ],
+    series: [ {
+            yAxis: 0,
+            visible: GseriesVisibilty[0],
+            showInNavigator: true,
+            name: 'dal verbruik',
+            type: 'spline',
+            color: '#CEA731',
+            data: consumptionKwhLow,
+        },
+        {
+            yAxis: 0,
+            visible: GseriesVisibilty[1],
+            showInNavigator: true,
+            name: 'piek verbruik',
+            type: 'spline',
+            color: '#FFC311',
+            data: consumptionKwhHigh,
+        },
+        {
+            yAxis: 0,
+            dashStyle: 'ShortDashDotDot',
+            visible: GseriesVisibilty[2],
+            showInNavigator: true,
+            name: 'totaal verbruik',
+            type: 'spline',
+            color: '#E9B620',
+            data: consumptionKwhTotal,
+        },
+        {
+            yAxis: 0,
+            visible: GseriesVisibilty[3],
+            showInNavigator: true,
+            name: 'netto dal geleverd',
+            type: 'spline',
+            color: '#7FAD1D',
+            data: productionKwhLow,
+        },
+        {
+            yAxis: 0,
+            visible: GseriesVisibilty[4],
+            showInNavigator: true,
+            name: 'netto piek geleverd',
+            type: 'spline',
+            color: '#98D023',
+            data: productionKwhHigh,
+        },
+        {
+            yAxis: 0,
+            dashStyle: 'ShortDashDotDot',
+            visible: GseriesVisibilty[5],
+            showInNavigator: true,
+            name: 'netto totaal geleverd',
+            type: 'spline',
+            color: '#8ABD20',
+            data: productionKwhTotal,
+        },
+        {
+            yAxis: 0,
+            visible: GseriesVisibilty[6],
+            showInNavigator: true,
+            name: 'bruto dal geleverd',
+            type: 'spline',
+            color: '#7FAD1D',
+            data: productionKwhLowGross,
+            zIndex: 0,
+        },
+        {
+            yAxis: 0,
+            visible: GseriesVisibilty[7],
+            showInNavigator: true,
+            name: 'bruto piek geleverd',
+            type: 'spline',
+            color: '#98D023',
+            data: productionKwhHighGross,
+        },
+        {
+            yAxis: 0,
+            dashStyle: 'ShortDashDotDot',
+            visible: GseriesVisibilty[8],
+            showInNavigator: true,
+            name: 'bruto totaal geleverd',
+            type: 'spline',
+            color: '#8ABD20',
+            data: productionKwhHighGross,
+    }],
     plotOptions: {
-      series: {
-        events: {
-          legendItemClick: function () {
-            //console.log('legendItemClick index='+this.index);
-            
-            if ( this.index === 0 ) {
-              toLocalStorage('meterreadings-d-consumptionKwhLow',!this.visible); // #PARAMETER
+        series: {
+            events: {
+            legendItemClick: function () {
+                //console.log('legendItemClick index='+this.index);
+                
+                if ( this.index === 0 ) {
+                    toLocalStorage('meterreadings-d-consumptionKwhLow',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 1 ) {
+                    toLocalStorage('meterreadings-d-consumptionKwhHigh',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 2 ) {
+                    toLocalStorage('meterreadings-d-consumptionKwhTotal',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 3 ) {
+                    toLocalStorage('meterreadings-d-productionKwhLow',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 4 ) {
+                    toLocalStorage('meterreadings-d-productionKwhHigh',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 5 ) {
+                    toLocalStorage('meterreadings-d-productionKwhTotal',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 6 ) {
+                    toLocalStorage('meterreadings-d-productionKwhLowGross',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 7 ) {
+                    toLocalStorage('meterreadings-d-productionKwhHighGross',!this.visible); // #PARAMETER
+                }
+                if ( this.index === 8 ) {
+                    toLocalStorage('meterreadings-d-productionKwhHTotalGross',!this.visible); // #PARAMETER
+                }
             }
-            if ( this.index === 1 ) {
-              toLocalStorage('meterreadings-d-consumptionKwhHigh',!this.visible); // #PARAMETER
             }
-            if ( this.index === 2 ) {
-              toLocalStorage('meterreadings-d-consumptionKwhTotal',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 3 ) {
-              toLocalStorage('meterreadings-d-productionKwhLow',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 4 ) {
-              toLocalStorage('meterreadings-d-productionKwhHigh',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 5 ) {
-              toLocalStorage('meterreadings-d-productionKwhTotal',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 6 ) {
-              toLocalStorage('meterreadings-d-productionKwhLowGross',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 7 ) {
-              toLocalStorage('meterreadings-d-productionKwhHighGross',!this.visible); // #PARAMETER
-            }
-            if ( this.index === 8 ) {
-              toLocalStorage('meterreadings-d-productionKwhHTotalGross',!this.visible); // #PARAMETER
-            }
-          }
         }
-      }
-    },
-  });
+    }
+    });
   
 }
 

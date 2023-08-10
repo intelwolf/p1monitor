@@ -18,11 +18,7 @@ import process_lib
 import paho.mqtt.client as mqtt
 from datetime import datetime
 
-#from sqldb import configDB, rtStatusDb, SqlDb1, WatermeterDBV2, currentWeatherDB, temperatureDB, powerProductionDB
-#from logger import fileLogger, logging
 from util import setFile2user, getUtcTime
-#from makeLocalTimeString import makeLocalTimeString
-#from getQuote import getQuote
 
 #const
 MQTT_PREFIX         = 'p1monitor'
@@ -691,15 +687,13 @@ def Main(argv):
                 if mqtt_para['phasepublishisactive'] == True:  #is active
                     _id, timestamp, _label, _security = rt_status_db.strget( 106, flog )
                     if ( mqtt_para['phaseprocessedtimestamp'] ) != timestamp:
-                        
                         getPhasePayloadFromDB ( mqtt_payload_phase )
-
                         if len( mqtt_topics_phase[0] ) > 0: # only send when we have data
                             mqttPublish( mqtt_client, mqtt_topics_phase,  mqtt_payload_phase )
                             mqtt_para['phaseprocessedtimestamp'] = timestamp
 
             except Exception as e:
-                flog.warning(inspect.stack()[0][3]+": onverwachte fout bij binnen temperatuur publish van melding:"+str(e))  
+                flog.warning(inspect.stack()[0][3]+": onverwachte fout bij binnen fase publish van melding:"+str(e))  
 
         flog.debug( inspect.stack()[0][3] + ": sleeping... mqtt_para['brokerconnectionisok'] = "  +  str(mqtt_para['brokerconnectionisok']) )
 

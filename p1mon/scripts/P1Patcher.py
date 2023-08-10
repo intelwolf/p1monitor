@@ -1,4 +1,3 @@
-# run manual with ./pythonlaunch.sh P1Patcher.py
 
 import argparse
 from genericpath import isdir
@@ -189,7 +188,7 @@ def Main( argv ):
 # path and is excutable. return true when all is  #
 # well.                                           #
 ###################################################
-def run_patch(extract_folderpath=None):
+def run_patch( extract_folderpath=None ):
     flog.debug( inspect.stack()[0][3] + " extract_folderpath = " + str(extract_folderpath) )
     # find the folder with the starting executable patch_lib.PATCH_START_SCRIPT_NAME
     
@@ -208,13 +207,18 @@ def run_patch(extract_folderpath=None):
         # find folder and file to execute without the path.
         working_folder, file_to_excute =  os.path.split( start_file_name[0] )
        
-        cmd = "cd " + working_folder + "; ./" + file_to_excute
+        cmd = "cd " + working_folder + "; ./" + file_to_excute + " " + str( const.FILE_PATCH_STATUS )
         flog.debug( inspect.stack()[0][3] + " cmd =  " + str(cmd) )
+
+        msg = ": aanpassingen worden doorgevoerd, dit kan even duren....."
+        writeLineToStatusFile( msg )
+        flog.info( inspect.stack()[0][3] + msg )
 
         try:
             proc = subprocess.Popen( [cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
             stdout, stderr  = proc.communicate()
-            returncode = int( proc.wait( timeout=180 ) )
+            #returncode = int( proc.wait( timeout=180 ) )
+            returncode = int( proc.wait( timeout=900 ) ) # fixed by v2.2.0 patch
             #print ( stdout, stderr, returncode )
             if returncode != 0:
                 raise Exception( "fout bij het uitvoeren van de patch." )
@@ -225,7 +229,10 @@ def run_patch(extract_folderpath=None):
                     flog.info( inspect.stack()[0][3] + msg )
             r=True # all is well.
         except Exception as e:
-            raise Exception( "patch uitvoerings probleem " + str(e) + " (stderr) output " + str( stderr.decode("utf-8") ) )
+            msg = ": patch uitvoerings probleem " + str(e) + " (stderr) output " + str( stderr.decode("utf-8") )
+            writeLineToStatusFile( msg )
+            flog.info( inspect.stack()[0][3] + msg )
+            raise Exception( msg )
 
     except Exception as e:
         flog.critical( inspect.stack()[0][3] + "start file " + str(e) )
@@ -315,7 +322,6 @@ def writeLineToStatusFile( msg ):
         flog.error( "status file schrijf fout: " + str(e) )
         initStatusFile()
 
-
 #####################################################
 # exit the program as clean as possible by closing  #
 # alle files, etc.                                  #
@@ -352,6 +358,7 @@ def stop( exit=0 ):
 # close program when a signal is recieved.             #
 ########################################################
 def saveExit(signum, frame):
+    stop()
     flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
     signal.signal(signal.SIGINT, original_sigint)
     sys.exit(0)

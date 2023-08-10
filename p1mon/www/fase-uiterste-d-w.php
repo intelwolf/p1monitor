@@ -111,230 +111,229 @@ function readJsonPhaseMinMax( cnt ){
 // change items with the marker #PARAMETER
 function createChart() {
     Highcharts.stockChart('wattChart', {
-    exporting: { enabled: false },
-    lang: {
-        noData: "Geen gegevens beschikbaar."
-    },
-    noData: {
-        style: { 
-        fontFamily: 'robotomedium',
-            fontWeight: 'bold',
-            fontSize: '25px',
-            color: '#10D0E7'
-    }
-    },
-    chart: {
-        style: {
-            fontFamily: 'robotomedium'
+        exporting: { enabled: false },
+        lang: {
+            noData: "Geen gegevens beschikbaar."
         },
-        backgroundColor: '#ffffff',
-        borderWidth: 0
-    },   
-    title: {
-        text: null
-    },  
-    navigator: {
+        noData: {
+            style: { 
+            fontFamily: 'robotomedium',
+                fontWeight: 'bold',
+                fontSize: '25px',
+                color: '#10D0E7'
+            }
+        },
+        chart: {
+            style: {
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
+            },
+            backgroundColor: '#ffffff',
+            borderWidth: 0
+        },
+        title: {
+            text: null
+        },
+        navigator: {
+            xAxis: {
+                type: 'datetime',
+                dateTimeLabelFormats: {
+                    day: '%a.<br>%d %B<br/>%Y',
+                    month: '%B<br/>%Y',
+                    year: '%Y'
+                }
+            },  
+            enabled: true,
+            outlineColor: '#384042',
+            outlineWidth: 1,
+            handles: {
+                backgroundColor: '#384042',
+                borderColor: '#6E797C'
+            },
+        },
         xAxis: {
-            type: 'datetime',
+            type: 'datetime', 
+            minTickInterval: 24 * 3600000, 
             dateTimeLabelFormats: {
                 day: '%a.<br>%d %B<br/>%Y',
-                month: '%B<br/>%Y',
-                year: '%Y'
-            } 
-        },  
-        enabled: true,
-        outlineColor: '#384042',
-        outlineWidth: 1,
-        handles: {
-            backgroundColor: '#384042',
-            borderColor: '#6E797C'
-        },
-    },   
-    xAxis: {
-        type: 'datetime', 
-        minTickInterval: 24 * 3600000, 
-        dateTimeLabelFormats: {
-            day: '%a.<br>%d %B<br/>%Y',
-        },
-        lineColor: '#6E797C',
-        lineWidth: 1, 
-        events: {
-        setExtremes: function(e) {
-            if(typeof(e.rangeSelectorButton)!== 'undefined') {
-                for (var j = 0;  j < GselectText.length; j++){    
-                    if ( GselectText[j] == e.rangeSelectorButton.text ) {
-                        toLocalStorage( 'fase-uiterste-d-select-w-index', j ); // #PARAMETER
-                        break;
-                    }
-                }
-            }
-        }
-    },
-    },
-    yAxis: [
-        {
-        opposite: false,
-        gridLineDashStyle: 'longdash',
-        gridLineColor: '#6E797C',
-        gridLineWidth: 0.5,
-        labels: {
-            //format: '{value} W',
-            format: '{value} ' + wattText,
-                style: {
-                color: '#384042'
-                }
             },
-        title: {
-            text: null, 
-        },
-    }],
-    tooltip: {
-        useHTML: true,
-        style: {
-            padding: 3,
-            color: '#6E797C'
-        },
-        formatter: function() {
-            
-            var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d', this.x) +'</b>'; //parameter
-            var d = this.points;
-            var max
-            var min
-            var delta
-            var txt
-
-            if ( useKw ) {
-                var wattTxt = 'kW'
-            } else {
-                var wattTxt = 'W'
+            lineColor: '#6E797C',
+            lineWidth: 1, 
+            events: {
+                setExtremes: function(e) {
+                    if(typeof(e.rangeSelectorButton)!== 'undefined') {
+                        for (var j = 0;  j < GselectText.length; j++){    
+                            if ( GselectText[j] == e.rangeSelectorButton.text ) {
+                                toLocalStorage( 'fase-uiterste-d-select-w-index', j ); // #PARAMETER
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-
-            for ( var i = 0; i < d.length; i++) { 
-
-                if ( d[i].series.name == GserieNames[0] && d[i].series.visible == true) {
-
-                    if ( useKw ) {
-                        max = d[i].point.high.toFixed(1);
-                        min = d[i].point.low.toFixed(1);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
-                    } else {
-                        max = d[i].point.high.toFixed(0);
-                        min = d[i].point.low.toFixed(0);;
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
-                    }
-
-                    txt = '<br/><span style="color: ' + L1C_color + '"><b>' + GserieNames[0] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
-                    s += txt;
-                    s += '<br/><span style="color: ' +  L1C_color + '">Maximum: </span>' + max + ' ' + wattTxt + ' ';
-                    s += '<span style="color: ' +  L1C_color + '">Minimum: </span>' + min + ' ' + wattTxt;
-                }
-
-                if ( d[i].series.name == GserieNames[1] && d[i].series.visible == true) {
-
-                    if ( useKw ) {
-                        max = d[i].point.high.toFixed(1);
-                        min = d[i].point.low.toFixed(1);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
-                    } else {
-                        max = d[i].point.high.toFixed(0);
-                        min = d[i].point.low.toFixed(0);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
-                    }
-
-                    txt = '<br/><span style="color: ' + L2C_color + '"><b>' + GserieNames[1] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
-                    s += txt;
-                    s += '<br/><span style="color: ' +  L2C_color + '">Maximum: </span>' + max + ' ' + wattTxt + ' ';
-                    s += '<span style="color: ' +  L2C_color + '">Minimum: </span>'+ min + ' ' + wattTxt;
-                }
-
-
-                if ( d[i].series.name == GserieNames[2] && d[i].series.visible == true) {
-
-                    if ( useKw ) {
-                        max = d[i].point.high.toFixed(1);
-                        min = d[i].point.low.toFixed(1);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
-                    } else {
-                        max = d[i].point.high.toFixed(0);
-                        min = d[i].point.low.toFixed(0);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
-                    }
-
-                    txt = '<br/><span style="color: ' + L3C_color + '"><b>' + GserieNames[2] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
-                    s += txt;
-                    s += '<br/><span style="color: ' + L3C_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
-                    s += '<span style="color: ' + L3C_color + '">Minimum: </span>' + min + ' ' + wattTxt;
-                }
-
-                if ( d[i].series.name == GserieNames[3] && d[i].series.visible == true) {
-
-                    if ( useKw ) {
-                        max = d[i].point.high.toFixed(1);
-                        min = d[i].point.low.toFixed(1);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
-                    } else {
-                        max = d[i].point.high.toFixed(0);
-                        min = d[i].point.low.toFixed(0);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
-                    }
-
-                    txt = '<br/><span style="color: ' + L1P_color + '"><b>' + GserieNames[3] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
-                    s += txt;
-                    s += '<br/><span style="color: ' +  L1P_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
-                    s += '<span style="color: ' +  L1P_color + '">Minimum: </span>' + min + ' ' + wattTxt;
-                }
-
-                if ( d[i].series.name == GserieNames[4] && d[i].series.visible == true) {
-
-                     if ( useKw ) {
-                        max = d[i].point.high.toFixed(1);
-                        min = d[i].point.low.toFixed(1);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
-                    } else {
-                        max = d[i].point.high.toFixed(0);
-                        min = d[i].point.low.toFixed(0);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
-                    }
-
-                    txt = '<br/><span style="color: ' + L2P_color + '"><b>' + GserieNames[4] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
-                    s += txt;
-                    s += '<br/><span style="color: ' +  L2P_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
-                    s += '<span style="color: ' +  L2P_color + '">Minimum: </span>' + max + ' ' + wattTxt + ' ';
-                }
-
-                if ( d[i].series.name == GserieNames[5] && d[i].series.visible == true) {
-                    
-                    if ( useKw ) {
-                        max = d[i].point.high.toFixed(1);
-                        min = d[i].point.low.toFixed(1);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
-                    } else {
-                        max = d[i].point.high.toFixed(0);
-                        min = d[i].point.low.toFixed(0);
-                        delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
-                    }
-
-                    txt = '<br/><span style="color: ' + L3P_color + '"><b>' + GserieNames[5] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
-                    s += txt;
-                    s += '<br/><span style="color: ' + L3P_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
-                    s += '<span style="color: ' + L3P_color + '">Minimum: </span>' + max + ' ' + wattTxt + ' ';
-                }
-
-            }
-
-            return s;
         },
-        backgroundColor: '#F5F5F5',
-        borderColor: '#DCE1E3',
-        crosshairs: [true, true],
-        borderWidth: 1
+        yAxis: [{
+            opposite: false,
+            gridLineDashStyle: 'longdash',
+            gridLineColor: '#6E797C',
+            gridLineWidth: 0.5,
+            labels: {
+                //format: '{value} W',
+                format: '{value} ' + wattText,
+                    style: {
+                    color: '#384042'
+                    }
+                },
+            title: {
+                text: null, 
+            },
+        }],
+        tooltip: {
+            useHTML: false,
+            style: {
+                padding: 3,
+                color: '#6E797C'
+            },
+            formatter: function() {
+                
+                var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d', this.x) +'</b>'; //parameter
+                var d = this.points;
+                var max
+                var min
+                var delta
+                var txt
+
+                if ( useKw ) {
+                    var wattTxt = 'kW'
+                } else {
+                    var wattTxt = 'W'
+                }
+
+                for ( var i = 0; i < d.length; i++) { 
+
+                    if ( d[i].series.name == GserieNames[0] && d[i].series.visible == true) {
+
+                        if ( useKw ) {
+                            max = d[i].point.high.toFixed(1);
+                            min = d[i].point.low.toFixed(1);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
+                        } else {
+                            max = d[i].point.high.toFixed(0);
+                            min = d[i].point.low.toFixed(0);;
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
+                        }
+
+                        txt = '<br/><span style="color: ' + L1C_color + '"><b>' + GserieNames[0] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
+                        s += txt;
+                        s += '<br/><span style="color: ' +  L1C_color + '">Maximum: </span>' + max + ' ' + wattTxt + ' ';
+                        s += '<span style="color: ' +  L1C_color + '">Minimum: </span>' + min + ' ' + wattTxt;
+                    }
+
+                    if ( d[i].series.name == GserieNames[1] && d[i].series.visible == true) {
+
+                        if ( useKw ) {
+                            max = d[i].point.high.toFixed(1);
+                            min = d[i].point.low.toFixed(1);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
+                        } else {
+                            max = d[i].point.high.toFixed(0);
+                            min = d[i].point.low.toFixed(0);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
+                        }
+
+                        txt = '<br/><span style="color: ' + L2C_color + '"><b>' + GserieNames[1] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
+                        s += txt;
+                        s += '<br/><span style="color: ' +  L2C_color + '">Maximum: </span>' + max + ' ' + wattTxt + ' ';
+                        s += '<span style="color: ' +  L2C_color + '">Minimum: </span>'+ min + ' ' + wattTxt;
+                    }
+
+
+                    if ( d[i].series.name == GserieNames[2] && d[i].series.visible == true) {
+
+                        if ( useKw ) {
+                            max = d[i].point.high.toFixed(1);
+                            min = d[i].point.low.toFixed(1);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
+                        } else {
+                            max = d[i].point.high.toFixed(0);
+                            min = d[i].point.low.toFixed(0);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
+                        }
+
+                        txt = '<br/><span style="color: ' + L3C_color + '"><b>' + GserieNames[2] + ' ( maximum delta ' + delta + ' ' + wattTxt + ' ) :</b></span>';
+                        s += txt;
+                        s += '<br/><span style="color: ' + L3C_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
+                        s += '<span style="color: ' + L3C_color + '">Minimum: </span>' + min + ' ' + wattTxt;
+                    }
+
+                    if ( d[i].series.name == GserieNames[3] && d[i].series.visible == true) {
+
+                        if ( useKw ) {
+                            max = d[i].point.high.toFixed(1);
+                            min = d[i].point.low.toFixed(1);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
+                        } else {
+                            max = d[i].point.high.toFixed(0);
+                            min = d[i].point.low.toFixed(0);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
+                        }
+
+                        txt = '<br/><span style="color: ' + L1P_color + '"><b>' + GserieNames[3] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
+                        s += txt;
+                        s += '<br/><span style="color: ' +  L1P_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
+                        s += '<span style="color: ' +  L1P_color + '">Minimum: </span>' + min + ' ' + wattTxt;
+                    }
+
+                    if ( d[i].series.name == GserieNames[4] && d[i].series.visible == true) {
+
+                        if ( useKw ) {
+                            max = d[i].point.high.toFixed(1);
+                            min = d[i].point.low.toFixed(1);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
+                        } else {
+                            max = d[i].point.high.toFixed(0);
+                            min = d[i].point.low.toFixed(0);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
+                        }
+
+                        txt = '<br/><span style="color: ' + L2P_color + '"><b>' + GserieNames[4] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
+                        s += txt;
+                        s += '<br/><span style="color: ' +  L2P_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
+                        s += '<span style="color: ' +  L2P_color + '">Minimum: </span>' + max + ' ' + wattTxt + ' ';
+                    }
+
+                    if ( d[i].series.name == GserieNames[5] && d[i].series.visible == true) {
+                        
+                        if ( useKw ) {
+                            max = d[i].point.high.toFixed(1);
+                            min = d[i].point.low.toFixed(1);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(1);
+                        } else {
+                            max = d[i].point.high.toFixed(0);
+                            min = d[i].point.low.toFixed(0);
+                            delta = Math.abs( d[i].point.high - d[i].point.low ).toFixed(0);
+                        }
+
+                        txt = '<br/><span style="color: ' + L3P_color + '"><b>' + GserieNames[5] + ' ( maximum delta ' + delta + ' '  + wattTxt + ' ) :</b></span>';
+                        s += txt;
+                        s += '<br/><span style="color: ' + L3P_color + '">Maximum: </span>'+ max + ' ' + wattTxt + ' ';
+                        s += '<span style="color: ' + L3P_color + '">Minimum: </span>' + max + ' ' + wattTxt + ' ';
+                    }
+
+                }
+
+                return s;
+            },
+            backgroundColor: '#F5F5F5',
+            borderColor: '#DCE1E3',
+            crosshairs: [true, true],
+            borderWidth: 1
         },
         rangeSelector: {
             inputEnabled: false,
             buttonSpacing: 5, 
             selected : Gselected,
-            buttons: [
-            {
+            buttons: [{
                 type: 'day',
                 count: 7,
                 text: GselectText[0]
@@ -360,36 +359,35 @@ function createChart() {
                 type: 'year',
                 count: 3,
                 text: GselectText[5]
-            }
-        ],
-        buttonTheme: { 
-            r: 3,
-            fill: '#F5F5F5',
-            stroke: '#DCE1E3',
-            'stroke-width': 1,
-            width: 65,
-            style: {
-            color: '#6E797C',
-            fontWeight: 'normal'
-            },
-            states: {
-            hover: {
+            }],
+            buttonTheme: { 
+                r: 3,
                 fill: '#F5F5F5',
-                style: {
-                color: '#10D0E7'
-                }
-            },
-            select: {
-                fill: '#DCE1E3',
                 stroke: '#DCE1E3',
                 'stroke-width': 1,
+                width: 65,
                 style: {
-                color: '#384042',
-                fontWeight: 'normal'
+                    color: '#6E797C',
+                    fontWeight: 'normal'
+                },
+                states: {
+                    hover: {
+                        fill: '#F5F5F5',
+                        style: {
+                            color: '#10D0E7'
+                        }
+                    },
+                    select: {
+                        fill: '#DCE1E3',
+                        stroke: '#DCE1E3',
+                        'stroke-width': 1,
+                        style: {
+                            color: '#384042',
+                        fontWeight: 'normal'
+                        }
+                    }
                 }
-            }
-            }
-        }  
+            }  
         },
         legend: {
             y: -38,
@@ -494,33 +492,33 @@ function createChart() {
 
         ],
         plotOptions: {
-        series: {
-            softThreshold: true,
-            showInNavigator: true,
-            events: {
-                legendItemClick: function () {
-                    // console.log('legendItemClick index='+this.index);
-                    if ( this.index === 0 ) {
-                        toLocalStorage('fase-uiterste-d-wc-L1',!this.visible); // #PARAMETER
-                    }
-                    if ( this.index === 1 ) {
-                        toLocalStorage('fase-uiterste-d-wc-L2',!this.visible); // #PARAMETER
-                    }
-                    if ( this.index === 2 ) {
-                        toLocalStorage('fase-uiterste-d-wc-L3',!this.visible); // #PARAMETER
-                    }
-                    if ( this.index === 3 ) {
-                        toLocalStorage('fase-uiterste-d-wp-L1',!this.visible); // #PARAMETER
-                    }
-                    if ( this.index === 4 ) {
-                        toLocalStorage('fase-uiterste-d-wp-L2',!this.visible); // #PARAMETER
-                    }
-                    if ( this.index === 5 ) {
-                        toLocalStorage('fase-uiterste-d-wp-L3',!this.visible); // #PARAMETER
+            series: {
+                softThreshold: true,
+                showInNavigator: true,
+                events: {
+                    legendItemClick: function () {
+                        // console.log('legendItemClick index='+this.index);
+                        if ( this.index === 0 ) {
+                            toLocalStorage('fase-uiterste-d-wc-L1',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 1 ) {
+                            toLocalStorage('fase-uiterste-d-wc-L2',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 2 ) {
+                            toLocalStorage('fase-uiterste-d-wc-L3',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 3 ) {
+                            toLocalStorage('fase-uiterste-d-wp-L1',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 4 ) {
+                            toLocalStorage('fase-uiterste-d-wp-L2',!this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 5 ) {
+                            toLocalStorage('fase-uiterste-d-wp-L3',!this.visible); // #PARAMETER
+                        }
                     }
                 }
-            }
-        }  
+            }  
         },
     });
 }

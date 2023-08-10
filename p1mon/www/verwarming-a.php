@@ -105,7 +105,8 @@ function createChartIn() {
         },
         chart: {
             style: {
-            fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             borderWidth: 0,
@@ -207,7 +208,7 @@ function createChartIn() {
                     }
             },
             dial: {
-                radius: '78%',
+                radius: '75%',
                 backgroundColor: '#384042',
                 borderWidth: 1,
                 baseWidth: 15,
@@ -245,7 +246,8 @@ function createChartOut() {
     },
     chart: {
         style: {
-        fontFamily: 'robotomedium'
+            fontFamily: 'robotomedium',
+            fontSize: '14px'
         },
         backgroundColor: '#ffffff',
         borderWidth: 0,
@@ -350,7 +352,7 @@ function createChartOut() {
                     }
                 },
             dial: {
-                radius: '78%',
+                radius: '75%',
                 backgroundColor: '#384042',
                 borderWidth: 1,
                 baseWidth: 15,
@@ -370,46 +372,46 @@ function createChartOut() {
 
 }
 
-function createChartGrafiek() {    
+function createChartGrafiek() { 
     $('#grafiekTemp').highcharts({
         chart: {
-            type: 'areasplinerange'     
+            type: 'areasplinerange'
         },
-      legend: { enabled: false },
-        exporting: { enabled: false },
-        credits: { enabled: false },
-        title: { text: null },     
-        tooltip: {
-            useHTML: true,
-            style: {
-                 padding: 3,
-                 color: '#6E797C'
-             },
-       formatter: function() {
-        var t_high  = 0;
-        var t_low   = 0;
-        var t_delta = 0;
+        legend: { enabled: false },
+            exporting: { enabled: false },
+            credits: { enabled: false },
+            title: { text: null },     
+            tooltip: {
+                useHTML: false,
+                style: {
+                    padding: 3,
+                    color: '#6E797C'
+                },
+                formatter: function() {
+                    var t_high  = 0;
+                    var t_low   = 0;
+                    var t_delta = 0;
 
-        t_high = this.point.low;
-        t_low  = this.point.high;
-        t_delta = Math.abs(t_high - t_low);
+                    t_high = this.point.low;
+                    t_low  = this.point.high;
+                    t_delta = Math.abs(t_high - t_low);
 
-        var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
-            s += '<br/><span style="color: #FF0000;"> '+ ui_in_label + ':' + t_high.toFixed(1) + '°C</span>'
-            s += '<br/><span style="color: #0000FF;"> ' + ui_uit_label + ':' + t_low.toFixed(1)+'°C</span>';
-            s += '<br/><span style="color: #333"><b></b>Verschil temperatuur:</b></span>';
-            s += '<br/><span style="color: #3333FF">' + ui_in_label + ' - ' + ui_uit_label + ':'+t_delta.toFixed(1)+"°C</span>";
-                return s;
-              },
-            backgroundColor: '#F5F5F5',
-            borderColor: '#DCE1E3',
-            crosshairs: [true, true],
-            borderWidth: 1
-        },  
-        xAxis: {           
-          type: 'datetime',
-          lineColor: '#6E797C',
-            lineWidth: 1     
+                    var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
+                        s += '<br/><span style="color: #FF0000;">'+ ui_in_label + ':' + t_high.toFixed(1) + '°C</span>'
+                        s += '<br/><span style="color: #0000FF;">' + ui_uit_label + ':' + t_low.toFixed(1)+'°C</span>';
+                        s += '<br/><span style="color: #333"><b></b>Verschil temperatuur:</b></span>';
+                        s += '<br/><span style="color: #3333FF">' + ui_in_label + ' - ' + ui_uit_label + ':'+t_delta.toFixed(1)+"°C</span>";
+                            return s;
+                    },
+                    backgroundColor: '#F5F5F5',
+                    borderColor: '#DCE1E3',
+                    crosshairs: [true, true],
+                    borderWidth: 1
+        },
+        xAxis: {
+            type: 'datetime',
+            lineColor: '#6E797C',
+            lineWidth: 1
         },
         yAxis: {
           //tickAmount: 7,

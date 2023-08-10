@@ -328,7 +328,7 @@ function creatCurrentUseChart() {
             [0.5, "#DDDF0D"], // yellow
             [0.9, "#DF5353"]  // red
         ],
-        lineWidth: 1,
+        lineWidth: 0,
         minorTickInterval: null,
         tickPixelInterval: 1000,
         tickWidth: 0,

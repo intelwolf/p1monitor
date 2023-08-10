@@ -1,5 +1,4 @@
 # run manual with ./pythonlaunch.sh P1Weather.py
-
 import argparse
 import base64
 #from symbol import pass_stmt
@@ -22,6 +21,7 @@ import util
 
 prgname = 'P1Weather'
 logfilename = const.DIR_FILELOG + prgname + '.log'
+weather_api_language = 'nl'
 
 rt_status_db            = sqldb.rtStatusDb()
 config_db               = sqldb.configDB()
@@ -395,7 +395,6 @@ def updateHistory(record ):
     timestamp_update[0:4]+'-01-01 00:00:00', const.DB_WEATHER_JAAR_TAB, weer_history_db_jaar )
 
 
-
 def insertWeatherHistory( rec_buffer, city_id, city, timestamp, database_tab, datebase_file ):
     try:
         sqlstr = "insert or replace into "+database_tab+ " \
@@ -511,8 +510,19 @@ def getWeatherFromApi( api_id, api_key):
     }
 
     try:
-        url = 'http://api.openweathermap.org/data/2.5/weather?id='+ api_id \
-        +'&units=metric&lang=nl&appid='+api_key
+        _id, language_index, _label = config_db.strget( 148, flog )
+        if int(language_index) == 1:
+            weather_api_language = 'en'
+        elif int(language_index) == 2:
+            weather_api_language = 'fr'
+        else:
+            weather_api_language = 'nl'
+    except Exception as e:
+        flog.warning( inspect.stack()[0][3] + ": taal error" + str(e) )
+
+    try:
+        url = 'https://api.openweathermap.org/data/2.5/weather?id='+ api_id \
+        +'&units=metric&lang=' + weather_api_language + '&appid=' + api_key
         flog.debug(inspect.stack()[0][3]+": API URL "+url)
         #print ( urllib.request.urlopen(url).read().decode('utf-8') )
         #sys.exit()

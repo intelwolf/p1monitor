@@ -48,7 +48,6 @@ var maxDataText     = ['MAX. data','MIN. data']
 var maxDataCount    = [ 26034, 744 ]
 var maxrecords      = maxDataCount[1];
 
-
 function readJsonApiHistoryHour( cnt ){ 
     $.getScript( "/api/v2/watermeter/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
       try {
@@ -75,7 +74,8 @@ function createWaterUsageChart() {
     Highcharts.stockChart('WaterUsageChart', {
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             renderTo: 'container',
@@ -243,7 +243,7 @@ function createWaterUsageChart() {
                 }]
             },
             tooltip: {
-            useHTML: true,
+            useHTML: false,
                 style: {
                     padding: 3,
                     color: '#6E797C'

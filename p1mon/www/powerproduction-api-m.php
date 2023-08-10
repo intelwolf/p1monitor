@@ -181,7 +181,8 @@ function createKwhChart() {
     Highcharts.stockChart('KwhChart', {
         chart: {
             style: {
-                fontFamily: 'robotomedium'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             renderTo: 'container',
@@ -241,7 +242,6 @@ function createKwhChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
-
                 {
                     text: "-",
                     events: {
@@ -373,7 +373,7 @@ function createKwhChart() {
                 }
             ],
             tooltip: {
-                useHTML: true,
+                useHTML: false,
                 style: {
                     padding: 3,
                     color: '#6E797C'
