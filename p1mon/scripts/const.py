@@ -38,7 +38,7 @@
 # elke release aanpassen                  #
 ###########################################
 P1_VERSIE                       = "2.3.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
+P1_PATCH_LEVEL                  = "a"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
 P1_SERIAL_VERSION               = "20230710"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
