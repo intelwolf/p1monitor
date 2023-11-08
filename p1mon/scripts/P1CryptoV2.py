@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1CryptoV2.py
+# run manual with ./P1CryptoV2
 
 import sys
 import argparse

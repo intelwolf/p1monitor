@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive( 102 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor watermeter dag</title>
+<title>P1-monitor <?php echo strIdx( 444 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -30,7 +31,12 @@ if ( checkDisplayIsActive( 102 ) == false) { return; }
 <script src="./js/p1mon-util.js"></script>
 
 <script>
-//var seriesOptions   = [];
+
+const text_days     = "<?php echo strIdx( 122 );?>"
+const text_week     = "<?php echo strIdx( 144 );?>"
+const text_month    = "<?php echo strIdx( 131 );?>"
+const text_months   = "<?php echo strIdx( 123 );?>"
+
 var recordsLoaded   = 0;
 var initloadtimer;
 var mins            = 1;  
@@ -38,7 +44,7 @@ var secs            = mins * 60;
 var currentSeconds  = 0;
 var currentMinutes  = 0;
 var Gselected       = 0;
-var GselectText     = ['1 week','14 dagen','1 maand','2 maanden']; // #PARAMETER
+var GselectText     = [ '1 '+text_week, '14 '+text_days, '1 '+text_month , '2 '+text_months]; // #PARAMETER
 var GseriesVisibilty= [true];
 var GverbrData      = [];
 var GgelvrData      = [];
@@ -213,8 +219,11 @@ function createWaterUsageChart() {
             maxRange:       61 * 24 * 3600000, // PARAMETER
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
             lineColor: '#6E797C',
             lineWidth: 1
@@ -249,11 +258,11 @@ function createWaterUsageChart() {
                 var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d', this.x) +'</b>';
 
                 var d = this.points;
-                var verbruikt   = "verborgen";
-                var d           = this.points;
+                var verbruikt   = "<?php echo strIdx( 340 );?>";
+                var d       = this.points;
 
                 var Pverbruik = 0;
-               
+            
                 for (var i=0,  tot=d.length; i < tot; i++) {
                     //console.log (d[i].series.userOptions.id);
                     if  ( d[i].series.userOptions.id === 'verbruik') {
@@ -265,8 +274,9 @@ function createWaterUsageChart() {
                     verbruikt = Pverbruik.toFixed(1)+" Liter";
                 }
                 
-                s += '<br/><span style="color: #6699ff;">verbruikt:&nbsp;</span>' + verbruikt + " (" + (parseFloat(verbruikt)/1000).toFixed(3) + " m<sup>3</sup>) water";
+                s += '<br/><span style="color: #6699ff;"><?php echo strIdx( 354 );?>:&nbsp;</span>' + verbruikt + " (" + (parseFloat(verbruikt)/1000).toFixed(3) + " m<sup>3</sup>) <?php echo strIdx( 220 );?>";
                 return s;
+
             },
             backgroundColor: '#F5F5F5',
             borderColor: '#DCE1E3',
@@ -297,22 +307,22 @@ function createWaterUsageChart() {
             {
                 id: 'verbruik',
                 visible: GseriesVisibilty[0],
-                name: 'Liter verbruikt',
+                name: '<?php echo strIdx( 440 );?>',
                 color: '#6699ff',
                 data: GverbrData 
             } 
             ],
             lang: {
-                noData: "Geen gegevens beschikbaar."
+                noData: "<?php echo ucfirst(strIdx( 425 ))?>"
             },
             noData: {
                 style: { 
-                    fontFamily: 'robotomedium',   
-                    fontWeight: 'bold',     
+                    fontFamily: 'robotomedium',
+                    fontWeight: 'bold',
                     fontSize: '25px',
-                    color: '#10D0E7'        
+                    color: '#10D0E7'
                 }
-            }        
+            }
   });
   // can only set text when chart is made.
   setHCButtonText( $('#WaterUsageChart').highcharts().rangeSelector.buttons[0], maxDataText, maxDataIsOn );
@@ -323,13 +333,6 @@ function updateData() {
     var chart = $('#WaterUsageChart').highcharts();
     if( typeof(chart) !== 'undefined') {
         chart.series[0].setData( GverbrData );
-        /*
-        chart.series[0].update({
-        pointStart: GverbrData[0][0],
-        data: GverbrData
-        }, false);
-        chart.redraw();
-        */
     }
 }
 
@@ -370,10 +373,12 @@ $(function() {
     }
 
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json();?>
     });
+
     secs = 0;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
@@ -403,14 +408,14 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">dagen (liter water)</span>
+            <span class="text-2"><?php echo strIdx( 443 );?></span>
         </div>
         <div class="frame-2-bot"> 
         <div id="WaterUsageChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 );?>" height="15" width="128"></div>
 
 </body>
 </html>

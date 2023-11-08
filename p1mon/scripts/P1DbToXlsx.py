@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1DbToXlsx.py
+# run manual with ./P1DbToXlsx
 
 import argparse
 import const

@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1DropBoxDeamon.py
+# run manual with ./P1DropBoxDeamon
 
 import const
 #import dropbox

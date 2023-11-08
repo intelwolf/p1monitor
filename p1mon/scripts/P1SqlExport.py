@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SqlExport.py
+# run manual with ./P1SqlExport
 
 import argparse
 import glob

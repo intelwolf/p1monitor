@@ -17,29 +17,30 @@ DBX_ROOT="/p1mon/mnt/ramdisk/dbx/"
 DBX_DATA="/data" 
 DBX_BACKUP="/backup"
 STATUS_FILE="p1mon*status"
-PRG1="P1SerReader"  #P1SerReader.py"
-PRG2="P1Db"         #P1Db.py
-PRG3="P1Watchdog"   #P1Watchdog.py"
+PRG1="P1SerReader"
+PRG2="P1Db"
+PRG3="P1Watchdog"
 PRG4="*.log*"
-PRG5="P1Weather"    #P1Weather.py
-PRG6="P1UdpDaemon.py"
-PRG7="P1DropBoxDeamon.py"
-PRG8="P1UdpBroadcaster.py"
+PRG5="P1Weather"
+PRG6="P1UdpDaemon"
+PRG7="P1DropBoxDeamon"
+PRG8="P1UdpBroadcaster"
 PRG9="gunicorn"
 PRG9_PATH="/p1mon/p1monenv/bin/"
 PRG9_ALIAS="P1Api.py"
-PRG9_PARAMETERS="--timeout 900 --bind localhost:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 2 P1Api:app --log-level warning"
+PRG9_PARAMETERS="--timeout 900 --bind localhost:10721 --worker-tmp-dir /p1mon/mnt/ramdisk --workers 3 P1Api:app --log-level warning"
 PRG10="niet meer in gebruik"
 PRG11="logspacecleaner.sh"
-PRG12="P1Watermeter.py"
-PRG13="P1MQTT.py"
-PRG14="P1GPIO.py"
-PRG15="P1PowerProductionS0.py"
-PRG16="P1WatermeterV2.py"
-PRG17="P1SolarEdgeReader.py"
+PRG12="niet meer in gebruik"
+PRG13="P1MQTT"
+PRG14="P1GPIO"
+PRG15="P1PowerProductionS0"
+PRG16="P1WatermeterV2"
+PRG17="P1SolarEdgeReader"
 PRG18="niet meer in gebruik"
-PRG19="P1UpgradeAide.py"
-PRG20="P1Notifier.py"
+PRG19="P1UpgradeAide"
+PRG20="P1Notifier"
+PRG21="P1DbCopy"
 P1FILE="p1msg.txt"
 
 # make a symbolic link for old /etc/nginx/sites-enabled/p1mon_80 config files added in version 2.0.0
@@ -86,8 +87,8 @@ start() {
     # Upgrade Aide check if there is data on an USB drive
     # restore and enlarge the SDHC when there is data on
     # the drive.
-    #$PRG_PATH$PRG19 --restore --reboot
-    eval "$MY_PYTHON $PRG19 --restore --reboot"
+    $PRG_PATH$PRG19 --restore --reboot
+    #eval "$MY_PYTHON $PRG19 --restore --reboot"
     echo "[*] $PRG19 gestart."
 
     # disable power save van de wifi.
@@ -143,8 +144,8 @@ start() {
     sudo find  $DBX_ROOT -type d -exec chmod 774 {} +
     sudo /bin/chmod 774 $DBX_ROOT
     sudo /bin/chown p1mon:p1mon $DBX_ROOT $DBX_ROOT$DBX_DATA $DBX_ROOT$DBX_BACKUP
-    eval "$MY_PYTHON $PRG7 2>&1 >/dev/null &"
-    #$PRG_PATH$PRG7 &>/dev/null &
+    #eval "$MY_PYTHON $PRG7 2>&1 >/dev/null &"
+    $PRG_PATH$PRG7 2>&1 >/dev/null &
     echo "[*] $PRG7 gestart."
 
     # Watchdog start
@@ -166,13 +167,14 @@ start() {
     echo "[*] $PRG5 --recover gestart."
 
     # UDP deamon start
-    #$PRG_PATH$PRG6 &>/dev/null &
-    eval "$MY_PYTHON $PRG6 2>&1 >/dev/null &"
+    $PRG_PATH$PRG6 2>&1 >/dev/null &
+    #eval "$MY_PYTHON $PRG6 2>&1 >/dev/null &"
     echo "[*] $PRG6 gestart."
 
     # UDP broadcast start
     $PRG_PATH$PRG8 &>/dev/null &
-    eval "$MY_PYTHON $PRG8 2>&1 >/dev/null &"
+    #eval "$MY_PYTHON $PRG8 2>&1 >/dev/null &"
+    $PRG_PATH$PRG8 2>&1 >/dev/null &
     echo "[*] $PRG8 gestart."
 
     # API start
@@ -183,12 +185,14 @@ start() {
 
     # GPIO start
     #$PRG_PATH$PRG14 &>/dev/null &
-    eval "$MY_PYTHON $PRG14 2>&1 >/dev/null &"
+    #eval "$MY_PYTHON $PRG14 2>&1 >/dev/null &"
+    $PRG_PATH$PRG14 2>&1 >/dev/null &
     echo "[*] $PRG14 gestart."
  
     # Notifier start
     #$PRG_PATH$PRG20 2>&1 >/dev/null &
-    eval "$MY_PYTHON $PRG20 2>&1 >/dev/null &"
+    #eval "$MY_PYTHON $PRG20 2>&1 >/dev/null &"
+    $PRG_PATH$PRG20 2>&1 >/dev/null &
     echo "[*] $PRG20 gestart."
 
     # set database rechten
@@ -284,11 +288,8 @@ stop() {
     # API stop
     process_kill $PRG9_PATH$PRG9 3
 
-    # schrijf cache naar disk/flash
-    sync
-    echo "[*] 10 seconden wachttijd, zodat data veilig naar disk wordt gekopierd."
-    sleep 10
-    echo "[*] stop gereed."
+    # copy ram to disk
+    copytodisk
 
 }
 
@@ -307,6 +308,19 @@ cleardb() {
   cd $PRG_PATH &>/dev/null
 }
 
+copytodisk(){
+     # force all the ram DB to disk
+    echo "[*] Ram naar disk copy starten."
+    $PRG_PATH$PRG21 --allcopy2disk --forcecopy 2>&1 >/dev/null 
+    echo "[*] $PRG21 Ram naar disk copy gereed."
+
+    # schrijf cache naar disk/flash
+    sync
+    echo "[*] 10 seconden wachttijd, zodat data veilig naar disk wordt gekopierd."
+    sleep 10
+    echo "[*] stop gereed."
+}
+
 case "$1" in
     start)
         start
@@ -318,7 +332,7 @@ case "$1" in
     ;;
     reload|restart|force-reload)
         stop
-        sleep 5
+        sleep 1
         start
         exit 0
     ;;

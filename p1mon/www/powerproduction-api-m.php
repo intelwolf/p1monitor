@@ -11,7 +11,7 @@ include_once '/p1mon/www/util/fullscreen.php';
 if ( checkDisplayIsActive( 147 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
 <title><?php echo strIdx(142);?></title>
@@ -263,7 +263,6 @@ function createKwhChart() {
                         }
                     }
                 },
-
                 {
                     type: 'month',
                     count: 6,
@@ -329,8 +328,11 @@ function createKwhChart() {
             maxRange:        120 * 30 * 24 * 3600000, // PARAMETER
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%Y',
+                year: '%Y'
             },
             lineColor: '#6E797C',
             lineWidth: 1

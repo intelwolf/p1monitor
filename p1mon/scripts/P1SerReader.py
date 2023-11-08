@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SerReader.py
+# run manual with ./P1SerReader.py
 
 import apiconst
 import const

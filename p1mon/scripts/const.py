@@ -32,14 +32,15 @@
 # versie 2.1.0 os upgrade, graaddagen en SOCAT toegevoegd.
 # versie 2.2.0 os upgrade, flexibele tarieven en piek waarde toegevoegd.
 # versie 2.3.0 P1Upgrade assistent en watermeter conversie verwijderd.
+# versie 2.4.0 Veel vertalingen uitgewerkt.
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "2.3.0"       # semantische versie nummers.
+P1_VERSIE                       = "2.4.0"       # semantische versie nummers.
 P1_PATCH_LEVEL                  = "a"           # standaard op 0, wordt verhoogd als op een image een patch wordt uigevoerd.
-P1_SERIAL_VERSION               = "20230710"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_SERIAL_VERSION               = "20231015"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'

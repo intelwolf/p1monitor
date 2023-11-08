@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1UdpDaemon.py
+# run manual with ./P1UdpDaemon
 
 import const
 import inspect
@@ -248,9 +248,8 @@ def backup_data():
     timestamp_last_backup = util.getUtcTime()
     #setFileFlags()
     flog.debug(inspect.stack()[0][3]+": Gestart")
-    #os.system("/p1mon/scripts/P1DbCopy.py --temperature2disk --forcecopy")
     process_lib.run_process( 
-        cms_str='/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --temperature2disk --forcecopy',
+        cms_str='/p1mon/scripts/P1DbCopy --temperature2disk --forcecopy',
         use_shell=True,
         give_return_value=True, 
         flog=flog 
@@ -264,9 +263,8 @@ def backup_data():
 def DiskRestore():
     # kopieren van bestaande database file van flash storage naar ramdisk
     # als deze nog niet al op de ramdisk staat
-    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
     process_lib.run_process( 
-        cms_str='/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2ram',
+        cms_str='/p1mon/scripts/P1DbCopy --allcopy2ram',
         use_shell=True,
         give_return_value=True,
         flog=flog 

@@ -11,7 +11,7 @@ include_once '/p1mon/www/util/fullscreen.php';
 if ( checkDisplayIsActive( 147 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
 <title><?php echo strIdx(142);?></title>
@@ -30,7 +30,7 @@ if ( checkDisplayIsActive( 147 ) == false) { return; }
 
 <script>
 
-var days_text   = '<?php echo strIdx(130);?>'
+var days_text   = '<?php echo strIdx(122);?>'
 var week_text   = '<?php echo strIdx(144);?>'
 var month_text  = '<?php echo strIdx(131);?>'
 var months_text = '<?php echo strIdx(123);?>'
@@ -253,7 +253,6 @@ function createKwhChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
-
                 {
                     text: "-",
                     events: {
@@ -275,7 +274,6 @@ function createKwhChart() {
                         }
                     }
                 },
-
                 {
                     type: 'day',   // #PARAMETER
                     count: 7,      // #PARAMETER
@@ -341,8 +339,11 @@ function createKwhChart() {
             maxRange:       61 * 24 * 3600000, // PARAMETER
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
             lineColor: '#6E797C',
             lineWidth: 1

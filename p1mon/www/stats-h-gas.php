@@ -46,8 +46,7 @@ const text_temp_max = "<?php echo strIdx( 337 );?>"
 const text_hidden   = "<?php echo strIdx( 340 );?>"
 const text_hidden_unkown = "<?php echo strIdx( 341 );?>"
 const text_gas_consumed = "<?php echo strIdx( 342 );?>"
-
-const text_hour = "<?php echo strIdx( 132 );?>"
+const text_hour = "<?php echo strIdx( 129 );?>"
 const text_day  = "<?php echo strIdx( 135 );?>"
 const text_days = "<?php echo strIdx( 122 );?>"
 
@@ -209,9 +208,12 @@ function createGasChart() {
             minRange:        1      * 3600000,
             maxRange:        5 * 24 * 3600000,
             dateTimeLabelFormats: {
-                        day: '%a.<br>%d %B<br/>%Y',
-                        hour: '%a.<br>%H:%M'
-                    },
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
+            },
             lineColor: '#6E797C',
             lineWidth: 1, 
             events: {

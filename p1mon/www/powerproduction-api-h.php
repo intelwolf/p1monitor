@@ -12,7 +12,7 @@ include_once '/p1mon/www/util/textlib.php';
 if ( checkDisplayIsActive( 147 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
 <title><?php echo strIdx(134);?></title>
@@ -31,7 +31,7 @@ if ( checkDisplayIsActive( 147 ) == false) { return; }
 
 <script>
 
-var days_text            = '<?php echo strIdx(130);?>'
+var days_text            = '<?php echo strIdx(122);?>'
 var day_text             = '<?php echo strIdx(135);?>'
 var hour_text            = '<?php echo strIdx(129);?>'
 var kwh_high_tariff_text = '<?php echo strIdx(126);?>'
@@ -245,7 +245,6 @@ function createKwhChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
-
                 {
                     text: "-",
                     events: {
@@ -266,7 +265,6 @@ function createKwhChart() {
                         }
                     }
                 },
-
                 {
                     type: 'hour',
                     count: 12,
@@ -332,8 +330,11 @@ function createKwhChart() {
             maxRange:        5 * 24 * 3600000,
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
             lineColor: '#6E797C',
             lineWidth: 1

@@ -1,6 +1,5 @@
 <?php
 session_start(); #must be here for every page using login
-
 include_once '/p1mon/www/util/auto_logout.php';
 include_once '/p1mon/www/util/page_header.php';
 include_once '/p1mon/www/util/p1mon-util.php';
@@ -624,7 +623,7 @@ function makeSelectorAmpere( $id ) {
                                     </div>
                                     <div>
                                         <input class="cursor-pointer" name="meterstanden" type="radio" value="1" <?php if ( config_read(62) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                        <input class="cursor-pointer" name="meterstanden" type="radio" value="0" <?php if ( config_read(62) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                        <input class="cursor-pointer" name="meterstanden" type="radio" value="0" <?php if ( config_read(62) == 0 ) { echo 'checked'; }?>><?php echo $sw_off?>
                                     </div>
                                     <div>
                                         <input class="cursor-pointer" name="watermeter" type="radio" value="1" <?php if ( config_read( 102 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>

@@ -7,18 +7,16 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive( 61 ) == false) { return; }
 
-"<?php echo strIdx(24);?>"
-
-
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor fase dag uiterste W</title>
+<title>P1-monitor <?php echo strIdx( 531 )?> W</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -35,6 +33,17 @@ if ( checkDisplayIsActive( 61 ) == false) { return; }
 <script>
 "use strict"; 
 
+const text_days                     = "<?php echo strIdx( 122 );?>";
+const text_week                     = "<?php echo strIdx( 144 );?>";
+const text_month                    = "<?php echo strIdx( 131 );?>";
+const text_months                   = "<?php echo strIdx( 123 );?>";
+const text_year                     = "<?php echo strIdx( 132 );?>";
+const text_years                    = "<?php echo strIdx( 124 );?>";
+const text_c_abr                    = "<?php echo strIdx( 534 );?>";
+const text_p_abr                    = "<?php echo strIdx( 535 );?>";
+const text_upper_limit              = "<?php echo strIdx( 537 );?>";
+const text_lower_limit              = "<?php echo strIdx( 538 );?>";
+
 var Grange_L1WC       = [];
 var Grange_L2WC       = [];
 var Grange_L3WC       = [];
@@ -48,9 +57,9 @@ var seriesOptions    = [];
 var recordsLoaded    = 0;
 var initloadtimer;
 var Gselected        = 0;
-var GselectText      = [ '1 week', '14 dagen', '1 maand', '2 maanden', '1 jaar', '3 jaar' ]; // #PARAMETER
+var GselectText      = [ '1 '+text_week , '14 '+text_days, '1 '+text_month, '2 '+text_months, '1 '+text_year, '3 '+text_years ]; // #PARAMETER
 var GseriesVisibilty = [ true, true, true, true, true, true, true ];
-var GserieNames      = [ "L1 V", "L2 V", "L3 V", "L1 L", "L2 L", "L3 L" ]
+var GserieNames      = [ "L1 "+text_c_abr, "L2 "+text_c_abr, "L3 "+text_c_abr, "L1 "+text_p_abr, "L2"+text_p_abr, "L3 "+text_p_abr ]
 var mins             = 1;
 var secs             = mins * 60;
 var currentSeconds   = 0;
@@ -71,7 +80,6 @@ if ( useKw ) {
 }
 
 function readJsonPhaseMinMax( cnt ){
-    //console.log(" readJsonPhaseMinMax ")
     $.getScript( "./api/v1/phaseminmax/day?limit=" + cnt , function( data, textStatus, jqxhr ) {
       try {
         var jsondata = JSON.parse(data); 
@@ -113,7 +121,7 @@ function createChart() {
     Highcharts.stockChart('wattChart', {
         exporting: { enabled: false },
         lang: {
-            noData: "Geen gegevens beschikbaar."
+            noData: "<?php echo ucfirst(strIdx( 425 ))?>"
         },
         noData: {
             style: { 
@@ -155,7 +163,11 @@ function createChart() {
             type: 'datetime', 
             minTickInterval: 24 * 3600000, 
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
             lineColor: '#6E797C',
             lineWidth: 1, 
@@ -410,7 +422,7 @@ function createChart() {
             },
             itemDistance: 5,
             title: {
-                text: '<span style="font-size: 12px; color: #6E797C;">V is verbruik en L is teruglevering aan het net.</span>',
+                text: '<span style="font-size: 12px; color: #6E797C;"><?php echo strIdx( 532 );?></span>',
             }
         },
         series: [
@@ -560,7 +572,7 @@ function DataLoop() {
 
 $(function() {
 
-    document.getElementById("headerTitle").innerHTML = 'Uiterste fase waarden per dag in ' + wattText;
+    document.getElementById("headerTitle").innerHTML = '<?php echo strIdx( 533 )?>' + ' ' + wattText;
 
     toLocalStorage('fase-menu',window.location.pathname);
 
@@ -574,9 +586,11 @@ $(function() {
 
     Highcharts.setOptions({
         global: {
-        useUTC: false
-        }
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
     DataLoop();
@@ -605,7 +619,7 @@ $(function() {
     </div> 
     <div class="mid-content-2 pad-13">
         <div class="frame-2-top">
-            <span id="headerTitle" class="text-2">Uiterste fase waarden per dag</span>
+            <span id="headerTitle" class="text-2">dynamisch gezet</span>
         </div>
         <div class="frame-2-bot"> 
             <div id="wattChart" style="width:100%; height:480px;"></div>
@@ -613,7 +627,7 @@ $(function() {
 </div>
 </div>
 <div id="loading-data">
-    <img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128">
+    <img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 )?>" height="15" width="128">
 </div>
 </body>
 </html>

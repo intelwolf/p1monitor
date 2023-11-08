@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(46) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor verwarming</title>
+<title>P1-monitor <?php echo strIdx( 187 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -45,12 +46,13 @@ var ui_uit_label    = "<?php echo config_read( 122 ); ?>";
 
 function setLabels() {
     if ( ui_in_label.length == 0 ) {
-        ui_in_label = 'IN';
+        ui_in_label = "<?php echo strIdx( 452 )?>";
     }
     if ( ui_uit_label.length == 0 ) {
-        ui_uit_label = 'UIT';
+        ui_uit_label = "<?php echo strIdx( 453 )?>";
     }
 }
+
 
 function readJsonIndoorTemperature( cnt ){ 
     $.getScript( "./api/v1/indoor/temperature?limit=" + cnt , function( data, textStatus, jqxhr ) {
@@ -61,7 +63,7 @@ function readJsonIndoorTemperature( cnt ){
         recordsLoaded = jsondata.length;
         GhistoryIn.length = 0;
 
-        for (var j = jsondata.length; j > 0; j--){    
+        for (var j = jsondata.length; j > 0; j--){
           item = jsondata[j-1];
           item[1] = item[1]*1000; // highcharts likes millisecs.
           GhistoryIn.push ( [item[1], item[5], item[9]] ); //in max, out min
@@ -143,7 +145,6 @@ function createChartIn() {
             min: -30,
             //max: 60,
             max: 90,
-
             minorTickPosition: 'inside',
             minorTickLength: 30,
             minorTickColor: '#F5F5F5',
@@ -366,10 +367,7 @@ function createChartOut() {
         data: [10],
         yAxis: 0
         }]
-    });
-
-   
-
+    }); 
 }
 
 function createChartGrafiek() { 
@@ -380,7 +378,7 @@ function createChartGrafiek() {
         legend: { enabled: false },
             exporting: { enabled: false },
             credits: { enabled: false },
-            title: { text: null },     
+            title: { text: null },
             tooltip: {
                 useHTML: false,
                 style: {
@@ -399,7 +397,7 @@ function createChartGrafiek() {
                     var s = '<b>'+ Highcharts.dateFormat('%A %H:%M:%S', this.x) +'</b>';
                         s += '<br/><span style="color: #FF0000;">'+ ui_in_label + ':' + t_high.toFixed(1) + '°C</span>'
                         s += '<br/><span style="color: #0000FF;">' + ui_uit_label + ':' + t_low.toFixed(1)+'°C</span>';
-                        s += '<br/><span style="color: #333"><b></b>Verschil temperatuur:</b></span>';
+                        s += '<br/><span style="color: #333"><b></b><?php echo strIdx( 450 )?>:</b></span>';
                         s += '<br/><span style="color: #3333FF">' + ui_in_label + ' - ' + ui_uit_label + ':'+t_delta.toFixed(1)+"°C</span>";
                             return s;
                     },
@@ -460,7 +458,8 @@ $(function() {
     Highcharts.setOptions({
         global: {
             useUTC: false
-        }
+        },
+        lang: <?php hc_language_json(); ?>
     });
     createChartIn();
     createChartOut();
@@ -494,7 +493,7 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">actuele verwarming temperatuur in °C</span>
+            <span class="text-2"><?php echo strIdx( 449 )?></span>
         </div>
         <div class="frame-2-bot"> 
         
@@ -509,16 +508,16 @@ $(function() {
           </div>
 
           <div class="center text-31">
-              <span>verschiltemperatuur&nbsp;</span><span id='deltatemp'>-</span><span>°C</span>
+              <span><?php echo strIdx( 450 )?>&nbsp;</span><span id='deltatemp'>-</span><span>°C</span>
          </div>
 
           <div class="pad-3" style="float:left;">
                 <div class="frame-3-top">
-                <span class="text-3">laatste 5 minuten</span>
+                <span class="text-3"><?php echo strIdx( 451 )?></span>
                 </div>
-                <div class="frame-2-bot"> 
-                  <div id="grafiekTemp" style="width:880px; height:110px;"></div>    
-                </div>        
+                <div class="frame-2-bot">
+                  <div id="grafiekTemp" style="width:880px; height:110px;"></div>
+                </div>
             </div>
         </div>
 </div>

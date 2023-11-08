@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive( 129 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor historie maanden opgewekte kWh</title>
+<title>P1monitor <?php echo strIdx( 435 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -29,6 +30,11 @@ if ( checkDisplayIsActive( 129 ) == false) { return; }
 <script src="./js/p1mon-util.js"></script>
 
 <script>
+
+const text_months   = "<?php echo strIdx( 123 );?>"
+const text_year     = "<?php echo strIdx( 132 );?>"
+const text_years    = "<?php echo strIdx( 124 );?>"
+
 var recordsLoaded    = 0;
 var initloadtimer;
 var mins             = 1;  
@@ -36,7 +42,7 @@ var secs             = mins * 60;
 var currentSeconds   = 0;
 var currentMinutes   = 0;
 var Gselected        = 0;
-var GselectText      = ['6 maanden','1 jaar','2 jaar','5 jaar' ]; // #PARAMETER
+var GselectText      = [ '6 '+text_months, '1 '+text_year, '2 '+text_years, '5 '+text_years ]; // #PARAMETER
 var GseriesVisibilty = [true,true,true, true];
 var GHighTariffData  = [];
 var GLowTariffData   = [];
@@ -176,7 +182,6 @@ function createKwhChart() {
                 buttonSpacing: 5, 
                 selected : Gselected,
                 buttons: [
-
                 {
                     text: "-",
                     events: {
@@ -263,8 +268,11 @@ function createKwhChart() {
             maxRange:        120 * 30 * 24 * 3600000, // PARAMETER
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%Y',
+                year: '%Y'
             },
             lineColor: '#6E797C',
             lineWidth: 1
@@ -332,28 +340,28 @@ function createKwhChart() {
                     }
 
                     if ( $('#KwhChart').highcharts().series[0].visible === true ) {
-                        s += '<br/><span style="color:' + high_tariff_color + '">kWh hoog tarief:&nbsp;</span>' + PHighTariff.toFixed(3) + " kWh";
+                        s += '<br/><span style="color:' + high_tariff_color + '"><?php echo strIdx( 126 );?>:&nbsp;</span>' + PHighTariff.toFixed(3) + " kWh";
                     }
                     if ( $('#KwhChart').highcharts().series[1].visible === true ) {
-                        s += '<br/><span style="color:' + low_tariff_color + '">kWh laag tarief:&nbsp;</span>' + PLowTariff.toFixed(3) + " kWh";;
+                        s += '<br/><span style="color:' + low_tariff_color + '"><?php echo strIdx( 127 );?>:&nbsp;</span>' + PLowTariff.toFixed(3) + " kWh";;
                     }
 
                     if ( $('#KwhChart').highcharts().series[2].visible === true ) {
-                        s += '<br/><span style="color:black">totaal:&nbsp;</span>' + Ptotal.toFixed(3) + " kWh";;
+                        s += '<br/><span style="color:black"><?php echo strIdx( 140 );?>:&nbsp;</span>' + Ptotal.toFixed(3) + " kWh";;
                     }
 
                     if ( $('#KwhChart').highcharts().series[3].visible === true ) {
                         if ( Pmax_temp != null ) {
-                            s += '<br/><span style="color: ' + max_temp_color + '">maximum temperatuur: </span>'    + Pmax_temp.toFixed(1) + " °C";
+                            s += '<br/><span style="color: ' + max_temp_color + '"><?php echo strIdx( 136 );?>: </span>'    + Pmax_temp.toFixed(1) + " °C";
                         }
                         if ( Pavg_temp != null ) {
-                            s += '<br/><span style="color: ' + avg_temp_color + '">gemiddelde temperatuur: </span>' + Pavg_temp.toFixed(1) + " °C";
+                            s += '<br/><span style="color: ' + avg_temp_color + '"><?php echo strIdx( 137 );?>: </span>' + Pavg_temp.toFixed(1) + " °C";
                         }
                         if ( Pmin_temp != null ) {
-                            s += '<br/><span style="color: ' + min_temp_color + '">minimum temperatuur: </span>'    + Pmin_temp.toFixed(1) + " °C";
+                            s += '<br/><span style="color: ' + min_temp_color + '"><?php echo strIdx( 138 );?>: </span>'    + Pmin_temp.toFixed(1) + " °C";
                         }
                     }
-              
+
                 return s;
             },
             backgroundColor: '#F5F5F5',
@@ -384,13 +392,13 @@ function createKwhChart() {
                 {
                     yAxis: 0,
                     visible: GseriesVisibilty[0],
-                    name: 'kWh hoog tarief',
+                    name: '<?php echo strIdx( 126 );?>',
                     color: high_tariff_color,
                     data: GHighTariffData 
                 },{
                     yAxis: 0,
                     visible: GseriesVisibilty[1],
-                    name: 'kWh laag tarief',
+                    name: '<?php echo strIdx( 127 );?>',
                     color: low_tariff_color,
                     data: GLowTariffData
                 },{
@@ -398,7 +406,7 @@ function createKwhChart() {
                     visible: GseriesVisibilty[2],
                     type: 'spline', 
                     color: 'black',
-                    name: 'totaal kWh',
+                    name: '<?php echo strIdx( 432 );?>',
                     data: GTotalData,
                     dashStyle: 'ShortDashDotDot',
                     lineWidth: 1
@@ -406,7 +414,7 @@ function createKwhChart() {
                     yAxis: 1,
                     visible: GseriesVisibilty[3],
                     showInNavigator: true,
-                    name: 'Temperatuur',
+                    name: '<?php echo strIdx( 139 );?>',
                     data: Gaverages,
                     type: 'spline',
                     zIndex: 2,
@@ -442,10 +450,10 @@ function createKwhChart() {
             },
             noData: {
                 style: { 
-                    fontFamily: 'robotomedium',   
-                    fontWeight: 'bold',     
+                    fontFamily: 'robotomedium',
+                    fontWeight: 'bold',
                     fontSize: '25px',
-                    color: '#10D0E7'        
+                    color: '#10D0E7'
                 }
             }        
   });
@@ -506,10 +514,12 @@ $(function() {
     }
 
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     secs = 0;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
@@ -539,14 +549,14 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">opgewekte kWh maanden</span>
+            <span class="text-2"><?php echo strIdx( 436 );?></span>
         </div>
         <div class="frame-2-bot"> 
-        <div id="KwhChart" style="width:100%; height:480px;"></div>    
+        <div id="KwhChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 );?>" height="15" width="128"></div>
 
 </body>
 </html>

@@ -1,5 +1,3 @@
-<!doctype html>
-<html lang="nl">
 <?php
 session_start(); #must be here for every page using login
 include_once '/p1mon/www/util/auto_logout.php';
@@ -26,8 +24,16 @@ if( $localip == False ){
         }
 }
 
+?>
+<!doctype html>
+<html lang="<?php echo strIdx( 370 )?>">
+<?php
+
 #print_r( $_POST );
 $err_cnt = 0;
+
+$sw_off  = strIdx( 193 );
+$sw_on   = strIdx( 192 );
 
 if ( isset($_POST["udp_deamon_active"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -91,26 +97,34 @@ if ( isset($_POST["patchfilepath"]) ) {
     }
 }
 
+
+// check if the watchdog has set an new version available when status idx 66 is not empty there is a new version
+if  ( strlen( readStatusDb(66)) > 0 ) {
+    $newSoftwareVersionP1monitor = ucfirst(strIdx( 375 )) . ' ' . readStatusDb(66); 
+    $download_url = readStatusDb(86);
+    $newVersionLink = '<a class="text-10" target="_blank" href="'. $download_url .'"><i class="menu-active-control fas fa-globe"></i>&nbsp;download</a>';
+}
+
 ?>
 <head>
 <meta name="robots" content="noindex">
-<title>Systeem configuratie</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title><?php echo ucfirst(strIdx( 374 ))?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/download2.js"></script>
-
 <script src="/fine-uploader/fine-uploader.min.js"></script>
+
 <script type="text/template" id="qq-template">
     <div class="qq-uploader-selector qq-uploader">
         <div class="qq-upload-button-selector qq-upload-button">
             <div>
-                <button class="input-2 but-1 float-left" id="patchbutton">
+                <button class="input-2 but-3 float-left" id="patchbutton">
                     <i class="color-menu fas fa-3x  fa-bandage"></i><br>
                     <span class="color-menu text-7">patch</span>
                 </button>
@@ -122,7 +136,6 @@ if ( isset($_POST["patchfilepath"]) ) {
     </div>
 </script>
 </head>
-
 
 <body>
 
@@ -146,50 +159,64 @@ if ( isset($_POST["patchfilepath"]) ) {
                 <div id="right-wrapper-config-left-2">
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
+
                         <div class="frame-4-top">
-                            <span class="text-15">herstart of stop systeem</span>
+                            <span class="text-15"><?php echo ucfirst(strIdx( 376 ))?></span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left pos-32">
+                            <div class="float-left text-10">
+                                <div><?php echo ucfirst(strIdx( 371 ))?>:&nbsp;<?php echo config_read(0); ?></div>
+                                <div><?php echo ucfirst(strIdx( 372 ))?>:&nbsp;<?php echo config_read(128); ?></div>
+                                <div><?php echo ucfirst(strIdx( 369 ))?>:&nbsp;<?php echo config_read(133); ?></div>
+                                <div><?php echo ucfirst(strIdx( 373 ))?>:&nbsp;<span id="newp1mon"><?php echo strIdx( 377 )?>.</span></div>
+                                <div id="p1newdownload" class="display_none"><?php echo $newVersionLink ?></div>
+                            </div> 
+                        </div> 
+                        <p></p>
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo ucfirst(strIdx( 378 ))?></span>
+                        </div>
+                        <div class="frame-4-bot">
+                            <div class="float-left">
                                 <div class="float-left margin-3">
-                                    <button class="input-2 but-1 cursor-pointer" id="fr_button" name="fr_button" type="submit">
+                                    <button class="input-2 but-3 cursor-pointer" id="fr_button" name="fr_button" type="submit">
                                         <i class="color-warning fa-3x fas fa-sync-alt"></i><br> 
-                                        <span class="color-warning text-7">herstart</span>
+                                        <span class="color-warning text-7"><?php echo strIdx( 379 )?></span>
                                     </button>
                                     <div class="pad-1 content-wrapper">
-                                    <button class="input-2 but-1 cursor-pointer" id="fs_button" name="fs_button" type="submit">
+                                    <button class="input-2 but-3 cursor-pointer" id="fs_button" name="fs_button" type="submit">
                                         <i class="color-error fa-3x fas fa-power-off"></i><br>
-                                        <span class="color-error text-7">&nbsp;stop</span>
+                                        <span class="color-error text-7">&nbsp;<?php echo strIdx( 380 )?></span>
                                     </button>
                                     </div>
                                 </div>
-                            
                             </div>
                         </div>
                         <p></p>
+
                         <div class="frame-4-top">
-                            <span class="text-15">wachtwoord reset</span>
+                            <span class="text-15"><?php echo ucfirst(strIdx( 381 ))?></span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left pos-32">
-                                <div class="float-left margin-3">    
-                                    <button class="input-2 but-1 cursor-pointer" id="pwreset_button" name="pwreset_button" type="submit">
-                                        <i class="color-error fas fa-3x fa-lock"></i><br>    
-                                        <span class="color-error text-7">&nbsp;reset</span>
+                            <div class="float-left">
+                                <div class="float-left margin-3">
+                                    <button class="input-2 but-3 cursor-pointer" id="pwreset_button" name="pwreset_button" type="submit">
+                                        <i class="color-error fas fa-3x fa-lock"></i><br>
+                                        <span class="color-error text-7"><?php echo ucfirst(strIdx( 382 ))?></span>
                                     </button>
                                 </div>
                             </div>    
                         </div>
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">systeem dump</span>
+                            <span class="text-15"><?php echo ucfirst(strIdx( 383 ))?></span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left pos-32">
+                            <div class="float-left">
                                 <div class="float-left margin-3">
-                                    <button class="input-2 but-1 cursor-pointer" id="sysdump_button" name="sysdump_button" type="submit">
+                                    <button class="input-2 but-3 cursor-pointer" id="sysdump_button" name="sysdump_button" type="submit">
                                         <i class="color-menu fas fa-3x fa-download"></i><br> 
-                                        <span class="color-menu text-7">&nbsp;dump</span>
+                                        <span class="color-menu text-7">&nbsp;<?php echo strIdx( 384 )?></span>
                                     </button>
                                 </div>
                             </div>
@@ -197,35 +224,35 @@ if ( isset($_POST["patchfilepath"]) ) {
 
                         <p></p>
                         <div class="frame-4-top" title="<?php echo strIdx( 316 );?>">
-                            <span class="text-15">patch bestand uploaden</span>
+                            <span class="text-15"><?php echo strIdx( 385 )?></span>
                         </div>
                         <div class="frame-4-bot" title="<?php echo strIdx( 316 );?>">
                             <div class="float-left margin-3" id="uploader"></div>
                             <div class="pad-1" title="<?php echo strIdx( 315 );?>">
                                 <input type="checkbox" id="cb_unsigned_allow" name="cb_unsigned_allow">
-                                <label class="text-10" for="cb_unsigned_allow">unsigned patch toestaan</label>
+                                <label class="text-10" for="cb_unsigned_allow"><?php echo strIdx( 386 )?></label>
                             </div>
                         </div>
                         <p></p>
 
                         <div class="frame-4-top">
-                            <span class="text-15">Nieuwe P1 monitor versie controle</span>
+                            <span class="text-15"><?php echo ucfirst(strIdx( 387 ))?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class='pad-12'>
-                                <input class="cursor-pointer" id="fs_rb_aan_version_check" name="version_check_active" type="radio" value="1" <?php if ( config_read(51) == 1 ) { echo 'checked'; }?>>Aan
-                                <input class="cursor-pointer" id="fs_rb_uit_version_check" name="version_check_active" type="radio" value="0" <?php if ( config_read(51) == 0 ) { echo 'checked'; }?>>Uit
+                                <input class="cursor-pointer" id="fs_rb_aan_version_check" name="version_check_active" type="radio" value="1" <?php if ( config_read(51) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                <input class="cursor-pointer" id="fs_rb_uit_version_check" name="version_check_active" type="radio" value="0" <?php if ( config_read(51) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                             </div>
                         </div>
                         
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15">UDP broadcast deamon</span>
+                            <span class="text-15"><?php echo ucfirst(strIdx( 388 ))?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class='pad-12'>
-                                <input class="cursor-pointer" id="fs_rb_aan_udp_deamon_check" name="udp_deamon_active" type="radio" value="1" <?php if ( config_read(55) == 1 ) { echo 'checked'; }?>>Aan
-                                <input class="cursor-pointer" id="fs_rb_uit_udp_deamon_check" name="udp_deamon_active" type="radio" value="0" <?php if ( config_read(55) == 0 ) { echo 'checked'; }?>>Uit
+                                <input class="cursor-pointer" id="fs_rb_aan_udp_deamon_check" name="udp_deamon_active" type="radio" value="1" <?php if ( config_read(55) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                <input class="cursor-pointer" id="fs_rb_uit_udp_deamon_check" name="udp_deamon_active" type="radio" value="0" <?php if ( config_read(55) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                             </div>
                         </div>
 
@@ -240,7 +267,7 @@ if ( isset($_POST["patchfilepath"]) ) {
                     </div>
                         <div id="right-wrapper-config-right-2">
                             <div class="frame-4-top">
-                                <span class="text-15">hulp</span>
+                                <span class="text-15"><?php echo ucfirst(strIdx( 389 ))?></span>
                             </div>
                             <div class="frame-4-bot text-10">
                                 <?php echo strIdx( 5 );?>
@@ -257,10 +284,9 @@ if ( isset($_POST["patchfilepath"]) ) {
     </div>
     <?php //echo div_err_succes();?>
 <div id="cancel_bar">
-    <span id="cancel_bar_text">Onderbreek systeem stop&nbsp;&nbsp;</span><i class="fas fa-times-circle"></i>
+    <span id="cancel_bar_text"><?php echo ucfirst(strIdx( 390 ))?>&nbsp;&nbsp;</span><i class="fas fa-times-circle"></i>
     <br>
     <div id="progressbar" class="progressbar-2"></div>
-    
 </div>
 
 <div id="system_dump">
@@ -268,25 +294,27 @@ if ( isset($_POST["patchfilepath"]) ) {
         <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
     </div>
     <br>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dump van het systeem<br>Wacht tot de download start.<br><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo ucfirst(strIdx( 391 ))?><br><?php echo ucfirst(strIdx( 392 ))?>.<br><br>
     <i id="dump_spinner" class="fas fa-spinner fa-pulse fa-2x"></i><br>
     <br>
-    <div class="content-wrapper">Bytes verwerkt: </div><div class="content-wrapper" id="dump_file_size">0</div>
+    <div class="content-wrapper"><?php echo ucfirst(strIdx( 393 ))?>: </div><div class="content-wrapper" id="dump_file_size">0</div>
     <br>
-    <div id="dump_dl_link" ><br><a id='dump_dl_href' href="">Als de download niet start klik dan hier</a></div>
+    <div id="dump_dl_link" ><br><a id='dump_dl_href' href=""><?php echo ucfirst(strIdx( 293 ))?></a></div>
 </div>
 
 <div id="patch_status_message">
      <div class='close_button' id="patch_status_message_close">
         <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
     </div>
-    <span class="text-15">patch status</span>
+    <span class="text-15"><?php echo strIdx( 394 )?></span>
     <div id="scroll_window" class="text-29" >
         <?php echo strIdx( 295 );?>
     </div>
 </div> 
 
 <script> 
+
+
 
 function readJsonApiConfigurationToStop( id ){
 
@@ -308,17 +336,17 @@ function readPatchStatusLogging(){
     $.get( "/txt/txt-patch-status.php", function( response, status, xhr ) {
         
         if ( status == "error" ) {
-            $("#scroll_window").html('patch status nog niet beschikbaar.');
+            $("#scroll_window").html("<?php echo strIdx( 395 );?>.");
         }
         
         if ( response.length > 0 ) {
-            //console.log("update =" + response.length )
+            
             $('#scroll_window').html( response );
 
             // keep scroll window scrolled down.
              $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
         } else {
-            $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+            $('#scroll_window').html( "<b><?php echo strIdx( 396 );?>.</b><br>" );
         }
 
     });
@@ -339,7 +367,6 @@ $('#patch_status_message_close').click(function() {
 
 PatchMessagesShow=getCookie("patch_messages_show"); 
 
-console.log( PatchMessagesShow )
 
 $(function() {
     hideStuff('dump_dl_link')
@@ -356,6 +383,13 @@ $(function() {
         patchLogTimer = setInterval('updatePatchLogging();', 1000);
     }
 
+    var jsNewSoftwareVersion = "<?php echo $newSoftwareVersionP1monitor?>"
+    if ( jsNewSoftwareVersion.length > 0 ) {
+        newP1SoftwareVersion = jsNewSoftwareVersion;
+        showStuff('p1newdownload');
+    }
+    $('#newp1mon').text( newP1SoftwareVersion )
+    
 });
 
 
@@ -370,7 +404,7 @@ var action = '';
 var progress = 0;
 var systemDumpTimer = 0;
 
-$('#dump_msg_close').click(function() {    
+$('#dump_msg_close').click(function() {
    hideStuff('system_dump');
    sysdump_id = 0;
 }); 
@@ -381,7 +415,6 @@ function systemDump() {
 }
 
 function autoDownLoad(filename){
-    console.log(filename);
     var x=new XMLHttpRequest();
     var dl_filename = filename.split('/').pop();
     x.open("GET", filename, true);
@@ -391,7 +424,6 @@ function autoDownLoad(filename){
 } 
 
 function readJsonDataSystemDump(){ 
-    //console.log('readJsonDataSystemDump id = '+sysdump_id); 
     $.getScript( "/systemdump.php?dumpid="+sysdump_id, function( data, textStatus, jqxhr ) {
       try {
         var jsondata = JSON.parse(data); 
@@ -420,18 +452,15 @@ function progressIndicator() {
     if (progressPct > 95) {
         
         if ( action === 'clear_password' ) {
-             console.log("clear_password");
              document.formvalues.systemaction.value = 'clear_password';
              $('#formvalues').submit();
         }
         
         if ( action === 'reboot' ) {
-             console.log("reboot");
              document.formvalues.systemaction.value = 'reboot';
              $('#formvalues').submit();
         }
         if ( action === 'stop' ) {
-              console.log('stop');
                document.formvalues.systemaction.value = 'stop';
                 $('#formvalues').submit();
         }
@@ -439,7 +468,7 @@ function progressIndicator() {
          return;
     }
     progressPct=progressPct+0.1;
-    $('#progressbar').width( progressPct+'%' );    
+    $('#progressbar').width( progressPct+'%' );
 }
 
 function setUpCancelBar(text) {
@@ -459,19 +488,19 @@ $('#sysdump_button').click(function(event) {
 
 $('#pwreset_button').click(function(event) {
     action = "clear_password";
-    setUpCancelBar("Onderbreek wissen van wachtwoord");
+    setUpCancelBar("<?php echo ucfirst(strIdx( 397 ));?>");
     event.preventDefault();
 });
 
 $('#fr_button').click(function(event) {
     action = "reboot";
-    setUpCancelBar("Onderbreek systeem herstart");
+    setUpCancelBar("<?php echo ucfirst(strIdx( 398 ));?>");
     event.preventDefault();
 });
 
 $('#fs_button').click(function(event) {
     action = "stop";
-    setUpCancelBar("Onderbreek systeem stop");
+    setUpCancelBar("<?php echo ucfirst(strIdx( 399 ));?>");
     event.preventDefault();
 });
 
@@ -482,6 +511,7 @@ $('#cancel_bar').click(function() {
 });
 
 </script>
+
 <?php echo autoLogout(); ?>
 <?php
 # moet hier staan wegens de brug naar javascript.

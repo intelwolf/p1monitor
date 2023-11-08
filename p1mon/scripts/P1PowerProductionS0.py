@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1PowerProductionS0.py
+# run manual with ./P1PowerProductionS0
 
 import const
 import datetime
@@ -639,9 +639,8 @@ def pulsSimulator(probility = 0.2 ):
 ########################################################
 def backupData():
     flog.debug( inspect.stack()[0][3] + ": Gestart" )
-    #os.system("/p1mon/scripts/./P1DbCopy.py --powerproduction2disk --forcecopy")
     process_lib.run_process( 
-        cms_str='/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --powerproduction2disk --forcecopy',
+        cms_str='/p1mon/scripts/P1DbCopy --powerproduction2disk --forcecopy',
         use_shell=True,
         give_return_value=False,
         flog=flog 
@@ -652,9 +651,8 @@ def backupData():
 # exist.                                               #
 ########################################################
 def DiskRestore():
-   #os.system("/p1mon/scripts/P1DbCopy.py --powerproduction2ram")
    process_lib.run_process(
-        cms_str='/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --powerproduction2ram',
+        cms_str='/p1mon/scripts/P1DbCopy --powerproduction2ram',
         use_shell=True,
         give_return_value=False,
         flog=flog 

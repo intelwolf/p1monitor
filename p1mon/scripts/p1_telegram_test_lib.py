@@ -63,7 +63,8 @@ class p1_telegram():
         if ( self.kwh_1_4_0_utc_timestamp + 900 ) - epoch_seconds < 0:
             self.kwh_1_4_0_utc_timestamp = epoch_seconds
             self.kwh_1_4_0_value = random.uniform(0.01, 9.99)
-            
+
+            # month change
             timestamp = util.mkLocalTimestamp()
             if self.kwh_1_6_0_timestamp[4:6] != timestamp[4:6]:
                 self.kwh_1_6_0_value = self.kwh_1_4_0_value
@@ -77,7 +78,7 @@ class p1_telegram():
         serialbuffer.append( line_1 )
         self.flog.warning(inspect.stack()[0][3]+": test piek kW kwartier regel toegevoegd aan telegram: " + line_1 )
 
-        line_2 = ''.join( filter(lambda x: x in string.printable, '1-0:1.6.0('+ self.kwh_1_6_0_timestamp + 'W)({0:02.3f}'.format(self.kwh_1_6_0_value)+'*kW)\r\n')).rstrip()[0:1024]
+        line_2 = ''.join( filter(lambda x: x in string.printable, '1-0:1.6.0('+ self.kwh_1_6_0_timestamp[2:] + 'W)({0:02.3f}'.format(self.kwh_1_6_0_value)+'*kW)\r\n')).rstrip()[0:1024]
         serialbuffer.append( line_2 )
         self.flog.warning(inspect.stack()[0][3]+": test piek kW maand regel toegevoegd aan telegram: " + line_2 )
 

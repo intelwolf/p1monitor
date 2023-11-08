@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1WatermeterV2CounterSet.py
+# run manual with ./P1WatermeterV2CounterSet
 
 import const
 import inspect

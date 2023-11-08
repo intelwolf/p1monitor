@@ -11,7 +11,7 @@ include_once '/p1mon/www/util/fullscreen.php';
 if ( checkDisplayIsActive( 147 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
 <title><?php echo strIdx(147);?></title>
@@ -298,6 +298,10 @@ function createKwhChart() {
             maxRange:       30 * 365 * 24 * 3600000,
             type: 'datetime',
             dateTimeLabelFormats: {
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
                 year: '%Y'
             },
             lineColor: '#6E797C',
@@ -399,7 +403,7 @@ function createKwhChart() {
             navigator: {
                 xAxis: {
                     dateTimeLabelFormats: {
-                        day: '%d %B'    
+                        day: '%d %B'
                     }    
                 },
                 enabled: true,

@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive( 61 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor fase dag uiterste V</title>
+<title>P1-monitor <?php echo strIdx( 531 )?> A</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -29,7 +30,14 @@ if ( checkDisplayIsActive( 61 ) == false) { return; }
 <script src="./js/p1mon-util.js"></script>
 
 <script>
-"use strict"; 
+"use strict";
+
+const text_days                     = "<?php echo strIdx( 122 );?>";
+const text_week                     = "<?php echo strIdx( 144 );?>";
+const text_month                    = "<?php echo strIdx( 131 );?>";
+const text_months                   = "<?php echo strIdx( 123 );?>";
+const text_year                     = "<?php echo strIdx( 132 );?>";
+const text_years                    = "<?php echo strIdx( 124 );?>";
 
 var Grange_L1A       = [];
 var Grange_L2A       = [];
@@ -39,7 +47,7 @@ var seriesOptions    = [];
 var recordsLoaded    = 0;
 var initloadtimer;
 var Gselected        = 0;
-var GselectText      = [ '1 week', '14 dagen', '1 maand', '2 maanden', '1 jaar', '3 jaar' ]; // #PARAMETER
+var GselectText      = [ '1 '+text_week, '14 '+text_days, '1 '+text_month, '2 '+text_months, '1 '+text_year, '3 '+text_years ]; // #PARAMETER
 var GseriesVisibilty = [ true, true, true ];
 var GserieNames      = [ "L1", "L2", "L3" ]
 var mins             = 1;
@@ -98,7 +106,7 @@ function createChart() {
     Highcharts.stockChart('ampChart', {
         exporting: { enabled: false },
         lang: {
-            noData: "Geen gegevens beschikbaar."
+            noData: "<?php echo ucfirst(strIdx( 425 ))?>"
         },
         noData: {
             style: { 
@@ -140,7 +148,11 @@ function createChart() {
             type: 'datetime', 
             minTickInterval: 24 *  3600000, 
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
             lineColor: '#6E797C',
             lineWidth: 1, 
@@ -406,9 +418,11 @@ $(function() {
 
     Highcharts.setOptions({
         global: {
-        useUTC: false
-        }
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
     DataLoop();
@@ -437,15 +451,15 @@ $(function() {
     </div> 
     <div class="mid-content-2 pad-13">
         <div class="frame-2-top">
-            <span class="text-2">Uiterste fase waarden per dag (A)</span>
+            <span class="text-2"><?php echo strIdx( 533 )?> A</span>
         </div>
-        <div class="frame-2-bot"> 
+        <div class="frame-2-bot">
         <div id="ampChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
 <div id="loading-data">
-    <img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128">
+    <img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 )?>" height="15" width="128">
 </div>
 </body>
 </html>

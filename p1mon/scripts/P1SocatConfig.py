@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SocatConfig.py
+# run manual with ./P1SocatConfig
 
 import argparse
 import const
@@ -18,7 +18,7 @@ prgname = 'P1SocatConfig'
 config_db    = sqldb.configDB()
 rt_status_db = sqldb.rtStatusDb()
 
-def Main( argv ): 
+def Main( argv ):
 
     my_pid = os.getpid()
 
@@ -56,8 +56,6 @@ def Main( argv ):
         required=False,
         action="store_true",
         help="scontroleer de status en update de status database." )
-
-
 
     args = parser.parse_args()
 

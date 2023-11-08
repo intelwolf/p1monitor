@@ -161,7 +161,7 @@ function page_menu($id) {
     // fase informatie.
     $t=strIdx(113);
     if ( config_read(61) == 1 ) {
-        echo "<a title=\"$t\" id=\"menu10\" href=\"fase-a.php\">
+        echo "<a title=\"$t\" id=\"menu10\" href=\"fase-a-home.php\">
             <span class=\"fa-layers fa-gw frame-1-mid $m10\">
                 <i class=\"far fa-circle\" data-fa-transform=\"grow-18\"></i>
                 <i class=\"fas fa-bolt\" data-fa-transform=\"shrink-6 left-0 up-5\"></i>
@@ -172,7 +172,7 @@ function page_menu($id) {
     }
 
     // informatie pagina
-    $t=strIdx(114);
+    $t=ucfirst(strIdx(114));
     if ( config_read(22) == 1 ) {
         echo "<a title=\"$t\" id=\"menu3\" href=\"info.php\">
                     <span class=\"fa-layers frame-1-mid $m3\">
@@ -181,14 +181,13 @@ function page_menu($id) {
         </a>"."\n";
     }
     
-    // informatie pagina
+    // tariff page
     $t=strIdx(115);
     if($localip == True or $noInetCheck == True){
         echo "<a  title=\"$t\" id=\"menu2\" href=\"config-tarief.php\">
                     <span class=\"fa-layers frame-1-bot $m2\">
                         <i class=\"fas fa-wrench\" data-fa-transform=\"grow-18\"></i>
                       </span>
-
         </a>"."\n";
     }
 

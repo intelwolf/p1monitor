@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1FtpCopy.py
+# run manual with ./P1FtpCopy
 
 import argparse
 import base64

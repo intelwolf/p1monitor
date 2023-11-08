@@ -16,7 +16,7 @@ PROCESS_DEFAULT_TIMEOUT = 30 # timeout in sec before a process calls returns
 # timeout = None just launches the program, return value is from the first script or program #
 #                                                                                            #
 ##############################################################################################
-def run_process( cms_str=None, use_shell=True, give_return_value=True, flog=None, timeout=PROCESS_DEFAULT_TIMEOUT  ):
+def run_process( cms_str=None, use_shell=True, give_return_value=True, flog=None, timeout=PROCESS_DEFAULT_TIMEOUT ):
 
     returncode = 1
     stdout = subprocess.PIPE
@@ -37,7 +37,7 @@ def run_process( cms_str=None, use_shell=True, give_return_value=True, flog=None
                 flog.debug('stdout = ' + str( stdout ) + " stderr = " + str( stderr) )
             returncode = int( proc.wait() )
         except Exception as e:
-            proc.kill() # clean up left over bits
+            proc.kill() # clean up left over bits.
             if flog != None:
                 flog.error( inspect.stack()[0][3] + "cmd(2) = " + str(cms_str) + " " +str(e) )
     else:

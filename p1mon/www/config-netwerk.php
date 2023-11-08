@@ -300,7 +300,7 @@ $(function () {
                             <span class="text-15">wifi</span>
                         </div>
                         <div class="frame-4-bot">
-                            <div class="float-left">                
+                            <div class="float-left">
                                 <i class="text-10 pad-7 fa-fw fas fa-wifi"></i>
                                 <label class="text-10">SSID</label>
                                 <p class="p-1"></p>
@@ -308,17 +308,19 @@ $(function () {
                                 <label class="text-10"><?php echo strIdx(226);?></label> 
                             </div>
                             <div class="float-left pad-1">
-                                <input class="input-7 color-settings color-input-back" id="wifi_essid" name="wifi_essid"  type="text" value="<?php echo config_read(11);?>">
+                                <input class="input-5 color-settings color-input-back" id="wifi_essid" name="wifi_essid"  type="text" value="<?php echo config_read(11);?>">
                                 <p class="p-1"></p>
-                                <input class="input-7 color-settings color-input-back" id="wifi_pw" name="wifi_pw"  type="password" value="<?php echo decodeString(12, 'wifipw');?>">
+                                <input class="input-5 color-settings color-input-back" id="wifi_pw" name="wifi_pw"  type="password" value="<?php echo decodeString(12, 'wifipw');?>">
                                 <p class="p-1"></p>
                             </div>
-                            <div id="wifi_search" onclick=wifiSelectClick() class="float-left pad-1 cursor-pointer">
-                                <span><i class="color-menu pad-7 fas fa-search"></i></span>
-                            </div>
-                            <p class="p-1"></p>
-                            <div id="wifi_password" onclick="toggelPasswordVisibility('wifi_pw')" class="float-left pad-21 cursor-pointer">
-                                <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                            <div class="float-right">
+                                <div id="wifi_search" onclick=wifiSelectClick() class="float-left pad-1 cursor-pointer">
+                                    <span><i class="color-menu pad-7 fas fa-search"></i></span>
+                                </div>
+                                <p class="p-1"></p>
+                                <div id="wifi_password" onclick="toggelPasswordVisibility('wifi_pw')" class="float-left pad-21 cursor-pointer">
+                                    <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                                </div>
                             </div>
                             <p class="p-1"></p>
                             

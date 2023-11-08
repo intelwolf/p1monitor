@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1DropBoxAuth.py
+# run manual with ./P1DropBoxAuth
 
 import argparse
 import const

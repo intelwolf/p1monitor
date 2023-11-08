@@ -11,7 +11,7 @@ include_once '/p1mon/www/util/highchart.php';
 
 ?> 
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
 <title>P1monitor <?php echo strIdx( 343 )?> 2</title>

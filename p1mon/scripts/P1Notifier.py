@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1Notifier.py
+# run manual with ./P1Notifier
 
 from typing import Counter
 import const
@@ -7,6 +7,7 @@ import logger
 import os
 import p1_port_shared_lib
 import phase_shared_lib
+import power_shared_lib
 import pwd
 import signal
 import sqldb
@@ -19,6 +20,7 @@ prgname = 'P1Notifier'
 rt_status_db        = sqldb.rtStatusDb()
 config_db           = sqldb.configDB()
 fase_db_min_max_dag = sqldb.PhaseMaxMinDB()
+e_db_serial         = sqldb.SqlDb1()
 
 def Main( argv ):
     my_pid = os.getpid()
@@ -36,7 +38,7 @@ def Main( argv ):
    
     # open van config database
     try:
-        config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
+        config_db.init( const.FILE_DB_CONFIG, const.DB_CONFIG_TAB )
     except Exception as e:
         flog.critical(inspect.stack()[0][3]+": database niet te openen(2)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]))
         sys.exit(1)
@@ -50,18 +52,27 @@ def Main( argv ):
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FASE_MINMAX_DAG_TAB + " succesvol geopend.")
 
+    # open van seriele database
+    try:
+        e_db_serial.init( const.FILE_DB_E_FILENAME ,const.DB_SERIAL_TAB )
+    except Exception as e:
+        flog.critical(inspect.stack()[0][3]+": database niet te openen(4)." + const.FILE_DB_E_FILENAME + ") melding:" + str(e.args[0]))
+        sys.exit(1)
+    flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_SERIAL_TAB + " succesvol geopend.")
 
     # set start timestamp
     rt_status_db.timestamp( 126, flog )
 
     # init functions
-    p1_port_notification = p1_port_shared_lib.P1PortDataNotification( statusdb=rt_status_db, configdb=config_db, flog=flog )
+    p1_port_notification    = p1_port_shared_lib.P1PortDataNotification( statusdb=rt_status_db, configdb=config_db, flog=flog )
     fase_max_min_notication = phase_shared_lib.VoltageMinMaxNotification( configdb=config_db, phasedb=fase_db_min_max_dag, flog=flog )
-  
+    power_nottification     = power_shared_lib.WattTresholdNotification( configdb=config_db, serialdb=e_db_serial, flog=flog)
+
     # init run
     p1_port_notification.run()
     fase_max_min_notication.run()
-    
+    power_nottification.run() 
+
     timer = 0
     while True:
 
@@ -69,10 +80,15 @@ def Main( argv ):
         flog.debug(inspect.stack()[0][3]+": elke 10 seconden acties uitvoeren.")  
         p1_port_notification.run()
 
+        #flog.setLevel( logger.logging.DEBUG )
+        #power_nottification.run()
+        #p1_port_notification.run()
+        #fase_max_min_notication.run()
+        #flog.setLevel( logger.logging.INFO )
+
         if timer%3 == 0: # every 30 seconds
-            #flog.setLevel( logger.logging.DEBUG )
             fase_max_min_notication.run()
-            #flog.setLevel( logger.logging.INFO )
+            power_nottification.run()
 
         timer += 1
         time.sleep( 10 ) # don't change!

@@ -3,6 +3,7 @@ session_start();
 include_once '/p1mon/www/util/config_read.php';
 include_once '/p1mon/www/util/p1mon-util.php';
 include_once '/p1mon/www/util/p1mon-password.php';
+include_once '/p1mon/www/util/textlib.php';
 
 #print_r($_post);
 
@@ -16,17 +17,17 @@ $localip     = validLocalIpAdress(getClientIP());
 //$localip        = False;
 //$noInetCheck    = False;
 if( $localip == False ){ 
-        if( $noInetCheck == False ) {
-            die();
-        }
+    if( $noInetCheck == False ) {
+        die();
+    }
 }
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 531 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1 monitor login</title>
+<title>P1-monitor login</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -105,7 +106,7 @@ if( $localip == False ){
             if ($(this).val().length == 0) {
                 $("#password_strength").html("voer wachtwoord in");
                 $("#password_strength").css("color", '#6E797C');
-                hideStuff('button_id_set_pw');    
+                hideStuff('button_id_set_pw');
                 return;
             } else {
                 showStuff('button_id_set_pw');
@@ -126,32 +127,32 @@ if( $localip == False ){
                     passed++;
                 }
             }
- 
+
             //Validate for length of Password.
             if (passed > 2 && $(this).val().length > 8) {
                 passed++;
             }
- 
+
             //Display status.
             var color = "";
             var strength = "";
             switch (passed) {
                 case 0:
                 case 1:
-                    strength = "zwak";
+                    strength = "<?php echo strIdx( 609 )?>";
                     color = "red";
                     break;
                 case 2:
-                    strength = "goed";
+                    strength = "<?php echo strIdx( 570 )?>";
                     color = "darkorange";
                     break;
                 case 3:
                 case 4:
-                    strength = "sterk";
+                    strength = "<?php echo strIdx( 571 )?>";
                     color = "green";
                     break;
                 case 5:
-                    strength = "erg sterk";
+                    strength = "<?php echo strIdx( 610 )?>";
                     color = "darkgreen";
                     break;
             }
@@ -160,36 +161,34 @@ if( $localip == False ){
         });
         document.getElementById("loginpasswd").focus();
     });
-    
-
 
 </script>
 
 <div>
    <!-- wachtwoord instellen -->
-    <div id="dialog_setpw">    
-    <h2>wachtwoord instellen</h2>
+    <div id="dialog_setpw">
+    <h2><?php echo strIdx( 611 )?></h2>
     <form name="login_set" method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
         <input id="password_text" type="password" name="password_text"><br><br>
-        <span class="text-4">kwaliteit:&nbsp;&nbsp;</span><span class="text-4" id="password_strength">voer wachtwoord in</span>
+        <span class="text-4"><?php echo strIdx( 613 )?>:&nbsp;&nbsp;</span><span class="text-4" id="password_strength"><?php echo strIdx( 614 )?></span>
         <p></p>
         <div id='button_id_set_pw'>
-            <button id="login_set_pw_button" class="input-2 but-1" name="set_password" type="submit" value="set_password">
+            <button id="login_set_pw_button" class="input-2 but-3" name="set_password" type="submit" value="set_password">
                 <i class="color-menu fa fa-3x fa-database"></i>
-                <span class="color-menu text-7">opslaan</span>
+                <span class="color-menu text-7"><?php echo strIdx( 117 )?></span>
             </button>
         </div>
-    </form>    
+    </form>
     </div>
     <!-- wachtwoord invoeren -->
-    <div id="dialog_checkpw">    
-    <h2 class="color-ok-2">wachtwoord</h2>
+    <div id="dialog_checkpw">
+    <h2 class="color-ok-2"><?php echo strIdx( 612 )?></h2>
     <form name="login" method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
         <div class="content-wrapper pad-2">
             <input class="input-8" id="loginpasswd" type="password" name="password" autocomplete="off">
             <span class="pad-13" onclick="toggelPasswordVisibility('loginpasswd')"><i class="color-menu fas fa-eye fa-lg"></i></span>
         </div>
-        
+
         <div class='content-wrapper pos-12'>
             <button class="input-2 but-1 float-left" name="check_password_button" type="submit" value="check_password_button">
                 <i class="color-menu fas fa-sign-in-alt fa-3x"></i>
@@ -197,7 +196,7 @@ if( $localip == False ){
             </button>
             <button class="input-2 but-1 float-right" name="go_home_button" type="submit" value="go_home">
                 <i class="color-settings fas fa-sign-out-alt fa-3x"></i>
-                <span class="color-settings text-7">home</span>
+                <span class="color-settings text-7"><?php echo strIdx( 615 )?></span>
             </button>
         </div>
     </form>

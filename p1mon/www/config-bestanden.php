@@ -45,10 +45,10 @@ if ( isset($_POST["dboxauth"]) ) {
         // magic to handle tokens that start with a hypen, thank you Dropbox :)
         if ( substr( $clean_dbox_auth , 0, 1 ) === "-" ) {
             $clean_dbox_auth_changed = substr( $clean_dbox_auth , 1, strlen( $clean_dbox_auth ) );
-            $command = '/p1mon/scripts/pythonlaunch.sh P1DropBoxAuth.py --token --addhyphen ' . $clean_dbox_auth_changed;
+            $command = '/p1mon/scripts/P1DropBoxAuth --token --addhyphen ' . $clean_dbox_auth_changed;
         } else {
             #$command = '/p1mon/scripts/p1monExec -p ' . ' "/p1mon/scripts/P1DropBoxAuth.py --token  ' . $clean_dbox_auth  . '"';
-            $command = "/p1mon/scripts/pythonlaunch.sh P1DropBoxAuth.py --token " . $clean_dbox_auth;
+            $command = "/p1mon/scripts/P1DropBoxAuth --token " . $clean_dbox_auth;
         }
 
         //echo "command = " . $command . "<br>";

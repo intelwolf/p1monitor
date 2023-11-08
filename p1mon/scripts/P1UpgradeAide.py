@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1UpgradeAide.py
+# run manual with ./P1UpgradeAide
 
 import argparse
 import const
@@ -768,7 +768,7 @@ def socat_restore():
         _id, socat_is_active, _label = config_db.strget( 200, flog )
         if ( int(socat_is_active) == 1):
             flog.info( inspect.stack()[0][3] + ": socat is actief, service wordt geinstalleerd." )
-            cmd = '/p1mon/scripts/pythonlaunch.sh P1SocatConfig.py --enable'
+            cmd = '/p1mon/scripts/P1SocatConfig --enable'
             flog.debug ( inspect.stack()[0][3] + ": cmd =" + cmd )
             proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
             _stdout, _stderr  = proc.communicate( timeout=30 )

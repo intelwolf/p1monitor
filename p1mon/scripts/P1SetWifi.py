@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SetWifi.py
+# run manual with ./P1SetWifi
 
 import base64
 import const

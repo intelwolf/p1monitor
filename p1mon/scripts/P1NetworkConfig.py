@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1NetworkConfig.py
+# run manual with ./P1NetworkConfig
 
 import argparse
 import const
@@ -166,7 +166,7 @@ def Main( argv ):
 
 def disk_to_ram_restore():
     process_lib.run_process( 
-        cms_str='/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2ram',
+        cms_str='/p1mon/scripts/P1DbCopy --allcopy2ram',
         use_shell=True,
         give_return_value=True,
         flog=flog 

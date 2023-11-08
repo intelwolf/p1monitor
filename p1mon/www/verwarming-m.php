@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(46) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor verwarming maand</title>
+<title>P1-monitor verwarming maand</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -31,6 +32,17 @@ if ( checkDisplayIsActive(46) == false) { return; }
 <script>
 "use strict"; 
 
+
+const text_months   = "<?php echo strIdx( 123 );?>";
+const text_year     = "<?php echo strIdx( 132 );?>"
+const text_years    = "<?php echo strIdx( 124 );?>"
+const text_avg      = "<?php echo strIdx( 454 );?>";
+const text_in       = "<?php echo strIdx( 452 );?>";
+const text_out      = "<?php echo strIdx( 453 );?>";
+
+var ui_in_label     = "<?php echo config_read( 121 ); ?>";
+var ui_uit_label    = "<?php echo config_read( 122 ); ?>";
+
 var GrangeIn        = [];
 var GrangeInAvg     = [];
 var GrangeOut       = [];
@@ -40,9 +52,9 @@ var seriesOptions   = [];
 var recordsLoaded   = 0;
 var initloadtimer;
 var Gselected       = 0;
-var GselectText     = ['6 maanden','1 jaar','2 jaar','5 jaar','10 jaar' ]; // #PARAMETER
+var GselectText     = ['6 '+text_months, '1 '+text_year, '2 '+text_years,'5 '+text_years, '10 '+text_years ]; // #PARAMETER
 var GseriesVisibilty= [true,true,true,true];
-var GserieNames     = ["IN","IN(GEM.)","UIT","UIT(GEM.)"]
+var GserieNames     = [ text_in,  text_in+"("+text_avg+")", text_out, text_out+"("+text_avg+")" ]
 var mins            = 1;
 var secs            = mins * 60;
 var currentSeconds  = 0;
@@ -54,17 +66,14 @@ var maxDataText     = ['MAX. data','MIN. data']
 var maxDataCount    = [ 36000, 366 ]
 var maxrecords      = maxDataCount[1];
 
-var ui_in_label     = "<?php echo config_read( 121 ); ?>"; 
-var ui_uit_label    = "<?php echo config_read( 122 ); ?>";
-
 function setLabels() {
     if ( ui_in_label.length > 0 ) {
         GserieNames[0] = ui_in_label;
-        GserieNames[1] = ui_in_label +"(GEM.)";
+        GserieNames[1] = ui_in_label + "("+text_avg+")"
     }
     if ( ui_uit_label.length > 0 ) {
         GserieNames[2] = ui_uit_label;
-        GserieNames[3] = ui_uit_label +"(GEM.)";
+        GserieNames[3] = ui_uit_label  + "("+text_avg+")"
     }
 }
 
@@ -148,8 +157,10 @@ function createChart() {
             type: 'datetime', 
             minTickInterval: 600000, 
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %b<br/>%Y',
-                hour: '%a.<br>%H:%M',
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%Y',
                 year: '%Y'
             },
             lineColor: '#6E797C',
@@ -198,12 +209,13 @@ function createChart() {
                 var s = '<b>'+ Highcharts.dateFormat('%B, %Y', this.x) +'</b>'; //PARAMETER
                 var d = this.points;
                 
-                var in_temp_min  = 'verborgen';
-                var in_temp_max  = 'verborgen';
-                var in_temp_avg  = 'verborgen';
-                var out_temp_min = 'verborgen';
-                var out_temp_max = 'verborgen';
-                var out_temp_avg = 'verborgen';
+                const hidden_text  = '<?php echo strIdx(340);?>'; 
+                var in_temp_min  = hidden_text;
+                var in_temp_max  = hidden_text;
+                var in_temp_avg  = hidden_text;
+                var out_temp_min = hidden_text;
+                var out_temp_max = hidden_text;
+                var out_temp_avg = hidden_text;
                 var in_header    = '';
                 var out_header   = '';
                 var delta_header = '';
@@ -211,63 +223,63 @@ function createChart() {
                 var max_temp_color = '#FF0000';
                 var min_temp_color = '#0088FF';
 
-                for (var i = 0; i < d.length; i++) { 
+                for (var i = 0; i < d.length; i++) {
 
                 if (d[i].series.name == GserieNames[0] && d[i].series.visible == true) {
                     in_temp_max = d[i].point.high;
                     in_temp_min = d[i].point.low;
                     if ( in_header == '') {
-                    in_header = "<br/><br/><span>Temperatuur " + GserieNames[0] + ":</span>"
-                    s += in_header;
-                    }
-                    s += '<br/><span style="color: #FF0000">Maximum: </span>'+in_temp_max.toFixed(1)+"°C";;
-                    s += '<br/><span style="color: #FF6666">Minimum: </span>'+in_temp_min.toFixed(1)+"°C";
+                        in_header = "<br/><br/><span><?php echo strIdx( 139 );?> " + GserieNames[0] + ":</span>"
+                        s += in_header;
+                    } 
+                    s += '<br/><span style="color: #FF0000"><?php echo strIdx( 337);?>: </span>'+in_temp_max.toFixed(1)+"°C";;
+                    s += '<br/><span style="color: #FF6666"><?php echo strIdx( 339 );?>: </span>'+in_temp_min.toFixed(1)+"°C";
                 }
 
                 if (d[i].series.name == GserieNames[1] && d[i].series.visible == true) {
                     in_temp_avg = d[i].point.y;
                     if ( in_header == '') {
-                    in_header = "<br/><br/><span>Temperatuur " + GserieNames[1] + ":</span>"
-                    s += in_header;
+                        in_header = "<br/><br/><span><?php echo strIdx( 139 );?> " + GserieNames[1] + ":</span>"
+                        s += in_header;
                     }
-                    s += '<br/><span style="color: #ff3333">Gemiddelde: </span>'+in_temp_avg.toFixed(1)+"°C";
-                }
+                    s += '<br/><span style="color: #ff3333"><?php echo strIdx( 137 );?>: </span>'+in_temp_avg.toFixed(1)+"°C";
+                } 
 
                 if (d[i].series.name == GserieNames[2] && d[i].series.visible == true) {
                     out_temp_max = d[i].point.high;
                     out_temp_min = d[i].point.low;
                     if ( out_header == '') {
-                    out_header = "<br/><br/><span>Temperatuur " + GserieNames[2] + ":</span>"
-                    s += out_header;
+                        out_header = "<br/><br/><span><?php echo strIdx( 139 );?> " + GserieNames[2] + ":</span>"
+                        s += out_header;
                     }
-                    s += '<br/><span style="color: #0000FF">Maximum: </span>'+out_temp_max.toFixed(1)+"°C";
-                    s += '<br/><span style="color: #0088FF">Minimum: </span>'+out_temp_min.toFixed(1)+"°C";
+                    s += '<br/><span style="color: #0000FF"><?php echo strIdx( 337 );?>: </span>'+out_temp_max.toFixed(1)+"°C";
+                    s += '<br/><span style="color: #0088FF"><?php echo strIdx( 339 );?>: </span>'+out_temp_min.toFixed(1)+"°C";
                 }
-
+                
                 if (d[i].series.name == GserieNames[3] && d[i].series.visible == true) {
                     out_temp_avg = d[i].point.y;
                     if ( out_header == '') {
-                    out_header = "<br/><br/><span>Temperatuur " + GserieNames[3] + ":</span>"
-                    s += out_header;
+                        out_header = "<br/><br/><span><?php echo strIdx( 139 );?> " + GserieNames[3] + ":</span>"
+                        s += out_header;
                     }
-                    s += '<br/><span style="color: #3333ff">Gemiddelde: </span>'+out_temp_avg.toFixed(1)+"°C";
+                    s += '<br/><span style="color: #3333ff"><?php echo strIdx( 137 );?>: </span>'+out_temp_avg.toFixed(1)+"°C";
                 }
                 }
-
-                if (in_temp_avg != 'verborgen' && out_temp_avg != 'verborgen') {
+                
+                if (in_temp_avg != hidden_text && out_temp_avg != hidden_text) {
                 if ( delta_header == '') {
-                    delta_header= "<br/><br/><span>Verschil temperatuur:</span>"
+                    delta_header= "<br/><br/><span><?php echo strIdx( 457 );?>:</span>"
                     s += delta_header;
                 }
-                s += '<br/><span style="color: #3333ff">Gemiddelde ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_avg - out_temp_avg).toFixed(1)+"°C";
+                s += '<br/><span style="color: #3333ff"><?php echo strIdx( 137 );?>: ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_avg - out_temp_avg).toFixed(1)+"°C";
                 }
 
-                if (in_temp_max != 'verborgen' && out_temp_min != 'verborgen') {
+                if (in_temp_max != hidden_text && out_temp_min != hidden_text) {
                 if ( delta_header == '') {
-                    delta_header = "<br/><br/><span>Verschil temperatuur:</span>"
+                    delta_header = "<br/><br/><span><?php echo strIdx( 457 );?>:</span>"
                     s += delta_header;
                 }
-                s += '<br/><span style="color: #3333ff">Max ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_max - out_temp_min).toFixed(1)+"°C";
+                s += '<br/><span style="color: #3333ff"><?php echo strIdx( 136 );?> ' + GserieNames[0] + ' - ' + GserieNames[2] + ': </span>'+Math.abs(in_temp_max - out_temp_min).toFixed(1)+"°C";
                 }
                 return s;
             },
@@ -276,7 +288,6 @@ function createChart() {
             crosshairs: [true, true],
             borderWidth: 1
         },
-
         rangeSelector: {
             inputEnabled: false,
             buttonSpacing: 5, 
@@ -351,7 +362,6 @@ function createChart() {
                 }
             }  
         },
-
         legend: {
             y: -38,
             symbolHeight: 12,
@@ -373,7 +383,6 @@ function createChart() {
             },
             itemDistance: 5
         },
-
         series: [
             {
                 showInNavigator: true,
@@ -524,9 +533,11 @@ $(function() {
 
     Highcharts.setOptions({
         global: {
-        useUTC: false
-        }
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
     DataLoop();
@@ -556,14 +567,14 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">maanden verwarming temperatuur in °C</span>
+            <span class="text-2"><?php echo strIdx( 462 );?></span>
         </div>
         <div class="frame-2-bot"> 
-        <div id="tempChart" style="width:100%; height:480px;"></div>    
+        <div id="tempChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128" /></div>   
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx(295);?>" height="15" width="128"></div>
 
 </body>
 </html>

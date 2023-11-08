@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(18) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor actueel levering</title>
+<title>P1-monitor <?php echo strIdx( 407 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -53,7 +54,6 @@ if ( useKw ) {
     var wattText = 'watt'
 }
 
-
 Number.prototype.countDecimals = function () {
 
     if (Math.floor(this.valueOf()) === this.valueOf()) return 0;
@@ -66,7 +66,6 @@ Number.prototype.countDecimals = function () {
     }
     return str.split("-")[1] || 0;
 }
-
 
 function readJsonApiSmartMeter(){ 
     $.getScript( "./api/v1/smartmeter?limit=720", function( data, textStatus, jqxhr ) {
@@ -153,9 +152,9 @@ function createChartVerbruikGrafiek() {
         formatter: function () {
             var s = "<b>" + Highcharts.dateFormat("%A %H:%M:%S", this.x) + "</b>";
             if ( useKw ) {
-                s += "<br/><span style='color: #98D023;'>kW geleverd: </span>" + ( this.y );
+                s += "<br/><span style='color: #98D023;'><?php echo strIdx( 408 )?>: </span>" + ( this.y );
             } else {
-                s += "<br/><span style='color: #98D023;'>Watt geleverd: </span>" + ( this.y * 1000 ).toFixed(0);
+                s += "<br/><span style='color: #98D023;'><?php echo strIdx( 409 )?>: </span>" + ( this.y * 1000 ).toFixed(0);
             }
             return s;
         },
@@ -409,7 +408,8 @@ $(function () {
     Highcharts.setOptions({
         global: {
             useUTC: false
-        }
+        },
+        lang: <?php hc_language_json(); ?>
     });
     creatCurrentUseChart();
     createDailytUseChart();
@@ -449,7 +449,7 @@ $(function () {
 
                 <div class="mid-content-3 pad-13">
                     <div class="frame-2-top">
-                        <span class="text-2">actuele levering</span>
+                        <span class="text-2"><?php echo strIdx( 408 )?></span>
                     </div>
                     <div class="frame-2-bot">
                         <div id="currentuse"></div>
@@ -458,7 +458,7 @@ $(function () {
 
                 <div class="pos-23 pad-1">
                     <div class="frame-2-top">
-                        <span class="text-2">totaal vandaag</span>
+                        <span class="text-2"><?php echo strIdx( 358 )?></span>
                     </div>
                     <div class="frame-2-bot pos-24">
                         <div id="dailyuse"></div>
@@ -468,7 +468,7 @@ $(function () {
                 </div>
                 <div class="pos-25">
                     <div class="frame-3-top">
-                        <span class="text-3">laatste levering</span>
+                        <span class="text-3"><?php echo strIdx( 410 )?></span>
                     </div>
                     <div class="frame-2-bot">
                         <div id="vermogenMeterGrafiekVerbruik" class="pos-26"></div>

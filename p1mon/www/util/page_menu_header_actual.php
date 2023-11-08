@@ -3,6 +3,24 @@
 function page_menu_header_actual($id) {
     $m0=$m1=$m2=$m3=$m4=$m5='';
 
+    $consumptionkWh = strIdx( 400 );
+    $productionKwh  = strIdx( 401 );
+    $gasconsumption = strIdx( 402 );
+
+    /* adjust font and such to fix the longer text */
+    $class_pos  = "pos-7"; /* default */
+    $language_index = config_read( 148 );
+    if(isset($language_index) ) {
+        switch ($language_index) {
+            case 1:
+                $class_pos = "pos-52";
+                break;
+            case 2:
+                $class_pos = "pos-53";
+                break;
+        }
+    } 
+
     switch ($id) {
         case 0: /* home */
             $m0 = "menu-active";
@@ -19,9 +37,9 @@ function page_menu_header_actual($id) {
     }
     echo <<< EOT
     <div class="pad-13 content-wrapper">
-        <div class="pos-7 content-wrapper $m0"><a href="e-verbruik.php" class="$m0">kWh verbruik</a></div>
-        <div class="pos-7 content-wrapper $m1"><a href="e-levering.php" class="$m1">kWh levering</a></div>
-        <div class="pos-7 content-wrapper $m2"><a href="g-verbruik.php" class="$m2">gas verbruik</a></div>
+        <div class="$class_pos content-wrapper $m0"><a href="e-verbruik.php" class="$m0">$consumptionkWh</a></div>
+        <div class="$class_pos content-wrapper $m1"><a href="e-levering.php" class="$m1">$productionKwh</a></div>
+        <div class="$class_pos content-wrapper $m2"><a href="g-verbruik.php" class="$m2">$gasconsumption</a></div>
     </div>
     EOT;
 }

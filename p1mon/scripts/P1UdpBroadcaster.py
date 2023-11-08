@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1UdpBroadcaster.py
+# run manual with ./P1UdpBroadcaster
 
 #import argparse
 #import base64

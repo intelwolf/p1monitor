@@ -7,14 +7,16 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
 include_once '/p1mon/www/util/page_menu_header_meterreadings.php';
+include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(62) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor historie dag meterstanden</title>
+<title>P1-monitor <?php echo strIdx( 517 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -30,6 +32,14 @@ if ( checkDisplayIsActive(62) == false) { return; }
 
 <script>
 "use strict"; 
+
+const text_week                 = "<?php echo strIdx( 144 );?>";
+const text_month                = "<?php echo strIdx( 131 );?>";
+const text_year                 = "<?php echo strIdx( 132 );?>";
+const text_total                = "<?php echo strIdx( 140 );?>";
+const text_gas_consumed         = "<?php echo strIdx( 342 );?>";
+const text_water_consumption    = "<?php echo strIdx( 526 );?>";
+
 // change items with the marker #PARAMETER
 var consumptionKwhGas   = [];
 var consumptionWater    = [];
@@ -37,7 +47,7 @@ var seriesOptions       = [];
 var recordsLoaded       = 0;
 var initloadtimer;
 var Gselected           = 0;
-var GselectText         = [ '1 week','1 maand','1 jaar','totaal' ]; // #PARAMETER
+var GselectText         = [ '1 '+text_week,'1 '+text_month,'1 '+text_year, text_total ]; // #PARAMETER
 var GseriesVisibilty    = [ true,true ];
 var mins                = 1;
 var secs                = mins * 60;
@@ -94,7 +104,7 @@ function createMeterReadingsChart() {
     Highcharts.stockChart('meterReadingChart', {
         exporting: { enabled: false },
         lang: {
-            noData: "Geen gegevens beschikbaar."
+            noData: "<?php echo ucfirst(strIdx( 425 ))?>"
         },
         noData: {
             style: { 
@@ -148,9 +158,11 @@ function createMeterReadingsChart() {
         minRange:       7  * 24 * 3600000,
         maxRange:       61 * 24 * 3600000,
         dateTimeLabelFormats: {
-            day: '%a.<br>%d %b<br/>%Y',
-            hour: '%a.<br>%H:%M',
-            year: '%Y'
+            minute: '%H:%M',
+            hour: '%H:%M',
+            day: "%a.<br>%e %b.",
+            month: '%b.<br>%y',
+            year: '%y'
         },
         lineColor: '#6E797C',
         lineWidth: 1, 
@@ -195,16 +207,13 @@ function createMeterReadingsChart() {
                 var d = this.points;
                 
                 for (var i=0,  tot=d.length; i < tot; i++) {
-                        if ( d[i].series.userOptions.name === 'gas verbruik' ) {
-                            s += '<br/><span style="color:#507ABF">Gas verbruik: </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
-                            //console.log( d[i].y )
+                        if ( d[i].series.userOptions.id === 'gas_ver' ) {
+                            s += '<br/><span style="color:#507ABF">' + text_gas_consumed + ' : </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
                         }    
-                        if ( d[i].series.userOptions.name === 'water verbruik' ) {
-                            s += '<br/><span style="color:#6699FF">Water verbruik: </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
-                            //console.log( d[i].y )
-                        }  
+                        if ( d[i].series.userOptions.id === 'water_ver' ) {
+                            s += '<br/><span style="color:#6699FF">' + text_water_consumption + ' : </span>' + d[i].y.toFixed(3) + " m<sup>3</sup>";
+                        }
                 }
-                //console.log (s)
                 return s;
             },
             backgroundColor: '#F5F5F5',
@@ -285,20 +294,22 @@ function createMeterReadingsChart() {
         },
         series: [ 
             {
+                id: 'gas_ver',
                 yAxis: 0,
                 visible: GseriesVisibilty[0],
                 showInNavigator: true,
-                name: 'gas verbruik',
+                name: text_gas_consumed,
                 type: 'spline',
                 color: '#507ABF',
                 data: consumptionKwhGas,
                 zIndex: 0,
             },
             {
+                id: 'water_ver',
                 yAxis: 0,
                 visible: GseriesVisibilty[1],
                 showInNavigator: true,
-                name: 'water verbruik',
+                name: text_water_consumption,
                 type: 'spline',
                 color: '#6699FF',
                 data: consumptionWater,
@@ -360,10 +371,12 @@ $(function() {
     Gselected = parseInt(getLocalStorage('select-meterreadings-d-m3-index'),10); // #PARAMETER
 
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+            global: {
+                useUTC: false
+            },
+            lang: <?php hc_language_json(); ?>
     });
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
     createMeterReadingsChart();
@@ -394,14 +407,14 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">meterstanden per dag</span>
+            <span class="text-2"><?php echo strIdx( 112 )?></span>
         </div>
         <div class="frame-2-bot"> 
         <div id="meterReadingChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 )?>" height="15" width="128"></div>
 
 </body>
 </html>

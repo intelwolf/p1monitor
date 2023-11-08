@@ -1,4 +1,14 @@
 
+function setFaseHorizontalOrVertical() {
+    var current_page = localStorage.getItem("phase-actual-orientation");
+    console.log("clicked = " + current_page )
+    if ( current_page == '/fase-a-v.php') {
+        window.location.replace('/fase-a-h.php');
+    } else {
+        window.location.replace('/fase-a-v.php');
+    }
+}
+
 
 // check if the url/file exists
 function doesFileExistOnWebServer( urlToFile ) {
@@ -12,7 +22,6 @@ function doesFileExistOnWebServer( urlToFile ) {
         return true;
     }
 }
-
 
 
 // set HighChart Button text

@@ -192,8 +192,10 @@ function createGasChart() {
             minRange:        6   * 30 * 24 * 3600000,
             maxRange:        120 * 30 * 24 * 3600000,
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %b<br/>%Y',
-                hour: '%a.<br>%H:%M',
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%Y',
                 year: '%Y'
             },
             lineColor: '#6E797C',

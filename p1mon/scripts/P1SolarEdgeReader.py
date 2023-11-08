@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SolarEdgeReader.py
+# run manual with ./P1SolarEdgeReader
 
 import const
 import datetime

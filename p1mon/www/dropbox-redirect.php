@@ -1,8 +1,7 @@
 
 <?php
-    #$command = '/p1mon/scripts/p1monExec -p "/p1mon/scripts/P1DropBoxAuth.py -u"';
-   
-    $command = '/p1mon/scripts/pythonlaunch.sh P1DropBoxAuth.py -u';
+
+    $command = '/p1mon/scripts/P1DropBoxAuth -u';
     exec( $command ,$arr_execoutput, $exec_ret_value );
     echo $arr_execoutput[0];
 

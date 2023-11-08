@@ -77,22 +77,36 @@ if ( isset($_POST["API_key"]) ) {
         #debugLog( '$crypto_api_key api key plain ='.$input );
         #debugLog( '$crypto_api_key api key encoded ='.$crypto_api_key );
         #debugLog( '$crypto_api_key api key decoded ='. decodeString(13, 'weatherapikey') );
+
+        #debugLog( '$_POST["stad"](1) ='. $_POST["stad"] );
         
+        # pre process city name
+        $city_name = preg_replace( '/[\x00-\x1F\x7F]/u', '',$_POST["stad"] );
+        $city_name = str_replace("'", "''", $city_name ); # done to handle city names with ' like Braine-l'Alleud
+
         if ( updateConfigDb("update config set parameter = '".$crypto_api_key."' where ID = 13")) $err_cnt += 1;
-        if ( updateConfigDb("update config set parameter = '".preg_replace('/[\x00-\x1F\x7F]/u', '',$_POST["stad"])."' where ID = 14")) $err_cnt += 1;
+        //if ( updateConfigDb("update config set parameter = '".preg_replace('/[\x00-\x1F\x7F]/u', '',$_POST["stad"])."' where ID = 14")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '".$city_name ."' where ID = 14")) $err_cnt += 1;
+
+        ##$sql = "update config set parameter = '".$city_name."' where ID = 14";
+        ##debugLog( 'sql update ='. $sql );
+
+        if ( updateConfigDb($sql)) $err_cnt += 1;
 
         $busy_indicator = '';
         if ( strlen(trim($_POST["API_key"])) == 0 ) { # to prevent error on a empty input
-        header('Location: '.$_SERVER['PHP_SELF']);
-        die;
-    }
+            header('Location: '.$_SERVER['PHP_SELF']);
+            die;
+        }
+
         getJsonGetWeatherData(); // setting the weather id from the city name.
 }
 
-# set id by city idm by name is skipped.
+# set id by city id by name is skipped.
 if ( isset($_POST["stad_id"]) ) {
     if ( strlen(trim($_POST["stad_id"])) > 0 ) {
         $stad_id_clean = preg_replace('/\D/', '', $_POST["stad_id"]);
+        #echo $stad_id_clean."<br>";
         if ( updateConfigDb("update config set parameter = '" . $stad_id_clean . "' where ID = 25") ){
             updateConfigDb("update config set parameter = '0' where ID = 25");
             return false; # could not update ID
@@ -122,6 +136,8 @@ function setCityNameByID( $city_id ) {
     $url = 'https://api.openweathermap.org/data/2.5/weather?id=' . strval($city_id) .'&units=metric&lang='. $lang. '&appid=' . $api_key;
     $json = @file_get_contents( $url );
    
+    #debugLog( '$json   ='.$json   ); 
+
     # something fishy with the json
     if ( strlen($json) < 10 ) {
         $weather_api['w_city']='';
@@ -131,15 +147,19 @@ function setCityNameByID( $city_id ) {
     $main_array = json_decode( $json,true );
     #print_r($main_array);
     $weather_api['w_city'] = $main_array['name'];
+    $weather_api['w_city'] = str_replace("'", "''", $weather_api['w_city'] ); # done to handle city names with ' like Braine-l'Alleud
 
-    if ( updateConfigDb("update config set parameter = '" . $weather_api['w_city'] . "' where ID = 14") ){
-        echo "<br> error 1 <br>";
-        updateConfigDb("update config set parameter = '0' where ID = 14");
+    $sql = "update config set parameter = '" . $weather_api['w_city'] . "' where ID = 14";
+    #debugLog( '$sql(2)  ='.$sql  ); 
+
+    #if ( updateConfigDb("update config set parameter = '" . $weather_api['w_city'] . "' where ID = 14") ){
+    if ( updateConfigDb( $sql ) ){
+        #debugLog( "error 1"  ); 
+        updateConfigDb("update config set parameter = '' where ID = 14");
         return false; # could not update city name
     }
     
     # update database 
-    #$command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
     $command = '/p1mon/scripts/P1Weather --getweather &';
     exec( $command ,$arr_execoutput, $exec_ret_value );
     return true;
@@ -155,7 +175,7 @@ function getJsonGetWeatherData() {
     # only set the ID by name when city ID is not set.
     if ( isset($_POST["stad_id"]) ) {
         if ( strlen(trim($_POST["stad_id"])) > 0 ) {
-            #echo "stad id gezet 1  niet door stads naam<br>";
+            #echo "stad id gezet 1 niet door stads naam<br>";
             return;
         }
     }
@@ -163,6 +183,9 @@ function getJsonGetWeatherData() {
     $api_key = decodeString( 13, 'weatherapikey');
 
     $url = 'https://api.openweathermap.org/data/2.5/weather?q='.config_read(14).'&units=metric&lang='.$lang.'&appid='.$api_key; 
+
+    #debugLog( '$url ='.$url );
+
     #echo '<br>'.$url.'<br>';
     $json = @file_get_contents($url);
     //echo "json length = ". strlen($json). '<br>';
@@ -179,12 +202,11 @@ function getJsonGetWeatherData() {
     $weather_api['city_id']=$main_array['id'];
 
     if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '',$weather_api['city_id'])."' where ID = 25") ){
-            updateConfigDb("update config set parameter = '0' where ID = 25");
-            return false; # could not update ID
+        updateConfigDb("update config set parameter = '0' where ID = 25");
+        return false; # could not update ID
     }
 
     # update database 
-    #$command = '/p1mon/scripts/pythonlaunch.sh P1Weather.py --getweather &';
     $command = '/p1mon/scripts/P1Weather --getweather &';
     exec($command ,$arr_execoutput, $exec_ret_value );
     return true;

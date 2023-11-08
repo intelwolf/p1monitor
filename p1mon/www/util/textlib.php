@@ -314,9 +314,9 @@ $arr = array (
     'Le temps en secondes pour attendre une réponse du serveur de e-mail.'
     ),
 /* 062 */   array(
-    'Vul hier de instellingen in van de email provider die je wilt gebruiken.',
-    'Enter the settings of the email provider you want to use here. ',
-    'Entrez ici les paramètres du fournisseur de messagerie que vous souhaitez utiliser.'
+    'email gegevens:<br>Vul hier de instellingen in van de email provider die je wilt gebruiken.',
+    'email data:<br>Enter the settings of the email provider you want to use here. ',
+    "détails de l'email:<br>Entrez ici les paramètres du fournisseur de messagerie que vous souhaitez utiliser."
     ),
 /* 063 */   array(
     'Notificatie als er geen slimme meter data wordt ontvangen.',
@@ -541,7 +541,7 @@ $arr = array (
     'Fase gegevens.','Phase data.','Données de phase.'
     ),
 /* 114 */   array(
-    'Algemene systeem informatie.','General system information.','Informations générales sur le système'
+    'algemene systeem informatie.','general system information.','informations générales sur le système'
     ),
 /* 115 */   array(
     'Configuratie en instellingen.','Configuration and settings.','Configuration et paramètres.'
@@ -590,7 +590,7 @@ $arr = array (
     'uur','hour','heure'
     ),
 /* 130 */ array(
-    'dagen','days','jours'
+    'historie dagen','history days','journées historiques'
     ),
 /* 131 */ array(
     'maand','month','mois'
@@ -841,8 +841,8 @@ $arr = array (
 /* 209 */ array(
     'systeem','system','système'
     ),
-/* 210 */ array(
-    'database','database','database'
+/* 210  short*/ array(
+    'database','database','bd'
     ),
 /* 211 */ array(
     'in-export','in-export','en-export'
@@ -1087,7 +1087,7 @@ $arr = array (
     ),
 /* 282 */ array(
     'Vast IP adres: <span style = "color: red">Waarschuwing! </span> de voorkeur methode is static binding via de DHCP server van je router. Niet deze optie. Als je een fout maakt met de IP adressen dan kun effectief je zelf buiten sluiten omdat de Rpi niet meer bereikbaar is. Controleer de adressen dus extra voordat je deze opslaat.',
-    'Fixed IP address: <span style = "color: red">Warning! </span> the preferred method is static binding via your router&apos;s DHCP server, not this option. If you make a mistake with the IP addresses you can effectively exclude you because Rpi is inaccessible. So check the addresses extra before you save them.',
+    'Fixed IP address: <span style = "color: red">Warning! </span> the preferred method is static binding via your router&apos;s DHCP server, not this option. If you make a mistake with the IP addresses you can effectively lock yourself out because the Rpi is inaccessible. So check the addresses extra before you save them.',
     'Adresse IP fixe: <span style = "color: red">Attention!</span> la méthode préférée est la liaison statique via le serveur DHCP de votre routeur, pas cette option. Si vous faites une erreur avec les adresses IP, vous pouvez effectivement vous exclure car Rpi est inaccessible. Vérifiez donc les adresses avant de les enregistrer.'
     ),
 /* 283 */ array(
@@ -1141,27 +1141,29 @@ $arr = array (
     'La valeur d&apos;ampère calculée (W/V), le compteur intelligent affiche uniquement la valeur par pas de 1 ampère.'
     ),
 /* 297 */ array(
-    'Netwerktijd is actief','Network time is active','Le temps réseau est actif'
+    'netwerktijd is actief','network time is active','le temps réseau est actif'
     ),
 /* 298 */ array(
-    'Netwerktijd synchronisatie','Network time synchronization','Synchronisation de l&apos;heure du réseau'
+    'netwerktijd synchronisatie',
+    'network time synchronization',
+    'synchronisation de l&apos;heure du réseau'
     ),
 /* 299 */ array(
-    'Laatste tijdsynchronisatie','Last time sync','Dernière synchronisation'
+    'laatste tijdsynchronisatie','last time sync','dernière synchronisation'
     ),
 /* 300 */ array(
-    'Netwerktijd servernaam','Network time server name','Nom du serveur de temps réseau'
+    'netwerktijd servernaam','network time server name','nom du serveur de temps réseau'
     ),
 /* 301 */ array(
-    'Netwerktijd server IP','Network time server IP','IP du serveur de temps réseau'
+    'netwerktijd server IP','network time server IP','IP du serveur de temps réseau'
     ),
 /* 302 */ array(
-    'Tijdzone','Time zone','Fuseau horaire'
+    'tijdzone','time zone','fuseau horaire'
     ),
 /* 303 */ array(
-    'Tijdsverschil slimme meter en het systeem (seconden)',
-    'Time difference smart meter and the system (seconds)',
-    'Compteur intelligent de décalage horaire et système (secondes)'
+    'tijdsverschil slimme meter en het systeem (seconden)',
+    'time difference smart meter and the system (seconds)',
+    'compteur intelligent de décalage horaire et système (secondes)'
     ),
 /* 304 */ array(
     'Dit is normaal niet meer dan een paar seconden. Als het verschil groter is dan is de tijd van het systeem of van de slimme meter niet correct.',
@@ -1227,7 +1229,7 @@ $arr = array (
     'socat configuratie','socat configuration','socat de configuration'
 ),
 /* 319 */ array(
-    'IP adres','IP address','Adresse IP'
+    'IP adres','IP address','adresse IP'
 ),
 /* 320 */ array(
     'IP poort','IP port','Port IP'
@@ -1238,7 +1240,7 @@ $arr = array (
     'socat est un moyen de recevoir des données série sur le réseau. Le dispositif qui se connecte au port P1 et envoie les données n&apos;est pas fourni par le moniteur P1. Le moniteur P1 prend en charge la réception des données. Vous devez installer un dispositif qui offre cette capacité. Lorsque vous activez l&apos;option socat, les autres paramètres série sont ignorés.'
 ),
 /* 322 */ array(
-    'IP adres van het remote socat apparaat.','IP address of the remote socat device.','Adresse IP du périphérique socat distant.'
+    'IP adres van het remote socat apparaat.','IP address of the remote socat device.','adresse IP du périphérique socat distant.'
 ),
 /* 323 */ array(
     'IP poort van het remote socat apparaat.','IP port of remote socat device.','Port IP du périphérique socat distant. '
@@ -1360,7 +1362,7 @@ $arr = array (
     'verbruikt','consumed','consomme'
 ),
 /* 360 */ array(
-    'geleverd','delivered','livrée'
+    'geleverd','produced','produit'
 ),
 /* 361 */ array(
     'vermogen','power','énergie'
@@ -1386,17 +1388,867 @@ $arr = array (
     'gas verbruikt per uur','gas consumed per hour','gaz consommé par heure'
 ),
 /* 368 */ array(
+    'levering','production','production'
+),
+/* 369 */ array(
+    'nummer','number','nombre'
+),
+/* 370 */ array(
+    'nl','en','fr'
+),
+/* 371 */ array(
+    'versie','version','version'
+),
+/* 372 */ array(
+    'Patch versie','Patch version','Version du correctif'
+),
+/* 373 */ array(
+    'status','status','statut'
+),
+/* 374 */ array(
+    'systeem configuratie','system configuration','configuration du système'
+),
+/* 375 */ array(
+    'nieuwe versie','latest release','nouvelle version'
+),
+/* 376 */ array(
+    'P1-monitor software','P1-monitor software','logiciel P1-monitor'
+),
+/* 377 */ array(
+    'laatste versie is geïnstalleerd','latest version has been installed','la dernière version est installée'
+),
+/* 378 */ array(
+    'herstart of stop systeem','restart or halt system','redémarrage ou arrêt du système'
+),
+/* 379 */ array(
+    'herstart','restart','redémarrer'
+),
+/* 380 */ array(
+    'stop','halt','arrêter'
+),
+/* 381 */ array(
+    'wachtwoord reset','password reset','réinitialisation du mot de passe'
+),
+/* 382 */ array(
+    'reset','reset','réinitialiser'
+),
+/* 383 */ array(
+    'systeem dump','system dump','vidage du système'
+),
+/* 384 */ array(
+    'dump','dump','vidange'
+),
+/* 385 */ array(
+    'patch bestand uploaden','upload patch file','télécharger le fichier patch'
+),
+/* 386 */ array(
+    'unsigned patch toestaan','allow unsigned patch','autorise les patchs non signés'
+),
+/* 387 */ array(
+    'nieuwe P1-monitor versie controle','new P1-monitor version check','Nouveau contrôle de version "P1-monitor'
+),
+/* 388 */ array(
+    'UDP broadcast deamon','UDP broadcast deamon','Déamon UDP broadcast'
+),
+/* 389 */ array(
+    'hulp','help','aider'
+),
+/* 390 */ array(
+    'Onderbreek systeem stop','Interrupt system halt',"Interruption de l'arrêt du système"
+),
+/* 391 */ array(
+    'dump van het systeem','dump of the system','vidage du système'
+),
+/* 392 */ array(
+    'wacht tot de download start.','wait until the download starts.','attendez que le téléchargement commence.'
+),
+/* 393 */ array(
+    'bytes verwerkt','bytes processed','octets traités'
+),
+/* 394 */ array(
+    'patch status','patch status','statut du patch'
+),
+/* 395 */ array(
+    'patch status nog niet beschikbaar','patch status not yet available',"l'état du patch n'est pas encore disponible"
+),
+/* 396 */ array(
+    'even geduld aub, gegevens worden verwerkt','please wait, data is being processed','Soyez patient, les données sont en cours de traitement'
+),
+/* 397 */ array(
+    'onderbreek wissen van wachtwoord','interrupt erasing password',"interruption de l'effacement du mot de passe"
+),
+/* 398 */ array(
+    'onderbreek systeem herstart','interrupt system restart','interrompre le redémarrage du système'
+),
+/* 399 */ array(
+    'onderbreek systeem stop','system shutdown stop','interruption du système arrêt'
+),
+/* 400 */ array(
+    'kWh verbruik','kWh consumption','consommation en kWh'
+),
+/* 401 */ array(
+    'kWh levering','kWh production','production de kWh'
+),
+/* 402 */ array(
+    'gas verbruik','gas consumption','consommation de gaz'
+),
+/* 403 */ array(
+    'actueel verbruik','current consumption','consommation de courant'
+),
+/* 404 */ array(
+    'kW verbruikt','kW consumed','kW consommés'
+),
+/* 405 */ array(
+    'Watt verbruikt','Watt consumed','Watt consommés'
+),
+/* 406 */ array(
+    'laatste verbruik','latest consumption','dernière consommation'
+),
+/* 407 */ array(
+    'actueel levering','current production','production actuelle'
+),
+/* 408 */ array(
+    'kW geleverd','kW produced','kW produits'
+),
+/* 409 */ array(
+    'Watt geleverd','Watt produced','Watt produits'
+),
+/* 410 */ array(
+    'laatste geleverd','latest production','dernière production'
+),
+/* 411 */ array(
+    'actueel gas verbruik','current gas consumption','consommation actuelle de gaz'
+),
+/* 412 */ array(
+    'laatste vierentwintig uur verbruik','last 24 hours consumption','consommation des dernières 24 heures'
+),
+/* 413 */ array(
+    'historie minuten','history minutes','historique minutes'
+),
+/* 414 */ array(
+    'prognose verbruikt','forecast consumed','prévisions consommation'
+),
+/* 415 */ array(
+    'prognose geleverd','forecast produced','prévisions production'
+),
+/* 416 */ array(
+    'kWh verbruikt','kWh consumed','kWh consommés'
+),
+/* 417 */ array(
+    'kWh geleverd','kWh produced','kWh produits'
+),
+/* 418 */ array(
+    'historie uren','history hours',"heures d'histoire"
+),
+/* 419 */ array(
+    'netto kWh','net kWh','kWh net'
+),
+/* 420 */ array(
+    'verbruik en levering gelijk','consumption and production equal','consommation et production égales'
+),
+/* 421 */ array(
+    'netto geleverd','net produced','produit net'
+),
+/* 422 */ array(
+    'netto verbruikt','net consumed','consommation nette'
+),
+/* 423 */ array(
+    'historie maanden','history months',"mois d'histoire"
+),
+/* 424 */ array(
+    'historie jaren','history years','années historiques'
+),
+/* 425 */ array(
+    'geen gegevens beschikbaar.','no data available.','pas de données disponibles.'
+),
+/* 426 */ array(
+    'historie minuten opgewekte kWh','history minutes produced kWh','historique minutes produites kWh'
+),
+/* 427 */ array(
+    'opgewekte kWh minuten','kWh produced minutes','kWh produits minutes'
+),
+/* 428 */ array(
+    'prognose hoog tarief','forecast high tariff','prévoir un tarif élevé'
+),
+/* 429 */ array(
+    'prognose laag tarief','forecast low tariff','prévoir un tarif bas'
+),
+/* 430 */ array(
+    'opgewekte kWh uren','kWh produced hours','kWh produits heures'
+),
+/* 431 */ array(
+    'historie uren opgewekte kWh','history hours produced kWh','historique heures produites kWh'
+),
+/* 432 */ array(
+    'totaal kWh','total kWh','kWh total'
+),
+/* 433 */ array(
+    'opgewekte kWh dagen','kWh produced days','kWh produits jours'
+),
+/* 434 */ array(
+    'historie dagen opgewekte kWh','history days kWh produced',"jours d'historique kWh produits"
+),
+/* 435 */ array(
+    'historie maanden opgewekte kWh','history months produced kWh','historique mois produits kWh'
+),
+/* 436 */ array(
+    'opgewekte kWh maanden','kWh produced months','kWh produits mois'
+),
+/* 437 */ array(
+    'historie jaren opgewekte kWh','history years produced kWh','historique années produites kWh'
+),
+/* 438 */ array(
+    'watermeter minuten','watermeter minutes',"minutes du compteur d'eau"
+),
+/* 439 */ array(
+    'minuten (liter water)','minutes (liters of water)',"minutes (litres d'eau)"
+),
+/* 440 */ array(
+    'Liter verbruikt','Liters consumed','Litres consommés'
+),
+/* 441 */ array(
+    'watermeter uur','watermeter hour',"compteur d'eau uur"
+),
+/* 442 */ array(
+    'uren (liter water)','hours (liters of water)',"heures (litres d'eau)"
+),
+/* 443 */ array(
+    'dagen (liter water)','days (liters of water)',"jours (litres d'eau)"
+),
+/* 444 */ array(
+    'watermeter dag','watermeter day',"jour compteur d'eau"
+),
+/* 445 */ array(
+    'watermeter maand','watermeter month',"compteur d'eau mois"
+),
+/* 446 */ array(
+    'maanden (liter water)','months (liters of water)',"mois (litres d'eau)"
+),
+/* 447 */ array(
+    'watermeter jaar','watermeter year',"année du compteur d'eau"
+),
+/* 448 */ array(
+    'jaren (liter water)','years (liters of water)',"ans (litres d'eau)"
+),
+/* 449 */ array(
+    'actuele verwarming temperatuur in °C','current heating temperature in °C','température de chauffage actuelle en °C'
+),
+/* 450 */ array(
+    'verschiltemperatuur','temperature difference','différence de température'
+),
+/* 451 */ array(
+    'laatste 5 minuten','last 5 minutes','5 dernières minutes'
+),
+/* 452 */ array(
+    'inkomend','inbound','entrant'
+),
+/* 453 */ array(
+    'uitgaand','outbound','sortant'
+),
+/* 454 */ array(
+    'gem.','moy.','avg.'
+),
+/* 455 */ array(
+    'verwarming minuten','heating minutes','minutes de chauffage'
+),
+/* 456 */ array(
+    'minuten verwarming temperatuur in °C','minutes heating temperature in °C','minutes température de chauffage en °C'
+),
+/* 457 */ array(
+    'verschil temperatuur','temperature difference','température différentielle'
+),
+/* 458 */ array(
+    'verwarming uren','heating hours','heures de chauffage'
+),
+/* 459 */ array(
+    'uren verwarming temperatuur in °C','hours heating temperature in °C','heures température de chauffage en °C'
+),
+/* 460 */ array(
+    'verwarming dag','heating day','jour de chauffe'
+),
+/* 461 */ array(
+    'dagen verwarming temperatuur in °C','days heating temperature in °C','jours température de chauffage en °C'
+),
+/* 462 */ array(
+    'maanden verwarming temperatuur in °C','months heating temperature in °C','mois température de chauffage en °C'
+),
+/* 463 */ array(
+    'Notificatie configuratie','Notification configuration','Configuration des notifications'
+),
+/* 464 */ array(
+    'email gegevens','email data',"détails de l'email"
+),
+/* 465 */ array(
+    'account','account','compte'
+),
+/* 466 */ array(
+    'e-mail server','e-mail server','Serveur de messagerie'
+),
+/* 467 */ array(
+    'TCP poort SSL/TLS','TCP port SSL/TLS','port TCP SSL/TLS'
+),
+/* 468 */ array(
+    'TCP poort STARTTLS','TCP port STARTTLS','port TCP STARTTLS'
+),
+/* 469 */ array(
+    'TCP poort standaard','TCP port standard','Port TCP standard'
+),
+/* 470 */ array(
+    'onderwerp','subject','sujet'
+),
+/* 471 */ array(
+    'ontvangers','recipients','destinataires'
+),
+/* 472 */ array(
+    'timeout in seconden','timeout in seconds','timeout en secondes'
+),
+/* 473 */ array(
+    'Notificatie bij het wegvallen van de P1 data',
+    'Notification when P1 data is lost',
+    'Notification en cas de perte de données P1'
+),
+/* 474 */ array(
+    'Driefase','Three-phase','Triphasé'
+),
+/* 475 */ array(
+    'Notificatie bij overschrijding van de min. of max. spanning (V).',
+    'Notification when min. or max. voltage (V) is exceeded.',
+    'Dépassement de la tension minimale ou maximale (V).'
+),
+/* 476 */ array(
+    'Bovengrenswaarde en ondergrenswaarde Watt',
+    'Upper limit value and lower limit value Watts',
+    'Limite supérieure et inférieure Watt'
+),
+/* 477 */ array(
+    'Bovengrenswaarde levering (Watt)',
+    'Upper limit production (Watt)',
+    'Limite supérieure de production (Watt)'
+),
+/* 478 */ array(
+    'Periode actief','Period active',"Période d'activité"
+),
+/* 479 */ array(
+    'Ondergrenswaarde levering (Watt)',
+    'Lower limit production (Watt)',
+    'Limite inférieure de production (Watt)'
+),
+/* 480 */ array(
+    'Bovengrenswaarde verbruik (Watt)',
+    'Upper limit consumption (Watt)',
+    'Limite supérieure de consommation (Watt)'
+),
+/* 481 */ array(
+    'Ondergrenswaarde verbruik (Watt)',
+    'Lower limit consumption (Watt)',
+    'Limite inférieure de consommation (Watt)'
+),
+/* 482 */ array(
+    'ma','mo','lu'
+),
+/* 483 */ array(
+    'di','tu','ma'
+),
+/* 484 */ array(
+    'wo','we','me'
+),
+/* 485 */ array(
+    'do','th','je'
+),
+/* 486 */ array(
+    'vr','fr','ve'
+),
+/* 487 */ array(
+    'za','sa','sa'
+),
+/* 488 */ array(
+    'zo','su','di'
+),
+/* 489 */ array(
+    'P1 poort: als er langer dan ongeveer 1 minuut geen data wordt ontvangen.',
+    'P1 port: if no data is received for more than about 1 minute.',
+    "port P1: si aucune donnée n'est reçue pendant plus d'une minute environ."
+),
+/* 490 */ array(
+    'Driefase : de Volt  boven of ondergrens waarde in de UI instelling wordt overschreden.',
+    'Three-phase : the Volt upper or lower limit value in the UI setting is exceeded.',
+    "Triphasé : la valeur limite supérieure ou inférieure de Volt dans le réglage de l'interface utilisateur est dépassée."
+),
+/* 491 */ array(
+    'Bovengrenswaarde en ondergrenswaarde Watt : een tijd en datum gebonden melding als de ingestelde waarde wordt overschreden.',
+    'Upper limit value and lower limit value Watts: a time and date bound notification when the set value is exceeded.',
+    'Limite supérieure et inférieure Watt: une notification limitée dans le temps et dans la date en cas de dépassement de la valeur fixée.'
+),
+/* 492 */ array(
+    'kosten per dag','cost per day','coût par jour'
+),
+/* 493 */ array(
+    'Euro per dag','Euro per day','Euro par jour'
+),
+/* 494 */ array(
+    'piek tarief verbruik','high tariff consumption','consommation tarifaire élevée'
+),
+/* 495 */ array(
+    'dal tarief verbruik','low tariff consumption','faible consommation tarifaire'
+),
+/* 496 */ array(
+    'gas kosten verbruik','gas cost consumption','coût du gaz consommation'
+),
+/* 497 */ array(
+    'water kosten verbruik','water cost consumption',"coûts de l'eau consommation"
+),
+/* 498 */ array(
+    'totaal verbruikt','total consumed','consommation totale'
+),
+/* 499 */ array(
+    'totaal geleverd','total produced','total produit'
+),
+/* 500 */ array(
+    'dal tarief geleverd','low tariff production','production à bas tarifs'
+),
+/* 501 */ array(
+    'piek tarief geleverd','high tariff production','production à tarif élevé'
+),
+/* 502 */ array(
+    'netto kosten','net cost','coût net'
+),
+/* 503 */ array(
+    'netto opbrengsten','net revenue','revenus nets'
+),
+/* 504 */ array(
+    'kosten per maand','monthly costs','coûts mensuels'
+),
+/* 505 */ array(
+    'Euro per maand','Euro per month','Euro par mois'
+),
+/* 506 */ array(
+    'kosten per jaar','annual costs','coûts annuels'
+),
+/* 507 */ array(
+    'Euro per jaar','Euros per year','Euro par an'
+),
+/* 508 */ array(
+    'piek verbruik elek.','high cons. elec.','haute conso. elec.'
+),
+/* 509 */ array(
+    'dal verbruik elek.','low cons. elec.','basse conso. elec.'
+),
+/* 510 */ array(
+    'piek geleverd elek.','high prod. elec.',"haute prod. d'elec."
+),
+/* 511 */ array(
+    'dal geleverd elek.','low prod. elec.',"basse prod. d'elec."
+),
+/* 512 */ array(
+    'verbruik gas','gas cons.','conso. de gaz'
+),
+/* 513 */ array(
+    'verbruik water','water cons.',"cons. d'eau"
+),
+/* 514 */ array(
+    'grens kost.','cost limit','limite de coût'
+),
+/* 515 */ array(
+    'netto kost.','net cost','coût net.'
+),
+/* 516 */ array(
+    'gas en water','gas and water','gaz et eau'
+),
+/* 517 */ array(
+    'historie dag meterstanden','history of daily meter readings',"l'historique des relevés quotidiens des compteurs"
+),
+/* 518 */ array(
+    'dal verbruik','low consumption','faible consommation'
+),
+/* 519 */ array(
+    'piek verbruik','high consumption',"consommation élevée"
+),
+/* 520 */ array(
+    'netto dal geleverd','net low produced','net faible produit'
+),
+/* 521 */ array(
+    'netto piek geleverd','net high produced','net élevé produit'
+),
+/* 522 */ array(
+    'netto totaal geleverd','net total produced','net total produit'
+),
+/* 523 */ array(
+    'bruto dal geleverd','gross low produced','brut faible produit'
+),
+/* 524 */ array(
+    'bruto piek geleverd','gross high produced','brut élevé produit'
+),
+/* 525 */ array(
+    'bruto totaal geleverd','gross total produced','brut total produit'
+),
+/* 526 */ array(
+    'water verbruik','water consumption',"consommation d'eau"
+),
+/* 527 */ array(
+    'actueel fase','current phase','phase actuelle'
+),
+/* 528 */ array(
+    'historie fase','history phase','phase historique'
+),
+/* 529 */ array(
+    'datapunten','data points','points de données'
+),
+/* 530 */ array(
+    'wacht op data','waiting for data','attente de données'
+),
+/* 531 */ array(
+    'fase dag uiterste','phase day limit','limite du jour de la phase'
+),
+/* 532 */ array(
+    'V is verbruik, L is teruglevering aan het net.','C is consumption, P is production to the grid.','C est la consommation, P est la production vers le réseau.'
+),
+/* 533 */ array(
+    'uiterste fase waarden per dag','phase values limits per day','valeurs de phase limites par jour'
+),
+/* 534 */ array(
+    'V','C','C'
+),
+/* 535 */ array(
+    'L','P','P'
+),
+/* 536 */ array(
+    'grenswaarden','limit values','valeurs limites'
+),
+/* 537 */ array(
+    'bovengrens','upper limit','limite supérieure'
+),
+/* 538 */ array(
+    'ondergrens','lower limit','limite inférieure'
+),
+/* 539 */ array(
+    'P1 poort','P1 port','Port P1'
+),
+/* 540 */ array(
+    'in orde','alright','très bien'
+),
+/* 541 */ array(
+    'geen data','no data','pas de données'
+),
+/* 542 */ array(
+    'CPU belasting','CPU load','charge du CPU'
+),
+/* 543 */ array(
+    'CPU temperatuur','CPU temperature','température du CPU'
+),
+/* 544 */ array(
+    'database belasting','database load','chargement bd.'
+),
+/* 545 */ array(
+    'RAM belasting','RAM load','chargement de RAM'
+),
+/* 546 */ array(
+    'database','database','base de données'
+),
+/* 547 */ array(
+    'systeem processen','system processes','processus du système'
+),
+/* 548 */ array(
+    'besturingsysteem','operating system','système opérateur'
+),
+/* 549 */ array(
+    'slimme meter','smart meter','Compteur intelligent'
+),
+/* 550 */ array(
+    'clipboard','clipboard','presse-papiers'
+),
+/* 551 */ array(
+    'laatste verwerkte bericht uit de slimme meter',
+    'last processed message from smart meter',
+    'dernier message traité provenant du compteur intelligent'
+),
+/* 552 */ array(
+    'laatste verwerkte minuten gegevens',
+    'last minute data processed',
+    'données de dernière minute traitées'
+),
+/* 553 */ array(
+    'laatste verwerkte uur gegevens',
+    'last hour of data processed',
+    'dernière heure des données traitées'
+),
+/* 554 */ array(
+    'laatste verwerkte dag gegevens',
+    'last day data processed',
+    'dernier jour de traitement des données'
+),
+/* 555 */ array(
+    'laatste verwerkte maand gegevens',
+    'last month data processed',
+    'données du dernier mois traitées'
+),
+/* 556 */ array(
+    'laatste verwerkte jaar gegevens',
+    'last year data processed',
+    "données traitées l'année dernière"
+),
+/* 557 */ array(
+    'laatste verwerkte weergegevens',
+    'last processed weather data',
+    'dernières données météorologiques traitées'
+),
+/* 558 */ array(
+    'laatste ram naar disk back-up',
+    'last ram to disk backup',
+    'dernière sauvegarde de la mémoire vive sur disque'
+),
+/* 559 */ array(
+    'laatste ram naar disk back-up(serieel)',
+    'last ram to disk backup(serial)',
+    'dernière sauvegarde de la mémoire vive sur disque (série)'
+),
+/* 560 */ array(
+    'laatste succesvol FTP back-up',
+    'last successful FTP backup',
+    'dernière sauvegarde FTP réussie'
+),
+/* 561 */ array(
+    'laatste ram naar disk back-up(verwarming)',
+    'last ram to disk backup(heating)',
+    'dernière sauvegarde de la mémoire vive sur disque(chauffage)'
+),
+/* 562 */ array(
+    'laatste verwerkte verwarming gegevens',
+    'last processed heating data',
+    'dernières données de chauffage traitées'
+),
+/* 563 */ array(
+    'laatste Dropbox back-up','last Dropbox backup','dernière sauvegarde Dropbox'
+),
+/* 564 */ array(
+    'laatste Dropbox data verzonden',
+    'last Dropbox data sent',
+    'dernières données Dropbox envoyées'
+),
+/* 565 */ array(
+    'laatste UDP broadcast',
+    'last UDP broadcast',
+    'dernière émission UDP'
+),
+/* 566 */ array(
+    'laatste succesvolle e-mail verstuurd',
+    'last successful email sent',
+    'dernier e-mail envoyé avec succès'
+),
+/* 567 */ array(
+    'teruglevering, laatste schakeling',
+    'production switching, last activated',
+    'commutation de la production, dernière activation'
+),
+/* 568 */ array(
+    'tarief schakeling, laatste schakeling',
+    'tariff switching, last activated',
+    'commutation tarifaire, dernière activation'
+),
+/* 569 */ array(
+    'laatste verwerkte watermeter puls',
+    'last processed water meter pulse',
+    "dernière impulsion de compteur d'eau traitée"
+),
+/* 570 */ array(
+    'goed',
+    'good',
+    'bon'
+),
+/* 571 */ array(
+    'sterk',
+    'strong',
+    'fort'
+),
+/* 572 */ array(
+    'laatste MQTT client bericht','last MQTT client message','dernier message client MQTT'
+),
+/* 573 */ array(
+    'laatste verwerkte KWh meter productie(S0) puls',
+    'last processed KWh meter production(S0) pulse',
+    'dernier KWh traité production du compteur (S0) impulsion'
+),
+/* 574 */ array(
+    'laatste verwerkte bericht Solar Edge API',
+    'last Solar Edge API message processed',
+    'dernier message API Solar Edge traité'
+),
+/* 575 */ array(
+    'start van P1 interface(elektrisch)',
+    'start of P1 interface(electric)',
+    "démarrage de l'interface P1 (électrique)"
+),
+/* 576 */ array(
+    'database start',
+    'database start',
+    'démarrage de la base de données'
+),
+/* 577 */ array(
+    'watchdog start',
+    'watchdog start',
+    'démarrage watchdog'
+),
+/* 578 */ array(
+    'UDP daemon start',
+    'UDP daemon start',
+    'démarrage du démon UDP'
+),
+/* 579 */ array(
+    'start Dropbox daemon',
+    'Dropbox daemon start',
+    'démarrage du démon Dropbox'
+),
+/* 580 */ array(
+    'start UDP broadcast daemon',
+    'UDP broadcast daemon start',
+    'démarrage du démon UDP broadcast'
+),
+/* 581 */ array(
+    'MQTT client start',
+    'MQTT client start',
+    'démarrage du client MQTT'
+),
+/* 582 */ array(
+    'watermeter start',
+    'water meter start',
+    "démarrage du compteur d'eau"
+),
+/* 583 */ array(
+    'GPIO daemon start',
+    'GPIO daemon start',
+    'démarrage du démon GPIO'
+),
+/* 584 */ array(
+    'KWh meter productie(S0) start',
+    'KWh meter production(S0) start',
+    'démarrage KWh production du compteur (S0)'
+),
+/* 585 */ array(
+    'notificatie start',
+    'notification start',
+    'démarrage de la notification'
+),
+/* 586 */ array(
+    'tijd verstreken sinds OS start',
+    'time passed since OS start',
+    "temps écoulé depuis le démarrage de l'OS"
+),
+/* 587 */ array(
+    'besturingssysteem versie',
+    'operating system version',
+    "version du système d'exploitation"
+),
+/* 588 */ array(
+    'python versie','python version','version python'
+),
+/* 589 */ array(
+    'P1-monitor versie','P1-monitor version','version du P1-monitor'
+),
+/* 590 */ array(
+    'P1-monitor patch versie',
+    'P1-monitor patch version',
+    'version du patch du P1-monitor'
+),
+/* 591 */ array(
+    'P1-monitor versie code',
+    'P1-monitor version code',
+    'code de la version du P1-monitor'
+),
+/* 592 */ array(
+    'CPU model','CPU model','modèle de CPU'
+),
+/* 593 */ array(
+    'CPU hardware','CPU hardware','matériel CPU'
+),
+/* 594 */ array(
+    'CPU revisie','CPU revision','révision du CPU'
+),
+/* 595 */ array(
+    'Raspberry Pi model','Raspberry Pi model','modèle Raspberry Pi'
+),
+/* 596 */ array(
+    'internet beschikbaar','internet available','internet accessible'
+),
+/* 597 */ array(
+    'internet IP-adres','internet IP address',"l'adresse IP internet"
+),
+/* 598 */ array(
+    'internet hostnaam','internet hostname',"nom d'hôte internet"
+),
+/* 599 */ array(
+    'laaste keer dat internet bereikbaar was',
+    'last time internet was available',
+    "la dernière fois que l'internet était disponible"
+),
+/* 600 */ array(
+    'LAN IP-adres','LAN IP address','adresse IP du réseau local(LAN)'
+),
+/* 601 */ array(
+    'LAN MAC adres','LAN MAC address','adresse MAC du réseau local(LAN)'
+),
+/* 602 */ array(
+    'LAN hostnaam','LAN hostname',"nom d'hôte du réseau local(LAN)"
+),
+/* 603 */ array(
+    'Wifi ESSID','Wi-Fi ESSID','Wi-Fi ESSID'
+),
+/* 604 */ array(
+    'WifI IP-adres:','Wi-Fi IP address','adresse IP Wi-Fi'
+),
+/* 605 */ array(
+    'Wifi MAC adres','Wi-Fi MAC address','adresse MAC du Wi-Fi'
+),
+/* 606 */ array(
+    'ja','yes','oui'
+),
+/* 607 */ array(
+    'nee','no','non'
+),
+/* 608 */ array(
+    'laaste update dynamische tarieven',
+    'last update dynamic tariffs',
+    'dernière mise à jour tarifs dynamiques'
+),
+/* 609 */ array(
+    'zwak','weak','faible'
+),
+/* 610 */ array(
+    'erg sterk','very strong','très forte'
+),
+/* 611 */ array(
+    'wachtwoord instellen','set password','configuration du mot de passe'
+),
+/* 612 */ array(
+    'wachtwoord','password','mot de passe'
+),
+/* 613 */ array(
+    'kwaliteit','quality','qualité'
+),
+/* 614 */ array(
+    'voer wachtwoord in','enter password','entrer le mot de passe'
+),
+/* 615 */ array(
+    'home','home','d’accueil'
+),
+/* 616 */ array(
+    '','',''
+),
+/* 617 */ array(
+    '','',''
+),
+/* 618 */ array(
     '','',''
 ),
 
 
-);
 
+
+
+);
 
     $language_index = languageIndex();
 
     if(!isset($arr[ $_index  ][ $language_index ] ) ) {
-        return '<span style = "color: red">tekst voor index '. $_index . ' niet gevonden! Meld dit op www.ztatz.nl.</span>';
+        return '<span style = "color: red">tekst voor index '. $_index . ' niet gevonden! Meld dit op www.ztatz.nl., not found! Report this at www.ztatz.nl. , introuvable! Signalez-le à www.ztatz.nl.</span>';
     } else {
         return $arr[ $_index ][ $language_index ];
     }

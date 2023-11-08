@@ -8,14 +8,15 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
 include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(19) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor historie minuten</title>
+<title>P1-monitor <?php echo strIdx( 413 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -30,6 +31,12 @@ if ( checkDisplayIsActive(19) == false) { return; }
 <script src="./js/p1mon-util.js"></script>
 
 <script>
+
+const text_min_short    = "<?php echo strIdx( 128 );?>"
+const text_hour         = "<?php echo strIdx( 129 );?>"
+const text_hours        = "<?php echo strIdx( 121 );?>"
+
+
 var recordsLoaded            = 0;
 var initloadtimer;
 var mins                     = 1;  
@@ -37,13 +44,14 @@ var secs                     = mins * 60;
 var currentSeconds           = 0;
 var currentMinutes           = 0;
 var Gselected                = 0;
-var GselectText              = ['15 min','30 min','1 uur','8 uur','12 uur','24 uur']; // #PARAMETER
+var GselectText              = ['15 '+text_min_short ,'30 '+text_min_short ,'1 '+text_hour,'8 '+text_hours,'12 '+text_hours,'24 '+text_hours]; // #PARAMETER
 var GseriesVisibilty         = [true,true, true, true];
 var GverbrData               = [];
 var GgelvrData               = [];
 var GConsumptionPrognoseData = [];
 var GProductionPrognoseData  = [];
 var maxrecords               = 1442;
+
 
 function readJsonApiHistoryMin( cnt ){ 
     $.getScript( "/api/v1/powergas/minute?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -64,8 +72,7 @@ function readJsonApiHistoryMin( cnt ){
             GgelvrData.push               ( [item[1], item[7] * -1  ] ); 
             GConsumptionPrognoseData.push ( [item[1], item[6] * 60  ] );
             GProductionPrognoseData.push  ( [item[1], item[7] * -60 ] );
-
-        }  
+        }
         updateData();
       } catch(err) {}
    });
@@ -215,8 +222,11 @@ function createKwhChart() {
                 maxRange:        24      *  60000,
                 type: 'datetime',
                 dateTimeLabelFormats: {
-                    day: '%a.<br>%d %B<br/>%Y',
-                    hour: '%a.<br>%H:%M'
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: "%a.<br>%e %b.",
+                    month: '%b.<br>%y',
+                    year: '%y'
                 },
                 lineColor: '#6E797C',
                 lineWidth: 1
@@ -260,10 +270,11 @@ function createKwhChart() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M', this.x) +'</b>';
 
                     var d = this.points;
-                    var consumption         = "verborgen";
-                    var production          = "verborgen";
-                    var consumptionPrognose = "verborgen";
-                    var productionPrognose  = "verborgen";
+                    
+                    var consumption         = "<?php echo strIdx( 340 )?>";
+                    var production          = "<?php echo strIdx( 340 )?>";
+                    var consumptionPrognose = "<?php echo strIdx( 340 )?>";
+                    var productionPrognose  = "<?php echo strIdx( 340 )?>";
 
                     for (var i=0,  tot=d.length; i < tot; i++) {
                         //console.log (d[i].series.userOptions.id);
@@ -282,10 +293,10 @@ function createKwhChart() {
                         }
                     }
 
-                    s += '<br/><span style="color: #F2BA0F;">verbruikt: </span>' + consumption;
-                    s += '<br/><span style="color: #98D023;">geleverd : </span>' + production; 
-                    s += '<br/><span style="color: #F2BA0F;">prognose verbruikt: </span>' + consumptionPrognose;
-                    s += '<br/><span style="color: #98D023;">prognose geleverd : </span>' + productionPrognose; 
+                    s += '<br/><span style="color: #F2BA0F;"><?php echo strIdx( 359 )?>: </span>' + consumption;
+                    s += '<br/><span style="color: #98D023;"><?php echo strIdx( 360 )?>: </span>' + production; 
+                    s += '<br/><span style="color: #F2BA0F;"><?php echo strIdx( 414 )?>: </span>' + consumptionPrognose;
+                    s += '<br/><span style="color: #98D023;"><?php echo strIdx( 415 )?>: </span>' + productionPrognose; 
 
                     return s;
                 },
@@ -301,8 +312,8 @@ function createKwhChart() {
                     //minTickInterval:      60 * 60000,  
                     //maxRange:             24 * 60 * 60000,
                     dateTimeLabelFormats: {
-                        day: '%d %B'    
-                    }    
+                        day: '%d %B'
+                    }
                 },
                 enabled: true,
                 outlineColor: '#384042',
@@ -321,7 +332,7 @@ function createKwhChart() {
                 id: 'consumption',
                 yAxis: 0,
                 visible: GseriesVisibilty[0],
-                name: 'kWh verbruikt',
+                name: '<?php echo strIdx( 416 )?>',
                 color: '#F2BA0F',
                 data: GverbrData, 
             }, 
@@ -329,7 +340,7 @@ function createKwhChart() {
                 id: 'production',
                 yAxis: 0,
                 visible: GseriesVisibilty[1],
-                name: 'kWh geleverd',
+                name: '<?php echo strIdx( 417 )?>',
                 color: '#98D023',
                 data: GgelvrData
             },
@@ -339,7 +350,7 @@ function createKwhChart() {
                 type: 'areaspline',
                 //dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[2],
-                name: 'prognose kWh verbruikt',
+                name: '<?php echo strIdx( 414 )?>',
                 color: '#F2BA0F',
                 data: GConsumptionPrognoseData, 
             }, 
@@ -349,21 +360,21 @@ function createKwhChart() {
                 type: 'areaspline',
                 //dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[3],
-                name: 'prognose kWh geleverd',
+                name: '<?php echo strIdx( 415 )?>',
                 color: '#98D023',
                 data: GProductionPrognoseData
             }],
             lang: {
-                noData: "Geen gegevens beschikbaar."
+                noData: "<?php echo ucfirst(strIdx( 425 ))?>"
             },
             noData: {
                 style: { 
-                    fontFamily: 'robotomedium',   
-                    fontWeight: 'bold',     
+                    fontFamily: 'robotomedium',
+                    fontWeight: 'bold',
                     fontSize: '25px',
-                    color: '#10D0E7'        
+                    color: '#10D0E7'
                 }
-            }        
+            }
   });
 }
 
@@ -384,8 +395,8 @@ function DataLoop() {
     if(currentSeconds <= 9) { currentSeconds = "0" + currentSeconds; }
     secs--;
     document.getElementById("timerText").innerHTML = zeroPad(currentMinutes,2) + ":" + zeroPad(currentSeconds,2);
-    if(secs < 0 ) { 
-        mins = 1;  
+    if(secs < 0 ) {
+        mins = 1;
         secs = mins * 60;
         currentSeconds = 0;
         currentMinutes = 0;
@@ -408,9 +419,10 @@ $(function() {
     GseriesVisibilty[2] = JSON.parse(getLocalStorage('stat-verbr-visible-prognose'));  // ONLY for minute chart
     GseriesVisibilty[3] = JSON.parse(getLocalStorage('stat-gelvr-visible-prognose'));  // ONLY for minute chart
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
@@ -440,22 +452,21 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">minuten (kWh)</span> 
+            <span class="text-2"><?php echo strIdx( 120 )?> (kWh)</span> 
                 <div class="content-wrapper" id="help_icon" onMouseOver="show_help_detail()" >
                     <i class="color-menu fas fa-question-circle" data-fa-transform="grow-10 right-20 up-4"></i>
                     <div class="cursor-pointer" id="help_detail" onclick="$('#help_detail').hide();">
-                        <span><?php echo strIdx(75);?>"</span>
+                        <span>"<?php echo strIdx(75);?>"</span>
                 </div>
             <!-- </span> -->
-
         </div>
-        <div class="frame-2-bot"> 
-        <div id="KwhChart" style="width:100%; height:480px;"></div>    
+        <div class="frame-2-bot">
+        <div id="KwhChart" style="width:100%; height:480px;"></div>
         </div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx(295);?>" height="15" width="128"></div>
 
 <script>
 function show_help_detail() {

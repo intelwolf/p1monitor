@@ -8,14 +8,15 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
 include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(61) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor historie fase</title>
+<title>P1-monitor <?php echo strIdx( 528 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -32,6 +33,11 @@ if ( checkDisplayIsActive(61) == false) { return; }
 
 <script>
 const dataIndexOffset      = 50;
+
+const text_unknown              = "<?php echo strIdx( 269 );?>";
+const text_consumed             = "<?php echo strIdx( 359 );?>";
+const text_produced             = "<?php echo strIdx( 360 );?>";
+const text_waiting_for_data     = "<?php echo strIdx( 530 );?>";
 
 var recordsLoaded          = 0;
 var GWattDataL1Consumed    = [];
@@ -171,46 +177,34 @@ function updateData() {
       //hideStuff('loading-fasedata');
     }
 
-    $('#L1WattGraph').highcharts().series[0].setData( null, false );
-    $('#L1WattGraph').highcharts().series[1].setData( null, false );
-    $('#L1WattGraph').highcharts().series[0].setData( GWattDataL1Consumed, false ); // update the chart only when all data is set.
+    $('#L1WattGraph').highcharts().series[0].setData( GWattDataL1Consumed, false );
     $('#L1WattGraph').highcharts().series[1].setData( GWattDataL1Produced, false );
-    $('#L1WattGraph').highcharts().redraw();
+    $('#L1WattGraph').highcharts().redraw( );
 
-    $('#L2WattGraph').highcharts().series[0].setData( null, false );
-    $('#L2WattGraph').highcharts().series[1].setData( null, false );
-    $('#L2WattGraph').highcharts().series[0].setData( GWattDataL2Consumed, false ); // update the chart only when all data is set.
+    $('#L2WattGraph').highcharts().series[0].setData( GWattDataL2Consumed, false ); 
     $('#L2WattGraph').highcharts().series[1].setData( GWattDataL2Produced, false );
     $('#L2WattGraph').highcharts().redraw();
 
-    $('#L3WattGraph').highcharts().series[0].setData( null, false );
-    $('#L3WattGraph').highcharts().series[1].setData( null, false );
-    $('#L3WattGraph').highcharts().series[0].setData( GWattDataL3Consumed, false ); // update the chart only when all data is set.
+    $('#L3WattGraph').highcharts().series[0].setData( GWattDataL3Consumed, false );
     $('#L3WattGraph').highcharts().series[1].setData( GWattDataL3Produced, false );
     $('#L3WattGraph').highcharts().redraw();
 
-    $('#L1AmpereGraph').highcharts().series[0].setData( null, false );
-    $('#L1AmpereGraph').highcharts().series[0].setData( GAmpereL1, false ); // update the chart only when all data is set.
+    $('#L1AmpereGraph').highcharts().series[0].setData( GAmpereL1, false );
     $('#L1AmpereGraph').highcharts().redraw();
 
-    $('#L2AmpereGraph').highcharts().series[0].setData( null, false );
-    $('#L2AmpereGraph').highcharts().series[0].setData( GAmpereL2, false ); // update the chart only when all data is set.
+    $('#L2AmpereGraph').highcharts().series[0].setData( GAmpereL2, false );
     $('#L2AmpereGraph').highcharts().redraw();
 
-    $('#L3AmpereGraph').highcharts().series[0].setData( null, false );
-    $('#L3AmpereGraph').highcharts().series[0].setData( GAmpereL3, false ); // update the chart only when all data is set.
+    $('#L3AmpereGraph').highcharts().series[0].setData( GAmpereL3, false );
     $('#L3AmpereGraph').highcharts().redraw();
 
-    $('#L1VoltGraph').highcharts().series[0].setData( null, false );
-    $('#L1VoltGraph').highcharts().series[0].setData( GVoltL1, false ); // update the chart only when all data is set.
+    $('#L1VoltGraph').highcharts().series[0].setData( GVoltL1, false );
     $('#L1VoltGraph').highcharts().redraw();
 
-    $('#L2VoltGraph').highcharts().series[0].setData( null, false );
-    $('#L2VoltGraph').highcharts().series[0].setData( GVoltL2, false ); // update the chart only when all data is set.
+    $('#L2VoltGraph').highcharts().series[0].setData( GVoltL2, false );
     $('#L2VoltGraph').highcharts().redraw();
 
-    $('#L3VoltGraph').highcharts().series[0].setData( null, false );
-    $('#L3VoltGraph').highcharts().series[0].setData( GVoltL3, false ); // update the chart only when all data is set.
+    $('#L3VoltGraph').highcharts().series[0].setData( GVoltL3, false );
     $('#L3VoltGraph').highcharts().redraw();
 
     setButtonEvents( true ); 
@@ -219,13 +213,11 @@ function updateData() {
 
 function DataLoop() {
     readJsonApiPhaseInformation();
-
     if ( p1TelegramMaxSpeedIsOn == true ) {
         setTimeout( 'DataLoop()', 1000  );
     } else {
         setTimeout( 'DataLoop()', 10000 );
     }
-
 }
 
 $(function () {
@@ -250,8 +242,10 @@ $(function () {
     Highcharts.setOptions({
         global: {
             useUTC: false
-        }
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     dataIndexStart  = 0;
     dataIndexStop   = dataOffset;
     
@@ -497,7 +491,7 @@ function setButtonVisbilty() {
                 </div>
 
                 <div class="content-wrapper pad-36">
-                    <span class="text-10">datapunten:&nbsp;</span><span class="text-10" id="datapunten-value">onbekend</span>
+                    <span class="text-10"><?php echo strIdx( 529 );?>:&nbsp;</span><span class="text-10" id="datapunten-value"><?php echo strIdx( 269 );?></span>
                 </div>
 
 
@@ -554,7 +548,7 @@ function setButtonVisbilty() {
                 <div class="float-left"       id="L3VoltGraph"></div>
             </div>
             <div id="loading-data" >
-                <img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128">
+                <img src="./img/ajax-loader.gif" alt="<?php echo strIdx(295);?>" height="15" width="128">
             </div>
             <div id="loading-fasedata">
                    <?php echo strIdx( 91 );?>
@@ -565,7 +559,6 @@ function setButtonVisbilty() {
 
 <script>
 
-  
     var areaSplineOptions = {
         chart: {
             style: {
@@ -583,10 +576,11 @@ function setButtonVisbilty() {
             lineColor: "#6E797C",
             lineWidth: 1,
             dateTimeLabelFormats: {
-                second: '%H:%M:%S',
-                //second: '%Y-%m-%d<br/>%H:%M:%S',
-                //day: '%a.<br>%d %B<br/>%Y',
-                //hour: '%a.<br>%H:%M'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
         },
         yAxis: {
@@ -621,7 +615,7 @@ function setButtonVisbilty() {
                 borderWidth: 1
             },  
         title: {
-            text: 'niet gezet!'
+            text: null
         },
         legend: {
             enabled: false
@@ -649,8 +643,8 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
-                    var verbruikt = 'onbekend';
-                    var geleverd  = 'onbekend';
+                    var verbruikt = text_unknown;
+                    var geleverd  = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GWattDataL1Consumed[i][0] ==  this.x ) { // timestamp
@@ -665,8 +659,8 @@ function setButtonVisbilty() {
                             }
                         }
                     } catch{};
-                    s += '<br/><span style="color: #F2BA0F;">verbruikt: </span>'+verbruikt;
-                    s += '<br/><span style="color: #98D023;">geleverd : </span>'+geleverd; 
+                    s += '<br/><span style="color: #F2BA0F;">' + text_consumed + ' : </span>'+verbruikt;
+                    s += '<br/><span style="color: #98D023;">' + text_produced + ' : </span>'+geleverd; 
                     return s;
                 }
         },
@@ -690,8 +684,8 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
-                    var verbruikt = 'onbekend';
-                    var geleverd  = 'onbekend';
+                    var verbruikt = text_unknown;
+                    var geleverd  = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GWattDataL2Consumed[i][0] ==  this.x ) { // timestamp
@@ -706,8 +700,8 @@ function setButtonVisbilty() {
                             }
                         }
                     }catch{};
-                    s += '<br/><span style="color: #F2BA0F;">verbruikt: </span>'+verbruikt;
-                    s += '<br/><span style="color: #98D023;">geleverd : </span>'+geleverd; 
+                    s += '<br/><span style="color: #F2BA0F;">' + text_consumed + ' : </span>'+verbruikt;
+                    s += '<br/><span style="color: #98D023;">' + text_produced + ' : </span>'+geleverd; 
                     return s;
                 }
         },
@@ -731,8 +725,8 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
-                    var verbruikt = 'onbekend';
-                    var geleverd  = 'onbekend';
+                    var verbruikt = text_unknown;
+                    var geleverd  = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GWattDataL3Consumed[i][0] ==  this.x ) { // timestamp
@@ -747,8 +741,8 @@ function setButtonVisbilty() {
                             }
                         }
                     } catch{}
-                        s += '<br/><span style="color: #F2BA0F;">verbruikt: </span>'+verbruikt;
-                        s += '<br/><span style="color: #98D023;">geleverd : </span>'+geleverd; 
+                        s += '<br/><span style="color: #F2BA0F;">' + text_consumed + ' : </span>'+verbruikt;
+                        s += '<br/><span style="color: #98D023;">' + text_produced + ' : </span>'+geleverd; 
                     return s;
                 }
         },
@@ -772,7 +766,7 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
-                    var ampere = 'onbekend';
+                    var ampere = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GAmpereL1[i][0] ==  this.x ) { // timestamp
@@ -801,7 +795,7 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
-                    var ampere = 'onbekend';
+                    var ampere = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GAmpereL2[i][0] ==  this.x ) { // timestamp
@@ -830,7 +824,7 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
-                    var ampere = 'onbekend';
+                    var ampere = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GAmpereL3[i][0] ==  this.x ) { // timestamp
@@ -861,7 +855,7 @@ function setButtonVisbilty() {
         tooltip: {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
-                    var volt = 'onbekend';
+                    var volt = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GVoltL1[i][0] ==  this.x ) { // timestamp
@@ -892,7 +886,7 @@ function setButtonVisbilty() {
         tooltip: {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
-                    var volt = 'onbekend';
+                    var volt = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GVoltL2[i][0] ==  this.x ) { // timestamp
@@ -925,7 +919,7 @@ function setButtonVisbilty() {
         tooltip: {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
-                    var volt = 'onbekend';
+                    var volt = text_unknown;
                     try {
                         for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
                             if ( GVoltL3[i][0] ==  this.x ) { // timestamp
@@ -954,7 +948,7 @@ function setChartTimestamps() {
 
 function chartSetTimestamp( value, index, array ) {
 
-    value.minimumTimestamp = value.renderer.text('wacht op data',8, 20)
+    value.minimumTimestamp = value.renderer.text(text_waiting_for_data ,8, 20)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -962,7 +956,7 @@ function chartSetTimestamp( value, index, array ) {
         })
         .add();
 
-    value.maximumTimestamp = value.renderer.text('wacht op data',715, 20)
+    value.maximumTimestamp = value.renderer.text(text_waiting_for_data ,715, 20)
         .css({
             fontWeight: 'bold',
             color: '#6E797C',
@@ -1043,7 +1037,7 @@ function setButtonEvents( active ) {
             </div>
             <div class="slidecontainer">
                 <input id="datapoints_slider" type="range" class="slider">
-                    <p class="text-10">datapunten: <span id="slider_datapunten_value"></span></p>
+                    <p class="text-10"><?php echo strIdx( 529 );?>: <span id="slider_datapunten_value"></span></p>
             </div>
     </div>
     

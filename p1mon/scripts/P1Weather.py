@@ -1,7 +1,6 @@
-# run manual with ./pythonlaunch.sh P1Weather.py
+# run manual with ./P1Weather
 import argparse
 import base64
-#from symbol import pass_stmt
 import const
 import datetime
 import crypto3
@@ -419,24 +418,24 @@ def insertWeatherHistory( rec_buffer, city_id, city, timestamp, database_tab, da
         DEGREE_DAYS \
         ) values (" +\
         "'"    +str(timestamp)            +"',"+ \
-             str(city_id)            +"," + \
-        "'"    +str(city)                +"',"+ \
-             str(rec_buffer[0][0])    +"," + \
-             str(rec_buffer[0][1])    +"," + \
-             str(rec_buffer[0][2])    +"," + \
-             str(rec_buffer[0][3])    +"," + \
-             str(round(rec_buffer[0][4],0))+"," + \
-             str(rec_buffer[0][5])    +"," + \
-             str(rec_buffer[0][6])    +"," + \
-             str(round(rec_buffer[0][7],0))+"," + \
-             str(rec_buffer[0][8])    +"," + \
-             str(rec_buffer[0][9])    +"," + \
-             str(round(rec_buffer[0][10],1))+"," + \
-             str(rec_buffer[0][11])    +"," + \
-             str(round(rec_buffer[0][12],0))+"," + \
-             str(round(rec_buffer[0][13],0))+"," + \
-             str(round(rec_buffer[0][14],0))+"," + \
-             str( rec_buffer[0][15] )+ \
+                str(city_id)            +"," + \
+        "'"    +str(city).replace("'","''")  +"',"+ \
+                str(rec_buffer[0][0])    +"," + \
+                str(rec_buffer[0][1])    +"," + \
+                str(rec_buffer[0][2])    +"," + \
+                str(rec_buffer[0][3])    +"," + \
+                str(round(rec_buffer[0][4],0))+"," + \
+                str(rec_buffer[0][5])    +"," + \
+                str(rec_buffer[0][6])    +"," + \
+                str(round(rec_buffer[0][7],0))+"," + \
+                str(rec_buffer[0][8])    +"," + \
+                str(rec_buffer[0][9])    +"," + \
+                str(round(rec_buffer[0][10],1))+"," + \
+                str(rec_buffer[0][11])    +"," + \
+                str(round(rec_buffer[0][12],0))+"," + \
+                str(round(rec_buffer[0][13],0))+"," + \
+                str(round(rec_buffer[0][14],0))+"," + \
+                str( rec_buffer[0][15] )+ \
         ")"
         sqlstr=" ".join(sqlstr.split())
         flog.debug(inspect.stack()[0][3]+": sql(insert)="+sqlstr)
@@ -553,7 +552,7 @@ def getWeatherFromApi( api_id, api_key):
     except Exception as e:
         flog.warning (inspect.stack()[0][3]+": stad id data niet beschikaar in api.")
     try: 
-        result['city']  = output['name']
+        result['city'] = output['name']
     except Exception as e:
         flog.warning (inspect.stack()[0][3]+": city naam data niet beschikaar in api.")
     try: 
@@ -595,21 +594,21 @@ def getWeatherFromApi( api_id, api_key):
 
     try:
         sqlstr = "insert or replace into "+const.DB_WEATHER_TAB+" values (" +\
-        "'"+str(result['timestamp'])    +"',"+ \
-            str(result['city_id'])        +"," + \
-         "'"+str(result['city'])        +"',"+ \
-            str(result['temperature'])    +"," + \
-        "'"+str(result['description'])    +"',"+ \
-        "'"+str(result['weather_icon'])+"',"+ \
-             str(result['pressure'])    +"," + \
-             str(result['humidity'])    +"," + \
-             str(result['wind_speed'])    +"," + \
-             str(result['wind_direction'])+"," + \
-             str(result['clouds'])        +"," + \
-             str(result['weather_id'])    +\
+        "'"+str(result['timestamp'])                +"',"+ \
+            str(result['city_id'])                  +"," + \
+         "'"+str(result['city'].replace("'","''")) +"',"+ \
+            str(result['temperature'])      +"," + \
+        "'"+str(result['description'])      +"',"+ \
+        "'"+str(result['weather_icon'])     +"',"+ \
+             str(result['pressure'])        +"," + \
+             str(result['humidity'])        +"," + \
+             str(result['wind_speed'])      +"," + \
+             str(result['wind_direction'])  +"," + \
+             str(result['clouds'])          +"," + \
+             str(result['weather_id'])      +\
         ")"
         sqlstr=" ".join(sqlstr.split())
-        flog.debug(inspect.stack()[0][3]+": sql(instert)="+sqlstr)
+        flog.debug(inspect.stack()[0][3]+": sql(insert) = "+sqlstr )
         weer_db.insert_rec(sqlstr) 
         api_timestamp = result['timestamp']
     except Exception as e:

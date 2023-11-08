@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1MQTT.py
+# run manual with ./P1MQTT
 
 #import argparse
 import apiconst

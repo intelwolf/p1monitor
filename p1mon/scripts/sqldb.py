@@ -325,16 +325,28 @@ class configDB():
         # 2 = ???
         # 3 = ???
 
-        #TODO 207,209,210 zijn nog vrij voor toekomstig gebruik nooit in productie gebruikt
         self.insert_rec( "insert or ignore into " + table + " values ( '204','0'               ,'gebruik van vaste tarieven of dynamische tarieven.')")
         self.insert_rec( "insert or ignore into " + table + " values ( '205','0.0212'          ,'flexible kosten per kWh inkoop.')")
         self.insert_rec( "insert or ignore into " + table + " values ( '206','1'               ,'UI piek kw verbergen (1/0)')")
         
+        #TODO 207 is nog vrij voor toekomstig gebruik nooit in productie gebruikt
         #self.insert_rec( "insert or ignore into " + table + " values ( '207','0'               ,'flexible kosten per kWh Opslag duurzame energie (ODE).')")
         self.insert_rec( "insert or ignore into " + table + " values ( '208','0.851'            ,'flexible kosten per gas inkoop.')")
-        #self.insert_rec( "insert or ignore into " + table + " values ( '209','0'               ,'flexible kosten per gas belasting.')")
-        #self.insert_rec( "insert or ignore into " + table + " values ( '210','0'               ,'flexible kosten per gas Opslag duurzame energie (ODE).')")
 
+        # notificatie
+        self.insert_rec( "insert or ignore into " + table + " values ( '209','0.0.23.59.0.0.0.0.0.0.0' ,'notificatie alarm levering bovengrenswaarde Watt format hh.mm.hh.mm.ma.di.wo.do.vr.za.zo (weekdagen 1 is aan)')" )
+        self.insert_rec( "insert or ignore into " + table + " values ( '210','0.0.23.59.0.0.0.0.0.0.0' ,'notificatie alarm levering ondergrenswaarde Watt format hh.mm.hh.mm.ma.di.wo.do.vr.za.zo (weekdagen 1 is aan)')" )
+        self.insert_rec( "insert or ignore into " + table + " values ( '211','0.0.23.59.0.0.0.0.0.0.0' ,'notificatie alarm verbruik bovengrenswaarde Watt format hh.mm.hh.mm.ma.di.wo.do.vr.za.zo (weekdagen 1 is aan)')" )
+        self.insert_rec( "insert or ignore into " + table + " values ( '212','0.0.23.59.0.0.0.0.0.0.0' ,'notificatie alarm verbruik ondergrenswaarde Watt format hh.mm.hh.mm.ma.di.wo.do.vr.za.zo (weekdagen 1 is aan)')" )
+        self.insert_rec( "insert or ignore into " + table + " values ( '213','0'                ,'notificatie alarm levering bovengrenswaarde Watt is actief (0/1).') ")
+        self.insert_rec( "insert or ignore into " + table + " values ( '214','0'                ,'notificatie alarm levering ondergrenswaarde Watt is actief (0/1).') ")
+        self.insert_rec( "insert or ignore into " + table + " values ( '215','0'                ,'notificatie alarm verbruik bovengrenswaarde Watt is actief (0/1).') ")
+        self.insert_rec( "insert or ignore into " + table + " values ( '216','0'                ,'notificatie alarm verbruik ondergrenswaarde Watt is actief (0/1).') ")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '217','0'                ,'notificatie Watt levering bovengrenswaarde.') ")
+        self.insert_rec( "insert or ignore into " + table + " values ( '218','0'                ,'notificatie Watt levering ondergrenswaarde.') ")
+        self.insert_rec( "insert or ignore into " + table + " values ( '219','0'                ,'notificatie Watt verbruik bovengrenswaarde.') ")
+        self.insert_rec( "insert or ignore into " + table + " values ( '220','0'                ,'notificatie Watt verbruik ondergrenswaarde.') ")
 
         # you need an account on www.noip.com before this can be used
         #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")
@@ -722,12 +734,15 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into "+table+\
         " values ( '92','onbekend','Serial device dat gebruikt wordt:',0)")
 
+        # removed in version 2.4.0
+        # can be reused in future versions
+        # used for status of sql auto import
         self.insert_rec("insert or ignore into "+table+\
-        " values ( '93','onbekend','Status automatische data import:',0)")
+        " values ( '93','onbekend','',0)")
 
         self.insert_rec("insert or ignore into "+table+\
-        " values ( '94','onbekend','Tijdstip automatische data import:',0)")
-
+        " values ( '94','onbekend','',0)")
+        
         self.insert_rec("insert or ignore into "+table+\
         " values ( '95','onbekend','Tijdstip start MQTT client:',0)")
 

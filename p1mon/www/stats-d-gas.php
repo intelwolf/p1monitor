@@ -195,8 +195,11 @@ function createGasChart() {
         //minRange:       7  * 24 * 3600000,
         //maxRange:       61 * 24 * 3600000,
         dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
+            minute: '%H:%M',
+            hour: '%H:%M',
+            day: "%a.<br>%e %b.",
+            month: '%b.<br>%y',
+            year: '%y'
         },
         lineColor: '#6E797C',
         lineWidth: 1,
@@ -498,13 +501,13 @@ function createGasChart() {
             legendItemClick: function () {
                 // console.log('legendItemClick index='+this.index);
                 if ( this.index === 0 ) {
-                toLocalStorage('stat-d-gas-visible',!this.visible); // #PARAMETER
+                    toLocalStorage('stat-d-gas-visible',!this.visible); // #PARAMETER
                 }
                 if ( this.index === 1 ) {
-                toLocalStorage('stat-d-gas-temp-visible',!this.visible); // #PARAMETER
+                    toLocalStorage('stat-d-gas-temp-visible',!this.visible); // #PARAMETER
                 }
                 if ( this.index === 3 ) {
-                toLocalStorage('stat-d-gas-graaddagen-visible',!this.visible); // #PARAMETER
+                    toLocalStorage('stat-d-gas-graaddagen-visible',!this.visible); // #PARAMETER
                 }
             }
             }

@@ -8,14 +8,15 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
 include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive( 129 ) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor historie minuten opgewekte kWh</title>
+<title>P1-monitor <?php echo strIdx( 426 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -30,6 +31,11 @@ if ( checkDisplayIsActive( 129 ) == false) { return; }
 <script src="./js/p1mon-util.js"></script>
 
 <script>
+
+const text_min_short    = "<?php echo strIdx( 128 );?>"
+const text_hour         = "<?php echo strIdx( 129 );?>"
+const text_hours        = "<?php echo strIdx( 121 );?>"
+
 var recordsLoaded            = 0;
 var initloadtimer;
 var mins                     = 1;  
@@ -37,7 +43,7 @@ var secs                     = mins * 60;
 var currentSeconds           = 0;
 var currentMinutes           = 0;
 var Gselected                = 0;
-var GselectText              = ['15 min','30 min','1 uur','8 uur','12 uur','24 uur']; // #PARAMETER
+var GselectText              = ['15 '+text_min_short,'30 '+text_min_short,'1 '+text_hour,'8 '+text_hours,'12 '+text_hours,'24 '+text_hours]; // #PARAMETER
 var GseriesVisibilty         = [true,true, true, true];
 var GHighTariffData          = [];
 var GLowTariffData           = [];
@@ -211,9 +217,18 @@ function createKwhChart() {
             maxRange:        24      *  60000,
             type: 'datetime',
             dateTimeLabelFormats: {
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: "%a.<br>%e %b.",
+                    month: '%b.<br>%y',
+                    year: '%y'
+            },
+            /*
+            dateTimeLabelFormats: {
                 day: '%a.<br>%d %B<br/>%Y',
                 hour: '%a.<br>%H:%M'
             },
+            */
             lineColor: '#6E797C',
             lineWidth: 1
             },
@@ -256,10 +271,10 @@ function createKwhChart() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M', this.x) +'</b>';
 
                     var d = this.points;
-                    var hoogTarief          = "verborgen";
-                    var laagTarief          = "verborgen";
-                    var hoogTariefPrognose  = "verborgen";
-                    var laagTariefPrognose  = "verborgen";
+                    var hoogTarief          = "<?php echo strIdx( 340 );?>";
+                    var laagTarief          = hoogTarief 
+                    var hoogTariefPrognose  = hoogTarief 
+                    var laagTariefPrognose  = hoogTarief 
 
                     for (var i=0,  tot=d.length; i < tot; i++) {
                         //console.log (d[i].series.userOptions.id);
@@ -278,10 +293,10 @@ function createKwhChart() {
                         }
                     }
 
-                    s += '<br/><span style="color: #F2BA0F;">kWh hoog tarief: </span>' + hoogTarief;
-                    s += '<br/><span style="color: #98D023;">kWh laag tarief: : </span>' + laagTarief; 
-                    s += '<br/><span style="color: #F2BA0F;">prognose kWh hoog tarief: </span>' + hoogTariefPrognose;
-                    s += '<br/><span style="color: #98D023;">prognose kWh laag tarief: </span>' + laagTariefPrognose; 
+                    s += '<br/><span style="color: #F2BA0F;"><?php echo strIdx( 126 );?>: </span>' + hoogTarief;
+                    s += '<br/><span style="color: #98D023;"><?php echo strIdx( 127 );?>: : </span>' + laagTarief; 
+                    s += '<br/><span style="color: #F2BA0F;"><?php echo strIdx( 428 );?>: </span>' + hoogTariefPrognose;
+                    s += '<br/><span style="color: #98D023;"><?php echo strIdx( 429 );?>: </span>' + laagTariefPrognose; 
 
                     return s;
 
@@ -315,7 +330,7 @@ function createKwhChart() {
                 yAxis: 0,
                 type: 'areaspline',
                 visible: GseriesVisibilty[0],
-                name: 'kWh hoog tarief',
+                name: '<?php echo strIdx( 126 );?>',
                 color: high_tariff_color,
                 data: GHighTariffData 
             },
@@ -324,7 +339,7 @@ function createKwhChart() {
                 yAxis: 0,
                 type: 'areaspline',
                 visible: GseriesVisibilty[1],
-                name: 'kWh laag tarief',
+                name: '<?php echo strIdx( 127 );?>',
                 color: low_tariff_color,
                 data: GLowTariffData
             },
@@ -334,7 +349,7 @@ function createKwhChart() {
                 type: 'areaspline',
                 //dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[2],
-                name: 'prognose kWh hoog tarief',
+                name: '<?php echo strIdx( 428 );?>',
                 color: high_tariff_color,
                 data: GHighTariffDataPrognose, 
             }, 
@@ -344,13 +359,13 @@ function createKwhChart() {
                 type: 'areaspline',
                 //dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[3],
-                name: 'prognose kWh laag tarief',
+                name: '<?php echo strIdx( 429 );?>',
                 color: low_tariff_color,
                 data: GLowTariffDataPrognose
             }
             ],
             lang: {
-                noData: "Geen gegevens beschikbaar."
+                noData: "<?php echo ucfirst(strIdx( 425 ))?>"
             },
             noData: {
                 style: { 
@@ -404,10 +419,12 @@ $(function() {
     GseriesVisibilty[3] =JSON.parse(getLocalStorage('powerprod-min-low-prognose-tariff-visible') );  // #PARAMETER
 
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
 });
@@ -436,7 +453,7 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">opgewekte kWh minuten</span> 
+            <span class="text-2"><?php echo strIdx( 427 );?></span> 
                 <div class="content-wrapper" id="help_icon" onMouseOver="show_help_detail()" >
                     <i class="color-menu fas fa-question-circle" data-fa-transform="grow-10 right-20 up-4"></i>
                     <div class="cursor-pointer" id="help_detail" onclick="$('#help_detail').hide();">
@@ -445,11 +462,11 @@ $(function() {
             </div>
         </div>
         <div class="frame-2-bot"> 
-        <div id="KwhChart" style="width:100%; height:480px;"></div>    
+        <div id="KwhChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 );?>" height="15" width="128"></div>
 
 <script>
 function show_help_detail() {

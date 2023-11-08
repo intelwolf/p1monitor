@@ -25,8 +25,7 @@ function debugLog($string) {
 
 function encodeString ( $input, $seed ) { # nog niet getest met zonder p1monExec
         $encoded_string = '';
-        #$command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --enc ".base64_encode($input)." --seed ".$seed."'";
-        $command = "/p1mon/scripts/pythonlaunch.sh P1CryptoV2.py --enc ".base64_encode( $input )." --seed ".$seed;
+        $command = "/p1mon/scripts/P1CryptoV2 --enc ".base64_encode( $input )." --seed ".$seed;
        
         #debugLog('$input='.$input); 
         #debugLog('$seed='.$seed);
@@ -43,8 +42,7 @@ function encodeString ( $input, $seed ) { # nog niet getest met zonder p1monExec
 
 function decodeString( $config_id, $seed ) {
     $decoded_string = '';
-    #$command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed."'";
-    $command = "/p1mon/scripts/pythonlaunch.sh P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed;
+    $command = "/p1mon/scripts/P1CryptoV2 --dec ".config_read($config_id)." --seed ".$seed;
 
 
     $arr_execoutput_dec = []; // make sure old stuff is cleared.
@@ -57,8 +55,7 @@ function decodeString( $config_id, $seed ) {
 
 function decodeStringNoBase64( $config_id, $seed ) { # used in API
     $decoded_string = '';
-    #$command = "/p1mon/scripts/p1monExec -p '/p1mon/scripts/P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed."'";
-    $command = "/p1mon/scripts/pythonlaunch.sh P1CryptoV2.py --dec ".config_read($config_id)." --seed ".$seed;
+    $command = "/p1mon/scripts/P1CryptoV2 --dec ".config_read($config_id)." --seed ".$seed;
 
     $arr_execoutput_dec = []; // make sure old stuff is cleared.
     exec($command ,$arr_execoutput_dec, $exec_ret_value );
@@ -86,6 +83,10 @@ function inputCleanDigitsOnly($string) {
    return preg_replace('/[^0-9]/', '', $string); // Removes special chars.
 }
 
+function inputCleanDigitsOnlyMinus($string) {
+    return preg_replace('/[^0-9\-]/', '', $string); // Removes special chars.
+ }
+
 // true = ok, false = not ok
 function cronSafeCharacters($str_in) {
     $regex = "/[^0-9,\/\-\*]+/";
@@ -100,7 +101,7 @@ function cronSafeCharacters($str_in) {
 // fout is een waarde groter dan 1
 function updateConfigDb($sql){
       $dbstr = '/p1mon/mnt/ramdisk/config.db'; 
-      $r = 0;    
+      $r = 0;
       try {
         $db = new SQLite3($dbstr,SQLITE3_OPEN_READWRITE);
         $db -> busyTimeout(300000);  // fix for database locks, wait 300 sec = 5 min

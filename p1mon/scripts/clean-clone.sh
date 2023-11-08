@@ -220,13 +220,13 @@ fi
 # make default http config file
 echo "=> standaard http configuratie wordt aangemaakt."
 ACTIVE_DIR=$CLONE/etc/nginx/sites-enabled
-/p1mon/scripts/pythonlaunch.sh P1NginxConfig.py --createhttpconfigfile $ACTIVE_DIR/p1mon_80
+/p1mon/scripts/P1NginxConfig --createhttpconfigfile $ACTIVE_DIR/p1mon_80
 echo "=> wacht 10 seconden."
 sleep 10
 
 DHCPCDFILE=$CLONE/etc/dhcpcd.conf
 echo "=> default dhcpcd config file naar clone schrijven : $DHCPCDFILE"
-/p1mon/scripts/pythonlaunch.sh P1NetworkConfig.py --defaultdhcpconfig -fp $DHCPCDFILE
+/p1mon/scripts/P1NetworkConfig --defaultdhcpconfig -fp $DHCPCDFILE
 echo "=> wacht 10 seconden."
 sleep 10
 

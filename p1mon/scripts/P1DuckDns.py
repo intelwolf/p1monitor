@@ -1,5 +1,5 @@
 
-# run manual with ./pythonlaunch.sh P1DuckDns.py
+# run manual with ./P1DuckDns
 
 import argparse
 import base64
@@ -105,13 +105,13 @@ def Main( argv ):
             if f.mode == 'r':
                 status =f.read().strip()
                 if status == "OK":
-                    flog.info(inspect.stack()[0][3]+": DNS naam naar IP update is succesvol." )
+                    flog.info(inspect.stack()[0][3]+": DNS naam: " +  dynamic_dns + " naar IP update is succesvol." )
                 else:
-                    flog.warning(inspect.stack()[0][3]+": DNS naam naar IP update is gefaald." )
+                    flog.warning(inspect.stack()[0][3]+": DNS naam: " + dynamic_dns + " naar IP update is gefaald." )
             f.close()
         except Exception as e:
             flog.warning(inspect.stack()[0][3]+": status check probleem -> " + str(e.args[0]) )
-            sys.exit(1)    
+            sys.exit(1)
 
         sys.exit(0)
 

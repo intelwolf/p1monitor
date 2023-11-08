@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SolarEdgeSetup.py
+# run manual with ./P1SolarEdgeSetup
 
 import argparse
 import const

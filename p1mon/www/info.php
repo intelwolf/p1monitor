@@ -9,15 +9,12 @@ include_once '/p1mon/www/util/pageclock.php';
 
 if ( checkDisplayIsActive(22) == false) { return; }
 
-$sw_off  = strIdx( 193 );
-$sw_on   = strIdx( 192 );
-
 ?> 
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 531 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor informatie</title>
+<title>P1-monitor <?php echo strIdx( 114 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -33,6 +30,12 @@ $sw_on   = strIdx( 192 );
 <script src="./js/p1mon-util.js"></script>
 
 <script>
+
+const on_text   = "<?php echo strIdx( 192 );?>";
+const off_text  = "<?php echo strIdx( 193 );?>";
+const yes_text  = "<?php echo strIdx( 606 );?>";
+const no_text   = "<?php echo strIdx( 607 );?>";
+
 //var initloadtimer;
 var CPUload                   = 0;
 var Ramdiskload               = 0;
@@ -54,7 +57,7 @@ function PlaySound() {
         var sound = document.getElementById("audio");
         sound.play()
     }
-}       
+}
 
 function soundOn() {
     //console.log("on")
@@ -80,16 +83,12 @@ function readJsonApiConfiguration(){
                 switch(jsonarr[j][0]) {
                     case 0:
                         $('#sy4v').text( jsonarr[j][1] );
-                        $('#sy4t').text( jsonarr[j][2] );
                     case 11:
                         $('#ne7v').text( jsonarr[j][1] );
-                        $('#ne7t').text( jsonarr[j][2] );
                     case 128:
                         $('#sy10v').text( jsonarr[j][1] );
-                        $('#sy10t').text( jsonarr[j][2] );
                     case 133:
                         $('#sy11v').text(jsonarr[j][1]);
-                        $('#sy11t').text(jsonarr[j][2]);  
                     default:
                         break;
             }
@@ -110,50 +109,40 @@ function readJsonApiStatus(){
                 switch(jsonarr[j][0]) {
                     case 5:
                         $('#pr1v').text(jsonarr[j][1]);
-                        $('#pr1t').text(jsonarr[j][2]);
                     break;
                     case 6:   
                         $('#pr2v').text(jsonarr[j][1]);
-                        $('#pr2t').text(jsonarr[j][2]);
                     break;
                     case 7:
                         $('#db2v').text(jsonarr[j][1]);
-                        $('#db2t').text(jsonarr[j][2]);
                     break;
                     case 12:
                         $('#db3v').text(jsonarr[j][1]);
-                        $('#db3t').text(jsonarr[j][2]);
                         break;
                     case 13:
                         $('#db4v').text(jsonarr[j][1]);
-                        $('#db4t').text(jsonarr[j][2]);
                         break;
                     case 14:
                         $('#db5v').text(jsonarr[j][1]);
-                        $('#db5t').text(jsonarr[j][2]);
                         break;
                     case 15:
                         $('#db6v').text(jsonarr[j][1]);
-                        $('#db6t').text(jsonarr[j][2]);
                         break;
                     case 16:
                         $('#db1v').text(jsonarr[j][1]);
-                        $('#db1t').text(jsonarr[j][2]);
                         break;
                     case 17:
                         $('#pr3v').text(jsonarr[j][1]);
-                        $('#pr3t').text(jsonarr[j][2]);
                         break;
                     case 18:
                         try {
                             CPUload = jsonarr[j][1]; 
                             point = $('#cpuload').highcharts().series[0].points[0];
                             point.update(parseFloat(CPUload), true, true, true);  
-                        } catch(err) {}            
+                        } catch(err) {}
                         break;
                     case 19:
                         $('#sy1v').text(jsonarr[j][1]);
-                        $('#sy1t').text(jsonarr[j][2]);
                         break;
                     case 20:
                         if (jsonarr[j][1].length === 0) {
@@ -162,7 +151,6 @@ function readJsonApiStatus(){
                             hideStuff('ne5t');
                         } else {
                             $('#ne5v').text(jsonarr[j][1]);
-                            $('#ne5t').text(jsonarr[j][2]);
                         }
                         break;
                     case 21:
@@ -170,11 +158,10 @@ function readJsonApiStatus(){
                             Ramdiskload = jsonarr[j][1]; 
                             point = $('#ramdiskload').highcharts().series[0].points[0];
                             point.update(parseFloat(Ramdiskload), true, true, true);  
-                        } catch(err) {}    
+                        } catch(err) {}
                         break;
                     case 22:
                         $('#sy2v').text(jsonarr[j][1]);
-                        $('#sy2t').text(jsonarr[j][2]);
                         break;
                     case 23:
                         if (jsonarr[j][1].length === 0) {
@@ -183,30 +170,29 @@ function readJsonApiStatus(){
                             hideStuff('ne4t');
                         } else {
                             $('#ne4v').text(jsonarr[j][1]);
-                            $('#ne4t').text(jsonarr[j][2]);
                         }
                         break;
                     case 24:
-                        if (jsonarr[j][1].length === 0) {
+                        if ( jsonarr[j][1].length === 0 ) {
                             hideStuff('ne1b');
                             hideStuff('ne1v');
                             hideStuff('ne1t');
                         } else {
-                            $('#ne1v').text(jsonarr[j][1]);
-                            $('#ne1t').text(jsonarr[j][2]);
+                            if ( jsonarr[j][1] === "ja" ) {
+                                $('#ne1v').text( yes_text );
+                            } else {
+                                $('#ne1v').text( no_text );
+                            }
                         }
                         break;
                     case 25:
                         $('#sy3v').text(jsonarr[j][1]);
-                        $('#sy3t').text(jsonarr[j][2]);
                         break;
                     case 26:
                         $('#ne2v').text(jsonarr[j][1]);
-                        $('#ne2t').text(jsonarr[j][2]);
                         break;
                     case 27:
                         $('#ne3v').text(jsonarr[j][1]);
-                        $('#ne3t').text(jsonarr[j][2]);
                         break;
                     case 28:
                         if (jsonarr[j][1].length === 0) {
@@ -215,75 +201,59 @@ function readJsonApiStatus(){
                             hideStuff('ne6t');
                         } else {
                             $('#ne6v').text(jsonarr[j][1]);
-                            $('#ne6t').text(jsonarr[j][2]);
                         }
                         break;
                 case 29:
                     $('#db7v').text(jsonarr[j][1]);
-                    $('#db7t').text(jsonarr[j][2]);
                     break; 
                 case 31:
                     try {
                         Ramload = jsonarr[j][1];
                         point = $('#ramload').highcharts().series[0].points[0];
                         point.update(parseFloat(Ramload), true, true, true);  
-                    } catch(err) {}    
+                    } catch(err) {}
                     break; 
                 case 41:
                     $('#db8v').text(jsonarr[j][1]);
-                    $('#db8t').text(jsonarr[j][2]);
                     break;
                 case 42:
                     $('#ne8v').text(jsonarr[j][1]);
-                    $('#ne8t').text(jsonarr[j][2]);
                     break;
                 case 45:
                     $('#db9v').text(jsonarr[j][1]);
-                    $('#db9t').text(jsonarr[j][2]);
                     break;  
                 case 49:
                     $('#db10v').text(jsonarr[j][1]);
-                    $('#db10t').text(jsonarr[j][2]);
                     break;
                 case 51:
                     $('#sy5v').text(jsonarr[j][1]);
-                    $('#sy5t').text(jsonarr[j][2]);
                     break;
                 case 52:
                     $('#sy6v').text(jsonarr[j][1]);
-                    $('#sy6t').text(jsonarr[j][2]);
                     break;
                 case 53:
                     $('#sy7v').text(jsonarr[j][1]);
-                    $('#sy7t').text(jsonarr[j][2]);
                     break;
                 case 55:
                     $('#sy9v').text(jsonarr[j][1]);
-                    $('#sy9t').text(jsonarr[j][2]);
                     break;
                 case 56:
                     $('#pr4v').text(jsonarr[j][1]);
-                    $('#pr4t').text(jsonarr[j][2]); 
                     break;  
                 case 57:
                     $('#db11v').text(jsonarr[j][1]);
-                    $('#db11t').text(jsonarr[j][2]);
                     break;
                 case 58:
                     $('#db12v').text(jsonarr[j][1]);
-                    $('#db12t').text(jsonarr[j][2]);
                     break;
                 case 60:
                     $('#db13v').text(jsonarr[j][1]);
-                    $('#db13t').text(jsonarr[j][2]);
                     break;
                 case 63:
                     $('#db14v').text(jsonarr[j][1]);
-                    $('#db14t').text(jsonarr[j][2]);
                     break;
                 case 65:
                     $('#pr5v').text(jsonarr[j][1]);
-                    $('#pr5t').text(jsonarr[j][2]);
                     break;
                 case 69:
                         try {
@@ -294,11 +264,9 @@ function readJsonApiStatus(){
                         break;
                 case 70:
                     $('#pr6v').text(jsonarr[j][1]);
-                    $('#pr6t').text(jsonarr[j][2]);
                     break;
                 case 71:
                     $('#db15v').text(jsonarr[j][1]);
-                    $('#db15t').text(jsonarr[j][2]);
                     break;
                 case 72:
                     if (jsonarr[j][1].length === 0) {
@@ -307,7 +275,6 @@ function readJsonApiStatus(){
                         hideStuff('ne9t');
                     } else {
                         $('#ne9v').text(jsonarr[j][1]);
-                        $('#ne9t').text(jsonarr[j][2]);
                     }
                     break;
                 case 73:
@@ -317,59 +284,45 @@ function readJsonApiStatus(){
                         hideStuff('ne10t');
                     } else {
                         $('#ne10v').text(jsonarr[j][1]);
-                        $('#ne10t').text(jsonarr[j][2]);
                     }
                     break;
                 case 82:
                     $('#db16v').text(jsonarr[j][1]);
-                    $('#db16t').text(jsonarr[j][2]);
                     break;
                 case 84:
                     $('#db17v').text(jsonarr[j][1]);
-                    $('#db17t').text(jsonarr[j][2]);
                     break;
                 case 88:
                     $('#db18v').text(jsonarr[j][1]);
-                    $('#db18t').text(jsonarr[j][2]);
                     break;
                 case 90:
                     $('#db19v').text(jsonarr[j][1]);
-                    $('#db19t').text(jsonarr[j][2]);
                     break;
                 case 93:
                     $('#db20v').text(jsonarr[j][1]);
-                    $('#db20t').text(jsonarr[j][2]);
                     break;
                 case 94:
                     $('#db21v').text(jsonarr[j][1]);
-                    $('#db21t').text(jsonarr[j][2]);
                     break;
                 case 95:
                     $('#pr7v').text(jsonarr[j][1]);
-                    $('#pr7t').text(jsonarr[j][2]);
                     break;
                 case 96:
                     $('#db22v').text(jsonarr[j][1]);
-                    $('#db22t').text(jsonarr[j][2]);
                     break;
                 case 98:
                     $('#pr8v').text(jsonarr[j][1]);
-                    $('#pr8t').text(jsonarr[j][2]);
                  case 99:
                     $('#pr9v').text(jsonarr[j][1]);
-                    $('#pr9t').text(jsonarr[j][2]);
                     break;
                 case 108:
                     $('#pr10v').text(jsonarr[j][1]);
-                    $('#pr10t').text(jsonarr[j][2]);
                     break;
                 case 109:
                     $('#db23v').text(jsonarr[j][1]);
-                    $('#db23t').text(jsonarr[j][2]);
                     break;
                 case 111:
                     $('#db24v').text(jsonarr[j][1]);
-                    $('#db24t').text(jsonarr[j][2]);
                     break;
                 case 123:
                     if ( jsonarr[j][1] == '0') {
@@ -390,15 +343,15 @@ function readJsonApiStatus(){
                     ntpArr = JSON.parse(jsonarr[j][1]); 
 
                     if ( ntpArr['ntp'] ) {
-                        $('#ntp1').text( "<?php echo $sw_on ?>" );
+                        $('#ntp1').text( on_text );
                     } else {
-                        $('#ntp1').text( "<?php echo $sw_off ?>" );
+                        $('#ntp1').text( off_text );
                     }
 
                     if ( ntpArr['ntp_synchronized'] ) {
-                        $('#ntp2').text( "<?php echo $sw_on ?>" );
+                        $('#ntp2').text( on_text );
                     } else {
-                        $('#ntp2').text( "<?php echo $sw_off ?>" );
+                        $('#ntp2').text( off_text );
                     }
 
                     $('#ntp3').text(ntpArr['ntp_last_timestamp']);
@@ -411,17 +364,15 @@ function readJsonApiStatus(){
                     break;
                 case 126:
                     $('#pr11v').text(jsonarr[j][1]);
-                    $('#pr11t').text(jsonarr[j][2]);
                     break;
                 case 129:
                     $('#db25v').text(jsonarr[j][1]);
-                    $('#db25t').text(jsonarr[j][2]);
+                    //$('#db25t').text(jsonarr[j][2]);
                     break;
                 default:
                     break;
             }
         }
-
 
       } catch(err) {
           console.log( err );
@@ -444,7 +395,6 @@ function readTextMeterTelegram(){
           $("#slimmemeter").html('Slimme meter data niet beschikbaar(2).');
       }
    });
-
 }
 
 
@@ -468,7 +418,7 @@ function getFormattedDate() {
     return str;
 }
 
-function createChartCpuTemperature() {    
+function createChartCpuTemperature() {
     $('#cputemp').highcharts({
 
     chart: {
@@ -513,7 +463,7 @@ function createChartCpuTemperature() {
         labels: {
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             },
             y: 16
         }
@@ -531,7 +481,7 @@ function createChartCpuTemperature() {
             color: "#6E797C",
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             }
         },
         data: [{
@@ -541,7 +491,7 @@ function createChartCpuTemperature() {
 });
 }
 
-function createChartCpuLoad() {    
+function createChartCpuLoad() {
     $('#cpuload').highcharts({
 
     chart: {
@@ -587,7 +537,7 @@ function createChartCpuLoad() {
         labels: {
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             },
             y: 16
         }
@@ -605,7 +555,7 @@ function createChartCpuLoad() {
             color: "#6E797C",
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             }
         },
         data: [{
@@ -615,7 +565,7 @@ function createChartCpuLoad() {
 });
 }
 
-function createChartRamdiskLoad() {    
+function createChartRamdiskLoad() {
     $('#ramdiskload').highcharts({
 
     chart: {
@@ -637,7 +587,6 @@ function createChartRamdiskLoad() {
             outerRadius: '100%',
             shape: 'arc'
         }
-       
     },
     tooltip: {
         enabled: false
@@ -661,7 +610,7 @@ function createChartRamdiskLoad() {
         labels: {
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             },
             y: 16
         }
@@ -679,7 +628,7 @@ function createChartRamdiskLoad() {
             color: "#6E797C",
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             }
         },
         data: [{
@@ -753,7 +702,7 @@ function createChartRamLoad() {
             color: "#6E797C",
             style: {
                 fontWeight: 'bold',
-                fontSize: '13px'       
+                fontSize: '13px'
             }
         },
         data: [{
@@ -830,84 +779,86 @@ $(function () {
             <!-- linker kant van mid sectie --> 
             <div class="pos-14"> 
                  <div class="frame-2-top">
-                    <span class="text-2">database</span>
+                    <span class="text-2"><?php echo strIdx( 546 );?></span>
                 </div>
                   <div class="frame-2-bot">
-                     <div id="db1t" class="text-9"></div><div id="db1v" class="text-9"></div><br>
-                     <div id="db2t" class="text-9"></div><div id="db2v" class="text-9"></div><br>
-                     <div id="db3t" class="text-9"></div><div id="db3v" class="text-9"></div><br>
-                     <div id="db4t" class="text-9"></div><div id="db4v" class="text-9"></div><br>
-                     <div id="db5t" class="text-9"></div><div id="db5v" class="text-9"></div><br>
-                     <div id="db6t" class="text-9"></div><div id="db6v" class="text-9"></div><br>
-                    <div id="db9t" class="text-9"></div><div id="db9v" class="text-9"></div><br>
-                     <div id="db7t" class="text-9"></div><div id="db7v" class="text-9"></div><br>
-                     <div id="db8t" class="text-9"></div><div id="db8v" class="text-9"></div><br>
-                    <div id="db10t" class="text-9"></div><div id="db10v" class="text-9"></div><br>
-                    <div id="heating">
-                        <div id="db11t" class="text-9"></div><div id="db11v" class="text-9"></div><br>
-                        <div id="db12t" class="text-9"></div><div id="db12v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 551 );?>:</div><div id="db1v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 552 );?>:</div><div id="db2v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 553 );?>:</div><div id="db3v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 554 );?>:</div><div id="db4v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 555 );?>:</div><div id="db5v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 556 );?>:</div><div id="db6v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 557 );?>:</div><div id="db9v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 558 );?>:</div><div id="db7v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 559 );?>:</div><div id="db8v" class="text-9"></div><br>
+                     <div class="text-9"><?php echo strIdx( 560 );?>:</div><div id="db10v" class="text-9"></div><br>
+                     <div id="heating">
+                        <div class="text-9"><?php echo strIdx( 561 );?>:</div><div id="db11v" class="text-9"></div><br>
+                        <div class="text-9"><?php echo strIdx( 562 );?>:</div><div id="db12v" class="text-9"></div><br>
                     </div>
-                    <div id="db13t" class="text-9"></div><div id="db13v" class="text-9"></div><br>
-                    <div id="db14t" class="text-9"></div><div id="db14v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 563 );?>:</div><div id="db13v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 564 );?>:</div><div id="db14v" class="text-9"></div><br>
                     <div id="udpBroadcast">
-                        <div id="db15t" class="text-9"></div><div id="db15v" class="text-9"></div><br>
+                        <div class="text-9"><?php echo strIdx( 565 );?>:</div><div id="db15v" class="text-9"></div><br>
                     </div>
-                    <div id="db16t" class="text-9"></div><div id="db16v" class="text-9"></div><br>
-                    <div id="db17t" class="text-9"></div><div id="db17v" class="text-9"></div><br>
-                    <div id="db18t" class="text-9"></div><div id="db18v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 566 );?>:</div><div id="db16v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 567 );?>:</div><div id="db17v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 568 );?>:</div><div id="db18v" class="text-9"></div><br>
                     <div id="watermeter">
-                        <div id="db19t" class="text-9"></div><div id="db19v" class="text-9"></div><br>
+                        <div class="text-9"><?php echo strIdx( 569 );?>:</div><div id="db19v" class="text-9"></div><br>
                     </div>
-                    <div id="db20t" class="text-9"></div><div id="db20v" class="text-9"></div><br>
-                    <div id="db21t" class="text-9"></div><div id="db21v" class="text-9"></div><br>
-                    <div id="db22t" class="text-9"></div><div id="db22v" class="text-9"></div><br>
+                    <!--
+                    <div class="text-9"><?php echo strIdx( 570 );?>:</div><div id="db20v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 571 );?>:</div><div id="db21v" class="text-9"></div><br>
+                    -->
+                    <div class="text-9"><?php echo strIdx( 572 );?>:</div><div id="db22v" class="text-9"></div><br>
                     <div id="powerProductionS0">
-                        <div id="db23t" class="text-9"></div><div id="db23v" class="text-9"></div><br>
+                        <div class="text-9"><?php echo strIdx( 573 );?>:</div><div id="db23v" class="text-9"></div><br>
                     </div>
                     <div id="powerProductionSolarEdge">
-                        <div id="db24t" class="text-9"></div><div id="db24v" class="text-9"></div><br>
+                        <div class="text-9"><?php echo strIdx( 574 );?>:</div><div id="db24v" class="text-9"></div><br>
                     </div>
                     <div id="dynamicsPricing">
-                        <div id="db25t" class="text-9"></div><div id="db25v" class="text-9"></div><br>
+                        <div class="text-9"><?php echo strIdx( 608 );?>:</div><div id="db25v" class="text-9"></div><br>
                     </div>
                  </div>
                  <br>
                  <div class="frame-2-top">
-                    <span class="text-2">processen</span>
+                    <span class="text-2"><?php echo strIdx( 547 );?></span>
                 </div>
                   <div class="frame-2-bot">
-                     <div id="pr1t" class="text-9"></div><div id="pr1v" class="text-9"></div><br>
-                     <div id="pr2t" class="text-9"></div><div id="pr2v" class="text-9"></div><br>
-                     <div id="pr3t" class="text-9"></div><div id="pr3v" class="text-9"></div><br>
-                    <div id="pr4t" class="text-9"></div><div id="pr4v" class="text-9"></div><br>
-                    <div id="pr5t" class="text-9"></div><div id="pr5v" class="text-9"></div><br>
-                    <div id="pr6t" class="text-9"></div><div id="pr6v" class="text-9"></div><br>
-                    <div id="pr7t" class="text-9"></div><div id="pr7v" class="text-9"></div><br>
-                    <div id="pr8t" class="text-9"></div><div id="pr8v" class="text-9"></div><br>
-                    <div id="pr9t" class="text-9"></div><div id="pr9v" class="text-9"></div><br>
-                    <div id="pr10t" class="text-9"></div><div id="pr10v" class="text-9"></div><br>
-                    <div id="pr11t" class="text-9"></div><div id="pr11v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 575 );?>:</div><div id="pr1v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 576 );?>:</div><div id="pr2v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 577 );?>:</div><div id="pr3v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 578 );?>:</div><div id="pr4v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 579 );?>:</div><div id="pr5v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 580 );?>:</div><div id="pr6v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 581 );?>:</div><div id="pr7v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 582 );?>:</div><div id="pr8v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 583 );?>:</div><div id="pr9v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 584 );?>:</div><div id="pr10v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 585 );?>:</div><div id="pr11v" class="text-9"></div><br>
                  </div>
                  <br>
                      <div class="frame-2-top">
-                    <span class="text-2">systeem</span>
+                    <span class="text-2"><?php echo strIdx( 548 );?></span>
                     <div title="<?php echo strIdx( 98 );?>" class="pos-43">
                         <button onclick="copyClipboard('systeem')" class="input-4 pos-31 cursor-pointer">
-                            <i class="color-menu fas fa-clipboard"></i>&nbsp;<span class="color-menu">clipboard</span>
+                            <i class="color-menu fas fa-clipboard"></i>&nbsp;<span class="color-menu"><?php echo strIdx( 550 );?></span>
                         </button>
                    </div>
                 </div>
                   <div id="systeem" class="frame-2-bot">
-                    <div id="sy1t" class="text-9"></div><div id="sy1v" class="text-9"></div><br>
-                    <div id="sy2t" class="text-9"></div><div id="sy2v" class="text-9"></div><br>
-                    <div id="sy3t" class="text-9"></div><div id="sy3v" class="text-9"></div><br>
-                    <div id="sy4t" class="text-9"></div><div id="sy4v" class="text-9"></div><br>
-                    <div id="sy10t" class="text-9"></div><div id="sy10v" class="text-9"></div><br>
-                    <div id="sy11t" class="text-9"></div><div id="sy11v" class="text-9"></div><br>
-                    <div id="sy5t" class="text-9"></div><div id="sy5v" class="text-9"></div><br>
-                    <div id="sy6t" class="text-9"></div><div id="sy6v" class="text-9"></div><br>
-                    <div id="sy7t" class="text-9"></div><div id="sy7v" class="text-9"></div><br>
-                    <div id="sy9t" class="text-9"></div><div id="sy9v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 586 );?>:</div><div id="sy1v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 587 );?>:</div><div id="sy2v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 588 );?>:</div><div id="sy3v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 589 );?>:</div><div id="sy4v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 590 );?>:</div><div id="sy10v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 591 );?>:</div><div id="sy11v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 592 );?>:</div><div id="sy5v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 593 );?>:</div><div id="sy6v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 594 );?>:</div><div id="sy7v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 595 );?>:</div><div id="sy9v" class="text-9"></div><br>
                     <div class="text-9"><?php echo strIdx( 297 );?>:</div><div id="ntp1" class="text-9"></div><br>
                     <div class="text-9"><?php echo strIdx( 298 );?>:</div><div id="ntp2" class="text-9"></div><br>
                     <div class="text-9"><?php echo strIdx( 299 );?>:</div><div id="ntp3" class="text-9"></div><br>
@@ -917,27 +868,27 @@ $(function () {
                  </div>
                  <br>
                  <div class="frame-2-top">
-                    <span class="text-2">netwerk</span>
+                    <span class="text-2"><?php echo strIdx( 213 );?></span>
                 </div>
                   <div class="frame-2-bot">
-                     <div id="ne1t" class="text-9"></div><div id="ne1v" class="text-9"></div><div><br id="ne1b"></div>
-                     <div id="ne2t" class="text-9"></div><div id="ne2v" class="text-9"></div><br>
-                     <div id="ne3t" class="text-9"></div><div id="ne3v" class="text-9"></div><br>
-                     <div id="ne4t" class="text-9"></div><div id="ne4v" class="text-9"></div><div><br id="ne4b"></div>
-                    <div id="ne5t" class="text-9"></div><div id="ne5v" class="text-9"></div><div><br id="ne5b"></div>
-                    <div id="ne9t" class="text-9"></div><div id="ne9v" class="text-9"></div><div><br id="ne9b"></div>
-                     <div id="ne6t" class="text-9"></div><div id="ne6v" class="text-9"></div><div><br id="ne6b"></div>
-                    <div id="ne7t" class="text-9"></div><div id="ne7v" class="text-9"></div><div><br id="ne7b"></div>
-                    <div id="ne8t" class="text-9"></div><div id="ne8v" class="text-9"></div><div><br id="ne8b"></div>
-                    <div id="ne10t" class="text-9"></div><div id="ne10v" class="text-9"></div><div><br id="ne10b"></div>
+                    <div class="text-9"><?php echo strIdx( 596 );?>:</div><div id="ne1v" class="text-9"></div><div><br id="ne1b"></div>
+                    <div class="text-9"><?php echo strIdx( 597 );?>:</div><div id="ne2v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 598 );?>:</div><div id="ne3v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 599 );?>:</div><div id="ne4v" class="text-9"></div><div><br id="ne4b"></div>
+                    <div class="text-9"><?php echo strIdx( 600 );?>:</div><div id="ne5v" class="text-9"></div><div><br id="ne5b"></div>
+                    <div class="text-9"><?php echo strIdx( 601 );?>:</div><div id="ne9v" class="text-9"></div><div><br id="ne9b"></div>
+                    <div class="text-9"><?php echo strIdx( 602 );?>:</div><div id="ne6v" class="text-9"></div><div><br id="ne6b"></div>
+                    <div class="text-9"><?php echo strIdx( 603 );?>:</div><div id="ne7v" class="text-9"></div><div><br id="ne7b"></div>
+                    <div class="text-9"><?php echo strIdx( 604 );?>:</div><div id="ne8v" class="text-9"></div><div><br id="ne8b"></div>
+                    <div class="text-9"><?php echo strIdx( 605 );?>:</div><div id="ne10v" class="text-9"></div><div><br id="ne10b"></div>
                  </div>
-                 
+
                  <br>
                  <div class="frame-2-top">
-                    <span class="text-2">slimme meter</span>
+                    <span class="text-2"><?php echo strIdx( 549);?></span>
                     <div title="<?php echo strIdx( 98 );?>" class="pos-43">
                         <button onclick="copyClipboard('slimmemeter')" class="input-4 pos-31 cursor-pointer">
-                            <i class="color-menu fas fa-clipboard"></i>&nbsp;<span class="color-menu">clipboard</span>
+                            <i class="color-menu fas fa-clipboard"></i>&nbsp;<span class="color-menu"><?php echo strIdx( 550 );?></span>
                         </button>
                    </div>
                 </div>
@@ -955,32 +906,34 @@ $(function () {
               <div class="pos-15">
                  
                  <div class="frame-2-top">
-                    <span class="text-2">P1 poort status</span>
+
+                    <div class="text-2 content-wrapper"><?php echo strIdx( 539 )?>&nbsp;</div>
+
+                    <div class="content-wrapper" title="geluid uit" onclick="soundOn()" id="sound_off" style="display:none">
+                            <span class="fa-layers fa-fw fa-2x color-menu cursor-pointer">
+                                <i class="fas fa-ban"></i>
+                                <i class="fas fa-volume-up color-error" data-fa-transform="shrink-6 right-0"></i>
+                            </span>
+                    </div>
+
+                    <div class="content-wrapper"title="geluid aan" onclick="soundOff()" id="sound_on" style="display:none">
+                            <span class="fa-layers fa-fw fa-2x color-menu cursor-pointer">
+                                <i class="fas fa-volume-up" data-fa-transform="shrink-0 right-2"></i>
+                            </span>
+                    </div>
+
                 </div>
                   <div class="frame-2-bot">
                       <div class="pad-11" id="p1status" title="<?php echo strIdx(2);?>">
                         
                         <div style="display:none" id="serial_ok" >
-                            <label  class="float-left text-11" >&nbsp;&nbsp;&nbsp;in orde&nbsp;</label>
-                            <i      class="float-left color-ok fa fa-2x fa-check-square" ></i>
+                            <label  class="text-11" ><?php echo strIdx( 540 );?>&nbsp;</label> 
+                            <i      class="color-ok fa fa-2x fa-check-square" ></i>
                         </div>
                         
                         <div style="display:none" id="serial_nok">
-                            <label class="float-left text-11" >geen data&nbsp;</label>
-                            <i     class="float-left color-error fa fa-2x fa-exclamation-triangle"></i>
-                        </div>
-
-                        <div title="geluid uit" onclick="soundOn()" id="sound_off" style="display:none">
-                            <span class="fa-layers fa-fw fa-2x color-menu cursor-pointer">
-                                <i class="fas fa-ban"></i>
-                                <i class="fas fa-volume-up color-error" data-fa-transform="shrink-6 right-0"></i>
-                            </span>
-                        </div>
-
-                        <div title="geluid aan" onclick="soundOff()" id="sound_on" style="display:none">
-                            <span class="fa-layers fa-fw fa-2x color-menu cursor-pointer">
-                                <i class="fas fa-volume-up" data-fa-transform="shrink-0 right-2"></i>
-                            </span>
+                            <label class="text-11"><?php echo strIdx( 541 );?>&nbsp;</label>
+                            <i     class="color-error fa fa-2x fa-exclamation-triangle"></i>
                         </div>
 
                     </div>
@@ -988,34 +941,32 @@ $(function () {
                   <br>
                  
                   <div class="frame-2-top">
-                    <span class="text-2">CPU belasting</span>
+                    <span class="text-2"><?php echo strIdx( 542 );?></span>
                 </div>
                   <div class="frame-2-bot">
                       <div id="cpuload"></div>
                   </div>
                 <br>
                 <div class="frame-2-top">
-                    <span class="text-2">CPU temperatuur</span>
+                    <span class="text-2"><?php echo strIdx( 543 );?></span>
                 </div>
                   <div class="frame-2-bot">
                       <div id="cputemp"></div>
                   </div>
                 <br>
                   <div class="frame-2-top">
-                    <span class="text-2">database belasting</span>
+                    <span class="text-2"><?php echo strIdx( 544 );?></span>
                 </div>
                   <div class="frame-2-bot">
                       <div id="ramdiskload"></div>
                   </div>
                   <br>
                   <div class="frame-2-top">
-                    <span class="text-2">geheugen belasting</span>
+                    <span class="text-2"><?php echo strIdx( 545 );?></span>
                 </div>
                   <div class="frame-2-bot">
                       <div id="ramload"></div>
-                  </div>        
-                      
-                      
+                  </div>
               </div>
         </div>
     </div>

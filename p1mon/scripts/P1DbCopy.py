@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1DbCopy.py
+# run manual with ./P1DbCopy
 
 import argparse
 import const
@@ -47,10 +47,10 @@ def Main(argv):
 
     args = parser.parse_args()
 
-    #print ( args )
+    # print ( args )
     # single file copy 
     if args.sourcefile != None and args.destinationfolder != None:
-        flog.debug(inspect.stack()[0][3]+": single file copy.")
+        flog.info(inspect.stack()[0][3]+": single file copy.")
         copyFile( args.sourcefile, args.destinationfolder , args.forcecopy)
         return
 
@@ -60,14 +60,14 @@ def Main(argv):
 
     #watermeter ram to disk copy
     if args.watermeter2disk == True:
-        flog.debug(inspect.stack()[0][3]+": watermeter bestand naar disk.")
+        flog.info(inspect.stack()[0][3]+": watermeter bestand naar disk.")
         makeBackupFileSet( diskPathByFilename( const.FILE_DB_WATERMETERV2 ) )
         copyFile( const.FILE_DB_WATERMETERV2 , const.DIR_FILEDISK, args.forcecopy )
         return
 
     #powerproduction to ram to disk copy
     if args.powerproduction2disk == True:
-        flog.debug(inspect.stack()[0][3]+": kWh eigen levering bestand naar disk.")
+        flog.info(inspect.stack()[0][3]+": kWh eigen levering bestand naar disk.")
         makeBackupFileSet( diskPathByFilename( const.FILE_DB_POWERPRODUCTION) )
         copyFile( const.FILE_DB_POWERPRODUCTION , const.DIR_FILEDISK, args.forcecopy )
         return
@@ -82,14 +82,14 @@ def Main(argv):
 
     #temperature to ram to disk copy
     if args.temperature2disk == True:
-        flog.debug(inspect.stack()[0][3]+": temperatuur bestand naar disk.")
+        flog.info(inspect.stack()[0][3]+": temperatuur bestand naar disk.")
         makeBackupFileSet( diskPathByFilename( const.FILE_DB_TEMPERATUUR_FILENAME ) )
         copyFile( const.FILE_DB_TEMPERATUUR_FILENAME , const.DIR_FILEDISK, args.forcecopy)
         return
 
     #serial to ram to disk copy
     if args.serialcopy2disk == True:
-        flog.debug(inspect.stack()[0][3]+": serialcopy2disk.")
+        flog.info(inspect.stack()[0][3]+": serialcopy2disk.")
         #print ( 'serialcopy2disk' )
         #print ( const.FILE_DB_E_FILENAME )
         #print ( const.DIR_FILEDISK )
@@ -99,7 +99,7 @@ def Main(argv):
 
     #all to ram to disk copy
     if args.allcopy2ram == True:
-        flog.debug(inspect.stack()[0][3]+": allcopy2ram")
+        flog.info(inspect.stack()[0][3]+": allcopy2ram")
         listCopy( const.DIR_FILEDISK, const.DIR_RAMDISK, filelist ,args.forcecopy)
         return
 
@@ -109,19 +109,19 @@ def Main(argv):
 
     #all to disk to ram copy
     if args.allcopy2disk == True:
-        flog.debug(inspect.stack()[0][3]+": allcopy2disk")
+        flog.info(inspect.stack()[0][3]+": allcopy2disk")
         listCopy( const.DIR_RAMDISK, const.DIR_FILEDISK, filelist ,args.forcecopy)
         return
 
     # watermeter disk to ram copy
     if args.watermeter2ram == True:
-        flog.debug(inspect.stack()[0][3]+": watermeter bestand naar ram.")
+        flog.info(inspect.stack()[0][3]+": watermeter bestand naar ram.")
         copyFile( diskPathByFilename( const.FILE_DB_WATERMETERV2) , const.DIR_RAMDISK, args.forcecopy )
         return
     
      # watermeter disk to ram copy
     if args.powerproduction2ram == True:
-        flog.debug(inspect.stack()[0][3]+": kWh eigen levering bestand naar ram.")
+        flog.info(inspect.stack()[0][3]+": kWh eigen levering bestand naar ram.")
         copyFile( diskPathByFilename( const.FILE_DB_POWERPRODUCTION ) , const.DIR_RAMDISK, args.forcecopy )
         return
 
@@ -183,7 +183,7 @@ def diskPathByFilename( filename ):
     _path,tail = os.path.split( filename )
     return const.DIR_FILEDISK + tail
 
-def listCopy(sourcefolder , destinationfolder, filelist, forcecopy):
+def listCopy( sourcefolder , destinationfolder, filelist, forcecopy ):
     # only make an back=up version of the file when copying to disk
     if destinationfolder == const.DIR_FILEDISK:
          for filename in filelist:

@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(19) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor historie dag</title>
+<title>P1-monitor <?php echo strIdx( 130 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -30,6 +31,12 @@ if ( checkDisplayIsActive(19) == false) { return; }
 
 <script>
 //var seriesOptions   = [];
+
+const text_days     = "<?php echo strIdx( 122 );?>";
+const text_week     = "<?php echo strIdx( 144 );?>";
+const text_month    = "<?php echo strIdx( 131 );?>";
+const text_months   = "<?php echo strIdx( 123 );?>";
+
 var recordsLoaded   = 0;
 var initloadtimer;
 var mins            = 1;  
@@ -37,7 +44,7 @@ var secs            = mins * 60;
 var currentSeconds  = 0;
 var currentMinutes  = 0;
 var Gselected       = 0;
-var GselectText     = ['1 week','14 dagen','1 maand','2 maanden']; // #PARAMETER
+var GselectText     = ['1 '+text_week ,'14 '+text_days,'1 '+text_month,'2 '+text_months ]; // #PARAMETER
 var GseriesVisibilty= [true,true,true,true];
 var GverbrData      = [];
 var GgelvrData      = [];
@@ -64,7 +71,7 @@ function readJsonApiHistoryDay( cnt ){
         Granges.length      = 0;
         Gaverages.length    = 0;
 
-        for (var j = jsondata.length; j > 0; j--){    
+        for (var j = jsondata.length; j > 0; j--){
             item    = jsondata[ j-1 ];
             item[1] = item[1] * 1000; // highchart likes millisecs.
             GverbrData.push ( [item[1], item[6] ]);
@@ -101,7 +108,6 @@ function readJsonApiWeatherHistoryDay( cnt ){
       }
    });
 }
-
 
 /* preload */
 //readJsonApiHistoryDay ( maxrecords )
@@ -254,8 +260,11 @@ function createKwhChart() {
             maxRange:       61 * 24 * 3600000, // PARAMETER
             type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                hour: '%a.<br>%H:%M'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
             lineColor: '#6E797C',
             lineWidth: 1
@@ -327,34 +336,37 @@ function createKwhChart() {
                     }
 
                     if ( $('#KwhChart').highcharts().series[0].visible === true ) {
-                        s += '<br/><span style="color: #F2BA0F;">verbruikt:&nbsp;</span>' + Pverbruik.toFixed(3) + " kWh";
+                        s += '<br/><span style="color: #F2BA0F;"><?php echo strIdx( 359 )?>:&nbsp;</span>' + Pverbruik.toFixed(3) + " kWh";
 
                     }
                     if ( $('#KwhChart').highcharts().series[1].visible === true ) {
-                        s += '<br/><span style="color: #98D023;">geleverd:&nbsp;</span>' + Pgeleverd.toFixed(3) + " kWh";;
+                        s += '<br/><span style="color: #98D023;"><?php echo strIdx( 360 )?>:&nbsp;</span>' + Pgeleverd.toFixed(3) + " kWh";;
                     }
                     if ( $('#KwhChart').highcharts().series[2].visible === true ) {
                         if  ( parseFloat( Pnetto ) == 0 ) {
-                            s += '<br/><span style="color: black">verbruik en levering gelijk.</span>'
+                            s += '<br/><span style="color: black"><?php echo strIdx( 420 )?>.</span>'
                         } 
                         if  ( parseFloat( Pnetto ) < 0 ) {
-                            s += '<br/><span style="color: black">netto geleverd: </span>' + ( Pnetto * -1).toFixed(3) + " kWh";
+                            s += '<br/><span style="color: black"><?php echo strIdx( 421 )?>: </span>' + ( Pnetto * -1).toFixed(3) + " kWh";
                         }
                         if  (parseFloat (Pnetto)  > 0 ) {
-                            s += '<br/><span style="color: black">netto verbruikt: </span>' + Pnetto.toFixed(3) + " kWh";
+                            s += '<br/><span style="color: black"><?php echo strIdx( 422 )?>: </span>' + Pnetto.toFixed(3) + " kWh";
                         }
                     }
+
                     if ( $('#KwhChart').highcharts().series[3].visible === true ) {
                         if ( Pmax_temp != null ) {
-                            s += '<br/><span style="color: ' + max_temp_color + '">maximum temperatuur: </span>'    + Pmax_temp.toFixed(1) + " °C";
+                            s += '<br/><span style="color: ' + max_temp_color + '"><?php echo strIdx( 136 )?>: </span>'    + Pmax_temp.toFixed(1) + " °C";
                         }
                         if ( Pavg_temp != null ) {
-                            s += '<br/><span style="color: ' + avg_temp_color + '">gemiddelde temperatuur: </span>' + Pavg_temp.toFixed(1) + " °C";
+                            s += '<br/><span style="color: ' + avg_temp_color + '"><?php echo strIdx( 137 )?>: </span>' + Pavg_temp.toFixed(1) + " °C";
                         }
                         if ( Pmin_temp != null ) {
-                            s += '<br/><span style="color: ' + min_temp_color + '">minimum temperatuur: </span>'    + Pmin_temp.toFixed(1) + " °C";
+                            s += '<br/><span style="color: ' + min_temp_color + '"><?php echo strIdx( 138 )?>: </span>'    + Pmin_temp.toFixed(1) + " °C";
                         }
                     }
+
+
               
                 return s;
             },
@@ -370,7 +382,7 @@ function createKwhChart() {
                     maxRange:       365 * 24 * 3600000,
                     dateTimeLabelFormats: {
                         day: '%d %B'
-                    }    
+                    }
                 },
                 enabled: true,
                 outlineColor: '#384042',
@@ -383,20 +395,19 @@ function createKwhChart() {
                     color: '#10D0E7'
                 }
             },
-
             series: [ 
-            {
-                yAxis: 0,
-                id: 'verbruik',
-                visible: GseriesVisibilty[0],
-                name: 'kWh verbruikt',
-                color: '#F2BA0F',
-                data: GverbrData 
+                {
+                    yAxis: 0,
+                    id: 'verbruik',
+                    visible: GseriesVisibilty[0],
+                    name: '<?php echo strIdx( 416 )?>',
+                    color: '#F2BA0F',
+                    data: GverbrData 
                 },{
                     yAxis: 0,
                     id: 'geleverd',
                     visible: GseriesVisibilty[1],
-                    name: 'kWh geleverd',
+                    name: '<?php echo strIdx( 417 )?>',
                     color: '#98D023',
                     data: GgelvrData
                 },{
@@ -405,7 +416,7 @@ function createKwhChart() {
                     visible: GseriesVisibilty[2],
                     type: 'spline', 
                     color: 'black',
-                    name: 'Netto kWh',
+                    name: '<?php echo strIdx( 419 )?>',
                     data: GnettoData,
                     dashStyle: 'ShortDashDotDot',
                     lineWidth: 1
@@ -414,7 +425,7 @@ function createKwhChart() {
                     visible: GseriesVisibilty[3],
                     showInNavigator: true,
                     id: 'temperatuur',
-                    name: 'Temperatuur',
+                    name: '<?php echo strIdx( 139 )?>',
                     data: Gaverages,
                     type: 'spline',
                     zIndex: 2,
@@ -448,14 +459,14 @@ function createKwhChart() {
             ],
 
             lang: {
-                noData: "Geen gegevens beschikbaar."
+                noData: "<?php echo ucfirst(strIdx( 425 ))?>"
             },
             noData: {
                 style: { 
-                    fontFamily: 'robotomedium',   
-                    fontWeight: 'bold',     
+                    fontFamily: 'robotomedium',
+                    fontWeight: 'bold',
                     fontSize: '25px',
-                    color: '#10D0E7'        
+                    color: '#10D0E7'
                 }
             }        
   });
@@ -519,10 +530,12 @@ $(function() {
     }
 
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
     secs = 0;
@@ -552,15 +565,15 @@ $(function() {
     </div> 
     <div class="mid-content-2 pad-13">
     <!-- links -->
-    	<div class="frame-2-top">
-    		<span class="text-2">dagen (kWh)</span>
-    	</div>
-    	<div class="frame-2-bot"> 
-    	<div id="KwhChart" style="width:100%; height:480px;"></div>	
-    	</div>
+        <div class="frame-2-top">
+            <span class="text-2"><?php echo strIdx( 122 )?> (kWh)</span>
+        </div>
+        <div class="frame-2-bot"> 
+        <div id="KwhChart" style="width:100%; height:480px;"></div>	
+        </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 )?>" height="15" width="128"></div>
 
 </body>
 </html>

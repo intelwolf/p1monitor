@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1Db.py
+# run manual with ./P1Db.py
 
 import const
 import inspect
@@ -59,7 +59,7 @@ def Main():
 
     DiskRestore()
 
-    # open van status database      
+    # open van status database
     try:    
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
     except Exception as e:
@@ -75,7 +75,7 @@ def Main():
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_SERIAL_TAB+" succesvol geopend.")
 
-    # open van config database      
+    # open van config database
     try:
         config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
     except Exception as e:
@@ -502,8 +502,7 @@ def backupFile(filename):
 def backupData():
     #setFileFlags()
     flog.debug(inspect.stack()[0][3]+": Gestart")
-    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2disk --forcecopy")
-    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2disk --forcecopy" # 1.8.0
+    cmd = "/p1mon/scripts/P1DbCopy --allcopy2disk --forcecopy" # 1.8.0
     process_lib.run_process( 
         cms_str = cmd,
         use_shell=True,
@@ -516,8 +515,7 @@ def backupData():
     flog.debug(inspect.stack()[0][3]+": Gereed")
 
 def DiskRestore():
-    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
-    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2ram" # 1.8.0
+    cmd = "/p1mon/scripts/P1DbCopy --allcopy2ram" # 1.8.0
     process_lib.run_process( 
         cms_str = cmd,
         use_shell=True,

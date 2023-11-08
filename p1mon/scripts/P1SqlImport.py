@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SqlImport.py
+# run manual with ./P1SqlImport
 import argparse
 import const
 import crontab_lib
@@ -303,7 +303,7 @@ def Main(argv):
     setSoftwareVersionInformation()
 
     msgToInfoLogAndStatusFile( 'WiFi wordt aangepast.' )
-    cmd = "sudo /p1mon/scripts/pythonlaunch.sh P1SetWifi.py" # 1.8.0 upgrade
+    cmd = "sudo /p1mon/scripts/P1SetWifi"
     r = process_lib.run_process( 
         cms_str = cmd,
         use_shell=True,
@@ -337,7 +337,7 @@ def Main(argv):
 
     #make sure that all is copied to disk
     msgToInfoLogAndStatusFile( "Databases worden van RAM naar het SDHC kaartje geschreven." )
-    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2disk --forcecopy" # 1.8.0 upgrade
+    cmd = "/p1mon/scripts/P1DbCopy --allcopy2disk --forcecopy" # 1.8.0 upgrade
     process_lib.run_process( 
         cms_str = cmd,
         use_shell=True,

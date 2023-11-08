@@ -27,7 +27,7 @@ Type=simple
 StandardOutput=inherit
 StandardError=inherit
 ExecStart=sudo /usr/bin/socat -T60 pty,link=###SOCATDEVICE##,rawer,group-late=dialout,mode=660 tcp:###SOCATREMOTEIP###:###SOCATREMOTEPORT###,retry=forever,interval=30
-ExecStartPost=-/p1mon/scripts/pythonlaunch.sh P1SocatConfig.py --succestimestamp 2>&1 >/dev/null
+ExecStartPost=-/p1mon/scripts/P1SocatConfig --succestimestamp 2>&1 >/dev/null
 Restart=always
 RestartSec=10s
 

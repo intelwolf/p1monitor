@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1NginxConfig.py
+# run manual with ./P1NginxConfig
 
 import argparse
 import base64
@@ -660,8 +660,7 @@ def set_cert_auto_renew( mode='on' , flog=None ):
 
     if mode == 'on':
         try:
-            #job = cron.new(command='/p1mon/scripts/P1NginxConfig.py --renewcerts >/dev/null 2>&1', comment=LETSENCRYPY_TAG)
-            job = cron.new(command='/p1mon/scripts/pythonlaunch.sh P1NginxConfig.py --renewcerts >/dev/null 2>&1', comment=LETSENCRYPY_TAG)
+            job = cron.new(command='/p1mon/scripts/P1NginxConfig --renewcerts >/dev/null 2>&1', comment=LETSENCRYPY_TAG)
             # be nice to LetsEncrypt and not DDOS with P1 monitor.
             hour = random.randint(0,6)
             min  = random.randint(0,59)

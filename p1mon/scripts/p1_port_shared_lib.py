@@ -24,17 +24,20 @@ import process_lib
 class P1PortDataNotification():
     
     def __init__( self, statusdb=None, configdb=None, flog=None ):
-        self.statusdb               = statusdb
-        self.configdb               = configdb
-        self.did_send_data          = False
-        self.flog                   = flog
+        self.statusdb                       = statusdb
+        self.configdb                       = configdb
+        self.did_send_data                  = False
+        self.flog                           = flog
+        self.email_timeout_user_setting     = 30
 
     def run( self ):
 
+        FUNCTION_TAG = __class__.__name__ + "." + __name__ + "."+ inspect.currentframe().f_code.co_name
+
         try:
-            _id, on, _label = self.configdb.strget( 175, self.flog )
+            _id, on, _label = self.configdb.strget( 73, self.flog )
             if int(on) != 1:
-                self.flog.debug( __class__.__name__ + ": email voor controle op P1 data staat uit, geen actie.")  
+                self.flog.debug( __class__.__name__ + ": email voor controle op P1 data staat uit, geen actie.")
                 return 
         except:
             return
@@ -44,7 +47,7 @@ class P1PortDataNotification():
             # construct subject.
             _id, subject, _label = self.configdb.strget( 69, self.flog )
             if len( subject) < 1:
-                subject =  const.DEFAULT_EMAIL_NOTIFICATION
+                subject = const.DEFAULT_EMAIL_NOTIFICATION
 
             # get time difference
             try:
@@ -63,26 +66,36 @@ class P1PortDataNotification():
 
             self.flog.debug( __class__.__name__ + ": p1_data_is_ok = " + p1_data_is_ok + " self.did_send_data = " +  str( self.did_send_data ) )
 
+            # read global email timeout
+            try:
+                # read treshold value 
+                _id, timeout_str, _label = self.configdb.strget( 72, self.flog )
+                timeout= int( timeout_str )
+                self.email_timeout_user_setting = timeout
+                self.flog.debug( FUNCTION_TAG + ": email time out is gezet op " + str( self.email_timeout_user_setting ) )
+            except:
+                self.flog.warning( FUNCTION_TAG + ": onverwachte fout " + str(e) )
+
+
             # P1 data is NOT ok
             if int ( p1_data_is_ok ) == 0 and self.did_send_data == False:
                 self.flog.debug( __class__.__name__ + ": P1 data ontbreekt. " )
-                subject_str = ' -subject "' + subject + ' (slimme meter data niet ontvangen)."'
-                messagetext = ' -msgtext "Data uit de slimme meter komt niet meer binnen.\n' +  timestring + ' Laatste slimme meter telegram ' + str( delta_time ) + ' seconden geleden ontvangen."'
-                messagehtml = ' -msghtml "<p>Data uit de slimme meter komt niet meer binnen.</p><p>' + timestring + ': Laatste slimme meter telegram <b>' + str(delta_time)+'</b> seconden geleden ontvangen.</p>"'
-                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                #    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data ontbreekt is gefaald." )
-                #else:
-                #    self.flog.warning(inspect.stack()[0][3]+" email verstuurd dat er geen P1 data wordt ontvangen in de afgelopen " + str( delta_time ) + " seconden." )
-                #    self.did_send_data = True
 
-                #cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py " + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' #180 upgrade
-                cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                timeout      = ' -time "'    + str( self.email_timeout_user_setting ) + '"'
+                subject_str  = ' -subject "' + subject + ' (slimme meter data niet ontvangen)."'
+                message_text = ' -msgtext "Data uit de slimme meter komt niet meer binnen.\n' +  timestring + ' Laatste slimme meter telegram ' + str( delta_time ) + ' seconden geleden ontvangen."'
+                message_html = ' -msghtml "<p>Data uit de slimme meter komt niet meer binnen.</p><p>' + timestring + ': Laatste slimme meter telegram <b>' + str(delta_time)+'</b> seconden geleden ontvangen.</p>"'
 
+                #cmd = "/p1mon/scripts/P1SmtpCopy '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                cmd = "/p1mon/scripts/P1SmtpCopy '" + timeout + subject_str + message_text + message_html + "' >/dev/null 2>&1"
+                self.flog.debug( FUNCTION_TAG + ": cmd  = " + str( cmd ) )
+                
                 r = process_lib.run_process( 
                     cms_str = cmd,
                     use_shell=True,
                     give_return_value=True,
-                    flog=self.flog 
+                    flog=self.flog,
+                    timeout=self.email_timeout_user_setting
                     )
                 if ( r[2] ) > 0:
                      self.flog.error( __class__.__name__ + " email notificatie P1 data ontbreekt is gefaald." )
@@ -96,13 +109,8 @@ class P1PortDataNotification():
                 subject_str = ' -subject "' + subject + ' (slimme meter data ontvangen.)."'
                 messagetext = ' -msgtext "Data uit de slimme meter komt binnen.\n' + timestring + ' Laatste slimme meter telegram ' + str( delta_time )+' seconden geleden ontvangen."'
                 messagehtml = ' -msghtml "<p>Data uit de slimme meter komt weer binnen.</p><p>' + timestring + ': Laatste slimme meter telegram <b>' + str(delta_time) +'</b> seconden geleden ontvangen.</p>"'
-                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                #    self.flog.error( inspect.stack()[0][3]+" email notificatie P1 data werkt weer is gefaald." )
-                # else:
-                #    self.flog.info( inspect.stack()[0][3]+" P1 data komt weer binnen, email verstuurd." )
-                #    self.did_send_data = False
-                #cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py " + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' #180 upgrade
-                cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                
+                cmd = "/p1mon/scripts/P1SmtpCopy '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
                 r = process_lib.run_process( 
                     cms_str = cmd,
                     use_shell=True,
@@ -488,8 +496,7 @@ def record_sanity_check( data_set=None, status=None, flog=None ):
 # restore data to ram from disk                             #
 #############################################################
 def disk_restore_from_disk_to_ram(flog=None):
-    #os.system("/p1mon/scripts/P1DbCopy.py --allcopy2ram")
-    cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --allcopy2ram" #180 upgrade
+    cmd = "/p1mon/scripts/P1DbCopy --allcopy2ram" #180 upgrade
     process_lib.run_process( 
         cms_str = cmd,
         use_shell=True,
@@ -509,8 +516,7 @@ def backup_data_to_disk_by_timestamp( statusdb=None, flog=None, minute_mod=15 ):
         file_sec_delta = util.file_delta_timestamp( const.FILE_DB_E_FILENAME ,const.DIR_FILEDISK )
         
         if file_sec_delta > 60  or file_sec_delta == -1:
-            #os.system("/p1mon/scripts/P1DbCopy.py --serialcopy2disk --forcecopy")
-            cmd = "/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --serialcopy2disk --forcecopy" #180 upgrade
+            cmd = "/p1mon/scripts/P1DbCopy --serialcopy2disk --forcecopy" #180 upgrade
             process_lib.run_process( 
                 cms_str = cmd,
                 use_shell=True,
@@ -709,10 +715,10 @@ def set_peak_kw_value(data_set=None, dbstatus=None, flog=None ):
             #print ("#2",  timestamp )
             #print ("#3",  str(data_set['peak_month_peak_160_ts']))
 
-            if value != str(data_set['peak_month_peak_160']) or timestamp != telegram_timestr_conversion( p1_telgram=str(data_set['peak_month_peak_160_ts'])):
+            if value != str(data_set['peak_month_peak_160']) or timestamp != telegram_timestr_conversion( p1_telegram=str(data_set['peak_month_peak_160_ts'])):
                 #print("1.6.0 update")
                 dbstatus.strset( str(data_set['peak_month_peak_160']) ,34 ,flog )
-                dbstatus.strset( telegram_timestr_conversion( p1_telgram=str(data_set['peak_month_peak_160_ts']), flog=flog ) ,35 ,flog )
+                dbstatus.strset( telegram_timestr_conversion( p1_telegram=str(data_set['peak_month_peak_160_ts']), flog=flog ) ,35 ,flog )
 
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": peak waarde update gefaald. Melding = "+str(e.args[0]) )
@@ -721,9 +727,9 @@ def set_peak_kw_value(data_set=None, dbstatus=None, flog=None ):
 ############################################################
 # make standard timestring from P1 telegram timestring     #
 ############################################################
-def telegram_timestr_conversion( p1_telgram=None, flog=None ) -> str:
+def telegram_timestr_conversion( p1_telegram=None, flog=None ) -> str:
     try:
-        return p1_telgram[0:4] + "-" + p1_telgram[4:6] + "-" + p1_telgram[6:8] + " " + p1_telgram[8:10] + ":" + p1_telgram[10:12] + ":" + p1_telgram[12:14]
+        return "20" + p1_telegram[0:2] + "-" + p1_telegram[2:4] + "-" + p1_telegram[4:6] + " " + p1_telegram[6:8] + ":" + p1_telegram[8:10] + ":" + p1_telegram[10:12]
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": tijd conversie gefaald. Melding="+str(e.args[0]) )
         return ""

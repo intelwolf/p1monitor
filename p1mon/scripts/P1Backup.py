@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1Backup.py
+# run manual with ./P1Backup
 
 import argparse
 import const
@@ -65,14 +65,7 @@ def Main(argv):
     if int(parameter) == 1:
         flog.debug(inspect.stack()[0][3]+": export file wordt gemaakt.")
         file_tmp_id = str( util.getUtcTime() ) + "-" + systemid.getSystemId()
-        # cmd = "/p1mon/scripts/P1SqlExport.py -e " + file_tmp_id 
-        #flog.debug( inspect.stack()[0][3] + ": export commando is ->" + str(cmd ))
-        #retvalue = os.system("/p1mon/scripts/P1SqlExport.py -e " + file_tmp_id )
-        #if retvalue != 0:
-        #    flog.error(inspect.stack()[0][3]+": export van file gefaald, gestopt.")
-        #    sys.exit(3)
-
-        cmd = "/p1mon/scripts/pythonlaunch.sh P1SqlExport.py -e " + file_tmp_id  # 1.8.0 upgrade
+        cmd = "/p1mon/scripts/P1SqlExport -e " + file_tmp_id
         flog.debug( inspect.stack()[0][3] + ": export commando is ->" + str(cmd ))
 
         r = process_lib.run_process( 
@@ -124,12 +117,7 @@ def Main(argv):
     
     if do_ftp_backup == 1:
         flog.info(inspect.stack()[0][3]+": FTP backup gestart")
-        #retvalue = os.system("/p1mon/scripts/P1FtpCopy.py")
-        #if retvalue > 0:
-        #    flog.error(inspect.stack()[0][3]+": ftp backup gefaald, gestopt.")
-        #    sys.exit(5)
-
-        cmd = "/p1mon/scripts/pythonlaunch.sh P1FtpCopy.py" # 1.8.0 upgrade
+        cmd = "/p1mon/scripts/P1FtpCopy"
         flog.debug( inspect.stack()[0][3] + ": export commando is ->" + str(cmd ))
         r = process_lib.run_process( 
             cms_str = cmd,

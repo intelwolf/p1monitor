@@ -24,9 +24,11 @@ class VoltageMinMaxNotification():
         self.flog     = flog
         self.did_send_high_message = False
         self.did_send_low_message  = False
-        
+        self.email_timeout_user_setting = 30
         
     def run( self ):
+
+        FUNCTION_TAG = __class__.__name__ + "." + __name__ + "."+ inspect.currentframe().f_code.co_name
 
         try:
             _id, on, _label = self.configdb.strget( 175, self.flog )
@@ -63,6 +65,19 @@ class VoltageMinMaxNotification():
                     self.flog.debug( __class__.__name__ + ": SQL select bevat geen valide data, er wordt niets gedaan." )
                     return
 
+            # read global email timeout
+            try:
+                # read treshold value 
+                _id, timeout_str, _label = self.configdb.strget( 72, self.flog )
+                timeout= int( timeout_str )
+                self.email_timeout_user_setting = timeout
+                self.flog.debug( FUNCTION_TAG + ": email time out is gezet op " + str( self.email_timeout_user_setting ) )
+            except:
+                self.flog.warning( FUNCTION_TAG + ": onverwachte fout " + str(e) )
+
+            # set once it can be used muliply times
+            timeout = ' -time "'    + str( self.email_timeout_user_setting ) + '"'
+
             max_L1 = float(rec[0][0])
             max_L2 = float(rec[0][1])
             max_L3 = float(rec[0][2])
@@ -92,27 +107,22 @@ class VoltageMinMaxNotification():
                 l1_text = 'L1: ' + str(max_L1) + 'V'
                 l2_text = 'L2: ' + str(max_L2) + 'V'
                 l3_text = 'L3: ' + str(max_L3) + 'V'
-                upper_text = 'Ingestelde bovengrenswaarde: ' + str(v_max) + ' V'
+                upper_text  = 'Ingestelde bovengrenswaarde: ' + str(v_max) + ' V'
                 subject_str = ' -subject "' + subject + ' (bovengrens fase spanning bereikt)."'
-                messagetext = ' -msgtext "' + timestring + ': bovengrens van de spanning van een van de drie fasen bereikt.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + upper_text + '\n"'
-                messagehtml = ' -msghtml "<p>' + timestring + ': bovengrens van de spanning van een van de drie fasen bereikt.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + upper_text + '</p>"'
-                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                #    self.flog.error( inspect.stack()[0][3]+" email notificatie bovengrenswaarde gefaald(1)." )
-                #else:
-                #    self.did_send_high_message = True
-                #    self.flog.info( inspect.stack()[0][3] + ": bovengrens fase spanning bereikt (" + str( max_total ) + ") is groter dan de hoogste grenswaarde van " + str(v_max) )
-            
-                #./pythonlaunch.sh P1SmtpCopy.py '-subject "test2 wil" -msgtext "a b c"'
+                message_text = ' -msgtext "' + timestring + ': bovengrens van de spanning van een van de drie fasen bereikt.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + upper_text + '\n"'
+                message_html = ' -msghtml "<p>' + timestring + ': bovengrens van de spanning van een van de drie fasen bereikt.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + upper_text + '</p>"'
 
-                #cmd = '/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' # 2.0.0 upgrade
-                cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                #cmd = "/p1mon/scripts/P1SmtpCopy '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                cmd = "/p1mon/scripts/P1SmtpCopy '" + timeout + subject_str + message_text + message_html + "' >/dev/null 2>&1"
+                self.flog.debug( FUNCTION_TAG + ": cmd  = " + str( cmd ) )
 
                 self.flog.debug( __class__.__name__ + ": mail = " + cmd )
                 r = process_lib.run_process( 
                     cms_str = cmd,
                     use_shell=True,
                     give_return_value=True,
-                    flog=self.flog 
+                    flog=self.flog,
+                    timeout=self.email_timeout_user_setting
                 )
                 if r[2] > 0:
                      self.flog.error( __class__.__name__ + " email notificatie bovengrenswaarde gefaald(1)." )
@@ -129,27 +139,25 @@ class VoltageMinMaxNotification():
                 l3_text = 'L3: ' + str(max_L3) + 'V'
                 upper_text = 'Ingestelde bovengrenswaarde: ' + str(v_max) + ' V'
                 subject_str = ' -subject "' + subject + ' (bovengrens fase spanning opgeheven)."'
-                messagetext = ' -msgtext "' + timestring + ': bovengrens van de spanning van een van de drie fasen niet langer van toepassing.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + upper_text + '\n"'
-                messagehtml = ' -msghtml "<p>' + timestring + ': bovengrens van de spanning van een van de drie fasen niet langer van toepassing.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + upper_text + '</p>"'
-                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                #    self.flog.error( inspect.stack()[0][3]+" email notificatie bovengrenswaarde gefaald(2)." )
-                #else:
-                #    self.did_send_high_message = False
-                #    self.flog.info( inspect.stack()[0][3] + ": bovengrens fase spanning niet langer van toepassing (" + str( max_total ) + ") is kleiner dan de hoogste grenswaarde van " + str(v_max) )
+                message_text = ' -msgtext "' + timestring + ': bovengrens van de spanning van een van de drie fasen niet langer van toepassing.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + upper_text + '\n"'
+                message_html = ' -msghtml "<p>' + timestring + ': bovengrens van de spanning van een van de drie fasen niet langer van toepassing.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + upper_text + '</p>"'
 
-                cmd = '/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' # 2.0.0 upgrade
-                self.flog.debug( inspect.stack()[0][3] + ": mail = " + cmd )
+                #cmd = "/p1mon/scripts/P1SmtpCopy '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                cmd = "/p1mon/scripts/P1SmtpCopy '" + timeout + subject_str + message_text + message_html + "' >/dev/null 2>&1"
+                self.flog.debug( FUNCTION_TAG + ": cmd  = " + str( cmd ) )
+
                 r = process_lib.run_process( 
                     cms_str = cmd,
                     use_shell=True,
                     give_return_value=True,
-                    flog=self.flog 
+                    flog=self.flog,
+                    timeout=self.email_timeout_user_setting
                 )
                 if r[2] > 0:
-                    self.flog.error( inspect.stack()[0][3]+" email notificatie bovengrenswaarde gefaald(2)." )
+                    self.flog.error(  __class__.__name__ + " email notificatie bovengrenswaarde gefaald(2)." )
                 else:
                     self.did_send_high_message = False
-                    self.flog.info( inspect.stack()[0][3] + ": bovengrens fase spanning niet langer van toepassing (" + str( max_total ) + ") is kleiner dan de hoogste grenswaarde van " + str(v_max) )
+                    self.flog.info(  __class__.__name__ + ": bovengrens fase spanning niet langer van toepassing (" + str( max_total ) + ") is kleiner dan de hoogste grenswaarde van " + str(v_max) )
 
             # low threshold check 
             if min_total <= v_min and self.did_send_low_message == False:
@@ -157,24 +165,22 @@ class VoltageMinMaxNotification():
                 l1_text = 'L1: ' + str(min_L1) + 'V'
                 l2_text = 'L2: ' + str(min_L2) + 'V'
                 l3_text = 'L3: ' + str(min_L3) + 'V'
-                lower_text = 'Ingestelde ondergrenswaarde: ' + str(v_min) + ' V'
-                subject_str = ' -subject "' + subject + ' (ondergrens fase spanning bereikt)."'
-                messagetext = ' -msgtext "' + timestring + ': ondergrens van de spanning van een van de drie fasen bereikt.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + lower_text + '\n"'
-                messagehtml = ' -msghtml "<p>' + timestring + ': ondergrens van de spanning van een van de drie fasen bereikt.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + lower_text + '</p>"'
-                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                #    self.flog.error( inspect.stack()[0][3]+" email notificatie ondergrenswaarde gefaald(1)." )
-                #else:
-                #    self.did_send_low_message = True
-                #    self.flog.info( inspect.stack()[0][3] + ": ondergrens fase spanning bereikt (" + str( min_total ) + ") is kleiner dan de lage grenswaarde " + str(v_min) )
+                lower_text      = 'Ingestelde ondergrenswaarde: ' + str(v_min) + ' V'
+                subject_str  = ' -subject "' + subject + ' (ondergrens fase spanning bereikt)."'
+                message_text = ' -msgtext "' + timestring + ': ondergrens van de spanning van een van de drie fasen bereikt.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + lower_text + '\n"'
+                message_html = ' -msghtml "<p>' + timestring + ': ondergrens van de spanning van een van de drie fasen bereikt.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + lower_text + '</p>"'
+                
+                #cmd = "/p1mon/scripts/P1SmtpCopy '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                #self.flog.debug( __class__.__name__ + ": mail = " + cmd )
+                cmd = "/p1mon/scripts/P1SmtpCopy '" + timeout + subject_str + message_text + message_html + "' >/dev/null 2>&1"
+                self.flog.debug( FUNCTION_TAG + ": cmd  = " + str( cmd ) )
 
-                #cmd = '/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' # 2.0.0 upgrade
-                cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
-                self.flog.debug( __class__.__name__ + ": mail = " + cmd )
                 r = process_lib.run_process( 
                     cms_str = cmd,
                     use_shell=True,
                     give_return_value=True,
-                    flog=self.flog 
+                    flog=self.flog,
+                    timeout=self.email_timeout_user_setting
                 )
                 if r[2] > 0:
                      self.flog.error( __class__.__name__ + " email notificatie ondergrenswaarde gefaald(1)." )
@@ -182,30 +188,29 @@ class VoltageMinMaxNotification():
                     self.did_send_low_message = True
                     self.flog.info( __class__.__name__ + ": ondergrens fase spanning bereikt (" + str( min_total ) + ") is kleiner dan de lage grenswaarde " + str(v_min) )
 
-             # low threshold reset check 
+            # low threshold reset check 
             if min_total > v_min and self.did_send_low_message == True:
                 self.flog.debug( __class__.__name__ + ": SEND(4) min Lx waarden " + str( max_total ) + " zijn groter dan de laag grenswaarde van " + str(v_min) )
                 l1_text = 'L1: ' + str(min_L1) + 'V'
                 l2_text = 'L2: ' + str(min_L2) + 'V'
                 l3_text = 'L3: ' + str(min_L3) + 'V'
-                lower_text = 'Ingestelde ondergrenswaarde: ' + str(v_min) + ' V'
-                subject_str = ' -subject "' + subject + ' (ondergrens fase spanning opgeheven)."'
-                messagetext = ' -msgtext "' + timestring + ': ondergrens van de spanning van een van de drie fasen niet langer van toepassing.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + lower_text + '\n"'
-                messagehtml = ' -msghtml "<p>' + timestring + ': ondergrens van de spanning van een van de drie fasen fasen niet langer van toepassing.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + lower_text + '</p>"'
-                #if os.system( '/p1mon/scripts/P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' ) > 0:
-                #    self.flog.error( inspect.stack()[0][3]+" email notificatie ondergrenswaarde gefaald(1)." )
-                #else:
-                #    self.did_send_low_message = False
-                #    self.flog.info( inspect.stack()[0][3] + ": ondergrens van de spanning van een van de drie fasen fasen niet langer van toepassing (" + str( min_total ) + ") is groter dan de lage grenswaarde " + str(v_min) )
+                lower_text   = 'Ingestelde ondergrenswaarde: ' + str(v_min) + ' V'
+                subject_str  = ' -subject "' + subject + ' (ondergrens fase spanning opgeheven)."'
+                message_text = ' -msgtext "' + timestring + ': ondergrens van de spanning van een van de drie fasen niet langer van toepassing.\n' + l1_text  + '\n' + l2_text + '\n' +  l3_text + '\n' + lower_text + '\n"'
+                message_html = ' -msghtml "<p>' + timestring + ': ondergrens van de spanning van een van de drie fasen fasen niet langer van toepassing.</p><p>' + l1_text  + '<br>' + l2_text + '<br>' +  l3_text + '<br>' + lower_text + '</p>"'
+               
+                #cmd = "/p1mon/scripts/P1SmtpCopy '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
+                #self.flog.debug( __class__.__name__ + ": mail = " + cmd )
 
-                #cmd = '/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py ' + subject_str + messagetext + messagehtml + ' >/dev/null 2>&1' # 2.0.0 upgrade
-                cmd = "/p1mon/scripts/pythonlaunch.sh P1SmtpCopy.py '" + subject_str + messagetext + messagehtml + "' >/dev/null 2>&1"
-                self.flog.debug( __class__.__name__ + ": mail = " + cmd )
+                cmd = "/p1mon/scripts/P1SmtpCopy '" + timeout + subject_str + message_text + message_html + "' >/dev/null 2>&1"
+                self.flog.debug( FUNCTION_TAG + ": cmd  = " + str( cmd ) )
+
                 r = process_lib.run_process( 
                     cms_str = cmd,
                     use_shell=True,
                     give_return_value=True,
-                    flog=self.flog 
+                    flog=self.flog,
+                    timeout=self.email_timeout_user_setting
                 )
                 if r[2] > 0:
                      self.flog.error( __class__.__name__ + " email notificatie ondergrenswaarde gefaald(1)." )

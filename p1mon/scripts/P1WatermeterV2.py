@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1WatermeterV2.py
+# run manual with ./P1WatermeterV2
 
 import const
 import datetime
@@ -577,9 +577,8 @@ def pulsSimulator(probility = 0.2 ):
 ########################################################
 def backupData(): 
     flog.debug( inspect.stack()[0][3] + ": Gestart" )
-    # os.system("/p1mon/scripts/./P1DbCopy.py --watermeter2disk --forcecopy") 1.8.0 upgrade
     process_lib.run_process( 
-        cms_str = '/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --watermeter2disk --forcecopy',
+        cms_str = '/p1mon/scripts/P1DbCopy --watermeter2disk --forcecopy',
         use_shell=True,
         give_return_value=True,
         flog=flog
@@ -594,7 +593,7 @@ def backupData():
 def DiskRestore():
    #os.system("/p1mon/scripts/P1DbCopy.py --watermeter2ram") 1.8.0 upgrade
    process_lib.run_process( 
-        cms_str = '/p1mon/scripts/pythonlaunch.sh P1DbCopy.py --watermeter2ram',
+        cms_str = '/p1mon/scripts/P1DbCopy --watermeter2ram',
         use_shell=True,
         give_return_value=True,
         flog=flog

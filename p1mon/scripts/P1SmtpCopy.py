@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1SmtpCopy.py
+# run manual with ./P1SmtpCopy
 
 import argparse
 import base64

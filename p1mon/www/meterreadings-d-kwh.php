@@ -8,14 +8,14 @@ include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
 include_once '/p1mon/www/util/page_menu_header_meterreadings.php';
 include_once '/p1mon/www/util/textlib.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(62) == false) { return; }
 ?>
-<!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor historie dag meterstanden</title>
+<title>P1-monitor <?php echo strIdx( 517 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -31,6 +31,21 @@ if ( checkDisplayIsActive(62) == false) { return; }
 
 <script>
 "use strict"; 
+
+const text_week                 = "<?php echo strIdx( 144 );?>";
+const text_month                = "<?php echo strIdx( 131 );?>";
+const text_year                 = "<?php echo strIdx( 132 );?>";
+const text_total                = "<?php echo strIdx( 140 );?>";
+const text_low_consumption      = "<?php echo strIdx( 518 );?>";
+const text_high_consumption     = "<?php echo strIdx( 519 );?>";
+const text_total_consumed       = "<?php echo strIdx( 498 );?>";
+const text_net_low_produced     = "<?php echo strIdx( 520 );?>";
+const text_net_high_produced    = "<?php echo strIdx( 521 );?>";
+const text_net_total_produced   = "<?php echo strIdx( 522 );?>";
+const text_gross_low_produced   = "<?php echo strIdx( 523 );?>";
+const text_gross_high_produced  = "<?php echo strIdx( 524 );?>";
+const text_gross_total_produced = "<?php echo strIdx( 525 );?>";
+
 // change items with the marker #PARAMETER
 var consumptionKwhLow       = [];
 var consumptionKwhHigh      = [];
@@ -47,7 +62,7 @@ var seriesOptions       = [];
 var recordsLoaded       = 0;
 var initloadtimer;
 var Gselected           = 0;
-var GselectText         = [ '1 week','1 maand','1 jaar','totaal' ]; // #PARAMETER
+var GselectText         = [ '1 '+text_week ,'1 '+text_month,'1 '+text_year, text_total ]; // #PARAMETER
 var GseriesVisibilty    = [ true,true,true,true,true,true,true,true,true ];
 var mins                = 1;
 var secs                = mins * 60;
@@ -119,21 +134,21 @@ function createMeterReadingsChart() {
     Highcharts.stockChart('meterReadingChart', {
         exporting: { enabled: false },
         lang: {
-            noData: "Geen gegevens beschikbaar."
+            noData: "<?php echo ucfirst(strIdx( 425 ))?>"
         },
         noData: {
             style: { 
-                fontFamily: 'robotomedium',   
-                fontWeight: 'bold',     
+                fontFamily: 'robotomedium',
+                fontWeight: 'bold',
                 fontSize: '25px',
-                color: '#10D0E7'        
+                color: '#10D0E7'
             }
         },
         chart: {
             //ignoreHiddenSeries: false,
             style: {
-            fontFamily: 'robotomedium',
-            fontSize: '14px'
+                fontFamily: 'robotomedium',
+                fontSize: '14px'
             },
             backgroundColor: '#ffffff',
             borderWidth: 0
@@ -173,9 +188,11 @@ function createMeterReadingsChart() {
             minRange:       7  * 24 * 3600000,
             maxRange:       61 * 24 * 3600000,
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %b<br/>%Y',
-                hour: '%a.<br>%H:%M',
-                year: '%Y'
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: "%a.<br>%e %b.",
+                month: '%b.<br>%y',
+                year: '%y'
             },
             lineColor: '#6E797C',
             lineWidth: 1, 
@@ -224,41 +241,34 @@ function createMeterReadingsChart() {
             var d = this.points;
             
             for (var i=0,  tot=d.length; i < tot; i++) {
-                        
-                    if ( d[i].series.userOptions.name === 'dal verbruik' ) {
-                        s += '<br/><span style="color:#CEA731">Dal verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
-                            //console.log( d[i].y )
+
+                    if ( d[i].series.userOptions.id === 'dal_ver' ) {
+                        s += '<br/><span style="color:#CEA731">'+ text_low_consumption + ' : </span>' + d[i].y.toFixed(3) + " kWh";
                     }
-                    if ( d[i].series.userOptions.name === 'piek verbruik' ) {
-                        s += '<br/><span style="color:#FFC311">Piek verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
-                        //console.log( d[i].y )
+                    if ( d[i].series.userOptions.id === 'piek_ver' ) {
+                        s += '<br/><span style="color:#FFC311">' + text_high_consumption + ' : </span>' + d[i].y.toFixed(3) + " kWh";
                     }
-                    if ( d[i].series.userOptions.name === 'totaal verbruik' ) {
-                        s += '<br/><span style="color:#6E797C">Totaal verbruik: </span>' + d[i].y.toFixed(3) + " kWh";
-                        //console.log( d[i].y )
+                    if ( d[i].series.userOptions.id=== 'totaal_ver' ) {
+                        s += '<br/><span style="color:#6E797C">' + text_total_consumed + ' : </span>' + d[i].y.toFixed(3) + " kWh";
                     }
-                    if ( d[i].series.userOptions.name === 'netto dal geleverd' ) {
-                        s += '<br/><span style="color:#7FAD1D">Netto dal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                        //console.log( d[i].y )
+                    if ( d[i].series.userOptions.id === 'netto_dal_geleverd' ) {
+                        s += '<br/><span style="color:#7FAD1D">' + text_net_low_produced + ' : </span>' + d[i].y.toFixed(3) + " kWh";
                     }   
-                    if ( d[i].series.userOptions.name === 'netto piek geleverd' ) {
-                        s += '<br/><span style="color:#98D023">Netto piek geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                    if ( d[i].series.userOptions.id === 'netto_piek_geleverd' ) {
+                        s += '<br/><span style="color:#98D023">' + text_net_high_produced + ' : </span>' + d[i].y.toFixed(3) + " kWh";
+                    }
+                    if ( d[i].series.userOptions.id === 'netto_totaal_geleverd' ) {
+                        s += '<br/><span style="color:#6E797C">' + text_net_total_produced + ' : </span>' + d[i].y.toFixed(3) + " kWh";
+                    }
+                    if ( d[i].series.userOptions.id === 'bruto_dal_geleverd' ) {
+                        s += '<br/><span style="color:#7FAD1D">' + text_gross_low_produced + ' : </span>' + d[i].y.toFixed(3) + " kWh";
+                    }
+                    if ( d[i].series.userOptions.id === 'bruto_piek_geleverd' ) {
+                        s += '<br/><span style="color:#98D023">' + text_gross_high_produced + ' : </span>' + d[i].y.toFixed(3) + " kWh";
                         //console.log( d[i].y )
                     }
-                    if ( d[i].series.userOptions.name === 'netto totaal geleverd' ) {
-                        s += '<br/><span style="color:#6E797C">Netto totaal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                        //console.log( d[i].y )
-                    }
-                    if ( d[i].series.userOptions.name === 'bruto dal geleverd' ) {
-                        s += '<br/><span style="color:#7FAD1D">Bruto dal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                        //console.log( d[i].y )
-                    }    
-                    if ( d[i].series.userOptions.name === 'bruto piek geleverd' ) {
-                        s += '<br/><span style="color:#98D023">Bruto piek geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
-                        //console.log( d[i].y )
-                    }
-                    if ( d[i].series.userOptions.name === 'bruto totaal geleverd' ) {
-                        s += '<br/><span style="color:#6E797C">Bruto totaal geleverd: </span>' + d[i].y.toFixed(3) + " kWh";
+                    if ( d[i].series.userOptions.id === 'bruto_totaal_geleverd' ) {
+                        s += '<br/><span style="color:#6E797C">' + text_gross_total_produced + ': </span>' + d[i].y.toFixed(3) + " kWh";
                         //console.log( d[i].y )
                     }
             }
@@ -342,86 +352,95 @@ function createMeterReadingsChart() {
         itemDistance: 5
     },
     series: [ {
+            id: 'dal_ver',
             yAxis: 0,
             visible: GseriesVisibilty[0],
             showInNavigator: true,
-            name: 'dal verbruik',
+            name: text_low_consumption,
             type: 'spline',
             color: '#CEA731',
             data: consumptionKwhLow,
         },
         {
+            id: 'piek_ver',
             yAxis: 0,
             visible: GseriesVisibilty[1],
             showInNavigator: true,
-            name: 'piek verbruik',
+            name: text_high_consumption,
             type: 'spline',
             color: '#FFC311',
             data: consumptionKwhHigh,
         },
         {
+            id: 'totaal_ver',
             yAxis: 0,
             dashStyle: 'ShortDashDotDot',
             visible: GseriesVisibilty[2],
             showInNavigator: true,
-            name: 'totaal verbruik',
+            name: text_total_consumed,
             type: 'spline',
             color: '#E9B620',
             data: consumptionKwhTotal,
         },
         {
+            id: 'netto_dal_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[3],
             showInNavigator: true,
-            name: 'netto dal geleverd',
+            name: text_net_low_produced,
             type: 'spline',
             color: '#7FAD1D',
             data: productionKwhLow,
         },
         {
+            id: 'netto_piek_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[4],
             showInNavigator: true,
-            name: 'netto piek geleverd',
+            name: text_net_high_produced,
             type: 'spline',
             color: '#98D023',
             data: productionKwhHigh,
         },
         {
+            id: 'netto_totaal_geleverd',
             yAxis: 0,
             dashStyle: 'ShortDashDotDot',
             visible: GseriesVisibilty[5],
             showInNavigator: true,
-            name: 'netto totaal geleverd',
+            name: text_net_total_produced,
             type: 'spline',
             color: '#8ABD20',
             data: productionKwhTotal,
         },
         {
+            id: 'bruto_dal_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[6],
             showInNavigator: true,
-            name: 'bruto dal geleverd',
+            name: text_gross_low_produced,
             type: 'spline',
             color: '#7FAD1D',
             data: productionKwhLowGross,
             zIndex: 0,
         },
         {
+            id: 'bruto_piek_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[7],
             showInNavigator: true,
-            name: 'bruto piek geleverd',
+            name: text_gross_high_produced,
             type: 'spline',
             color: '#98D023',
             data: productionKwhHighGross,
         },
         {
+            id: 'bruto_totaal_geleverd',
             yAxis: 0,
             dashStyle: 'ShortDashDotDot',
             visible: GseriesVisibilty[8],
             showInNavigator: true,
-            name: 'bruto totaal geleverd',
+            name: text_gross_total_produced,
             type: 'spline',
             color: '#8ABD20',
             data: productionKwhHighGross,
@@ -505,29 +524,31 @@ function DataLoop() {
 }
 
 $(function() {
-  toLocalStorage('meterreadings-menu',window.location.pathname);
+    toLocalStorage('meterreadings-menu',window.location.pathname);
 
-  GseriesVisibilty[0] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhLow'));       // #PARAMETER
-  GseriesVisibilty[1] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhHigh'));      // #PARAMETER
-  GseriesVisibilty[2] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhTotal'));     // #PARAMETER
-  GseriesVisibilty[3] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhLow'));        // #PARAMETER
-  GseriesVisibilty[4] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhHigh'));       // #PARAMETER
-  GseriesVisibilty[5] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhTotal'));      // #PARAMETER
-  GseriesVisibilty[6] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhLowGross'));   // #PARAMETER
-  GseriesVisibilty[7] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhHighGross'));  // #PARAMETER
-  GseriesVisibilty[8] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhTotalGross')); // #PARAMETER
+    GseriesVisibilty[0] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhLow'));       // #PARAMETER
+    GseriesVisibilty[1] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhHigh'));      // #PARAMETER
+    GseriesVisibilty[2] = JSON.parse(getLocalStorage('meterreadings-d-consumptionKwhTotal'));     // #PARAMETER
+    GseriesVisibilty[3] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhLow'));        // #PARAMETER
+    GseriesVisibilty[4] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhHigh'));       // #PARAMETER
+    GseriesVisibilty[5] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhTotal'));      // #PARAMETER
+    GseriesVisibilty[6] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhLowGross'));   // #PARAMETER
+    GseriesVisibilty[7] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhHighGross'));  // #PARAMETER
+    GseriesVisibilty[8] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhTotalGross')); // #PARAMETER
 
-  Gselected = parseInt(getLocalStorage('select-meterreadings-d-kwh-index'),10); // #PARAMETER
+    Gselected = parseInt(getLocalStorage('select-meterreadings-d-kwh-index'),10); // #PARAMETER
 
-  Highcharts.setOptions({
-   global: {
-    useUTC: false
-    }
-  });
-  screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
-  secs = 0;
-  createMeterReadingsChart();
-  DataLoop();
+    Highcharts.setOptions({
+            global: {
+                useUTC: false
+            },
+            lang: <?php hc_language_json(); ?>
+    });
+
+    screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
+    secs = 0;
+    createMeterReadingsChart();
+    DataLoop();
 });
 
 </script>
@@ -554,14 +575,14 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">meterstanden per dag</span>
+            <span class="text-2"><?php echo strIdx( 112 )?></span>
         </div>
         <div class="frame-2-bot"> 
         <div id="meterReadingChart" style="width:100%; height:480px;"></div>
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 )?>" height="15" width="128"></div>
 
 </body>
 </html>

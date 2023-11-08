@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1GPIO.py
+# run manual with ./P1GPIO
 
 import const
 import datetime

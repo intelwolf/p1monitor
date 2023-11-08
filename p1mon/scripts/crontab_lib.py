@@ -68,8 +68,8 @@ def update_crontab_backup( flog=None ):
             flog.info(inspect.stack()[0][3]+": FTP backup staat uit, crontab wordt gewist")
             deleteJob( my_cron, FTP_BACKUP_CRONLABEL, flog=flog )
         else:
-            _id,parameter,_label = config_db.strget(37,flog)
-            flog.info(inspect.stack()[0][3]+": cron parameters uit config database="+parameter)
+            _id,parameter,_label = config_db.strget( 37, flog )
+            flog.info(inspect.stack()[0][3]+": cron parameters uit config database=" + parameter)
             parts = parameter.split(':')
             if len(parts) != 5:
                 msg = inspect.stack()[0][3] +": tijd velden niet correct, gestopt."
@@ -77,8 +77,8 @@ def update_crontab_backup( flog=None ):
 
             deleteJob( my_cron, FTP_BACKUP_CRONLABEL, flog=flog )
         try:
-            #job = my_cron.new(command='/p1mon/scripts/P1Backup.py >/dev/null 2>&1', comment=ftp_backup_cronlabel)
-            job = my_cron.new( command='/p1mon/scripts/pythonlaunch.sh P1Backup.py >/dev/null 2>&1', comment=FTP_BACKUP_CRONLABEL )
+
+            job = my_cron.new( command='/p1mon/scripts/P1Backup >/dev/null 2>&1', comment=FTP_BACKUP_CRONLABEL )
             job.setall( str(parts[0]), str(parts[1]), str(parts[2]), str(parts[3]), str(parts[4]))
             my_cron.write()
         except Exception as e:

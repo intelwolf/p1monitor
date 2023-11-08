@@ -7,14 +7,15 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(18) == false) { return; }
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor actueel gas verbruik</title>
+<title>P1-monitor <?php echo strIdx( 411 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -87,7 +88,6 @@ function readJsonApiHistoryDay(){
    });
 }
 
-
 function readJsonApiHistoryHour(){ 
     $.getScript( "/api/v1/powergas/hour?limit=4", function( data, textStatus, jqxhr ) {
       try {
@@ -154,7 +154,6 @@ function readJsonApiFinancial(){
     });
 }
 
-
 function createChartVerbruikGrafiek() {
     $("#gasMeterGrafiekVerbruik").highcharts({
     chart: {
@@ -181,7 +180,7 @@ function createChartVerbruikGrafiek() {
         },
         formatter: function () {
             var s = "<b>" + Highcharts.dateFormat("%A %H:%M:%S", this.x) + "</b>";
-            s += "<br/><span style='color: #507ABF;'>m<sup>3</sup> verbruikt: </span>" + this.y.toFixed(2);
+            s += "<br/><span style='color: #507ABF;'>m<sup>3</sup> <?php echo strIdx( 359 )?>: </span>" + this.y.toFixed(2);
             return s;
         },
         backgroundColor: "#F5F5F5",
@@ -319,7 +318,7 @@ function createDailytUseChart() {
     });
 }
 
-function creatCurrentUseChart() {  //DONE
+function creatCurrentUseChart() { 
     $("#currentuse").highcharts({
     chart: {
         type: "solidgauge",
@@ -425,7 +424,8 @@ $(function () {
     Highcharts.setOptions({
         global: {
             useUTC: false
-        }
+        },
+        lang: <?php hc_language_json(); ?>
     });
     creatCurrentUseChart();
     createDailytUseChart();
@@ -463,7 +463,7 @@ $(function () {
 
                 <div class="mid-content-3 pad-13">
                     <div class="frame-2-top">
-                        <span class="text-2">actueel gas verbruik</span> <span class="text-25" id="gasVoorspelling" style="display: none">(voorspelling actief)</span>
+                        <span class="text-2"><?php echo strIdx( 411)?></span> <span class="text-25" id="gasVoorspelling" style="display: none">(<?php echo strIdx( 365 )?>)</span>
                     </div>
                     <div class="frame-2-bot">
                         <div id="currentuse"></div>
@@ -472,7 +472,7 @@ $(function () {
 
                 <div class="pos-23 pad-1">
                     <div class="frame-2-top">
-                        <span class="text-2">totaal vandaag</span>
+                        <span class="text-2"><?php echo strIdx( 358 )?></span>
                     </div>
                     <div class="frame-2-bot pos-24">
                         <div id="dailyuse"></div>
@@ -482,7 +482,7 @@ $(function () {
                 </div>
                 <div class="pos-25">
                     <div class="frame-3-top">
-                        <span class="text-3">laatste vierentwintig uur verbruik</span>
+                        <span class="text-3"><?php echo strIdx( 412 )?></span>
                     </div>
                     <div class="frame-2-bot">
                         <div id="gasMeterGrafiekVerbruik" class="pos-26"></div>

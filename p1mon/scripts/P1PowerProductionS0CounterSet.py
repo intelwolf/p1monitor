@@ -1,4 +1,4 @@
-# run manual with ./pythonlaunch.sh P1PowerProductionS0CounterSet.py
+# run manual with ./P1PowerProductionS0CounterSet
 
 import const
 import inspect

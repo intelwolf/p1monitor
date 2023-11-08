@@ -47,7 +47,7 @@ def cleanDigitStr(str_in):
         #print ('cleanDigitStr(return) = ' + str_out)
         return str_out
 
-def daysPerMonth(date):   
+def daysPerMonth(date):
     return calendar.monthrange( int(date[0:4]), int(date[5:7]) )[1]
 
 def name2uid(name):
