@@ -18,6 +18,9 @@ if [ ! -f /var/tmp/.firstrun ]; then
 		echo "Disable CPU temperature check"
 	       	sudo sed -i "s/^ *get_cpu_temperature/#&/" /p1mon/scripts/P1Watchdog.py 
 	fi
+	if [[ ! -z $TZ ]]; then
+		echo $TZ | sudo tee /etc/timezone
+	fi
 	if [[ ! -z $PROXYPATH ]]; then
 		echo "Setting reverse proxy configurations"
 		sudo sed -i 's/PHP_SELF//' /p1mon/www/login.php
