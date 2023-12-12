@@ -19,7 +19,8 @@ if [ ! -f /var/tmp/.firstrun ]; then
 	       	sudo sed -i "s/^ *get_cpu_temperature/#&/" /p1mon/scripts/P1Watchdog.py 
 	fi
 	if [[ ! -z $TZ ]]; then
-		echo $TZ | sudo tee /etc/timezone
+		sudo ln -fs /usr/share/zoneinfo/$TZ /etc/localtime
+		sudo dpkg-reconfigure -f noninteractive tzdata
 	fi
 	if [[ ! -z $PROXYPATH ]]; then
 		echo "Setting reverse proxy configurations"
