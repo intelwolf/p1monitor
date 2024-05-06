@@ -15,7 +15,7 @@ RUN echo >>/etc/sudoers "p1mon ALL=(ALL) NOPASSWD: ALL" && echo >>/etc/sudoers "
 
 # Install Python packages required
 #RUN pip3 install pythoncrc gunicorn certifi cffi chardet colorzero dropbox falcon future gpiozero idna iso8601 paho-mqtt pigpio psutil pycparser pycrypto pyserial python-crontab python-dateutil pytz PyYAML requests RPi.GPIO setuptools spidev urllib3 xlsxwriter
-RUN pip3 install --break-system-packages pythoncrc gunicorn certifi cffi chardet colorzero dropbox future idna iso8601 paho-mqtt pigpio psutil pycparser pycrypto pyserial python-crontab python-dateutil pytz PyYAML requests rpi-lgpio RPi.GPIO setuptools spidev urllib3 xlsxwriter
+RUN pip3 install --break-system-packages pythoncrc gunicorn certifi cffi chardet colorzero dropbox gpiozero future idna iso8601 paho-mqtt pigpio psutil pycparser pycryptodome pyserial python-crontab python-dateutil pytz PyYAML requests RPi.GPIO setuptools spidev urllib3 xlsxwriter
 
 # Copy original p1mon directory
 COPY --chown=p1mon:p1mon p1mon/ /p1mon/
