@@ -820,6 +820,7 @@ def initMttq():
             mqtt_client.disconnect()
 
         mqtt_client = mqtt.Client( 
+            mqtt.CallbackAPIVersion.VERSION1 ,
             mqtt_para['clientname'] , 
             clean_session=True , 
             protocol = mqtt_para['protocol'] 

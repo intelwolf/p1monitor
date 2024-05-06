@@ -57,7 +57,7 @@ sudo service nginx start
 
 echo "Starting php-fpm"
 sudo mkdir /run/php
-sudo /usr/sbin/php-fpm7.4 --fpm-config /etc/php/7.4/fpm/php-fpm.conf
+sudo /usr/sbin/php-fpm8.2 --fpm-config /etc/php/8.2/fpm/php-fpm.conf
 
 if [[ ! -z $SOCAT_CONF ]]; then
 	sudo service socat start
