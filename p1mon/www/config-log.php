@@ -25,10 +25,10 @@ if( $localip == False ){
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>Log viewer</title>
+<title><?php echo ucfirst(strIdx( 633 ))?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -274,12 +274,12 @@ $(function () {
                     <form name="formvalues" id="formvalues" method="POST">
 
                         <div class="frame-4-top">
-                            <span class="text-15">beschikbare log bestanden</span>
+                            <span class="text-15"><?php echo strIdx( 634 );?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-right">
                                 <button id="buttonLogFileListAutoRefresh" name="buttonLogFileListAutoRefresh" class="input-15 cursor-pointer float-right">
-                                <span id="textLogFileListAutoRefresh" class="color-menu">automatische vernieuwen</span>
+                                <span id="textLogFileListAutoRefresh" class="color-menu"><?php echo strIdx( 635 );?></span>
                                 </button>
                             </div>
                             <br>
@@ -293,14 +293,14 @@ $(function () {
                         <p></p>
 
                         <div id="logcontentframeheader" class="frame-4-top">
-                            <span class="text-15">log viewer&nbsp;&nbsp;</span>
+                            <span class="text-15"><?php echo strIdx( 633 );?>&nbsp;&nbsp;</span>
                             <span id="logviewer" class="text-27"></span>
                         </div>
                         <div id="logcontentframe" class="frame-4-bot">
 
                             <div class="float-right">
                                 <button id="buttonLogFileContentAutoRefresh" name="buttonLogFileContentAutoRefresh" class="input-15 cursor-pointer float-right">
-                                    <span id="textLogFileListContentRefresh" class="color-menu">automatische vernieuwen</span>
+                                    <span id="textLogFileListContentRefresh" class="color-menu"><?php echo strIdx( 635 );?></span>
                                 </button>
                             </div>
                             <br>
@@ -311,25 +311,21 @@ $(function () {
                             </div>
                             <p></p>
                             <div class="float-right" >
-                                <button id="download-csv"  class="color-menu input-15 cursor-pointer">download CSV</button>
-                                <button id="download-json" class="color-menu input-15 cursor-pointer">download JSON</button>
-                                <button id="download-xlsx" class="color-menu input-15 cursor-pointer">download XLSX</button>
+                                <button id="download-csv"  class="color-menu input-15 cursor-pointer"><?php echo strIdx( 636 );?> CSV</button>
+                                <button id="download-json" class="color-menu input-15 cursor-pointer"><?php echo strIdx( 636 );?> JSON</button>
+                                <button id="download-xlsx" class="color-menu input-15 cursor-pointer"><?php echo strIdx( 636 );?> XLSX</button>
                             </div>
-
                         </div>
-
                         <!-- placeholder variables for session termination -->
                     <input type="hidden" name="logout" id="logout" value="">
                     </form>
                 </div>
-                                
                 <div id="right-wrapper-config-right">
                         <div class="frame-4-top">
-                            <span class="text-15">hulp</span>
+                            <span class="text-15"><?php echo strIdx( 155 );?></span>
                         </div>
                         <div class="frame-4-bot text-10">
                             <?php echo strIdx(100);?>
-                            
                         </div>
                         </div>
                 </div>        

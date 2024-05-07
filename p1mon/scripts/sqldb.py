@@ -84,7 +84,7 @@ class configDB():
         self.insert_rec("insert or ignore into "+table+" values ( '38','1'                     ,'gas waarde telegram prefix 1-96.')")
         self.insert_rec("insert or ignore into "+table+" values ( '39','0'                     ,'financiele max. grens waarde')")
         self.insert_rec("insert or ignore into "+table+" values ( '40','0'                     ,'counter value API aan of uit (1/0)')")
-        self.insert_rec("insert or ignore into "+table+" values ( '41','10'                    ,'UI gas-levering maximaal')")
+        self.insert_rec("insert or ignore into "+table+" values ( '41','10'                    ,'UI gas-verbruik maximaal')")
         self.insert_rec("insert or ignore into "+table+" values ( '42','0'                     ,'p1data API aan of uit (1/0)')")
         self.insert_rec("insert or ignore into "+table+" values ( '43','0'                     ,'eigen user interface gebruiken.')") 
         self.insert_rec("insert or ignore into "+table+" values ( '44','0'                     ,'verwarmingstemperatuur gebruiken.')") 
@@ -328,9 +328,8 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '204','0'               ,'gebruik van vaste tarieven of dynamische tarieven.')")
         self.insert_rec( "insert or ignore into " + table + " values ( '205','0.0212'          ,'flexible kosten per kWh inkoop.')")
         self.insert_rec( "insert or ignore into " + table + " values ( '206','1'               ,'UI piek kw verbergen (1/0)')")
-        
-        #TODO 207 is nog vrij voor toekomstig gebruik nooit in productie gebruikt
-        #self.insert_rec( "insert or ignore into " + table + " values ( '207','0'               ,'flexible kosten per kWh Opslag duurzame energie (ODE).')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '207','6'                ,'UI gas-verbruik dag maximaal')")
         self.insert_rec( "insert or ignore into " + table + " values ( '208','0.851'            ,'flexible kosten per gas inkoop.')")
 
         # notificatie
@@ -760,11 +759,11 @@ class rtStatusDb():
 
         self.insert_rec("insert or ignore into " + table + " values ( '100','0','Huidige Amperage L1 (31.7.0)',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '101','0','Huidige Amperage L2 (51.7.0)',0)")
-        self.insert_rec("insert or ignore into " + table + " values ( '102','0','Huidige Amperage L2 (71.7.0)',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '102','0','Huidige Amperage L3 (71.7.0)',0)")
 
         self.insert_rec("insert or ignore into " + table + " values ( '103','0','Huidige Voltage L1 (32.7.0)',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '104','0','Huidige Voltage L2 (52.7.0)',0)")
-        self.insert_rec("insert or ignore into " + table + " values ( '105','0','Huidige Voltage L2 (72.7.0)',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '105','0','Huidige Voltage L3 (72.7.0)',0)")
 
         self.insert_rec("insert or ignore into " + table + " values ( '106','onbekend','Tijdstip laatste fase waarde wijziging:',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '107','onbekend','Status van watermeter totaal stand:',0)")
@@ -818,6 +817,12 @@ class rtStatusDb():
         self.update_rec(sql_update)
         sql_update = "update status set label ='Tijdstip laatste verwerkte watermeterstand reset:' where id=91"
         self.update_rec(sql_update)
+    
+        sql_update = "update status set label ='Huidige Amperage L3 (71.7.0)' where id=102"
+        self.update_rec(sql_update)
+        sql_update = "update status set label ='Huidige Voltage L3 (72.7.0)' where id=105"
+        self.update_rec(sql_update)
+
 
         # reuse of no longer used id's
         sql_update = "update status set label ='Kw waarde 1.4.0 P1 telegram:' where id=32"

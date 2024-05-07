@@ -241,10 +241,10 @@ function slectorWeekDays() {
 
 ?>
 <!doctype html>
-<html lang='NL'>
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>Backup configuratie</title>
+<title><?php echo ucfirst(strIdx( 637 ))?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -275,24 +275,24 @@ function readJsonApiConfiguration(){
                 switch(jsonarr[j][0]) {
                     case 47:
                         $('#ftp_backup_timestamp').text( jsonarr[j][1] );
-                                                break;
+                            break;
                     case 49:
-                                                $('#ftp_backup_timestamp_succes').text( jsonarr[j][1] );
+                        $('#ftp_backup_timestamp_succes').text( jsonarr[j][1] );
                         break;
-                                        case 48:
-                                                $('#ftp_backup_status').text( jsonarr[j][1] );
+                    case 48:
+                        $('#ftp_backup_status').text( jsonarr[j][1] );
                         break;
-                                        case 60:
-                                                $('#dbx_backup_timestamp').text( jsonarr[j][1] );
+                    case 60:
+                        $('#dbx_backup_timestamp').text( jsonarr[j][1] );
                         break;
-                                        case 61:
-                                                $('#dbx_backup_timestamp_succes').text( jsonarr[j][1] );
+                    case 61:
+                        $('#dbx_backup_timestamp_succes').text( jsonarr[j][1] );
                         break;
-                                        case 62:
-                                                $('#dbx_backup_status').text( jsonarr[j][1] );
+                    case 62:
+                        $('#dbx_backup_status').text( jsonarr[j][1] );
                         break;
                     default:
-                        break;            
+                        break;
             }
         }
       } catch(err) {
@@ -341,7 +341,7 @@ $(function () {
                                     <form name="formvalues" id="formvalues" method="POST">
                                             
                                             <div class="frame-4-top">
-                                                    <span class="text-15">Timer instellingen</span>
+                                                    <span class="text-15"><?php echo strIdx( 638 )?></span>
                                             </div>
                                             <div class="frame-4-bot">
                                                     
@@ -349,7 +349,7 @@ $(function () {
                                                     <!-- line minutes -->
                                                     <div class="content-wrapper pos-36"> 
                                                         <div class="content-wrapper pad-16">
-                                                                <label class="text-14">minuten</label>
+                                                                <label class="text-14"><?php echo strIdx( 120 )?></label>
                                                         </div>
                                                         <div class="content-wrapper">
                                                                 <select onchange="selectorUpdate('#minutes','#i_minutes')" class="select-3 color-menu color-input-back cursor-pointer" id="minutes">
@@ -364,7 +364,7 @@ $(function () {
                                                     <!-- line hours -->
                                                     <div class="content-wrapper pos-36"> 
                                                             <div class="pad-16 content-wrapper">
-                                                                    <label class="text-14">uren</label> 
+                                                                    <label class="text-14"><?php echo strIdx( 121 )?></label> 
                                                             </div>
                                                             <div class="content-wrapper">
                                                                     <select onchange="selectorUpdate('#hours','#i_hours')"  class="select-3 color-menu color-input-back cursor-pointer" id="hours">
@@ -379,7 +379,7 @@ $(function () {
                                                     <!-- line day of the month -->
                                                     <div class="content-wrapper pos-36"> 
                                                             <div class="pad-16 content-wrapper">
-                                                                    <label class="text-14">dag van de maand</label> 
+                                                                    <label class="text-14"><?php echo strIdx( 641 )?></label> 
                                                             </div>
                                                             <div class="content-wrapper">
                                                                     <select onchange="selectorUpdate('#days','#i_days')" class="select-3 color-menu color-input-back cursor-pointer" id="days">
@@ -394,7 +394,7 @@ $(function () {
                                                     <!-- month -->
                                                     <div class="content-wrapper pos-36"> 
                                                             <div class="pad-16 content-wrapper">
-                                                                    <label class="text-14">maand</label> 
+                                                                    <label class="text-14"><?php echo strIdx( 131 )?></label> 
                                                             </div>
                                                             <div class="content-wrapper">
                                                                     <select onchange="selectorUpdate('#months','#i_months')" class="select-3 color-menu color-input-back cursor-pointer" id="months">
@@ -409,7 +409,7 @@ $(function () {
                                                     <!-- weekday -->
                                                     <div class="content-wrapper pos-36"> 
                                                         <div class="pad-16 content-wrapper">
-                                                                <label class="text-14">dag van de week</label>  
+                                                                <label class="text-14"><?php echo strIdx( 642 )?></label>
                                                         </div>
                                                         <div class="content-wrapper">
                                                                 <select onchange="selectorUpdate('#weekdays','#i_weekdays')" class="select-3 color-menu color-input-back cursor-pointer" id="weekdays">
@@ -425,7 +425,7 @@ $(function () {
                                             <!-- end of timer part -->
                                             <p></p>
                                             <div class="frame-4-top">
-                                                    <span class="text-15">FTP gegevens</span>
+                                                    <span class="text-15"><?php echo strIdx( 639 )?></span>
                                             </div>
                                             <div class="frame-4-bot">
                                                 <div class="float-left pad-17">
@@ -439,7 +439,7 @@ $(function () {
                                                 
                                                 <div class="content-wrapper pos-36"> 
                                                         <div class="pad-16 content-wrapper">
-                                                                <label class="text-14">back-up</label> 
+                                                                <label class="text-14"><?php echo strIdx( 215 )?></label> 
                                                         </div>
                                                         <div class="content-wrapper">
                                                                 <input class="cursor-pointer" id="fs_rb_aan_ftp_backup" name="ftp_backup_active" type="radio" value="1" <?php if ( config_read(36) == 1 ) { echo 'checked'; }?>>Aan
@@ -449,7 +449,7 @@ $(function () {
                                                 <p class="p-1"></p>
                                                 <div class="content-wrapper pos-36" title="<?php echo strIdx(12);?>"> 
                                                         <div class="pad-16 content-wrapper">
-                                                                <label class="text-14">ftp mode</label> 
+                                                                <label class="text-14"><?php echo strIdx( 643 )?></label> 
                                                         </div>
                                                         <div class="content-wrapper">
                                                                 <input class="cursor-pointer" id="fs_rb_ftp"  name="ftp_mode" type="radio" value="ftp"  <?php if ( config_read(76) == 1 ) { echo 'checked'; }?>>FTP
@@ -458,9 +458,10 @@ $(function () {
                             </div>
                         </div> 
 
+                        <!-- FTP setting --> 
                         <div class="content-wrapper pos-36" title="<?php echo strIdx(13);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">account naam</label> 
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 644 )?></label> 
                                 </div>
                                 <div class="content-wrapper">
                                         <input class="input-6 color-settings color-input-back" id="i_ftp_name" name="i_ftp_name" type="text" value="<?php echo config_read(28);?>">
@@ -468,8 +469,8 @@ $(function () {
                         </div> 
 
                         <div class="content-wrapper pos-36" title="<?php echo strIdx(14);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">wachtwoord</label> 
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 226 )?></label> 
                                 </div>
                                 <div class="content-wrapper">
                                         <input class="input-6 color-settings color-input-back" id="i_ftp_pword" name="i_ftp_pword" type="password" value="<?php echo decodeString( 29, 'ftppw' );?>">
@@ -479,18 +480,18 @@ $(function () {
                                 </div>
                         </div> 
  
-                        <div class="content-wrapper pos-36" title="<?php echo strIdx(15);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">ftp folder</label> 
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(15);?>">
+                                <div class="pad-42 content-wrapper">
+                                    <label class="text-14"><?php echo strIdx( 645 )?></label>
                                 </div>
                                 <div class="content-wrapper">
                                         <input class="input-6 color-settings color-input-back" id="i_ftp_folder" name="i_ftp_folder" type="text" value="<?php echo config_read(30);?>">
                                 </div>
                         </div> 
 
-                        <div class="content-wrapper pos-36" title="<?php echo strIdx(16);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">server adres</label> 
+                        <div class="content-wrapper pos-36" title="<?php echo strIdx(16);?>">
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 646 )?></label>
                                 </div>
                                 <div class="content-wrapper">
                                         <input class="input-6 color-settings color-input-back" id="i_ftp_host" name="i_ftp_host" type="text" value="<?php echo config_read(31);?>">
@@ -498,8 +499,8 @@ $(function () {
                         </div> 
                         
                         <div class="content-wrapper pos-36" title="<?php echo strIdx(17);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">server poort</label> 
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 647 )?></label> 
                                 </div>
                                 <div class="content-wrapper">
                                         <input class="input-6 color-settings color-input-back" id="i_ftp_host_port" name="i_ftp_host_port" type="text" value="<?php echo config_read(32);?>">
@@ -507,16 +508,16 @@ $(function () {
                         </div> 
 
                         <div class="content-wrapper pos-36" title="<?php echo strIdx(18);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">aantal versies</label> 
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 648 )?></label> 
                                 </div>
                                 <div class="content-wrapper">
                                         <input class="input-6 color-settings color-input-back" id="i_ftp_max_versions" name="i_ftp_max_versions" type="text" value="<?php echo config_read(34);?>">
                                 </div>
                         </div> 
                         <div class="content-wrapper pos-36 margin-4" title="<?php echo strIdx(19);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">laatste backup</label> 
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 649 )?></label> 
                                 </div>
                                 <div class="content-wrapper">
                                         <label id="ftp_backup_timestamp" class="text-14"></label>
@@ -525,40 +526,39 @@ $(function () {
                         <p class="p-1"></p>
 
                         <div class="content-wrapper pos-36" title="<?php echo strIdx(20);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">succesvol op</label> 
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 650 )?></label> 
                                 </div>
                                 <div class="content-wrapper">
                                         <label id="ftp_backup_timestamp_succes" class="text-14"></label>
                                 </div>
                         </div> 
                         <p class="p-1"></p>
-                                                    
+
                         <div class="content-wrapper pos-36" title="<?php echo strIdx(21);?>"> 
-                                <div class="pad-16 content-wrapper">
-                                        <label class="text-14">backup status</label> 
+                                <div class="pad-42 content-wrapper">
+                                        <label class="text-14"><?php echo strIdx( 651 )?></label> 
                                 </div>
-                                
+
                         </div> 
                         <div class="content-wrapper pos-37">
-                                        <label  id="ftp_backup_status" class="text-14"></label>
+                            <label  id="ftp_backup_status" class="text-14"></label>
                         </div>
                         
                         </div>
                         </div>
                         <!-- end of ftp backup -->
-                                            
 
                         <p></p>
                         <div class="frame-4-top">
-                                <span class="text-15">Dropbox gegevens</span>
+                                <span class="text-15"><?php echo strIdx( 640 );?></span>
                         </div>
                         <div class="frame-4-bot">
                                 <div class="float-left pad-17">
                                 
                                 <div class="content-wrapper pos-36"> 
-                                        <div class="pad-16 content-wrapper">
-                                                <label class="text-14">back-up</label> 
+                                        <div class="pad-42 content-wrapper">
+                                                <label class="text-14"><?php echo strIdx( 215 )?></label> 
                                         </div>
                                         <div class="content-wrapper">
                                                 <input class="cursor-pointer" id="fs_rb_aan_dbx_backup" name="dbx_backup_active" type="radio" value="1" <?php if ( config_read(49) == 1 ) { echo 'checked'; }?>>Aan
@@ -568,16 +568,16 @@ $(function () {
                                 <p class="p-1"></p>
 
                                 <div class="content-wrapper pos-36" title="<?php echo strIdx(18);?>"> 
-                                        <div class="pad-16 content-wrapper">
-                                                <label class="text-14">aantal versies</label> 
+                                        <div class="pad-42 content-wrapper">
+                                                <label class="text-14"><?php echo strIdx( 648 )?></label> 
                                         </div>
                                         <div class="content-wrapper">
                                                 <input class="input-6 color-settings color-input-back" id="i_dbx_max_versions" name="i_dbx_max_versions" type="text" value="<?php echo config_read(48);?>">
                                         </div>
                                 </div> 
                                 <div class="content-wrapper pos-36 margin-4" title="<?php echo strIdx(19);?>"> 
-                                        <div class="pad-16 content-wrapper">
-                                                <label class="text-14">laatste backup</label> 
+                                        <div class="pad-42 content-wrapper">
+                                                <label class="text-14"><?php echo strIdx( 649 )?></label> 
                                         </div>
                                         <div class="content-wrapper">
                                                 <label id="dbx_backup_timestamp" class="text-14"></label>
@@ -586,8 +586,8 @@ $(function () {
                                 <p class="p-1"></p>
                                 
                                 <div class="content-wrapper pos-36" title="<?php echo strIdx(20);?>"> 
-                                        <div class="pad-16 content-wrapper">
-                                                <label class="text-14">succesvol op</label> 
+                                        <div class="pad-42 content-wrapper">
+                                                <label class="text-14"><?php echo strIdx( 650 )?></label> 
                                         </div>
                                         <div class="content-wrapper">
                                                 <label id="dbx_backup_timestamp_succes" class="text-14"></label>
@@ -596,13 +596,13 @@ $(function () {
                                 <p class="p-1"></p>
 
                                 <div class="content-wrapper pos-36" title="<?php echo strIdx(21);?>"> 
-                                        <div class="pad-16 content-wrapper">
-                                                <label class="text-14">backup status</label> 
+                                        <div class="pad-42 content-wrapper">
+                                                <label class="text-14"><?php echo strIdx( 651 )?></label> 
                                         </div>
                                         
                                 </div> 
                                 <div class="content-wrapper pos-33">
-                                                <label  id="dbx_backup_status" class="text-14"></label>
+                                    <label  id="dbx_backup_status" class="text-14"></label>
                                 </div>
                                 
                                 </div>
@@ -616,10 +616,10 @@ $(function () {
 
                 <div id="right-wrapper-config-right">
                         <div class="frame-4-top">
-                            <span class="text-15">hulp</span>
+                            <span class="text-15"><?php echo strIdx( 155 )?></span>
                         </div>
                         <div class="frame-4-bot text-10">
-                                <?php echo strIdx(11);?>
+                            <?php echo strIdx(11);?>
                         </div>
                 </div>
 

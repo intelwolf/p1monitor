@@ -35,6 +35,9 @@ $err_cnt = 0;
 $sw_off  = strIdx( 193 );
 $sw_on   = strIdx( 192 );
 
+$newVersionLink = "";
+$newSoftwareVersionP1monitor = "";
+
 if ( isset($_POST["udp_deamon_active"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["udp_deamon_active"] == '1' ) {

@@ -162,12 +162,10 @@ if ( isset($_POST["ui_peak_kw_hide"]) ) {
     }
 }
 
-
 if ( isset($_POST["verbruik_list_main"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["verbruik_list_main"])."' where ID = 52"))$err_cnt += 1;
 }
-
 
 if ( isset($_POST["levering_list_main"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -193,6 +191,11 @@ if ( isset($_POST["levering_list"]) ) {
 if ( isset($_POST["verbruik_g_list"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["verbruik_g_list"])."' where ID = 41"))$err_cnt += 1;
+}
+
+if ( isset($_POST["verbruik_g_day_list"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '".preg_replace('/\D/', '', $_POST["verbruik_g_day_list"])."' where ID = 207"))$err_cnt += 1;
 }
 
 if ( isset($_POST["custom_ui_list"]) ) { 
@@ -450,6 +453,32 @@ function makeSelectorGasSelector2($id) {
     echo '<option ' . $val_50 . ' value="5" >5 m&#179;</option>';
 }
 
+function makeSelectorGasSelector3($id) {
+    $configValue = config_read($id);
+    $val_1=$val_2=$val_4=$val_6=$val_8=$val_10=$val_12=$val_20=$val_40='';
+    
+    if ($configValue == '1'  ) { $val_1  = 'selected="selected"'; }
+    if ($configValue == '2'  ) { $val_2  = 'selected="selected"'; }
+    if ($configValue == '4'  ) { $val_4  = 'selected="selected"'; }
+    if ($configValue == '6'  ) { $val_6  = 'selected="selected"'; }
+    if ($configValue == '8'  ) { $val_8  = 'selected="selected"'; }
+    if ($configValue == '10' ) { $val_10 = 'selected="selected"'; }
+    if ($configValue == '12' ) { $val_12 = 'selected="selected"'; }
+    if ($configValue == '20' ) { $val_20 = 'selected="selected"'; }
+    if ($configValue == '40' ) { $val_40 = 'selected="selected"'; }
+
+    echo '<option ' . $val_1  . ' value="1"  >1 m&#179;</option>';
+    echo '<option ' . $val_2  . ' value="2"  >2 m&#179;</option>';
+    echo '<option ' . $val_4  . ' value="4"  >4 m&#179;</option>';
+    echo '<option ' . $val_6  . ' value="6"  >6 m&#179;</option>';
+    echo '<option ' . $val_8  . ' value="8"  >8 m&#179;</option>';
+    echo '<option ' . $val_10 . ' value="10" >10 m&#179;</option>';
+    echo '<option ' . $val_12 . ' value="12" >12 m&#179;</option>';
+    echo '<option ' . $val_20 . ' value="20" >20 m&#179;</option>';
+    echo '<option ' . $val_40 . ' value="40" >40 m&#179;</option>';
+}
+
+
 function makeSelectorKwSelector2($id) {
     $configValue = config_read($id);
     $val_10=$val_20=$val_50=$val_100=$val_120=$val_150=$val_200=$val_300=$val_1000=$val_3000=$val_5000=$val_7500=$val_10000='';
@@ -663,14 +692,17 @@ function makeSelectorAmpere( $id ) {
                                 <i class="text-10 pad-8 fab fa-gripfire"></i>
                                 <label class="text-10"><?php echo strIdx( 199 );?></label>
                                 <p class="p-1"></p>
+                                <i class="text-10 pad-8 fab fa-gripfire"></i>
+                                <label class="text-10"><?php echo strIdx( 616 );?></label>
+                                <p class="p-1"></p>
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
-                                <label class="text-10"><?php echo strIdx( 195 );?> (home scherm)</label>
+                                <label class="text-10"><?php echo strIdx( 195 );?> (home)</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fas fa-bolt"></i>
-                                <label class="text-10"><?php echo strIdx( 197 );?> (home scherm)</label>
+                                <label class="text-10"><?php echo strIdx( 197 );?> (home)</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fab fa-gripfire"></i>
-                                <label class="text-10"><?php echo strIdx( 199 );?> (home scherm)</label>
+                                <label class="text-10"><?php echo strIdx( 199 );?> (home)</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-7 fas fa-bolt"></i>
                                 <label class="text-10"><?php echo strIdx( 200 );?></label>
@@ -703,6 +735,10 @@ function makeSelectorAmpere( $id ) {
                                 <p class="p-1"></p>
                                 <select class="select-5 color-select color-input-back cursor-pointer" name="verbruik_g_list">
                                     <?php makeSelectorGasSelector(41);?>
+                                </select>
+                                <p class="p-1"></p> 
+                                <select class="select-5 color-select color-input-back cursor-pointer" name="verbruik_g_day_list">
+                                    <?php makeSelectorGasSelector3( 207 );?>
                                 </select>
                                 <p class="p-1"></p>
                                 <select class="select-5 color-select color-input-back cursor-pointer" name="levering_list_main">
@@ -840,56 +876,6 @@ function makeSelectorAmpere( $id ) {
                                 </div>
                             </div>
                         </div>
-
-                        <!--
-                        <div class="frame-4-bot">
-                        <div> 
-                          
-                            <div class="float-left">
-                                <div class="text-10"><?php echo strIdx( 205 );?></div>
-                                <div class="text-10"><?php echo strIdx( 206 );?></div>
-                                <div class="text-10"><?php echo strIdx( 207 );?></div>
-                                <div class="text-10"><?php echo strIdx( 256 );?></div>
-                                <div class="text-10"><?php echo strIdx( 257 );?></div>
-                                <div class="text-10" title="<?php echo strIdx( 314 );?>"><?php echo strIdx( 313 );?></div>
-                                <div class="text-10" title="<?php echo strIdx( 334 );?>"><?php echo strIdx( 333 );?></div>
-                            </div>
-                            
-                            <div class="float-right">
-                                <div>
-                                    <input class="cursor-pointer" name="voorspelling" type="radio" value="1" <?php if ( config_read(59) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                    <input class="cursor-pointer" name="voorspelling" type="radio" value="0" <?php if ( config_read(59) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
-                                </div>
-                                <div>
-                                    <input class="cursor-pointer" name="drie_fasen" type="radio" value="1" <?php if ( config_read(61) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                    <input class="cursor-pointer" name="drie_fasen" type="radio" value="0" <?php if ( config_read(61) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
-                                </div>
-                                <div>
-                                    <input class="cursor-pointer" name="ui_header" type="radio" value="1" <?php if ( config_read(134) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                    <input class="cursor-pointer" name="ui_header" type="radio" value="0" <?php if ( config_read(134) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
-                                </div>
-                                <div>
-                                    <input class="cursor-pointer" name="ui_water_hide" type="radio" value="1" <?php if ( config_read( 157 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                    <input class="cursor-pointer" name="ui_water_hide" type="radio" value="0" <?php if ( config_read( 157 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
-                                </div>
-                                <div>
-                                    <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="1" <?php if ( config_read( 158 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                    <input class="cursor-pointer" name="ui_gas_hide" type="radio" value="0" <?php if ( config_read( 158 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
-                                </div>
-                                <div title="<?php echo strIdx(314);?>">
-                                    <input class="cursor-pointer" name="ui_w2kw" type="radio" value="1" <?php if ( config_read( 180 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                    <input class="cursor-pointer" name="ui_w2kw" type="radio" value="0" <?php if ( config_read( 180 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
-                                </div>
-                                <div title="<?php echo strIdx(314);?>">
-                                    <input class="cursor-pointer" name="ui_peak_kw_hide" type="radio" value="1" <?php if ( config_read( 206 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
-                                    <input class="cursor-pointer" name="ui_peak_kw_hide" type="radio" value="0" <?php if ( config_read( 206 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
-                                </div>
-                            </div>
-                            </div>
-                           
-                        </div>
-                        -->
-
                         <p></p>
                         <div class="frame-4-top">
                             <span class="text-15"><?php echo strIdx( 178 );?></span>

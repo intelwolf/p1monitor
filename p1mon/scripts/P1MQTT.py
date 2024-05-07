@@ -819,12 +819,19 @@ def initMttq():
         if mqtt_client != None:
             mqtt_client.disconnect()
 
+        """
         mqtt_client = mqtt.Client( 
-            mqtt.CallbackAPIVersion.VERSION1 ,
             mqtt_para['clientname'] , 
             clean_session=True , 
             protocol = mqtt_para['protocol'] 
         )
+        """
+        mqtt_client = mqtt.Client(
+            mqtt.CallbackAPIVersion.VERSION2, 
+            clean_session=True,
+            protocol = mqtt_para['protocol']
+        )
+
         mqtt_client.on_connect    = on_connect
         mqtt_client.on_disconnect = on_disconnect 
         #mqtt_client.on_log        = on_log
@@ -852,6 +859,18 @@ def initMttq():
         mqtt_para['brokerconnectionisok'] = False
         return False
 
+def on_disconnect(client, userdata, flags, reason_code, properties):
+    global mqtt_para
+    flog.debug( inspect.stack()[0][3] + ": on_disconnect = " + str(reason_code) )
+    #if reason_code == 0:
+    #    # success disconnect
+    if reason_code > 0:
+        mqtt_para['brokerconnectionisok'] = False
+        mqtt_para['brokerconnectionstatustext'] = 'connectie met broker onverwacht afgebroken.'
+        flog.critical( inspect.stack()[0][3] + ": " + mqtt_para['brokerconnectionstatustext'] )
+        rt_status_db.strset( mqtt_para['brokerconnectionstatustext'], 97, flog)
+
+"""
 def on_disconnect(client, userdata, rc):
      global mqtt_para
      flog.debug( inspect.stack()[0][3] + ": on_disconnect = " + str(rc) )
@@ -860,10 +879,19 @@ def on_disconnect(client, userdata, rc):
         mqtt_para['brokerconnectionstatustext'] = 'connectie met broker onverwacht afgebroken.'
         flog.critical( inspect.stack()[0][3] + ": " + mqtt_para['brokerconnectionstatustext'] )
         rt_status_db.strset( mqtt_para['brokerconnectionstatustext'], 97, flog)
+"""
 
+
+def on_connect(client, userdata, flags, reason_code, properties):
+    flog.debug( inspect.stack()[0][3] + ": on_connect = " + str(reason_code) )
+    checkBrokerConnection( reason_code )
+
+"""
+# OLD v1.x version
 def on_connect(client, userdata, flags, rc):
     flog.debug( inspect.stack()[0][3] + ": on_connect = " + str(rc) )
     checkBrokerConnection( rc )
+"""
 
 def checkBrokerConnection( rc ):
     global mqtt_para

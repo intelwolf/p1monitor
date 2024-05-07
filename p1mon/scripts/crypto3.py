@@ -40,8 +40,7 @@ def p1Decrypt(cipher_text, seed=MAGIC_SEED):
 def p1Encrypt(plain_text, seed=MAGIC_SEED):
     try:
       encryption_suite = AES.new(p1CryptoGetKey(), AES_MODE, seedGenerator(seed))
-      cipher_text 	 = encryption_suite.encrypt( padding16(plain_text).encode("UTF-8") )
-      cipher_text 	+= encryption_suite.encrypt( spaceIndexer(plain_text).encode("UTF-8") )
+      cipher_text 	 = encryption_suite.encrypt( padding16(plain_text) + spaceIndexer(plain_text) )
       return str(base64.b64encode(cipher_text).decode())
     except Exception as _e:
       #print('error encrypt='+str(e))

@@ -64,7 +64,7 @@ def update_crontab_backup( flog=None ):
         else:
             parameter = 0
 
-        if int(parameter) == 0:
+        if int( parameter ) == 0:
             flog.info(inspect.stack()[0][3]+": FTP backup staat uit, crontab wordt gewist")
             deleteJob( my_cron, FTP_BACKUP_CRONLABEL, flog=flog )
         else:
@@ -76,14 +76,14 @@ def update_crontab_backup( flog=None ):
                 raise Exception( msg )
 
             deleteJob( my_cron, FTP_BACKUP_CRONLABEL, flog=flog )
-        try:
 
-            job = my_cron.new( command='/p1mon/scripts/P1Backup >/dev/null 2>&1', comment=FTP_BACKUP_CRONLABEL )
-            job.setall( str(parts[0]), str(parts[1]), str(parts[2]), str(parts[3]), str(parts[4]))
-            my_cron.write()
-        except Exception as e:
-            msg = inspect.stack()[0][3] + ": crontab backup kon niet worden ingesteld, gestopt! Fout=" + str(e.args[0])
-            raise Exception( msg )
+            try:
+                job = my_cron.new( command='/p1mon/scripts/P1Backup >/dev/null 2>&1', comment=FTP_BACKUP_CRONLABEL )
+                job.setall( str(parts[0]), str(parts[1]), str(parts[2]), str(parts[3]), str(parts[4]))
+                my_cron.write()
+            except Exception as e:
+                msg = inspect.stack()[0][3] + ": crontab backup kon niet worden ingesteld, gestopt! Fout=" + str(e.args[0])
+                raise Exception( msg )
 
     except Exception as e:
          raise Exception( "error in update_crontab_backup " + str(e) )
@@ -94,7 +94,7 @@ def deleteJob( cron, job_id, flog=None ):
         cron.remove_all( comment=job_id )
         cron.write()
     except Exception as _e:
-        flog.debug(inspect.stack()[0][3]+": crontab bevat geen commando met het label " + ftp_backup_cronlabel+" geen fout.")
+        flog.debug(inspect.stack()[0][3]+": crontab bevat geen commando met het label " + ftp_backup_cronlabel + " geen fout.")
 
 
 #########################################

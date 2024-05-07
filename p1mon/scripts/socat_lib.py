@@ -27,7 +27,7 @@ Type=simple
 StandardOutput=inherit
 StandardError=inherit
 ExecStart=sudo /usr/bin/socat -T60 pty,link=###SOCATDEVICE##,rawer,group-late=dialout,mode=660 tcp:###SOCATREMOTEIP###:###SOCATREMOTEPORT###,retry=forever,interval=30
-ExecStartPost=-/p1mon/scripts/P1SocatConfig --succestimestamp 2>&1 >/dev/null
+ExecStartPost=- sudo -u p1mon /p1mon/scripts/P1SocatConfig --succestimestamp 2>&1 >/dev/null
 Restart=always
 RestartSec=10s
 
@@ -76,6 +76,7 @@ class Socat():
     #############################################################
     def set_succes_timestamp( self ):
         self._set_status_timestamp_db( index=128 )
+
 
     ##################################################################
     # update the status db with the timestamp                        #
