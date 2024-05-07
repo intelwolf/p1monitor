@@ -1,0 +1,77 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Highstock Examples</title>
+        <style>
+            * {
+                font-family: sans-serif;
+            }
+            ul.nav > li > div {
+                font-size: 1.5em;
+                font-weight: bold;
+                margin: 1em 0 0.3em 0;
+            }
+            ul.nav > li {
+                list-style: none;
+                display: black
+            }
+            div > ul > li {
+                padding-bottom: 0.5em;
+            }
+            ul ul {
+                list-style-type: initial;
+                padding-left: 1.25em;
+                font-size: 1.15em;
+            }
+            li button.sidebar-category {
+                border: none;
+                background: none;
+                padding: 0;
+                margin: 1rem 0 0.5rem 0;
+                font-size: 1.4rem;
+            }
+            li a {
+                text-decoration: none;
+                color: #6065c8;
+            }
+            li a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Highstock Examples</h1>
+    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 sidebar d-md-block"><ul class="nav nav-sidebar" role="menu">
+    <li>
+        <button aria-controls="general-demos" aria-expanded="false" class="sidebar-category" tabindex="0"><span>General</span><icon class="toggle"></icon></button>
+        <ul id="general-demos" role="group" >
+        <li role="menuitem"><a href="examples/./stock-tools-gui/index.html">Stock chart with GUI</a></li><li role="menuitem"><a href="examples/./flags-general/index.html">Flags marking events</a></li><li role="menuitem"><a href="examples/./intraday-candlestick/index.html">Intraday candlestick</a></li><li role="menuitem"><a href="examples/./intraday-breaks/index.html">Intraday with breaks</a></li><li role="menuitem"><a href="examples/./intraday-area/index.html">Intraday area</a></li><li role="menuitem"><a href="examples/./lazy-loading/index.html">1.7 million points with async loading</a></li><li role="menuitem"><a href="examples/./soundscape/index.html">Soundscape</a></li><li role="menuitem"><a href="examples/./data-grouping/index.html">52000 points with data grouping</a></li><li role="menuitem"><a href="examples/./compare/index.html">Compare multiple series</a></li><li role="menuitem"><a href="examples/./candlestick-and-volume/index.html">Two panes candlestick and volume</a></li><li role="menuitem"><a href="examples/./basic-line/index.html">Single line series</a></li><li role="menuitem"><a href="examples/./cumulative-sum/index.html">Cumulative Sum</a></li><li role="menuitem"><a href="examples/./dynamic-update/index.html">Dynamically updated data</a></li>
+        </ul>
+    </li>
+    
+    <li>
+        <button aria-controls="chart-types-demos" aria-expanded="false" class="sidebar-category" tabindex="0"><span>Chart types</span><icon class="toggle"></icon></button>
+        <ul id="chart-types-demos" role="group" >
+        <li role="menuitem"><a href="examples/./columnrange/index.html">Column range</a></li><li role="menuitem"><a href="examples/./column/index.html">Column</a></li><li role="menuitem"><a href="examples/./ohlc/index.html">OHLC</a></li><li role="menuitem"><a href="examples/./candlestick/index.html">Candlestick</a></li><li role="menuitem"><a href="examples/./areasplinerange/index.html">Area spline range</a></li><li role="menuitem"><a href="examples/./depth-chart/index.html">Depth chart</a></li><li role="menuitem"><a href="examples/./arearange/index.html">Area range</a></li><li role="menuitem"><a href="examples/./areaspline/index.html">Area spline</a></li><li role="menuitem"><a href="examples/./area/index.html">Area</a></li><li role="menuitem"><a href="examples/./step-line/index.html">Step line</a></li><li role="menuitem"><a href="examples/./spline/index.html">Spline</a></li><li role="menuitem"><a href="examples/./line-markers/index.html">Line with markers and shadow</a></li><li role="menuitem"><a href="examples/./hollow-candlestick/index.html">Hollow Candlestick</a></li><li role="menuitem"><a href="examples/./hlc/index.html">HLC</a></li><li role="menuitem"><a href="examples/./heikinashi/index.html">Heikin Ashi</a></li><li role="menuitem"><a href="examples/./markers-only/index.html">Point markers only</a></li>
+        </ul>
+    </li>
+    
+    <li>
+        <button aria-controls="various-features-demos" aria-expanded="false" class="sidebar-category" tabindex="0"><span>Various features</span><icon class="toggle"></icon></button>
+        <ul id="various-features-demos" role="group" >
+        <li role="menuitem"><a href="examples/./scrollbar-disabled/index.html">Disabled scrollbar</a></li><li role="menuitem"><a href="examples/./responsive/index.html">Responsive chart</a></li><li role="menuitem"><a href="examples/./styled-scrollbar/index.html">Styled scrollbar</a></li><li role="menuitem"><a href="examples/./yaxis-reversed/index.html">Reversed Y axis</a></li><li role="menuitem"><a href="examples/./yaxis-plotbands/index.html">Plot bands on Y axis</a></li><li role="menuitem"><a href="examples/./yaxis-plotlines/index.html">Plot lines on Y axis</a></li><li role="menuitem"><a href="examples/./stock-tools-custom-gui/index.html">Stock chart with custom GUI</a></li><li role="menuitem"><a href="examples/./navigator-disabled/index.html">Disabled navigator</a></li>
+        </ul>
+    </li>
+    
+    <li>
+        <button aria-controls="flags-and technical indicators-demos" aria-expanded="false" class="sidebar-category" tabindex="0"><span>Flags and Technical indicators</span><icon class="toggle"></icon></button>
+        <ul id="flags-and technical indicators-demos" role="group" >
+        <li role="menuitem"><a href="examples/./flags-placement/index.html">Flags placement</a></li><li role="menuitem"><a href="examples/./sma-volume-by-price/index.html">SMA and Volume by price</a></li><li role="menuitem"><a href="examples/./macd-pivot-points/index.html">MACD and Pivot points</a></li><li role="menuitem"><a href="examples/./all-indicators/index.html">All technical indicators</a></li><li role="menuitem"><a href="examples/./flags-shapes/index.html">Flags shapes and colors</a></li>
+        </ul>
+    </li>
+    </ul></div>
+    </body>
+</html>
