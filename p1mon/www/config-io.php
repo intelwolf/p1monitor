@@ -10,11 +10,15 @@ include_once '/p1mon/www/util/config_read.php';
 include_once '/p1mon/www/util/updateStatusDb.php';
 include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/highchart.php';
 
 #print_r($_POST);
 loginInit();
 passwordSessionLogoutCheck();
 $err_cnt = -1;
+
+$sw_off = strIdx( 193 );
+$sw_on = strIdx( 192 );
 
 //print ( updateStatusDb( "update status set status = 'demo van de php pagina' where ID = 107" ) );
 
@@ -23,9 +27,9 @@ $localip     = validLocalIpAdress(getClientIP());
 //$localip        = False;
 //$noInetCheck    = False;
 if( $localip == False ){ 
-        if( $noInetCheck == False ) {
-            die();
-        }
+    if( $noInetCheck == False ) {
+        die();
+    }
 }
 
 $time_slot_1 = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
@@ -286,10 +290,10 @@ if ( updateConfigDb("update config set parameter = '" . implode(".",$time_slot_2
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>in en output configuratie</title>
+<title><?php echo ucfirst(strIdx( 657 ))?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -304,6 +308,7 @@ if ( updateConfigDb("update config set parameter = '" . implode(".",$time_slot_2
 <body>
 <script>
 var initloadtimer;
+var day = <?php hc_language_json(); ?> 
 
 function readJsonApiStatus(){ 
     $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
@@ -322,9 +327,9 @@ function readJsonApiStatus(){
                         break;    
                     case 89:
                         if ( jsonarr[j][1] == 1 ) { 
-                            $('#tarifswitcher_status').text( "aan" );
+                            $('#tarifswitcher_status').text( "<?php echo $sw_on ?>" );
                         } else {
-                            $('#tarifswitcher_status').text( "uit" );
+                            $('#tarifswitcher_status').text( "<?php echo $sw_off ?>" );
                         }
                         break;
             }
@@ -369,15 +374,15 @@ $(function () {
                     <form name="formvalues" id="formvalues" method="POST">
 
                         <div class="frame-4-top">
-                            <span class="text-15">teruglevering schakelaar</span>
+                            <span class="text-15"><?php echo strIdx( 661 )?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="rTable">
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-bolt"></i>
-                                        <label>gemiddelde grenswaarde vermogen inschakelen</label>
+                                        <label><?php echo strIdx( 660 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <input class="input-1 color-settings color-input-back" id="watt_on" name="watt_on" type="text" value="<?php echo config_read(81);?>">
@@ -385,9 +390,9 @@ $(function () {
                                 </div>
                             
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-bolt"></i>
-                                        <label>gemiddelde grenswaarde vermogen uitschakelen</label>
+                                        <label><?php echo strIdx( 667 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <input class="input-1 color-settings  color-input-back" id="watt_off" name="watt_off" type="text" value="<?php echo config_read(82);?>">
@@ -395,9 +400,9 @@ $(function () {
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 far fa-clock"></i>
-                                        <label>gemiddelde tijd inschakelen (min.)</label>
+                                        <label><?php echo strIdx( 666 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <input class="input-1 color-settings color-input-back" id="min_on" name="min_on" type="text" value="<?php echo config_read(83);?>">
@@ -405,9 +410,9 @@ $(function () {
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 far fa-clock"></i>
-                                        <label>gemiddelde tijd uitschakelen (min.)</label>
+                                        <label><?php echo strIdx( 668 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <input class="input-1 color-settings  color-input-back" id="min_off" name="min_off" type="text" value="<?php echo config_read(84);?>">
@@ -415,9 +420,9 @@ $(function () {
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 far fa-clock"></i>
-                                        <label>minimale tijd ingeschakeld (min.)</label>
+                                        <label><?php echo strIdx( 669 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <input class="input-1 color-settings color-input-back" id="min_on_minimal" name="min_on_minimal" type="text" value="<?php echo config_read(88);?>">
@@ -425,9 +430,9 @@ $(function () {
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 far fa-clock"></i>
-                                        <label>minimale tijd uitgeschakeld (min.)</label>
+                                        <label><?php echo strIdx( 670 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <input class="input-1 color-settings color-input-back" id="min_off_minimal" name="min_off_minimal" type="text" value="<?php echo config_read(89);?>">
@@ -435,9 +440,9 @@ $(function () {
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-map-pin"></i>
-                                        <label>GPIO pin selectie</label>
+                                        <label><?php echo strIdx( 665 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <select class="select-1 color-select color-input-back cursor-pointer" name="gpio_list" id="gpio_list">
@@ -447,40 +452,40 @@ $(function () {
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-toggle-off"></i>
-                                        <label>teruglevering aan of uit</label>
+                                        <label><?php echo strIdx( 172 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
-                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_on"  name="fs_rb_powerswitcher" type="radio" value="1" <?php if ( config_read(86) == 1 ) { echo 'checked'; }?>>Aan
-                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_off" name="fs_rb_powerswitcher" type="radio" value="0" <?php if ( config_read(86) == 0 ) { echo 'checked'; }?>>Uit
+                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_on"  name="fs_rb_powerswitcher" type="radio" value="1" <?php if ( config_read(86) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_off" name="fs_rb_powerswitcher" type="radio" value="0" <?php if ( config_read(86) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-toggle-off"></i>
-                                        <label>geforceerd in schakelen</label>
+                                        <label><?php echo strIdx( 662 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
-                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_forced_on"  name="fs_rb_powerswitcher_forced" type="radio" value="1" <?php if ( config_read(87) == 1 ) { echo 'checked'; }?>>Aan
-                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_forced_off" name="fs_rb_powerswitcher_forced" type="radio" value="0" <?php if ( config_read(87) == 0 ) { echo 'checked'; }?>>Uit
+                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_forced_on"  name="fs_rb_powerswitcher_forced" type="radio" value="1" <?php if ( config_read(87) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_forced_off" name="fs_rb_powerswitcher_forced" type="radio" value="0" <?php if ( config_read(87) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-toggle-off"></i>
-                                        <label>GPIO uitgang geïnverteerd</label>
+                                        <label><?php echo strIdx( 663 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
-                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_inverted_on"  name="fs_rb_powerswitcher_inverted" type="radio" value="1" <?php if ( config_read( 155 ) == 1 ) { echo 'checked'; }?>>Aan
-                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_inverted_off" name="fs_rb_powerswitcher_inverted" type="radio" value="0" <?php if ( config_read( 155 ) == 0 ) { echo 'checked'; }?>>Uit
+                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_inverted_on"  name="fs_rb_powerswitcher_inverted" type="radio" value="1" <?php if ( config_read( 155 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_powerswitcher_inverted_off" name="fs_rb_powerswitcher_inverted" type="radio" value="0" <?php if ( config_read( 155 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                         </div>
                                     </div>
                                 </div>
@@ -488,7 +493,7 @@ $(function () {
                                 <div class="rTableRow text-16">
                                     <div class="rTableCell ">
                                         <i class="pad-7 fas fa-bolt"></i>
-                                        <label>Huidige schakel vermogen in Watt (0 is uit):</label>
+                                        <label><?php echo strIdx( 671 )?>:</label>
                                         <span id="powerswitcher_power"></span>
                                     </div>
                                 </div>
@@ -496,7 +501,7 @@ $(function () {
                                 <div class="rTableRow text-16">
                                     <div class="rTableCell width-430">
                                         <i class="pad-7 far fa-clock"></i>
-                                        <label>Laatste schakel actie:</label>
+                                        <label><?php echo strIdx( 664 )?>:</label>
                                         <span id="powerswitcher_timestamp"></span>
                                     </div>
                                 </div>
@@ -508,7 +513,7 @@ $(function () {
                         <p></p>
 
                         <div class="frame-4-top">
-                            <span class="text-15">tariefschakelaar</span>
+                            <span class="text-15"><?php echo strIdx( 672 )?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="rTable">
@@ -516,7 +521,7 @@ $(function () {
                                 <div class="rTableRow text-16">
                                     <div class="rTableCell width-430">
                                         <i class="pad-7 fas fa-toggle-off"></i>
-                                        <label>Tijdsperiodes voor de schakeling</label>
+                                        <label><?php echo strIdx( 673 )?></label>
                                     </div>
                                 </div>
 
@@ -534,25 +539,25 @@ $(function () {
                                         <span>&nbsp;</span>
                                         <input type="hidden"                                  name="fs_rb_weekday_ma_1" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_ma_1" name="fs_rb_weekday_ma_1" type="checkbox" value="on" <?php if ( $time_slot_1[4] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_ma_1" class="text-27 margin-5">ma</label>
+                                        <label for="fs_rb_weekday_ma_1" class="text-27 margin-5" id="ma_1">ma</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_di_1" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_di_1" name="fs_rb_weekday_di_1" type="checkbox" value="on" <?php if ( $time_slot_1[5] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_di_1" class="text-27 margin-5">di</label>
+                                        <label for="fs_rb_weekday_di_1" class="text-27 margin-5" id="di_1">di</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_wo_1" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_wo_1" name="fs_rb_weekday_wo_1" type="checkbox" value="on" <?php if ( $time_slot_1[6] == 1  ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_wo_1" class="text-27 margin-5">wo</label>
+                                        <label for="fs_rb_weekday_wo_1" class="text-27 margin-5" id="wo_1">wo</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_do_1" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_do_1" name="fs_rb_weekday_do_1" type="checkbox" value="on" <?php if ( $time_slot_1[7] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_do_1" class="text-27 margin-5">do</label>
+                                        <label for="fs_rb_weekday_do_1" class="text-27 margin-5" id="do_1">do</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_vr_1" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_vr_1" name="fs_rb_weekday_vr_1" type="checkbox" value="on" <?php if ( $time_slot_1[8] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_vr_1" class="text-27 margin-5">vr</label>
+                                        <label for="fs_rb_weekday_vr_1" class="text-27 margin-5" id="vr_1">vr</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_za_1" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_za_1" name="fs_rb_weekday_za_1" type="checkbox" value="on" <?php if ( $time_slot_1[9] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_za_1" class="text-27 margin-5">za</label>
+                                        <label for="fs_rb_weekday_za_1" class="text-27 margin-5" id="za_1">za</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_zo_1" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_zo_1" name="fs_rb_weekday_zo_1" type="checkbox" value="on" <?php if ( $time_slot_1[10] == 1) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_zo_1" class="text-27 margin-5">zo</label>
+                                        <label for="fs_rb_weekday_zo_1" class="text-27 margin-5" id="zo_1">zo</label>
                                     </div>
                                 </div>
 
@@ -569,45 +574,45 @@ $(function () {
                                         <span>&nbsp;</span>
                                         <input type="hidden"                                  name="fs_rb_weekday_ma_2" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_ma_2" name="fs_rb_weekday_ma_2" type="checkbox" value="on" <?php if ( $time_slot_2[4] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_ma_2" class="text-27 margin-5">ma</label>
+                                        <label for="fs_rb_weekday_ma_2" class="text-27 margin-5" id="ma_2">ma</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_di_2" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_di_2" name="fs_rb_weekday_di_2" type="checkbox" value="on" <?php if ( $time_slot_2[5] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_di_2" class="text-27 margin-5">di</label>
+                                        <label for="fs_rb_weekday_di_2" class="text-27 margin-5" id="di_2">di</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_wo_2" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_wo_2" name="fs_rb_weekday_wo_2" type="checkbox" value="on" <?php if ( $time_slot_2[6] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_wo_2" class="text-27 margin-5">wo</label>
+                                        <label for="fs_rb_weekday_wo_2" class="text-27 margin-5" id="wo_2">wo</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_do_2" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_do_2" name="fs_rb_weekday_do_2" type="checkbox" value="on" <?php if ( $time_slot_2[7] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_do_2" class="text-27 margin-5">do</label>
+                                        <label for="fs_rb_weekday_do_2" class="text-27 margin-5" id="do_2">do</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_vr_2" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_vr_2" name="fs_rb_weekday_vr_2" type="checkbox" value="on" <?php if ( $time_slot_2[8] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_vr_2" class="text-27 margin-5">vr</label>
+                                        <label for="fs_rb_weekday_vr_2" class="text-27 margin-5" id="vr_2">vr</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_za_2" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_za_2" name="fs_rb_weekday_za_2" type="checkbox" value="on" <?php if ( $time_slot_2[9] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_za_2" class="text-27 margin-5">za</label>
+                                        <label for="fs_rb_weekday_za_2" class="text-27 margin-5" id="za_2">za</label>
                                         <input type="hidden"                                  name="fs_rb_weekday_zo_2" value="off">
                                         <input class="cursor-pointer margin-6" id="fs_rb_weekday_zo_2" name="fs_rb_weekday_zo_2" type="checkbox" value="on" <?php if ( $time_slot_2[10] == 1 ) { echo 'checked'; }?>>
-                                        <label for="fs_rb_weekday_zo_2" class="text-27 margin-5">zo</label>
+                                        <label for="fs_rb_weekday_zo_2" class="text-27 margin-5" id="zo_2">zo</label>
                                     </div>
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell  width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 far fa-clock"></i>
-                                        <label>Schakelen op piek of dal tarief</label>
+                                        <label><?php echo strIdx( 674 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
-                                            <input class="cursor-pointer" id="fs_rb_tarif_mode_piek" name="fs_rb_tarif_mode" type="radio" value="1" <?php if ( config_read(91) == 'P' ) { echo 'checked'; }?>>Piek
-                                            <input class="cursor-pointer" id="fs_rb_tarif_mode_dal"  name="fs_rb_tarif_mode" type="radio" value="0" <?php if ( config_read(91) == 'D' ) { echo 'checked'; }?>>Dal
+                                            <input class="cursor-pointer" id="fs_rb_tarif_mode_piek" name="fs_rb_tarif_mode" type="radio" value="1" <?php if ( config_read(91) == 'P' ) { echo 'checked'; }?>><?php echo strIdx( 658 )?>
+                                            <input class="cursor-pointer" id="fs_rb_tarif_mode_dal"  name="fs_rb_tarif_mode" type="radio" value="0" <?php if ( config_read(91) == 'D' ) { echo 'checked'; }?>><?php echo strIdx( 659 )?>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-map-pin"></i>
-                                        <label>GPIO pin selectie</label>
+                                        <label><?php echo strIdx( 665 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
@@ -619,40 +624,40 @@ $(function () {
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="text-10 pad-7 fas fa-toggle-off"></i>
-                                        <label>tarief schakeling aan of uit</label>
+                                        <label><?php echo strIdx( 172 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
-                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_on"  name="fs_rb_tarifpowerswitcher" type="radio" value="1" <?php if ( config_read(90) == 1 ) { echo 'checked'; }?>>Aan
-                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_off" name="fs_rb_tarifpowerswitcher" type="radio" value="0" <?php if ( config_read(90) == 0 ) { echo 'checked'; }?>>Uit
+                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_on"  name="fs_rb_tarifpowerswitcher" type="radio" value="1" <?php if ( config_read(90) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_off" name="fs_rb_tarifpowerswitcher" type="radio" value="0" <?php if ( config_read(90) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-toggle-off"></i>
-                                        <label>geforceerd in schakelen</label>
+                                        <label><?php echo strIdx( 662 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
-                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_forced_on"  name="fs_rb_tarifpowerswitcher_forced" type="radio" value="1" <?php if ( config_read(92) == 1 ) { echo 'checked'; }?>>Aan
-                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_forced_off" name="fs_rb_tarifpowerswitcher_forced" type="radio" value="0" <?php if ( config_read(92) == 0 ) { echo 'checked'; }?>>Uit
+                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_forced_on"  name="fs_rb_tarifpowerswitcher_forced" type="radio" value="1" <?php if ( config_read(92) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_forced_off" name="fs_rb_tarifpowerswitcher_forced" type="radio" value="0" <?php if ( config_read(92) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="rTableRow text-16">
-                                    <div class="rTableCell width-430">
+                                    <div class="rTableCell width-385">
                                         <i class="pad-7 fas fa-toggle-off"></i>
-                                        <label>GPIO uitgang geïnverteerd</label>
+                                        <label><?php echo strIdx( 663 )?></label>
                                     </div>
                                     <div class="rTableCell">
                                         <div class='pad-22'>
-                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_inverted_on"  name="fs_rb_tarifpowerswitcher_inverted" type="radio" value="1" <?php if ( config_read( 156 ) == 1 ) { echo 'checked'; }?>>Aan
-                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_inverted_off" name="fs_rb_tarifpowerswitcher_inverted" type="radio" value="0" <?php if ( config_read( 156 ) == 0 ) { echo 'checked'; }?>>Uit
+                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_inverted_on"  name="fs_rb_tarifpowerswitcher_inverted" type="radio" value="1" <?php if ( config_read( 156 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                            <input class="cursor-pointer" id="fs_rb_tarifpowerswitcher_inverted_off" name="fs_rb_tarifpowerswitcher_inverted" type="radio" value="0" <?php if ( config_read( 156 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                         </div>
                                     </div>
                                 </div>
@@ -660,7 +665,7 @@ $(function () {
                                 <div class="rTableRow text-16">
                                     <div class="rTableCell width-430">
                                         <i class="pad-7 fas fa-bolt"></i>
-                                        <label>Huidig status is :</label>
+                                        <label><?php echo strIdx( 246 )?>:</label>
                                         <span id="tarifswitcher_status"></span>
                                     </div>
                                 </div>
@@ -668,7 +673,7 @@ $(function () {
                                 <div class="rTableRow text-16">
                                     <div class="rTableCell width-430">
                                         <i class="pad-7 far fa-clock"></i>
-                                        <label>laatste schakel actie:</label>
+                                        <label><?php echo strIdx( 664 )?>:</label>
                                         <span id="tarifswitcher_timestamp"></span>
                                     </div>
                                 </div>
@@ -727,6 +732,7 @@ jQuery.validator.addMethod( "ztatz_gpio", function(value, element) {
 
 
 $(function() {
+
     $("#formvalues").validate({
         rules: {
             'gpio_list':{
@@ -832,6 +838,22 @@ $(function() {
             return false;  // will suppress error messages    
         }
     }); 
+
+    document.getElementById('ma_1').innerHTML = day.shortWeekdays[1];
+    document.getElementById('ma_2').innerHTML = day.shortWeekdays[1];
+    document.getElementById('di_1').innerHTML = day.shortWeekdays[2];
+    document.getElementById('di_2').innerHTML = day.shortWeekdays[2];
+    document.getElementById('wo_1').innerHTML = day.shortWeekdays[3];
+    document.getElementById('wo_2').innerHTML = day.shortWeekdays[3];
+    document.getElementById('do_1').innerHTML = day.shortWeekdays[4];
+    document.getElementById('do_2').innerHTML = day.shortWeekdays[4];
+    document.getElementById('vr_1').innerHTML = day.shortWeekdays[5];
+    document.getElementById('vr_2').innerHTML = day.shortWeekdays[5];
+    document.getElementById('za_1').innerHTML = day.shortWeekdays[6];
+    document.getElementById('za_2').innerHTML = day.shortWeekdays[6];
+    document.getElementById('zo_1').innerHTML = day.shortWeekdays[0];
+    document.getElementById('zo_2').innerHTML = day.shortWeekdays[0];
+
 });
 </script>
 <?php echo autoLogout();?>

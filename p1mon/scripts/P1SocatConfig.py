@@ -32,7 +32,7 @@ def Main( argv ):
         action='help', default=argparse.SUPPRESS,
         help='Laat dit bericht zien en stop.')
 
-    parser.add_argument( '-e', '--enable', 
+    parser.add_argument( '-e', '--enable',
         required=False,
         action="store_true",
         help="activeer de socat service." )
@@ -46,18 +46,11 @@ def Main( argv ):
         required=False,
         action="store_true",
         help="schrijf de succesvolle start timestamp naar de status database." )
-    
-    parser.add_argument( '-ft', '--failtimestamp',
-        required=False,
-        action="store_true",
-        help="schrijf de timestamp van het falen naar de status database." )
-    
-    parser.add_argument( '-s', '--status',
-        required=False,
-        action="store_true",
-        help="scontroleer de status en update de status database." )
+
 
     args = parser.parse_args()
+
+    print (args)
 
     ###################################
     # init stuff                      #
@@ -88,7 +81,6 @@ def Main( argv ):
         flog.info( inspect.stack()[0][3] + ": socat service succesvol gestart." )
         sys.exit(0)
 
-
     if args.disable == True:
         try:
             flog.info( "disable gestart" )
@@ -99,7 +91,6 @@ def Main( argv ):
             sys.exit(1)
         flog.info( inspect.stack()[0][3] + ": socat service succesvol gestopt." )
         sys.exit(0)
-
 
     if args.succestimestamp == True:
         try:
@@ -115,7 +106,6 @@ def Main( argv ):
 
     flog.warning( inspect.stack()[0][3] + ": geen commandline opties opgegeven. " )
     sys.exit(1)
-
 
 
 ########################################################

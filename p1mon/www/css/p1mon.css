@@ -1751,6 +1751,9 @@ a:hover {
     padding-bottom: 5px;
 }
 
+.pad-42 {
+    width: 175px;
+}
 
 .pos-1 {
     position: relative;
@@ -2156,6 +2159,11 @@ a:hover {
     height: 23px;
 }
 
+.pos-54 {
+    width: 198px;
+    padding-right: 4px;
+}
+
 
 .fieldset-1 {
     border: 0px;
@@ -2274,6 +2282,10 @@ a:hover {
     width: 80px !important; 
 }
 
+.width-120 {
+    width: 120px !important; 
+}
+
 .width-140 {
     width: 140px !important;
 }
@@ -2300,6 +2312,10 @@ a:hover {
 
 .width-320 {
     width: 320px !important; 
+}
+
+.width-385 {
+    width: 385px !important;
 }
 
 .width-430 {

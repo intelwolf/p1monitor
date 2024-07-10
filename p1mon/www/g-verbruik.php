@@ -31,19 +31,20 @@ if ( checkDisplayIsActive(18) == false) { return; }
 <script src="./js/p1mon-util.js"></script>
 
 <script>
-var currentGasUsage     = 0;
-var previousGasUsage    = -1; 
-var secs                = 10;
+var currentGasUsage         = 0;
+var previousGasUsage        = -1;
+var secs                    = 10;
 
-var GDailyGasM3         = 0;
-var GdataHourGas        = [];
-var currentGasUsageMaxValue = <?php echo config_read(41); ?>;
-var predictionInOn          = <?php echo config_read(59); ?>;
+var GDailyGasM3             = 0;
+var GdataHourGas            = [];
+var currentGasUsageMaxValue = <?php echo config_read( 41 ); ?>;
+var dayGasUsageMaxValue     = <?php echo config_read( 207 ); ?>;
+var predictionInOn          = <?php echo config_read( 59 ); ?>;
 var currentGasUsageMinValue = 0;
-var currentGasUsage     = 0;
+var currentGasUsage         = 0;
 var aninmatecurrentGasUsageTimer = 0;
-var gasCount            = 25;
-var Gaverage_gas_value  = 0;
+var gasCount                = 25;
+var Gaverage_gas_value      = 0;
 
 function readJsonApiSmartMeter( cnt ){ 
     $.getScript( "./api/v1/powergas/hour?limit=" + cnt, function( data, textStatus, jqxhr ) {
@@ -261,7 +262,7 @@ function createDailytUseChart() {
             enabled: false
         },
         yAxis: {
-            max: 20,
+            max: dayGasUsageMaxValue,
             min: 0,
             stops: [
                 [0.1, "#55BF3B"], // green
@@ -285,6 +286,7 @@ function createDailytUseChart() {
         },
         labels: {
             style: {
+                color: "#6E797C",
                 fontWeight: "bold",
                 fontSize: "28px"
             },
@@ -363,9 +365,9 @@ function creatCurrentUseChart() {
             text: "m<sup>3</sup>/uur",
             style: {
                 color: "#6E797C",
-                    fontWeight: "bold",
-                    fontSize: "55px"
-                },
+                fontWeight: "bold",
+                fontSize: "55px"
+            },
             },
             labels: {
                 color: "#6E797C",
@@ -373,6 +375,7 @@ function creatCurrentUseChart() {
                     return this.value 
                 },
                 style: {
+                    color: "#6E797C",
                     fontWeight: "bold",
                     fontSize: "26px"
                 },

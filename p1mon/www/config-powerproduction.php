@@ -28,6 +28,9 @@ if( $localip == False ){
         }
 }
 
+$sw_off = strIdx( 193 );
+$sw_on = strIdx( 192 );
+
 #print_r($_POST);
 $showStatusOutput = 0;
 if ( isset($_POST["fs_rb_kwhmeter_reset"]) ) {
@@ -105,10 +108,10 @@ if( isset($_POST["gpio_kwhmeter"]) ) { //ok
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>Energie levering configuratie</title>
+<title><?php echo ucfirst(strIdx( 697 ))?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -219,44 +222,44 @@ $(function () {
                     <form name="formvalues" id="formvalues" method="POST">
 
                         <div class="frame-4-top">
-                            <span class="text-15">opgewekte kWh</span>
+                            <span class="text-15"><?php echo strIdx( 698 )?></span>
                         </div>
                         <div class="frame-4-bot">
                            
                             <div class="float-left">
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-14 fas fa-map-pin"></i>
-                                <label class="text-10">GPIO pin selectie</label> 
+                                <label class="text-10"><?php echo strIdx( 665 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">kWh S0 puls meting actief</label>
+                                <label class="text-10"><?php echo strIdx( 699 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-bolt"></i>
-                                <label class="text-10" title='<?php echo strIdx( 92 );?>'>puls waarde in kWh</label>
+                                <label class="text-10" title='<?php echo strIdx( 92 );?>'><?php echo strIdx( 700 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-27 text-10 fas fa-bolt"></i>
-                                <label class="text-10" title='<?php echo strIdx( 93 );?>'>kWh meterstand hoog tarief in kWh</label>
+                                <label class="text-10" title='<?php echo strIdx( 93 );?>'><?php echo strIdx( 701 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-27 text-10 fas fa-bolt"></i>
-                                <label class="text-10" title='<?php echo strIdx( 93 );?>'>kWh meterstand laag tarief in kWh</label>
+                                <label class="text-10" title='<?php echo strIdx( 93 );?>'><?php echo strIdx( 702 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-27 text-10 far fa-clock"></i>
-                                <label class="text-10" title='<?php echo strIdx( 96 );?>'>kWh meterstand timestamp</label>
+                                <label class="text-10" title='<?php echo strIdx( 96 );?>'><?php echo strIdx( 703 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-toggle-off"></i>
-                                <label class="text-10" title='<?php echo strIdx( 94 );?>'>kWh meterstand reset</label>
+                                <label class="text-10" title='<?php echo strIdx( 94 );?>'><?php echo strIdx( 704 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-bolt"></i>
-                                <label class="text-10" title='<?php echo strIdx( 97 );?>'>kWh meterstand hoog tarief</label>
+                                <label class="text-10" title='<?php echo strIdx( 97 );?>'><?php echo strIdx( 705 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-bolt"></i>
-                                <label class="text-10" title='<?php echo strIdx( 97 );?>'>kWh meterstand laag tarief</label>
+                                <label class="text-10" title='<?php echo strIdx( 97 );?>'><?php echo strIdx( 706 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-bolt"></i>
-                                <label class="text-10" title='<?php echo strIdx( 97 );?>'>kWh meterstand totaal</label>
+                                <label class="text-10" title='<?php echo strIdx( 97 );?>'><?php echo strIdx( 707 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 far fa-clock"></i>
-                                <label class="text-10" title='<?php echo strIdx( 95 );?>'>tijdstip kWh puls</label>
+                                <label class="text-10" title='<?php echo strIdx( 95 );?>'><?php echo strIdx( 708 )?></label>
                             </div>
                             <div class="float-right pad-1">
                                 <p class="p-1"></p>
@@ -265,8 +268,8 @@ $(function () {
                                 </select>
                                 <p class="p-1"></p>
                                 <div class=''>
-                                    <input class="cursor-pointer" id="fs_rb_kwhmeter_on"  name="fs_rb_kwhmeter" type="radio" value="1" <?php if ( config_read( 125 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="fs_rb_kwhmeter_off" name="fs_rb_kwhmeter" type="radio" value="0" <?php if ( config_read( 125 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    <input class="cursor-pointer" id="fs_rb_kwhmeter_on"  name="fs_rb_kwhmeter" type="radio" value="1" <?php if ( config_read( 125 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" id="fs_rb_kwhmeter_off" name="fs_rb_kwhmeter" type="radio" value="0" <?php if ( config_read( 125 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                 </div>
                                 <p class="p-1"></p>
                                 <input title='<?php echo strIdx( 92 );?>' class="input-13 color-settings color-input-back" id="puls_kwh_value" name="puls_kwh_value" type="text" value="<?php echo config_read( 127 );?>">
@@ -282,13 +285,13 @@ $(function () {
                                     <input class="cursor-pointer" id="fs_rb_kwhmeter_reset_off" name="fs_rb_kwhmeter_reset" type="radio" value="0" checked>Uit
                                 </div>
                                 <p class="p-1"></p>
-                                <div title='<?php echo strIdx( 97 );?>' class="text-10 pad-20" ><span id="verbruikKwhHoog">onbekend</span></div>
+                                <div title='<?php echo strIdx( 97 );?>' class="text-10 pad-20" ><span id="verbruikKwhHoog"><?php echo strIdx( 269 )?></span></div>
                                 <p class="p-1"></p>
-                                <div title='<?php echo strIdx( 97 );?>' class="text-10 pad-20" ><span id="verbruikKwhLaag">onbekend</span></div>
+                                <div title='<?php echo strIdx( 97 );?>' class="text-10 pad-20" ><span id="verbruikKwhLaag"><?php echo strIdx( 269 )?></span></div>
                                 <p class="p-1"></p>
-                                <div title='<?php echo strIdx( 97 );?>' class="text-10 pad-20" ><span id="verbruikKwhTotaal">onbekend</span></div>
+                                <div title='<?php echo strIdx( 97 );?>' class="text-10 pad-20" ><span id="verbruikKwhTotaal"><?php echo strIdx( 269 )?></span></div>
                                 <p class="p-1"></p>
-                                <div title='<?php echo strIdx( 95 );?>' class="text-10 pad-20" ><span id="kwhmeter_puls_timestamp">onbekend</span></div>
+                                <div title='<?php echo strIdx( 95 );?>' class="text-10 pad-20" ><span id="kwhmeter_puls_timestamp"><?php echo strIdx( 269 )?></span></div>
                             </div>
                         </div>
                         <p></p>
@@ -300,7 +303,7 @@ $(function () {
 
                 <div id="right-wrapper-config-right-4">
                     <div class="frame-4-top">
-                        <span class="text-15">hulp</span>
+                        <span class="text-15"><?php echo strIdx( 155 )?></span>
                     </div>
                     <div class="frame-4-bot text-10">
                         <img class="pos-1" alt="PI GPIO pin layout" src="./img/pin_layout.svg">
@@ -316,7 +319,7 @@ $(function () {
             <i class="color-select fas fa-times-circle" data-fa-transform="grow-6"></i>
         </div>
     <div class="frame-4-top">
-        <span class="text-15">Meterstand reset logging</span>
+        <span class="text-15"><?php echo strIdx( 709 )?></span>
             </div>
                 <div class="frame-4-bot">
                     <div id="upgrade_asssist_logging" class="text-9">
@@ -388,12 +391,12 @@ $(function() {
         errorPlacement: function(error, element) {
             $(this).addClass('error');
             //console.log ( 'errorPlacement' );
-            return false;  // will suppress error messages    
+            return false;  // will suppress error messages
         }
     }); 
 });
 
-$('#assist_logging_close').click(function() {    
+$('#assist_logging_close').click(function() {
    hideStuff('counter_status');
 });
 

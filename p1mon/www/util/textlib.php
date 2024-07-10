@@ -134,7 +134,7 @@ $arr = array (
     ),
 /* 028 */   array(
     'Grenswaarde kosten is het bedrag wat je per maand aan kosten maakt of wil maken. In de kostenoverzicht levert dit een grenslijn op die aangeeft of je over of onder je maandbedrag blijft.',
-    'Limit cost is the amount that you incur or want to incur per month. In the cost overview, this produces a boundary line that indicates whether you stay over or under your monthly amount.',
+    'threshold cost is the amount that you incur or want to incur per month. In the cost overview, this produces a boundary line that indicates whether you stay over or under your monthly amount.',
     'Le coût limite est le montant que vous engagez ou que vous souhaitez engager par mois. Dans l&apos;aperçu des coûts, cela produit une ligne de démarcation qui indique si vous restez au-dessus ou en dessous de votre montant mensuel.'
     ),
 /* 029 */   array(
@@ -809,7 +809,7 @@ $arr = array (
     'max. dagwaarde e-verbruik','max. day value e-consumption','max. e-consommation valeur journalière'
     ),
 /* 199 */ array(
-    'max. waarde gas verbruik','max. value gas consumption','max. consom. de gaz de valeur.'
+    'max. waarde gasverbruik','max. value gas consumption','max. consom. de gaz de valeur.'
     ),
 /* 200 */ array(
     'max. fase meters','max. phase meters','compteurs de phase max.'
@@ -1374,7 +1374,7 @@ $arr = array (
     'Liter','Liter','Litres'
 ),
 /* 364 */ array(
-    'gas verbruik','gas consumption','consommation de gaz'
+    'gasverbruik','gas consumption','consommation de gaz'
 ),
 /* 365 */ array(
     'voorspelling actief','forecast active','prévisions actives'
@@ -1489,8 +1489,8 @@ $arr = array (
 /* 401 */ array(
     'kWh levering','kWh production','production de kWh'
 ),
-/* 402 */ array(
-    'gas verbruik','gas consumption','consommation de gaz'
+/* 402 */ array( /* TODO free to use */ 
+    '','',''
 ),
 /* 403 */ array(
     'actueel verbruik','current consumption','consommation de courant'
@@ -1517,7 +1517,7 @@ $arr = array (
     'laatste geleverd','latest production','dernière production'
 ),
 /* 411 */ array(
-    'actueel gas verbruik','current gas consumption','consommation actuelle de gaz'
+    'actueel gasverbruik','current gas consumption','consommation actuelle de gaz'
 ),
 /* 412 */ array(
     'laatste vierentwintig uur verbruik','last 24 hours consumption','consommation des dernières 24 heures'
@@ -1819,7 +1819,7 @@ $arr = array (
     'kosten per maand','monthly costs','coûts mensuels'
 ),
 /* 505 */ array(
-    'Euro per maand','Euro per month','Euro par mois'
+    'euro per maand','euro per month','euro par mois'
 ),
 /* 506 */ array(
     'kosten per jaar','annual costs','coûts annuels'
@@ -2230,18 +2230,333 @@ $arr = array (
     'home','home','d’accueil'
 ),
 /* 616 */ array(
-    '','',''
+    'max. waarde dag gasverbruik','max. daily gas consumption','consom.journalière max.de gaz'
 ),
 /* 617 */ array(
-    '','',''
+    'tarieven configuratie','tariff configuration','configuration des tarifs'
 ),
 /* 618 */ array(
+    'vaste tarieven electricteit','electricty fixed tariffs',"tarifs fixes de l'électricité"
+),
+/* 619 */ array(
+    'vaste tarieven gas','gas fixed tariffs','tarifs fixes gaz'
+),
+/* 620 */ array(
+    'vaste tarieven water','fixed water tariffs','tarifs fixes eau'
+),
+/* 621 */ array(
+    'flexibele tarieven','flexible tariffs','tarifs flexibles'
+),
+/* 622 */ array(
+    'kosten','costs','coûts'
+),
+/* 623 */ array(
+    'vastrecht','standing charge','frais fixes'
+),
+/* 624 */ array(
+    'kWh kosten','kWh costs','Coûts du kWh'
+),
+/* 625 */ array(
+    'gas kosten','gas cost','coût du gaz'
+),
+/* 626 */ array(
+    'hoog/piek','high/peak','haute/crête'
+),
+/* 627 */ array(
+    'laag/dal','low/off-peak','basse/vallée'
+),
+/* 628 */ array(
+    'per maand','per month','par mois'
+),
+/* 629 */ array(
+    'water','water',"l'eau"
+),
+/* 630 */ array(
+    'kosten selectie','cost selection','sélection des coûts'
+),
+/* 631 */ array(
+    'inkoop tarief','purchase price',"taux d'achat"
+),
+/* 632 */ array(
+    'tariefverstrekker','tariff provider','fournisseur de tarifs'
+),
+/* 633 */ array(
+    'log viewer','log viewer','visionneuse de logs'
+),
+/* 634 */ array(
+    'beschikbare log bestanden','available log files','les fichiers log disponibles'
+),
+/* 635 */ array(
+    'automatische vernieuwen','automatic renewal','renouvellement automatique'
+),
+/* 636 */ array(
+    'download','download','télécharger'
+),
+/* 637 */ array(
+    'backup configuratie','backup configuration','configuration de sauvegarde'
+),
+/* 638 */ array(
+    'timer instellingen','timer settings','réglages du minuteur'
+),
+/* 639 */ array(
+    'FTP gegevens','FTP details','données FTP'
+),
+/* 640 */ array(
+    'Dropbox gegevens','Dropbox details','données Dropbox'
+),
+/* 641 */ array(
+    'dag van de maand','day of the month','jour du mois'
+),
+/* 642 */ array(
+    'dag van de week','day of the week','jour de la semaine'
+),
+/* 643 */ array(
+    'FTP mode','FTP mode','Mode FTP'
+),
+/* 644 */ array(
+    'account naam','account name','nom du compte'
+),
+/* 645 */ array(
+    'FTP folder','FTP directory','Dossier FTP'
+),
+/* 646 */ array(
+    'server adres','server address','adresse du serveur'
+),
+/* 647 */ array(
+    'server poort','server port','port serveur'
+),
+/* 648 */ array(
+    'aantal versies','number of versions','nombre de versions'
+),
+/* 649 */ array(
+    'laatste back-up','latest backup','sauvegarde finale'
+),
+/* 650 */ array(
+    'succesvol op','successful on','réussie le'
+),
+/* 651 */ array(
+    'back-up status:','backup status:','état des sauvegardes:'
+),
+/* 652 */ array(
+    'grenswaarde','threshold','limite'
+),
+/* 653 */ array(
+    'security configuratie','security configuration','configuration de sécurité'
+),
+/* 654 */ array(
+    'systeem ID','system ID','L&apos;ID système'
+),
+/* 655 */ array(
+    'internet toegang','internet access',"accès à l'internet"
+),
+/* 656 */ array(
+    'configuratie via internet toestaan','allow configuration via internet',"permet la configuration via l'internet"
+),
+/* 657 */ array(
+    'in en output configuratie','input and output configuration','configuration des entrées et sorties'
+),
+/* 658 */ array(
+    'piek','high','pic'
+),
+/* 659 */ array(
+    'dal','off-peak','heures creuses'
+),
+/* 660 */ array(
+    'gemiddelde grenswaarde vermogen inschakelen','average limit power switch-on','limite moyenne puissance en marche'
+),
+/* 661 */ array(
+    'teruglevering schakelaar','production switch','commutateur de production'
+),
+/* 662 */ array(
+    'geforceerd inschakelen','forced switch-on','mise en marche forcée'
+),
+/* 663 */ array(
+    'GPIO uitgang geïnverteerd','GPIO output inverted','Sortie GPIO inversée'
+),
+/* 664 */ array(
+    'laatste schakelactie','last switching action','dernière manœuvre'
+),
+/* 665 */ array(
+    'GPIO-pin selectie','GPIO pin selection','Sélection du pin GPIO'
+),
+/* 666 */ array(
+    'gemiddelde tijd inschakelen (min.)','average switch-on time (min.)',"durée moyenne d'allumage (min.)"
+),
+/* 667 */ array(
+    'gemiddelde grenswaarde vermogen uitschakelen','average power cut-off limit',"limite de coupure de l'alimentation moyenne"
+),
+/* 668 */ array(
+    'gemiddelde tijd uitschakelen (min.)','average switch-off time (min.)',"temps d'arrêt moyen (min.)"
+),
+/* 669 */ array(
+    'minimale tijd ingeschakeld (min.)','minimum switch-on time (min.)',"durée minimale d'allumage (min.)"
+),
+/* 670 */ array(
+    'minimale tijd uitgeschakeld (min.)','minimum time switched off (min.)',"durée minimale d'arrêt (min.)"
+),
+/* 671 */ array(
+    'huidige schakel vermogen in Watt (0 is uit)','current switching power in watts (0 is off)','puissance de commutation actuelle en watts (0 est éteint)'
+),
+/* 672 */ array(
+    'tariefschakelaar','tariff switch','commutateur de tarif'
+),
+/* 673 */ array(
+    'tijdsperiodes voor de schakeling','switching time periods','périodes de commutation'
+),
+/* 674 */ array(
+    'schakelen op piek of daltarief','switching on peak or off-peak tariffs','passage au tarif heures pleines ou heures creuses'
+),
+/* 675 */ array(
+    'MQTT configuratie','MQTT configuration','configuration MQTT'
+),
+/* 676 */ array(
+    'MQTT client parameters','MQTT client parameters','paramètres du client MQTT'
+),
+/* 677 */ array(
+    'MQTT programma','MQTT program','programme MQTT'
+),
+/* 678 */ array(
+    'client ID','client ID','ID client'
+),
+/* 679 */ array(
+    'topic voorvoegsel','topic prefix','préfixe du topic'
+),
+/* 680 */ array(
+    'broker servernaam / IP','broker servername / IP','nom du serveur du broker / IP'
+),
+/* 681 */ array(
+    'broker IP poort','broker IP port','Port IP du broker'
+),
+/* 682 */ array(
+    'broker keep alive tijd','broker keep alive time','broker maintenir le temps de vie'
+),
+/* 683 */ array(
+    'broker gebruikersnaam','broker user name',"nom d'utilisateur du broker"
+),
+/* 684 */ array(
+    'broker gebruikerswachtwoord','broker user password',"mot de passe de l'utilisateur du broker"
+),
+/* 685 */ array(
+    'QoS (Quality of Service)','QoS (Quality of Service)','QoS (Qualité de service)'
+),
+/* 686 */ array(
+    'protocol versie','protocol version','version du protocole'
+),
+/* 687 */ array(
+    'laatst verstuurde bericht','last message sent','dernier message envoyé'
+),
+/* 688 */ array(
+    'verzenden watermeter','sending water meter',"envoi du compteur d'eau"
+),
+/* 689 */ array(
+    'verzenden smartmeter','sending smart meter',"envoi d'un compteur intelligent"
+),
+/* 690 */ array(
+    'verzenden weerinformatie','sending weather information',"envoi d'informations météorologiques"
+),
+/* 691 */ array(
+    'verzenden binnentemperatuur','sending indoor temperature','envoi de la température intérieure'
+),
+/* 692 */ array(
+    'verzenden faseinformatie','sending phase information',"envoi d'informations sur les phases"
+),
+/* 693 */ array(
+    'verzenden opgewekte vermogen','sending generated power',"envoi de l'énergie produite"
+),
+/* 694 */ array(
+    'verzenden kWh en gas','sending kWh and gas','envoi de kWh et de gaz'
+),
+/* 695 */ array(
+    'verzenden financiële informatie','sending financial information',"envoi d'informations financières"
+),
+/* 696 */ array(
+    'MQTT published topics','MQTT published topics','Thèmes publiés MQTT'
+),
+/* 697 */ array(
+    'Energie levering configuratie','Energy production configuration',"Configuration de la production d'énergie"
+),
+/* 698 */ array(
+    'opgewekte kWh','kWh produced','kWh produit'
+),
+/* 699 */ array(
+    'kWh S0 puls meting','kWh S0 pulse reading',"kWh S0 lecture d'impulsion"
+),
+/* 700 */ array(
+    'puls waarde in kWh','pulse value in kWh',"valeur d'impulsion en kWh"
+),
+/* 701 */ array(
+    'kWh meterstand hoog tarief in kWh',
+    'kWh meter reading high tariff in kWh',
+    'kWh relevé de compteur tarif élevé en kWh'
+),
+/* 702 */ array(
+    'kWh meterstand laag tarief in kWh',
+    'kWh meter reading low tariff in kWh',
+    'kWh relevé de compteur tarif bas en kWh'
+),
+/* 703 */ array(
+    'kWh meterstand timestamp','kWh meter reading timestamp','Horodatage du relevé des kWh'
+),
+/* 704 */ array(
+    'kWh meterstand reset','kWh meter readings reset','Remise à zéro des relevés de kWh'
+),
+/* 705 */ array(
+    'kWh meterstand hoog tarief',
+    'kWh meter reading high tariff',
+    'kWh relevé de compteur tarif élevé'
+),
+/* 706 */ array(
+    'kWh meterstand laag tarief',
+    'kWh meter reading on low tariff',
+    'Relevé de compteur de kWh sur le tarif bas'
+),
+/* 707 */ array(
+    'kWh meterstand totaal','kWh meter reading total','kWh relevé de compteur total'
+),
+/* 708 */ array(
+    'tijdstip kWh puls','time kWh pulse','temps kWh impulsion'
+),
+/* 709 */ array(
+    'meterstand reset logging',
+    'meter reading reset logging',
+    'enregistrement de la remise à zéro du compteur'
+),
+/* 710 */ array(
+    'watermeterconfiguratie','watermeter configuration',"configuration du compteur d'eau"
+),
+/* 711 */ array(
+    'watermeter','watermeter',"compteur d'eau"
+),
+/* 712 */ array(
+    'watermeter puls meting','watermeter pulse measurement',"compteur d'eau puls meting"
+),
+/* 713 */ array(
+    'puls waarde in Liter','pulse value in litres',"valeur d'impulsion en litres"
+),
+/* 714 */ array(
+    'watermeter stand in','water meter reading',"compteur d'eau stand in"
+),
+/* 715 */ array(
+    'meterstand timestamp','meter reading timestamp','horodatage du relevé de compteur'
+),
+/* 716 */ array(
+    'reset activeren','trigger reset','activer réinitialiser'
+),
+/* 717 */ array(
+    'watermeter stand','water meter reading',"relevé des compteurs d'eau"
+),
+/* 718 */ array(
+    'tijdstip water puls','water pulse time',"temps impulsion de l'eau"
+),
+/* 719 */ array(
     '','',''
 ),
-
-
-
-
+/* 720 */ array(
+    '','',''
+),
+/* 721 */ array(
+    '','',''
+),
 
 );
 

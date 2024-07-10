@@ -27,6 +27,9 @@ if( $localip == False ){
         }
 }
 
+$sw_off = strIdx( 193 );
+$sw_on = strIdx( 192 );
+
 #print_r($_POST);
 $showStatusOutput = 0;
 if ( isset($_POST["fs_rb_watermeter_reset"]) ) {
@@ -97,10 +100,10 @@ if( isset($_POST["gpio_water"]) ) { //ok
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>Water levering configuratie</title>
+<title><?php echo ucfirst(strIdx( 710 ))?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -203,35 +206,35 @@ $(function () {
                     <form name="formvalues" id="formvalues" method="POST">
 
                         <div class="frame-4-top">
-                            <span class="text-15">watermeter</span>
+                            <span class="text-15"><?php echo strIdx( 711 )?></span>
                         </div>
                         <div class="frame-4-bot">
                            
                             <div class="float-left">
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-14 fas fa-map-pin"></i>
-                                <label class="text-10">GPIO pin selectie</label> 
+                                <label class="text-10"><?php echo strIdx( 665 )?></label> 
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">Watermeter puls meting actief</label>
+                                <label class="text-10"><?php echo strIdx( 712 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-tint"></i>
-                                <label class="text-10" title='<?php echo strIdx( 84 );?>'>puls waarde in Liter</label>
+                                <label class="text-10" title='<?php echo strIdx( 84 );?>'><?php echo strIdx( 713 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-27 text-10 fas fa-tint"></i>
-                                <label class="text-10" title='<?php echo strIdx( 85 );?>'>watermeter stand in m&#179;</label>
+                                <label class="text-10" title='<?php echo strIdx( 85 );?>'><?php echo strIdx( 714 )?> m&#179;</label>
                                 <p class="p-1"></p>
                                 <i class="pad-27 text-10 far fa-clock"></i>
-                                <label class="text-10" title='<?php echo strIdx( 86 );?>'>meterstand timestamp</label>
+                                <label class="text-10" title='<?php echo strIdx( 86 );?>'><?php echo strIdx( 715 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-toggle-off"></i>
-                                <label class="text-10" title='<?php echo strIdx( 87 );?>'>meterstand reset</label>
+                                <label class="text-10" title='<?php echo strIdx( 87 );?>'><?php echo strIdx( 716 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 fas fa-tint"></i>
-                                <label class="text-10" title='<?php echo strIdx( 89 );?>'>watermeter stand</label>
+                                <label class="text-10" title='<?php echo strIdx( 89 );?>'><?php echo strIdx( 717 )?></label>
                                 <p class="p-1"></p>
                                 <i class="pad-7 text-10 far fa-clock"></i>
-                                <label class="text-10" title='<?php echo strIdx( 90 );?>'>tijdstip water puls</label>
+                                <label class="text-10" title='<?php echo strIdx( 90 );?>'><?php echo strIdx( 718 )?></label>
                             </div>
                             <div class="float-right pad-1">
                                 <p class="p-1"></p>
@@ -240,8 +243,8 @@ $(function () {
                                 </select>
                                 <p class="p-1"></p>
                                 <div class=''>
-                                    <input class="cursor-pointer" id="fs_rb_watermeter_on"  name="fs_rb_watermeter" type="radio" value="1" <?php if ( config_read( 96 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="fs_rb_watermeter_off" name="fs_rb_watermeter" type="radio" value="0" <?php if ( config_read( 96 ) == 0 ) { echo 'checked'; }?>>Uit
+                                    <input class="cursor-pointer" id="fs_rb_watermeter_on"  name="fs_rb_watermeter" type="radio" value="1" <?php if ( config_read( 96 ) == 1 ) { echo 'checked'; }?>>A<?php echo $sw_on ?>
+                                    <input class="cursor-pointer" id="fs_rb_watermeter_off" name="fs_rb_watermeter" type="radio" value="0" <?php if ( config_read( 96 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                 </div>
                                 <p class="p-1"></p>
                                 <input title='<?php echo strIdx( 84 );?>' class="input-13 color-settings color-input-back" id="puls_liter_value" name="puls_liter_value" type="text" value="<?php echo config_read( 98 );?>">
@@ -253,14 +256,14 @@ $(function () {
                                 <p class="p-1"></p>
 
                                 <div title='<?php echo strIdx( 87 );?>'>
-                                    <input class="cursor-pointer" id="fs_rb_watermeter_reset_on"  name="fs_rb_watermeter_reset" type="radio" value="1">Aan
-                                    <input class="cursor-pointer" id="fs_rb_watermeter_reset_off" name="fs_rb_watermeter_reset" type="radio" value="0" checked>Uit
+                                    <input class="cursor-pointer" id="fs_rb_watermeter_reset_on"  name="fs_rb_watermeter_reset" type="radio" value="1"><?php echo $sw_on ?>
+                                    <input class="cursor-pointer" id="fs_rb_watermeter_reset_off" name="fs_rb_watermeter_reset" type="radio" value="0" checked><?php echo $sw_off ?>
                                 </div>
                                 <p class="p-1"></p>
-                                <div title='<?php echo strIdx( 89 );?>' class="text-10 pad-20" ><span id="verbruikWater">onbekend</span></div>
+                                <div title='<?php echo strIdx( 89 );?>' class="text-10 pad-20" ><span id="verbruikWater"><?php echo strIdx( 269 );?></span></div>
                                 <p class="p-1"></p>
                                 
-                                <div title='<?php echo strIdx( 90 );?>' class="text-10 pad-20" ><span id="watermeter_puls_timestamp">onbekend</span></div>
+                                <div title='<?php echo strIdx( 90 );?>' class="text-10 pad-20" ><span id="watermeter_puls_timestamp"><?php echo strIdx( 269 );?></span></div>
                             </div>
                         </div>
                         <p></p>
@@ -272,7 +275,7 @@ $(function () {
 
                 <div id="right-wrapper-config-right-4">
                     <div class="frame-4-top">
-                        <span class="text-15">hulp</span>
+                        <span class="text-15"><?php echo strIdx( 155 );?></span>
                     </div>
                     <div class="frame-4-bot text-10">
                         <img class="pos-1" alt="PI GPIO pin layout" src="./img/pin_layout.svg">
@@ -288,7 +291,7 @@ $(function () {
             <i class="color-select fas fa-times-circle" data-fa-transform="grow-6"></i>
         </div>
     <div class="frame-4-top">
-        <span class="text-15">Meterstand reset logging</span>
+        <span class="text-15"><?php echo strIdx( 709 );?></span>
             </div>
                 <div class="frame-4-bot">
                     <div id="upgrade_asssist_logging" class="text-9">

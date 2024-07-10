@@ -24,6 +24,8 @@ if( $localip == False ){
             die();
         }
 }
+$sw_off = strIdx( 193 );
+$sw_on = strIdx( 192 );
 
 $update_MQTT_setting_flag = False;  #set this flag to true to update the database, so the Pyhton P1MQTY.py is triggert to update
 $err_cnt = -1;
@@ -216,14 +218,14 @@ function makeSelectorMQTTProctocolVersionSelector($id) {
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>MQTT configuratie</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title><?php echo ucfirst(strIdx( 675 ))?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-<link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
-<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon.css">
+<link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
@@ -304,190 +306,237 @@ $(function () {
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
                         <div class="frame-4-top">
-                            <span class="text-15">MQTT client parameters</span>
+                            <span class="text-15"><?php echo strIdx( 676 )?></span>
                         </div>
                         
                         <div class="frame-4-bot">
-                            <div class="float-left">
-                                <i class="pad-7 text-10 fas fa-toggle-off"></i>
-                                <label class="text-10">MQTT programma is actief</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-7 fas fa-wrench"></i>
-                                <label class="text-10">client ID</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-27 fas fa-wrench"></i>
-                                <label class="text-10">topic voorvoegsel</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-27 fas fa-server"></i>
-                                <label class="text-10">broker servernaam / IP</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-27 fas fa-server"></i>
-                                <label class="text-10">broker IP poort</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-27 far fa-clock"></i>
-                                <label class="text-10">broker keep alive tijd</label>
-                                <p class="p-1"></p>
+                            <div class="rTable">
 
-                                <i class="text-10 pad-27 fas fa-user"></i>
-                                <label class="text-10">broker gebruikers naam</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-27 fas fa-lock"></i>
-                                <label class="text-10">broker gebruikers wachtwoord</label>
-                                <p class="p-1"></p>
-
-                                <i class="text-10 pad-9 fas fa-medal"></i>
-                                <label class="text-10">QoS (Quality of Service)</label>
-                                <p class="p-1"></p>
-                                <i class="text-10 pad-9 fas fa-server"></i>
-                                <label class="text-10">protocol versie</label>
-                                <p class="p-1"></p>
-                                <br>
-                                <label class="text-10">laatst verstuurde bericht:</label>
-                                <p class="p-1"></p>
-                                <label class="text-10">status</label>
-                                <p class="p-1"></p>
-                            </div>
-
-                            <div class="float-left pad-1">
-                                <div class='pad-14'>
-                                    <input class="cursor-pointer" id="fs_rb_mqtt_on"  name="fs_rb_mqtt" type="radio" value="1" <?php if ( config_read( 135 ) == 1 ) { echo 'checked'; }?>>Aan
-                                    <input class="cursor-pointer" id="fs_rb_mqtt_off" name="fs_rb_mqtt" type="radio" value="0" <?php if ( config_read( 135 ) == 0 ) { echo 'checked'; }?>>Uit
-                                </div>
-                                <p class="p-1"></p>
-                                <input class="input-14 color-settings color-input-back" id="client_id" name="client_id" type="text" value="<?php echo config_read( 105 );?>">
-                                <p class="p-1"></p>
-                                <input class="input-14 color-settings color-input-back" id="topic_prefix" name="topic_prefix" type="text" value="<?php echo config_read( 106 );?>">
-                                <p class="p-1"></p>
-                                <input class="input-14 color-settings color-input-back" id="broker_host" name="broker_host" type="text" value="<?php echo config_read( 109 );?>">
-                                <p class="p-1"></p>
-                                <input class="input-14 color-settings color-input-back" id="broker_port" name="broker_port" type="text" value="<?php echo config_read( 110 );?>">
-                                <p class="p-1"></p>
-                                <input class="input-14 color-settings color-input-back" id="keep_alive" name="keep_alive" type="text" value="<?php echo config_read( 111 );?>">
-                                <p class="p-1"></p>
-                                <input class="input-14 color-settings color-input-back" id="broker_user_name" name="broker_user_name" type="text" value="<?php echo config_read( 107 );?>">
-                                <p class="p-1"></p>
-
-                                <div class="content-wrapper">
-                                    <input class="input-14 color-settings color-input-back" id="broker_user_pw" name="broker_user_pw" type="password" value="<?php echo decodeString( 108, 'mqttclpw');?>">
-                                    <div id="broker_passwd" onclick="toggelPasswordVisibility('broker_user_pw')" class="float-right pad-33 cursor-pointer">    
-                                        <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="pad-7 text-10 fas fa-toggle-off"></i>
+                                        <label class="text-10"><?php echo strIdx( 677 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="fs_rb_mqtt_on"  name="fs_rb_mqtt" type="radio" value="1" <?php if ( config_read( 135 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="fs_rb_mqtt_off" name="fs_rb_mqtt" type="radio" value="0" <?php if ( config_read( 135 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
-                                <p class="p-1"></p>
 
-                                <select class="select-6 color-select color-input-back cursor-pointer" id="qos_list" name="qos_list">
-                                    <?php makeSelectorQoSSelector( 113 );?>
-                                </select>
-                                <p class="p-1"></p>
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-7 fas fa-wrench"></i>
+                                        <label class="text-10"><?php echo strIdx( 678 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-14 color-settings color-input-back" id="client_id" name="client_id" type="text" value="<?php echo config_read( 105 );?>">
+                                    </div>
+                                </div>
 
-                                <select class="select-6 color-select color-input-back cursor-pointer" id="mqtt_version_list" name="mqtt_version_list">
-                                    <?php makeSelectorMQTTProctocolVersionSelector( 112 );?>
-                                </select>
-                                <p class="p-1"></p>
-                                <br>
-                                <label class="text-10"><span id="publish_timestamp"></span></label>
-                                <p class="p-1"></p>
-                                <div class="text-10 pos-51"><span id="publish_status"></span></div>
-                                <p class="p-1"></p>
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-27 fas fa-wrench"></i>
+                                        <label class="text-10"><?php echo strIdx( 679 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-14 color-settings color-input-back" id="topic_prefix" name="topic_prefix" type="text" value="<?php echo config_read( 106 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-27 fas fa-server"></i>
+                                        <label class="text-10"><?php echo strIdx( 680 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-14 color-settings color-input-back" id="broker_host" name="broker_host" type="text" value="<?php echo config_read( 109 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-27 fas fa-server"></i>
+                                        <label class="text-10"><?php echo strIdx( 681 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-14 color-settings color-input-back" id="broker_port" name="broker_port" type="text" value="<?php echo config_read( 110 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-27 far fa-clock"></i>
+                                        <label class="text-10"><?php echo strIdx( 682 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-14 color-settings color-input-back" id="keep_alive" name="keep_alive" type="text" value="<?php echo config_read( 111 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-27 fas fa-user"></i>
+                                        <label class="text-10"><?php echo strIdx( 683 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-14 color-settings color-input-back" id="broker_user_name" name="broker_user_name" type="text" value="<?php echo config_read( 107 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-27 fas fa-lock"></i>
+                                        <label class="text-10"><?php echo strIdx( 684 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <div class="content-wrapper">
+                                            <input class="input-14 color-settings color-input-back" id="broker_user_pw" name="broker_user_pw" type="password" value="<?php echo decodeString( 108, 'mqttclpw');?>">
+                                            <div id="broker_passwd" onclick="toggelPasswordVisibility('broker_user_pw')" class="float-right pad-33 cursor-pointer">    
+                                                <span><i class="color-menu pad-7 fas fa-eye"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-9 fas fa-medal"></i>
+                                        <label class="text-10"><?php echo strIdx( 685 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <select class="select-6 color-select color-input-back cursor-pointer" id="qos_list" name="qos_list">
+                                            <?php makeSelectorQoSSelector( 113 );?>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <i class="text-10 pad-9 fas fa-server"></i>
+                                        <label class="text-10"><?php echo strIdx( 686 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <select class="select-6 color-select color-input-back cursor-pointer" id="mqtt_version_list" name="mqtt_version_list">
+                                            <?php makeSelectorMQTTProctocolVersionSelector( 112 );?>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <label class="text-10"><?php echo strIdx( 687 )?>:</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10"><span id="publish_timestamp"></span></label>
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-290">
+                                        <label class="text-10"><?php echo strIdx( 246 )?>:</label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <div class="text-10 pos-51"><span id="publish_status"></span></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 689 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_smartmeter_data_on"  name="publish_smartmeter_data" type="radio" value="1" <?php if ( config_read( 114 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_smartmeter_data_off" name="publish_smartmeter_data" type="radio" value="0" <?php if ( config_read( 114 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 688 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_watermeter_data_on"  name="publish_watermeter_data" type="radio" value="1" <?php if ( config_read( 115 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_watermeter_data_off" name="publish_watermeter_data" type="radio" value="0" <?php if ( config_read( 115 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 690 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_weather_data_on"  name="publish_weather_data" type="radio" value="1" <?php if ( config_read( 116 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_weather_data_off" name="publish_weather_data" type="radio" value="0" <?php if ( config_read( 116 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 691 )?></label>
+                                    </div>
+                                    <div class="rTableCell"> 
+                                        <input class="cursor-pointer" id="publish_indoortemperature_data_on"  name="publish_indoortemperaturer_data" type="radio" value="1" <?php if ( config_read( 117 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_indoortemperature_data_off" name="publish_indoortemperaturer_data" type="radio" value="0" <?php if ( config_read( 117 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 692 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_phase_data_on"  name="publish_phase_data" type="radio" value="1" <?php if ( config_read( 120 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_phase_data_off" name="publish_phase_data" type="radio" value="0" <?php if ( config_read( 120 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 693 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_ownpowerproduction_data_on"  name="publish_ownpowerproduction_data" type="radio" value="1" <?php if ( config_read( 136 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_ownpowerproduction_data_off" name="publish_ownpowerproduction_data" type="radio" value="0" <?php if ( config_read( 136 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 694 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_kwhgas_data_on"  name="publish_kwhgas_data" type="radio" value="1" <?php if ( config_read( 176 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_kwhgas_data_off" name="publish_kwhgas_data" type="radio" value="0" <?php if ( config_read( 176 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 695 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_finance_data_on"  name="publish_finance_data" type="radio" value="1" <?php if ( config_read( 177 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_finance_data_off" name="publish_finance_data" type="radio" value="0" <?php if ( config_read( 177 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
 
                             </div>
-
-                            <div class="rTable text-10">
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden smartmeter</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_smartmeter_data_on"  name="publish_smartmeter_data" type="radio" value="1" <?php if ( config_read( 114 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_smartmeter_data_off" name="publish_smartmeter_data" type="radio" value="0" <?php if ( config_read( 114 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden watermeter</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_watermeter_data_on"  name="publish_watermeter_data" type="radio" value="1" <?php if ( config_read( 115 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_watermeter_data_off" name="publish_watermeter_data" type="radio" value="0" <?php if ( config_read( 115 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden weer</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_weather_data_on"  name="publish_weather_data" type="radio" value="1" <?php if ( config_read( 116 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_weather_data_off" name="publish_weather_data" type="radio" value="0" <?php if ( config_read( 116 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden binnentemperatuur</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_indoortemperature_data_on"  name="publish_indoortemperaturer_data" type="radio" value="1" <?php if ( config_read( 117 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_indoortemperature_data_off" name="publish_indoortemperaturer_data" type="radio" value="0" <?php if ( config_read( 117 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden fase</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_phase_data_on"  name="publish_phase_data" type="radio" value="1" <?php if ( config_read( 120 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_phase_data_off" name="publish_phase_data" type="radio" value="0" <?php if ( config_read( 120 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden opgewekte vermogen</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_ownpowerproduction_data_on"  name="publish_ownpowerproduction_data" type="radio" value="1" <?php if ( config_read( 136 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_ownpowerproduction_data_off" name="publish_ownpowerproduction_data" type="radio" value="0" <?php if ( config_read( 136 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden kWh en gas</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_kwhgas_data_on"  name="publish_kwhgas_data" type="radio" value="1" <?php if ( config_read( 176 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_kwhgas_data_off" name="publish_kwhgas_data" type="radio" value="0" <?php if ( config_read( 176 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                                <div class="rTableRow" title="Gegevens wel of niet verwerken.">
-                                    <div class="rTableCell width-290">
-                                        <i class="fas fa-toggle-off"></i>
-                                        <label>verzenden financieel</label>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <input class="cursor-pointer" id="publish_finance_data_on"  name="publish_finance_data" type="radio" value="1" <?php if ( config_read( 177 ) == 1 ) { echo 'checked'; }?>>Aan
-                                        <input class="cursor-pointer" id="publish_finance_data_off" name="publish_finance_data" type="radio" value="0" <?php if ( config_read( 177 ) == 0 ) { echo 'checked'; }?>>Uit
-                                    </div>
-                                </div> <!-- row end -->
-
-                            </div> <!-- table end -->
-                            
                         </div>
                         <br>
                         <div class="frame-4-top">
-                            <span class="text-15">MQTT published topics</span>
+                            <span class="text-15"><?php echo strIdx( 696 )?></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="text-10" id="topic_list"> </div>
@@ -500,9 +549,9 @@ $(function () {
 
                 <div id="right-wrapper-config-right-4">
                     <div class="frame-4-top">
-                        <span class="text-15">hulp</span>
+                        <span class="text-15"><?php echo strIdx( 155 );?></span>
                     </div>
-                    <div class="frame-4-bot text-10">    
+                    <div class="frame-4-bot text-10">
                         <?php echo strIdx( 76 );?>
                     </div>
                 </div>

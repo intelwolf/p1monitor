@@ -101,10 +101,10 @@ if( isset($_POST["tariff_provider"]))
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>Tarieven configuratie</title>
+<title><?php echo ucfirst(strIdx( 617 ))?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -142,80 +142,101 @@ if( isset($_POST["tariff_provider"]))
                     <form name="formvalues" id="formvalues" method="POST">
                     <!--  tarieven E  start-->
                     <div class="frame-4-top">
-                        <span class="text-15">vaste tarieven electricteit</span>
+                        <span class="text-15"><?php echo strIdx( 618 )?></span>
                     </div>
                     <div class="frame-4-bot">
-                        <div class="float-left pos-32">
-                            <div class="frame-3-top">
-                                <span class="text-3">verbruik</span>
-                            </div>
-                        <div class="frame-2-bot pos-11 margin-2"> 
-                            <div class="float-left">
-                                <i class="text-8 far fa-sun"></i>
-                                <label class="text-8" for="verbr_piek">hoog/piek</label>
-                                <p class="p-1"></p>
-                                <i class="text-8 far fa-moon"></i>
-                                <label class="text-8" for="verbr_dal">laag/dal</label>
-                            </div>
-                            <div class="float-right">
-                                <input class="input-1 color-verbr color-input-back" id="verbr_piek" name="verbr_piek" type="text" value="<?php echo config_read(2);?>">
-                                <p class="p-1"></p>
-                                <input class="input-1 color-verbr color-input-back" id="verbr_dal"  name="verbr_dal"  type="text" value="<?php echo config_read(1);?>">
-                            </div>
-                        </div>
-                    </div>
-                        
-                    <div class="float-left pos-32">
                         <div class="frame-3-top">
-                            <span class="text-3">geleverd</span>
+                            <span class="text-3"><?php echo strIdx( 354 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
-                            <div class="float-left">
-                                <i class="text-8 far fa-sun"></i>
-                                <label class="text-8" for="gelvr_piek">hoog/piek</label>
-                                <p class="p-1"></p>
-                                <i class="text-8 far fa-moon"></i>
-                                <label class="text-8" for="gelvr_dal">laag/dal</label>
-                            </div>
-                            <div class="float-right">
-                                <input class="input-1 color-gelvr color-input-back" id="gelvr_piek" name="gelvr_piek" type="text" value="<?php echo config_read(4);?>">
-                                <p class="p-1"></p>
-                                <input class="input-1 color-gelvr color-input-back" id="gelvr_dal"  name="gelvr_dal"  type="text" value="<?php echo config_read(3);?>">
-                            </div>
+                            <div class="rTable">
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-120">
+                                    <i class="text-8 far fa-sun"></i>
+                                        <label class="text-8" for="verbr_piek"><?php echo strIdx( 626 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-1 color-verbr color-input-back" id="verbr_piek" name="verbr_piek" type="text" value="<?php echo config_read(2);?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-120">
+                                        <i class="text-8 far fa-moon"></i>
+                                        <label class="text-8" for="verbr_dal"><?php echo strIdx( 627 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-1 color-verbr color-input-back" id="verbr_dal"  name="verbr_dal"  type="text" value="<?php echo config_read(1);?>">
+                                    </div>
+                                </div>
+                            </div> 
                         </div>
-                    </div>
-            
-                    <div class="float-left pos-32">
+                        <p></p>
+
                         <div class="frame-3-top">
-                            <span class="text-3">vastrecht</span>
+                            <span class="text-3"><?php echo strIdx( 360 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
-                            <div class="float-left">
-                                <i class="text-8 fas fa-bolt"></i>
-                                <label class="text-8" for="gelvr_piek">per maand</label>
-                            </div>    
-                            <div class="float-right">
-                                <input class="input-1 color-settings color-input-back" id="e_vastrecht" name="e_vastrecht" type="text" value="<?php echo config_read(5);?>">
-                            </div>
+                            <div class="rTable">
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-120">
+                                    <i class="text-8 far fa-sun"></i>
+                                        <label class="text-8" for="verbr_piek"><?php echo strIdx( 626 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-1 color-gelvr color-input-back" id="gelvr_piek" name="gelvr_piek" type="text" value="<?php echo config_read(4);?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-120">
+                                        <i class="text-8 far fa-moon"></i>
+                                        <label class="text-8" for="verbr_dal"><?php echo strIdx( 627 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-1 color-gelvr color-input-back" id="gelvr_dal"  name="gelvr_dal"  type="text" value="<?php echo config_read(3);?>">
+                                    </div>
+                                </div>
+                            </div> 
+
                         </div>
-                    </div>        
+                        <p></p>
+
+
+                        <div class="frame-3-top">
+                            <span class="text-3"><?php echo strIdx( 623 )?></span>
+                        </div>
+                        <div class="frame-2-bot pos-11"> 
+                            <div class="rTable">
+                                <div class="rTableRow">
+                                    <div class="rTableCell width-120">
+                                        <i class="text-8 fas fa-bolt"></i>
+                                        <label class="text-8" for="gelvr_piek"><?php echo strIdx( 628 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="input-1 color-settings color-input-back" id="e_vastrecht" name="e_vastrecht" type="text" value="<?php echo config_read(5);?>">
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                        <p></p>
                 </div>
                 <!--  tarieven E end -->
         
                 <p></p>
                 <!--  tarieven gas start-->
                 <div class="frame-4-top">
-                    <span class="text-15">vaste tarieven gas</span>
+                    <span class="text-15"><?php echo strIdx( 618 )?></span>
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left pos-32">
                         <div class="frame-3-top">
-                            <span class="text-3">verbruik</span>
+                            <span class="text-3"><?php echo strIdx( 354 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11 margin-2"> 
                             <div class="float-left">
                                 <i class="text-8 fas fa-euro-sign"></i>
-                                <label class="text-8" for="verbr_gas">gas m<sup>3</sup></label>
+                                <label class="text-8" for="verbr_gas"><?php echo strIdx( 336 )?> m<sup>3</sup></label>
                                 <p class="p-1"></p>
                             </div>
                             <div class="float-right">
@@ -226,12 +247,12 @@ if( isset($_POST["tariff_provider"]))
                         
                     <div class="float-left pos-32">
                         <div class="frame-3-top">
-                            <span class="text-3">vastrecht</span>
+                            <span class="text-3"><?php echo strIdx( 623 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
                             <div class="float-left">
                                 <i class="text-8 fab fa-gripfire"></i>
-                                <label class="text-8" for="vastrecht_gas">per maand</label>
+                                <label class="text-8" for="vastrecht_gas"><?php echo strIdx( 628 )?></label>
                             </div>    
                             <div class="float-right">
                                 <input class="input-1 color-settings color-input-back" id="vastrecht_gas" name="vastrecht_gas" type="text" value="<?php echo config_read(16);?>">
@@ -244,17 +265,17 @@ if( isset($_POST["tariff_provider"]))
                 <p></p>
                 <!--  tarieven water start-->
                 <div class="frame-4-top">
-                    <span class="text-15">vaste tarieven water</span>
+                    <span class="text-15"><?php echo strIdx( 620 )?></span>
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left pos-32">
                         <div class="frame-3-top">
-                            <span class="text-3">verbruik</span>
+                            <span class="text-3"><?php echo strIdx( 354 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11 margin-2"> 
                             <div class="float-left">
                                 <i class="text-8 fas fa-euro-sign"></i>
-                                <label class="text-8" for="verbr_gas">water m<sup>3</sup></label>
+                                <label class="text-8" for="verbr_gas"><?php echo strIdx( 629 )?> m<sup>3</sup></label>
                                 <p class="p-1"></p> 
                             </div>
                             <div class="float-right">
@@ -265,12 +286,12 @@ if( isset($_POST["tariff_provider"]))
                         
                     <div class="float-left pos-32">
                         <div class="frame-3-top">
-                            <span class="text-3">vastrecht</span>
+                            <span class="text-3"><?php echo strIdx( 623 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
                             <div class="float-left">
                                 <i class="text-8 fas fa-tint"></i>
-                                <label class="text-8" for="vastrecht_gas">per maand</label>
+                                <label class="text-8" for="vastrecht_gas"><?php echo strIdx( 628 )?></label>
                             </div>    
                             <div class="float-right">
                                 <input class="input-1 color-settings color-input-back" id="vastrecht_water" name="vastrecht_water" type="text" value="<?php echo config_read( 103 );?>">
@@ -283,20 +304,20 @@ if( isset($_POST["tariff_provider"]))
 
                 <!--  flexibele tarieven start -->
                 <div class="frame-4-top">
-                    <span class="text-15">flexibele tarieven</span>
+                    <span class="text-15"><?php echo strIdx( 621 )?></span>
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left">
                        
                         <div class="frame-3-top">
-                            <span class="text-3">kWh kosten</span>
+                            <span class="text-3"><?php echo strIdx( 624 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
                             <div class="rTable"> 
                                 <div class="rTableRow">
-                                    <div class="rTableCell width-80">
+                                    <div class="rTableCell width-120">
                                         <i class="text-8 fas fa-euro-sign"></i>
-                                        <label class="text-10">inkoop</label>
+                                        <label class="text-10"><?php echo strIdx( 631 )?></label>
                                     </div>
                                     <div class="rTableCell pad-12">
                                         <input class="input-17 color-settings color-input-back" id="inkoop_kwh_kosten" name="inkoop_kwh_kosten" type="text" value="<?php echo config_read( 205 );?>">
@@ -307,14 +328,14 @@ if( isset($_POST["tariff_provider"]))
                         <p></p>
 
                         <div class="frame-3-top">
-                            <span class="text-3">Gas kosten</span>
+                            <span class="text-3"><?php echo strIdx( 625 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
                             <div class="rTable"> 
                                 <div class="rTableRow">
-                                    <div class="rTableCell width-80">
+                                    <div class="rTableCell width-120">
                                         <i class="text-8 fas fa-euro-sign"></i>
-                                        <label class="text-10">inkoop</label>
+                                        <label class="text-10"><?php echo strIdx( 631 )?></label>
                                     </div>
                                     <div class="rTableCell pad-12">
                                         <input class="input-17 color-settings color-input-back" id="inkoop_gas_kosten" name="inkoop_gas_kosten" type="text" value="<?php echo config_read( 208 );?>">
@@ -325,14 +346,14 @@ if( isset($_POST["tariff_provider"]))
                         <p></p>
 
                         <div class="frame-3-top">
-                            <span class="text-3">kosten selectie</span>
+                            <span class="text-3"><?php echo strIdx( 630 )?></span>
                         </div>
                         <div class="frame-2-bot pos-11"> 
 
                         <div class="rTable"> 
                             <div class="rTableRow" title="">
                                 <div class="rTableCell">
-                                    <label class="text-10">tariefverstrekker</label>
+                                    <label class="text-10"><?php echo strIdx( 632 )?></label>
                                 </div>
                                 <div class="rTableCell pad-12">
                                 <select class="select-4 color-select color-input-back cursor-pointer" name="tariff_provider">
@@ -355,20 +376,20 @@ if( isset($_POST["tariff_provider"]))
                 <p></p>
                 <!--  kosten start-->
                 <div class="frame-4-top">
-                    <span class="text-15">kosten</span>
+                    <span class="text-15"><?php echo strIdx( 622 )?></span>
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left pos-40">
 
                     <div class="frame-3-top">
-                        <span class="text-3">kosten selectie</span>
+                        <span class="text-3"><?php echo strIdx( 652 )?></span>
                     </div>
                     <div class="frame-2-bot pos-11"> 
                         <div class="rTable"> 
                             <div class="rTableRow" title="">
                                 <div class="rTableCell">
                                     <i class="text-8 far fa-check-square"></i>
-                                    <label class="text-8" for="verbr_gas">euro per maand</label>
+                                    <label class="text-8" for="verbr_gas"><?php echo strIdx( 505 )?></label>
                                 </div>
                                 <div class="rTableCell pad-12">
                                     <input class="input-1 color-verbr-gas-front color-input-back" id="max_cost" name="max_cost" type="text" value="<?php echo config_read(39);?>">

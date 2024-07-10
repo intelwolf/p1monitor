@@ -31,8 +31,8 @@ NGINX_TMP_EXT   = '_nginx.tmp'
 
 base_443 =\
 """
-# 1m is 1 megabyte storage for buffer and rate is request per second.
-limit_req_zone $binary_remote_addr zone=apilimit:1m rate=5r/s; 
+# 10m is 10 megabyte storage for buffer and r/s is request per second.
+limit_req_zone $binary_remote_addr zone=apilimit:10m rate=5r/s;
 
 server {
 
@@ -85,7 +85,7 @@ server {
     ##########################################
     location /api/ {
 
-        limit_req zone=apilimit burst=5 nodelay; 
+        limit_req zone=apilimit burst=30 nodelay;
 
         include proxy_params; 
 

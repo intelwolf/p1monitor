@@ -5,7 +5,7 @@ function page_menu_header_actual($id) {
 
     $consumptionkWh = strIdx( 400 );
     $productionKwh  = strIdx( 401 );
-    $gasconsumption = strIdx( 402 );
+    $gasconsumption = strIdx( 364 );
 
     /* adjust font and such to fix the longer text */
     $class_pos  = "pos-7"; /* default */

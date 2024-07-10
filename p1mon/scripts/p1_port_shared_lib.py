@@ -73,7 +73,7 @@ class P1PortDataNotification():
                 timeout= int( timeout_str )
                 self.email_timeout_user_setting = timeout
                 self.flog.debug( FUNCTION_TAG + ": email time out is gezet op " + str( self.email_timeout_user_setting ) )
-            except:
+            except Exception as e:
                 self.flog.warning( FUNCTION_TAG + ": onverwachte fout " + str(e) )
 
 

@@ -263,6 +263,7 @@ function createDailytUseChart() {
         labels: {
             format: '{value:.0f}',
             style: {
+                color: "#6E797C",
                 fontWeight: "bold",
                 fontSize: "28px"
             },
@@ -349,6 +350,7 @@ function creatCurrentUseChart() {
                     return this.value 
                 },
                 style: {
+                    color: "#6E797C",
                     fontWeight: "bold",
                     fontSize: "26px"
                 },
