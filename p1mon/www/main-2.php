@@ -1,4 +1,4 @@
-<?php 
+ <?php 
 include_once '/p1mon/www/util/p1mon-util.php';
 include_once '/p1mon/www/util/page_header.php'; 
 include_once '/p1mon/www/util/page_menu.php';
@@ -133,110 +133,119 @@ function readJsonApiSmartMeter(){
 
 function readJsonApiStatus(){ 
 
-$.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
-  try {
-    //var verbruikTotaal =  0;
-    //var geleverdTotaal =  0;
-    var jsondata = JSON.parse(data);
+    $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
+    try {
+        //var verbruikTotaal =  0;
+        //var geleverdTotaal =  0;
+        var jsondata = JSON.parse(data);
 
-    var lowProductionKw = peakConsumptionKw  = 0
-    var peakConsumptionKwTimestamp = lowConsumptionKwTimestamp = "??:??:??"
-    
-    for (var j=0;  j < jsondata.length; j++){  
-        // console.log( jsondata[j][0] + ' - ' + jsondata[j][1] )
-        if ( jsondata[j][0] == 1 ) {
-            $('#maxkWPiekVerbruikWaarde').text( padXX( jsondata[j][1], 2, 2 ) + " kW" );
-            var peakConsumptionKw = padXX( jsondata[j][1], 2, 2 )
-            continue;
-        }
-
-        if ( jsondata[j][0] == 2 ) {
-            var peakConsumptionKwTimestamp = jsondata[j][1].substring( 11 );
-            $('#maxkWPiekVerbruikDatum').text( jsondata[j][1] );
-            continue;
-        }
-
-
-        if ( jsondata[j][0] == 8 ) { 
-            $('#verbruikDalKW').text( padXX( jsondata[j][1], 5, 3 ) + " kWh" );
-            //verbruikTotaal = verbruikTotaal + parseFloat( jsondata[j][1] );
-            continue;
-        }
-        if ( jsondata[j][0] == 9 ) {
-            $('#verbruikPiekKW').text( padXX( jsondata[j][1], 5, 3 ) + " kWh" );
-            //verbruikTotaal = verbruikTotaal + parseFloat( jsondata[j][1] );
-            continue;
-        }
-
-        if ( jsondata[j][0] == 32 ) {
-                $('#P_Q_kw').text( padXX( jsondata[j][1], 3, 3 ) );
-                continue;
-            }
-            if ( jsondata[j][0] == 33 ) {
-                $('#P_Q_timestamp').text(jsondata[j][1] );
+        var lowProductionKw = peakConsumptionKw  = 0
+        var peakConsumptionKwTimestamp = lowConsumptionKwTimestamp = "??:??:??"
+        
+        for (var j=0;  j < jsondata.length; j++){  
+            // console.log( jsondata[j][0] + ' - ' + jsondata[j][1] )
+            if ( jsondata[j][0] == 1 ) {
+                $('#maxkWPiekVerbruikWaarde').text( padXX( jsondata[j][1], 2, 2 ) + " kW" );
+                var peakConsumptionKw = padXX( jsondata[j][1], 2, 2 )
                 continue;
             }
 
-            if ( jsondata[j][0] == 34 ) {
-                $('#P_M_kw').text( padXX( jsondata[j][1], 3, 3 ) );
-                continue;
-            }
-            if ( jsondata[j][0] == 35 ) {
-                $('#P_M_timestamp').text(jsondata[j][1] );
+            if ( jsondata[j][0] == 2 ) {
+                var peakConsumptionKwTimestamp = jsondata[j][1].substring( 11 );
+                $('#maxkWPiekVerbruikDatum').text( jsondata[j][1] );
                 continue;
             }
 
-        /*
-        if ( jsondata[j][0] == 44 ) {
-            $('#verbruikGasDag').text( padXX( jsondata[j][1] ,5, 3) );
-            continue;
+
+            if ( jsondata[j][0] == 8 ) { 
+                $('#verbruikDalKW').text( padXX( jsondata[j][1], 5, 3 ) + " kWh" );
+                //verbruikTotaal = verbruikTotaal + parseFloat( jsondata[j][1] );
+                continue;
+            }
+            if ( jsondata[j][0] == 9 ) {
+                $('#verbruikPiekKW').text( padXX( jsondata[j][1], 5, 3 ) + " kWh" );
+                //verbruikTotaal = verbruikTotaal + parseFloat( jsondata[j][1] );
+                continue;
+            }
+
+            if ( jsondata[j][0] == 32 ) {
+                    $('#P_Q_kw').text( padXX( jsondata[j][1], 3, 3 ) );
+                    continue;
+                }
+                if ( jsondata[j][0] == 33 ) {
+                    $('#P_Q_timestamp').text(jsondata[j][1] );
+                    continue;
+                }
+
+                if ( jsondata[j][0] == 34 ) {
+                    $('#P_M_kw').text( padXX( jsondata[j][1], 3, 3 ) );
+                    continue;
+                }
+                if ( jsondata[j][0] == 35 ) {
+                    $('#P_M_timestamp').text(jsondata[j][1] );
+                    continue;
+                }
+
+            /*
+            if ( jsondata[j][0] == 44 ) {
+                $('#verbruikGasDag').text( padXX( jsondata[j][1] ,5, 3) );
+                continue;
+            }
+            */
+            if ( jsondata[j][0] == 74 ) { 
+                consumptionPowerPhase[0] = parseFloat( jsondata[j][1] )
+                continue;
+            }
+            if ( jsondata[j][0] == 75 ) { 
+                consumptionPowerPhase[1] = parseFloat( jsondata[j][1] )
+                continue;
+            }
+            if ( jsondata[j][0] == 76 ) { 
+                consumptionPowerPhase[2] = parseFloat( jsondata[j][1] )
+                continue;
+            }
+
+            if ( jsondata[j][0] == 113 ) {
+                var lowConsumptionKw = padXX( jsondata[j][1], 2, 2 )
+                continue;
+            }
+
+            if ( jsondata[j][0] == 114 ) {
+                var lowConsumptionKwTimestamp = jsondata[j][1].substring( 11 );
+                continue;
+            }
+
+            if ( jsondata[j][0] == 132 ) {
+                if ( showPhaseInformation && jsondata[j][1] > 0 ) {
+                        $('#actVermogenFaseVerbruikTotal').text( padXX( jsondata[j][1], 1, 3 ) );
+                        $('#actVermogenFaseVerbruikID').show();
+                    } else {
+                        $('#actVermogenFaseVerbruikID').hide();
+                    }
+                    continue;
+            }
         }
-        */
-        if ( jsondata[j][0] == 74 ) { 
-            consumptionPowerPhase[0] = parseFloat( jsondata[j][1] )
-            continue;
-        }
-        if ( jsondata[j][0] == 75 ) { 
-            consumptionPowerPhase[1] = parseFloat( jsondata[j][1] )
-            continue;
-        }
-        if ( jsondata[j][0] == 76 ) { 
-            consumptionPowerPhase[2] = parseFloat( jsondata[j][1] )
-            continue;
-        }
 
-        if ( jsondata[j][0] == 113 ) {
-             var lowConsumptionKw = padXX( jsondata[j][1], 2, 2 )
-            continue;
-        }
+        readJsonApiSmartMeter();
 
-        if ( jsondata[j][0] == 114 ) {
-            var lowConsumptionKwTimestamp = jsondata[j][1].substring( 11 );
-            continue;
+        $('#peakKWConsumption').text(" " + peakConsumptionKw + " kW " + peakConsumptionKwTimestamp );
+        $('#lowKWConsumption').text(" " + lowConsumptionKw + " kW " + lowConsumptionKwTimestamp );
+
+        if ( showPhaseInformation != 0 ) {
+                autoHideNonPresentPhaseInformation() 
+        }
+        
+        // check if there is phase information for consumption
+        if ( showPhaseInformation == 0 || consumptionPowerPhase[0] == 0 && consumptionPowerPhase[1] == 0 && consumptionPowerPhase[2] == 0 ) {
+            $("#actVermogenFaseVerbruik").highcharts().series[0].hide();
+        } else {
+            $("#actVermogenFaseVerbruik").highcharts().series[0].show();
+            $("#actVermogenFaseVerbruik").highcharts().series[0].setData( consumptionPowerPhase );
         }
 
-     }
 
-    readJsonApiSmartMeter();
-
-    $('#peakKWConsumption').text(" " + peakConsumptionKw + " kW " + peakConsumptionKwTimestamp );
-    $('#lowKWConsumption').text(" " + lowConsumptionKw + " kW " + lowConsumptionKwTimestamp );
-
-    if ( showPhaseInformation != 0 ) {
-            autoHideNonPresentPhaseInformation() 
-    }
-     
-    // check if there is phase information for consumption
-    if ( showPhaseInformation == 0 || consumptionPowerPhase[0] == 0 && consumptionPowerPhase[1] == 0 && consumptionPowerPhase[2] == 0 ) {
-        $("#actVermogenFaseVerbruik").highcharts().series[0].hide();
-    } else {
-        $("#actVermogenFaseVerbruik").highcharts().series[0].show();
-        $("#actVermogenFaseVerbruik").highcharts().series[0].setData( consumptionPowerPhase );
-    }
-
-
-  } catch(err) {}
-});
+    } catch(err) {}
+    });
 }
 
 function autoHideNonPresentPhaseInformation() {
@@ -840,8 +849,11 @@ $(function () {
             <span class="text-2"><?php echo strIdx( 362 );?></span>
         </div>
         <div class="frame-2b-bot"> 
-            <div class="pos-2" id="actVermogenMeterVerbruik"></div>    
+            <div class="pos-2" id="actVermogenMeterVerbruik"></div>
             <div class="pos-46" id="actVermogenFaseVerbruik"></div>
+            <div class="pos-55 text-33" id="actVermogenFaseVerbruikID" title="<?php echo strIdx(720);?>">
+                <?php echo strIdx( 719 );?>:&nbsp;<span id="actVermogenFaseVerbruikTotal">0</span>&nbsp;kW
+            </div>
             <div class="pos-47 pad-2">
                 <div class="frame-3-top">
                 <span id="verbruikPiekHeader" class="text-3"><?php echo strIdx( 357 );?></span>

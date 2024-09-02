@@ -6,8 +6,8 @@
 # max files ereased on a run is FILES_ERASE_COUNT * LOOP_COUNT    #
 ###################################################################
 LOG_PATH="/var/log"
-LOOP_COUNT=10
-MAX_PCT_IN_USE=70
+LOOP_COUNT=15
+MAX_PCT_IN_USE=50
 FILES_ERASE_COUNT=3
 
 # functions

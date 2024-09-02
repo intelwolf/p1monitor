@@ -246,8 +246,8 @@ def Main(argv):
                 temperature_db.fix_missing_month_day( flog )
 
             ############################################
-            elif tail.startswith( const.DB_E_HISTORIE ):
-                processImportDataSet( const.DB_E_HISTORIE, e_db_history_min, zf, fname, 'replace into e_history*' )
+            elif tail.startswith( const.DB_E_HISTORIE_TAIL ):
+                processImportDataSet( const.DB_E_HISTORIE_TAIL, e_db_history_min, zf, fname, 'replace into e_history*' )
 
             ############################################
             # the OR is fix from version 0.9.19 > to fix the typo in "finacieel" text

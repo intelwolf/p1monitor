@@ -82,7 +82,6 @@ p1_status['day_night_mode']         = 0  # default NL, 1 is Belgium
 
 day_values = day_values_lib.dayMinMaxkW()
 
-
 def main_prod():
 
     flog.info("Start van programma.")

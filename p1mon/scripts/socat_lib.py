@@ -8,7 +8,7 @@ import network_lib
 import filesystem_lib
 import process_lib
 
-SOCATDEVICE                 ='/dev/socatcom1'
+SOCATDEVICE                 = '/dev/socatcom1'
 SOCATSERVICEFILE            = '/etc/systemd/system/socat.service'
 SOCAT_TMP_EXT               = '_socat.tmp'
 SOCAT_ENABLE_COMMAND_LIST   = [ 'sudo systemctl daemon-reload', 'sudo systemctl enable socat.service', 'sudo systemctl start socat.service' ]
@@ -23,17 +23,20 @@ Description=Socat Serial Loopback
 After=network.target
 
 [Service]
+SuccessExitStatus=143
 Type=simple
 StandardOutput=inherit
 StandardError=inherit
-ExecStart=sudo /usr/bin/socat -T60 pty,link=###SOCATDEVICE##,rawer,group-late=dialout,mode=660 tcp:###SOCATREMOTEIP###:###SOCATREMOTEPORT###,retry=forever,interval=30
-ExecStartPost=- sudo -u p1mon /p1mon/scripts/P1SocatConfig --succestimestamp 2>&1 >/dev/null
+ExecStart=/usr/bin/socat -T60 pty,link=###SOCATDEVICE##,rawer,group-late=dialout,mode=660 tcp:###SOCATREMOTEIP###:###SOCATREMOTEPORT###,retry=forever,interval=30
+ExecStartPost=/usr/bin/sudo -u p1mon /p1mon/scripts/P1SocatConfig --succestimestamp
 Restart=always
 RestartSec=10s
 
 [Install]
 WantedBy=multi-user.target shutdown.target reboot.target halt.target
 """
+
+#ExecStartPost=/usr/bin/sudo -u p1mon /p1mon/scripts/P1SocatConfig --succestimestamp 2>&1 >/dev/null
 
 class Socat():
 

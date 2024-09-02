@@ -32,7 +32,7 @@ echo "[*] export folder aanpassen"
 cd /p1mon/export
 chmod 770 .;chown p1mon:p1mon .
 echo "[*] /var/tmp aanpassen."
-chmod 770 /p1mon/var/tmp; chown p1mon:p1mon /p1mon/var/tmp   
+chmod 770 /p1mon/var/tmp; chown p1mon:p1mon /p1mon/var/tmp
 # wissen van cache en dergelijke.
 echo "[*] opschonen oude packages"
 # clean is beter dan autoclean.

@@ -480,41 +480,50 @@ def write_phase_history_values_to_db( phase_db_rec=None, configdb=None, phasedb=
 #############################################################
 def write_phase_status_to_db( phase_db_rec=None, statusdb=None, flog=None):
 
+    consumption_phases_kW_total = 0
+    production_phases_kW_total = 0
+    net_value_kW_phases = 0 
+
     try:
         
         if float( phase_db_rec['consumption_L1_kW'] ) != const.NOT_SET:
             statusdb.strset( float( phase_db_rec['consumption_L1_kW'] ) ,74, flog )
+            consumption_phases_kW_total = consumption_phases_kW_total + float( phase_db_rec['consumption_L1_kW'])
         else:
             statusdb.strset( '0.0' ,74, flog )
             phase_db_rec['consumption_L1_kW'] = 0
 
         if float( phase_db_rec['consumption_L2_kW'] ) !=  const.NOT_SET:
             statusdb.strset( float( phase_db_rec['consumption_L2_kW'] ) ,75, flog )
-
+            consumption_phases_kW_total = consumption_phases_kW_total + float( phase_db_rec['consumption_L2_kW'])
         else:
             statusdb.strset( '0.0' ,75, flog )
             phase_db_rec['consumption_L2_kW'] = 0
 
         if float( phase_db_rec['consumption_L3_kW'] ) !=  const.NOT_SET:
             statusdb.strset( float( phase_db_rec['consumption_L3_kW'] ) ,76, flog )
+            consumption_phases_kW_total = consumption_phases_kW_total + float( phase_db_rec['consumption_L3_kW'])
         else:
             statusdb.strset( '0.0' ,76, flog )
             phase_db_rec['consumption_L3_kW'] = 0
 
         if float( phase_db_rec['production_L1_kW'] ) !=  const.NOT_SET:
             statusdb.strset( float( phase_db_rec['production_L1_kW'] ) ,77, flog )
+            production_phases_kW_total = production_phases_kW_total + float( phase_db_rec['production_L1_kW'] )
         else:
             statusdb.strset( '0.0' ,77, flog )
             phase_db_rec['production_L1_kW'] = 0
 
         if float( phase_db_rec['production_L2_kW'] ) !=  const.NOT_SET:
             statusdb.strset( float( phase_db_rec['production_L2_kW'] ) ,78, flog )
+            production_phases_kW_total = production_phases_kW_total + float( phase_db_rec['production_L2_kW'] )
         else:
             statusdb.strset( '0.0' ,78, flog )
             phase_db_rec['production_L2_kW'] = 0
 
         if float( phase_db_rec['production_L3_kW'] ) !=  const.NOT_SET:
             statusdb.strset( float( phase_db_rec['production_L3_kW'] ) ,79, flog )
+            production_phases_kW_total = production_phases_kW_total + float( phase_db_rec['production_L3_kW'] )
         else:
             statusdb.strset( '0.0' ,79, flog )
             phase_db_rec['production_L3_kW'] = 0
@@ -554,6 +563,14 @@ def write_phase_status_to_db( phase_db_rec=None, statusdb=None, flog=None):
         else:
             statusdb.strset( '0.0' ,102, flog )
             phase_db_rec['L3_A'] = 0
+
+
+        # calculate the difference between all production and consumption phase Watts
+        net_value_kW_phases = consumption_phases_kW_total - production_phases_kW_total 
+        #print( "net_value_phases ", net_value_kW_phases )
+        statusdb.strset( consumption_phases_kW_total ,130, flog )
+        statusdb.strset( production_phases_kW_total ,131, flog )
+        statusdb.strset( net_value_kW_phases ,132, flog )
 
         statusdb.timestamp( 106, flog ) # update timestamp of phase values in status database.
 

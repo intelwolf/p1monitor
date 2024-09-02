@@ -47,10 +47,7 @@ def Main( argv ):
         action="store_true",
         help="schrijf de succesvolle start timestamp naar de status database." )
 
-
     args = parser.parse_args()
-
-    print (args)
 
     ###################################
     # init stuff                      #

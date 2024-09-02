@@ -1,28 +1,22 @@
 # run manual with ./P1DropBoxDeamon
 
 import const
-#import dropbox
 import dropbox_lib
+import filesystem_lib
 import inspect
 import logger
 import signal
 import sqldb
 import systemid
-#import time
 import os
 import sys
 import time
 import util
-#import crypto3
+
+
 
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
-#from logger import *
-#from os import listdir, chmod
-#from os.path import isfile,join
-#from sqldb import configDB,rtStatusDb
-#from util import *
-#from time import sleep
 
 prgname         = 'P1DropBoxDeamon'
 config_db       = sqldb.configDB()
@@ -33,12 +27,19 @@ files_data     = []
 
 systemid = systemid.getSystemId()
 
-def Main(argv): 
+def Main(argv):
+
     global files_backup, files_data
 
     flog.info("Start van programma.")
     local_dbx_folders = []
    
+    # do an intial clean to fix problems after a restart.
+    try:
+        filesystem_lib.clear_folder_by_age( rootfolder=const.DIR_DBX_LOCAL, age_in_seconds=7205, flog=flog)
+    except Exception as e:
+        flog.warning(inspect.stack()[0][3]+": wissen van mogelik oude bestanden gefaald melding -> " + str(e.args[0]) )
+
     # open van status database
     try:    
         rt_status_db.init(const.FILE_DB_STATUS,const.DB_STATUS_TAB)
@@ -86,8 +87,14 @@ def Main(argv):
         _id, drop_box_backup_on ,_label = config_db.strget(49,flog)
         _id, drop_box_data_on   ,_label = config_db.strget(50,flog)
 
-        file_count = fillFileListBuffer()
+        file_count = fill_file_list_buffer()
 
+        try:
+            filesystem_lib.clear_folder_by_age( rootfolder=const.DIR_DBX_LOCAL, age_in_seconds=7205, flog=flog)
+        except Exception as e:
+            flog.warning(inspect.stack()[0][3]+": wissen van mogelik oude bestanden gefaald melding -> " + str(e.args[0]) )
+
+        """ # removed in version 2.4.2 replace by filesystem_lib.clear_folder_by_age
         if int(drop_box_backup_on) == 0: 
             for filename in files_backup: 
                 flog.info(inspect.stack()[0][3]+": failsave wissen van back-up bestanden.")
@@ -103,6 +110,7 @@ def Main(argv):
                     os.remove(const.DIR_DBX_LOCAL + const.DBX_DIR_DATA + '/' + filename)
                 except Exception as _e:
                     pass
+        """
 
         if int(drop_box_backup_on) == 0 and int(drop_box_data_on) == 0: 
             flog.debug(inspect.stack()[0][3]+": Dropbox staat uit, wacht 30 seconden.")
@@ -242,12 +250,13 @@ def Main(argv):
         #######################
         # files not processed #
         #######################
-        file_count = fillFileListBuffer()
+        file_count = fill_file_list_buffer()
         if file_count > 2: # problem files are not copied or not deleted.
             delay = 30
             flog.warning(inspect.stack()[0][3]+" bestanden gevonden die niet te wissen waren of niet gekopierd. Vertraagde verwerking van " + \
                 str( delay ) + " seconden actief.")
             time.sleep( delay  )
+        
         
 
 
@@ -268,7 +277,7 @@ def validFilePermissions(filename):
         return False
 
 
-def fillFileListBuffer():
+def fill_file_list_buffer():
     global files_backup, files_data
     files_backup = [f for f in os.listdir( const.DIR_DBX_LOCAL + const.DBX_DIR_BACKUP ) \
             if os.path.isfile(os.path.join( const.DIR_DBX_LOCAL + const.DBX_DIR_BACKUP, f ))]

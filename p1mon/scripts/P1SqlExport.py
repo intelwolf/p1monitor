@@ -371,37 +371,37 @@ def Main( argv ):
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_PHASEINFORMATION + " -> " + str(e) )
         updateStatusPct( statusfile, 33, record_cnt )
 
-    flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_E_HISTORIE )
+    flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_E_HISTORIE_TAIL )
     try:
-        record_cnt = record_cnt + e_db_history_min.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        record_cnt = record_cnt + e_db_history_min.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
         updateStatusPct(statusfile, 34, record_cnt)
     except Exception as e:
-        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
     
     try:
-        record_cnt = record_cnt + e_db_history_uur.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        record_cnt = record_cnt + e_db_history_uur.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
         updateStatusPct(statusfile, 35, record_cnt)
     except Exception as e:
-        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     try:
-        record_cnt = record_cnt + e_db_history_dag.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        record_cnt = record_cnt + e_db_history_dag.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
         updateStatusPct(statusfile, 36, record_cnt)
     except Exception as e:
-        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     try:
-        record_cnt = record_cnt + e_db_history_maand.sql2file(const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        record_cnt = record_cnt + e_db_history_maand.sql2file(const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
         updateStatusPct(statusfile, 37, record_cnt)
     except Exception as e:
-        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     try:
-        record_cnt = record_cnt + e_db_history_jaar.sql2file( const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        record_cnt = record_cnt + e_db_history_jaar.sql2file( const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
         flog.info(inspect.stack()[0][3]+": historie sql geëxporteerd.")
         updateStatusPct(statusfile, 38, record_cnt)
     except Exception as e:
-        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE + " -> " + str(e) )
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_FINANCIEEL )
     try:
@@ -522,8 +522,8 @@ def Main( argv ):
 
     try:
         flog.info(inspect.stack()[0][3]+": historie sql aan zip file toevoegen")
-        zf.write(const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode, compress_type=zipfile.ZIP_DEFLATED)
-        os.remove(const.DIR_EXPORT + const.DB_E_HISTORIE + exportcode)
+        zf.write(const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode, compress_type=zipfile.ZIP_DEFLATED)
+        os.remove(const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
         updateStatusPct(statusfile, 82 ,record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": historie sql aan zip file toevoegen gefaald")

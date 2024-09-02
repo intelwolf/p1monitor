@@ -14,7 +14,15 @@ sudo pip cache purge 2>/dev/null
 echo "[*] file rechten herstellen"
 sudo /p1mon/scripts/setok.sh
 echo "[*] clone maken naar SDA extern card"
-sudo rpi-clone -U -v sda --exclude=/home/p1mon/.cache/* --exclude=/var/hdd.log --exclude=/var/cache/* --exclude=/var/backups/* --exclude=/p1mon/scripts/archief --exclude=/p1mon/www/archief --exclude=/p1mon/www/util/archief --exclude=/p1mon/www/js/archief --exclude=/p1mon/www/css/archief --exclude=/p1mon/data/*.db* --exclude=/p1mon/dev --exclude=/p1mon/scripts/._*  --exclude=/tmp
-echo "[*] data en andere gegevens van de SDA card verwijderen"
-sudo /p1mon/scripts/clean-clone.sh sda
+sudo rpi-clone -U -v sda --exclude=/home/p1mon/.cache/*  --exclude=/var/hdd.log --exclude=/var/cache/* --exclude=/var/backups/* --exclude=/p1mon/scripts/archief --exclude=/p1mon/www/archief --exclude=/p1mon/www/util/archief --exclude=/p1mon/www/js/archief --exclude=/p1mon/www/css/archief --exclude=/p1mon/data/*.db* --exclude=/p1mon/dev --exclude=/p1mon/scripts/._*  --exclude=/tmp --exclude=/p1mon/recovery
+echo 
+if [ $? == 0 ]
+then
+    echo "[*] data en andere gegevens van de SDA card verwijderen"
+    sudo /p1mon/scripts/clean-clone.sh sda
+else
+    echo "[*] rpi-clone gefaalt"
+    exit 1
+fi
+
 echo "[*] gereed"
