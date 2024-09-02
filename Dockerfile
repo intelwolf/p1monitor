@@ -1,8 +1,6 @@
 FROM debian:bookworm-slim
-#FROM debian:bullseye-slim
 
 # Set timezone
-#RUN ln -fs /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 ENV TZ="Europe/Amsterdam"
 
 # Install packages
