@@ -59,7 +59,7 @@ app.set_error_serializer( p1_serializer )
 # open databases
 # open van seriele database
 try:
-     e_db_serial.init(const.FILE_DB_E_FILENAME ,const.DB_SERIAL_TAB)        
+     e_db_serial.init(const.FILE_DB_E_FILENAME ,const.DB_SERIAL_TAB)
 except Exception as e:
     flog.critical( str(__name__)  + " database niet te openen(1)."+const.FILE_DB_E_FILENAME+") melding:" + str(e.args[0]) )
     sys.exit(1)
@@ -67,7 +67,7 @@ flog.info( str(__name__)  + ": database tabel "+const.DB_SERIAL_TAB+" succesvol 
 
 # open van power + gas history database (1 min interval)
 try:
-    e_db_history_sqldb2.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_MIN_TAB)    
+    e_db_history_sqldb2.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_MIN_TAB) 
 except Exception as e:
     flog.critical( str(__name__) + ": database niet te openen(2)." + const.FILE_DB_E_HISTORIE + ") melding:" + str(e.args[0]) )
     sys.exit(1)
@@ -105,7 +105,7 @@ except Exception as e:
     sys.exit(1)
 flog.info( str(__name__) + ": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
 
-# open van financieel database (
+# open van financieel database
 try:
     e_db_financieel.init( const.FILE_DB_FINANCIEEL , const.DB_FINANCIEEL_DAG_TAB )
 except Exception as e:

@@ -2236,7 +2236,7 @@ $arr = array (
     'tarieven configuratie','tariff configuration','configuration des tarifs'
 ),
 /* 618 */ array(
-    'vaste tarieven electricteit','electricty fixed tariffs',"tarifs fixes de l'électricité"
+    'vaste tarieven elektriciteit','electricty fixed tariffs',"tarifs fixes de l'électricité"
 ),
 /* 619 */ array(
     'vaste tarieven gas','gas fixed tariffs','tarifs fixes gaz'
@@ -2549,10 +2549,12 @@ $arr = array (
     'tijdstip water puls','water pulse time',"temps impulsion de l'eau"
 ),
 /* 719 */ array(
-    '','',''
+    'L1,L2,L3 netto','L1,L2,L3 net','L1,L2,L3 nette'
 ),
 /* 720 */ array(
-    '','',''
+    'Netto elektrische vermogen van het verschil van levering en verbruik van alle fases L1,L2,L3.',
+    'Net electrical power of the difference of supply and consumption of all phases L1,L2,L3',
+    "Puissance électrique nette de la différence entre l'offre et la consommation de toutes les phases L1,L2,L3."
 ),
 /* 721 */ array(
     '','',''

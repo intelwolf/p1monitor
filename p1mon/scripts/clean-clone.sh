@@ -2,7 +2,7 @@
 
 PGM=`basename $0`
 
-RSYNC_OPTIONS="--force -rltWDEgopt"
+#RSYNC_OPTIONS="--force -rltWDEgopt"
 
 # List of extra dirs to create under /mnt.
 OPTIONAL_MNT_DIRS="clone mnt sda sdb rpi0 rpi1"
@@ -160,13 +160,21 @@ delete_from_dir(){
     echo "=> verwerken van $ACTIVE_DIR start."
     cd $ACTIVE_DIR 
     PWD=$(pwd)
+
+    #check if we are in a clone path
+    if [[ $ACTIVE_DIR != *"/mnt/clone"* ]]; then
+        echo "=> verwerken van $ACTIVE_DIR gestopt, geen clone folder."
+        return 1
+    fi
+
     if [ "$ACTIVE_DIR" == "$PWD" ]
         then
             for var in "$@"
             do
                 #echo "$var"
                 if [ -f "$var" ]; then
-                    rm -fvr  "$var"
+                   rm -fvr  "$var"
+                   #echo "dummy rm ""$var"
                 fi
             done
             echo "=> verwerken van $ACTIVE_DIR succes."
@@ -175,6 +183,14 @@ delete_from_dir(){
     fi
     return 0
 }
+
+
+ACTIVE_DIR=$CLONE/etc/nginx/sites-enabled
+if [ -d "$ACTIVE_DIR" ]; then
+    cd $ACTIVE_DIR
+    PWD=$(pwd)
+    delete_from_dir p1mon_80 p1mon_443
+fi
 
 ################ Lets Encrypt ##################
 echo "=> verwijderden van Lets Encrypt configuratie"
@@ -203,12 +219,6 @@ cd $ACTIVE_DIR
 echo $(pwd)
 rm -rfv ./**
 
-ACTIVE_DIR=$CLONE/etc/nginx/sites-enabled
-if [ -d "$ACTIVE_DIR" ]; then
-    cd $ACTIVE_DIR
-    PWD=$(pwd)
-    delete_from_dir p1mon_80 p1mon_443
-fi
 
 ACTIVE_DIR=$CLONE/etc/nginx/conf.d
 if [ -d "$ACTIVE_DIR" ]; then
@@ -238,6 +248,13 @@ if [ -d "$ACTIVE_DIR" ]; then
 fi
 
 ACTIVE_DIR=$CLONE/p1mon/export
+if [ -d "$ACTIVE_DIR" ]; then
+    cd $ACTIVE_DIR 
+    PWD=$(pwd)
+    delete_from_dir * .*Store ._*
+fi
+
+ACTIVE_DIR=$CLONE/p1mon/recovery
 if [ -d "$ACTIVE_DIR" ]; then
     cd $ACTIVE_DIR 
     PWD=$(pwd)

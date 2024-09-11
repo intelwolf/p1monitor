@@ -2,7 +2,8 @@ import sqlite3
 
 class PricingDb():
 
-    def init( self, dbname, table):
+    def init( self, dbname, table,flog=None):
+        self.flog = flog
         #print dbname, table
         self.dbname = dbname
         self.con = sqlite3.connect(dbname)

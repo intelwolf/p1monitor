@@ -98,7 +98,7 @@ class Cost2Database():
             +str(data['verbr_gas'])+","\
             +str(data['verbr_water'])+")"
             sqlstr=" ".join(sqlstr.split())
-            self.flog.debug(__class__.__name__ + ": sql(update update kosten dag )="+sqlstr)
+            self.flog.debug(__class__.__name__ + ": sql(update update kosten dag )=" + sqlstr )
             self.financial_db.insert_rec(sqlstr)
 
         except Exception as e:
@@ -180,30 +180,45 @@ class Cost2Database():
         self.flog.debug( __class__.__name__ + ": water berekening gestart. " )
         timestamp_dag = timestamp[0:10]
 
-        # read te day records for the day in the timestamp.
+        # read te hour records for the day in the timestamp.
         try:
-            sqlstr = "select CAST( substr(timestamp,12,2) as INT), VERBR_PER_TIMEUNIT from " +\
-                      const.DB_WATERMETERV2_TAB + " where TIMEPERIOD_ID=12 and substr(timestamp,1,10) = '" + timestamp_dag + "'"
+            sqlstr = "select SUM(VERBR_PER_TIMEUNIT) from " + const.DB_WATERMETERV2_TAB + " where TIMEPERIOD_ID=12 and substr(timestamp,1,10) = '" + timestamp_dag + "'"
+
+            #sqlstr = "select TIMESTAMP, VERBR_PER_TIMEUNIT from " + const.DB_WATERMETERV2_TAB + " where TIMEPERIOD_ID=12 and substr(timestamp,1,10) = '" + timestamp_dag + "'"
 
             sqlstr =" ".join(sqlstr.split())
             self.flog.debug( __class__.__name__ + ": sql(water)=" + sqlstr )
+
             records = self.watermeter_db.select_rec( sqlstr )
 
             self.flog.debug(__class__.__name__ + ": waarde van water record" + str(records))
+            self.flog.debug(__class__.__name__ +  ": timestamp = " + str(timestamp_dag) + " liters vandaag is " + str(records[0][0]))
         except Exception as e:
             self.flog.error( __class__.__name__ + ": sql error(water)" +str(e) )
 
+        try:
+            data['verbr_water'] = self.prices_dict[0]['water_consumption'] * float(records[0][0])
+            self.flog.debug(__class__.__name__ +  ": water kosten zonder vastrecht " + str(data['verbr_water']))
+            data['verbr_water'] += self.fixed_fee_water_day
+            self.flog.debug(__class__.__name__ +  ": water kosten inclusief vastrecht " + str(data['verbr_water']))
+        except Exception as e:
+            self.flog.warning( __class__.__name__ + ": fout bij het bereken van de dag kosten water " + str(e) )
+
+        """
         for rec in records:
             try:
-                data['verbr_water'] += self.prices_dict[rec[0]]['water_consumption']
+                print("#", rec )
+                ##data['verbr_water'] += self.prices_dict[rec[0]]['water_consumption']
             except Exception as e:
                 self.flog.warning( __class__.__name__ + ": fout bij het aanpassen water gebruik voor uur " + str(e) )
-       
+        """
+
+        """
         try:
             data['verbr_water'] += self.fixed_fee_water_day
         except Exception as e:
             self.flog.error( __class__.__name__ + ": fout bij het aanpassen water vastrecht." + str(e) )
-
+        """
 
     ##############################################################
     # convert kwh and gas consumption/production to actual costs #
@@ -249,7 +264,7 @@ class Cost2Database():
             self.flog.error( __class__.__name__ + ": fout bij het aanpassen gas en kwh vastrecht." + str(e) )
 
     ##############################################################
-    # fill the dictonary with prices for every hour              #
+    # fill the dictonary with prices for every day               #
     # sets static or dynamic prices                              #
     ##############################################################
     def _set_hour_prices( self, timestamp=None ):

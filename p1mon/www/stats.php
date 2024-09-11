@@ -65,8 +65,14 @@ function readJsonApiHistoryMin( cnt ){
         GConsumptionPrognoseData.length = 0;
         GProductionPrognoseData.length  = 0;
 
-        for ( var j = jsondata.length; j > 0; j-- ){    
+        for ( var j = jsondata.length; j > 0; j-- ){
+
             item = jsondata[ j-1 ];
+
+            if ( item[0].length != 19 ) {
+                continue // fishy date field skip the data. 
+            }
+
             item[1] = item[1] * 1000; // highchart likes millisecs.
             GverbrData.push               ( [item[1], item[6]       ] ); 
             GgelvrData.push               ( [item[1], item[7] * -1  ] ); 

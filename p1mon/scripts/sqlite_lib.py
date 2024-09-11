@@ -5,6 +5,9 @@ import sqlite3
 import inspect
 import filesystem_lib
 import time
+import const
+import sqldb
+import sqldb_pricing
 
 #import sys
 
@@ -16,6 +19,68 @@ sqlite_table_colum_info = {
     'default_value'             : '',
     'part_of_the_primary_key'   : 0
 }
+
+
+#########################################################
+# base database class                                   #
+#########################################################
+class SqlDatabase():
+
+    ###########################################
+    # init the class                          #
+    ###########################################
+    def init( self, flog=None ):
+        self.flog = flog
+        self.db_names = { 
+            const.DB_SERIAL:{ (const.DB_SERIAL_TAB, sqldb.SqlDb1()) },
+            const.DB_E_HISTORIE: { (const.DB_HISTORIE_MIN_TAB,sqldb.SqlDb2()), (const.DB_HISTORIE_UUR_TAB,sqldb.SqlDb3()), (const.DB_HISTORIE_DAG_TAB,sqldb.SqlDb4()), (const.DB_HISTORIE_MAAND_TAB,sqldb.SqlDb4()), (const.DB_HISTORIE_JAAR_TAB,sqldb.SqlDb4()) },
+            const.DB_FINANCIEEL:{ (const.DB_FINANCIEEL_DAG_TAB ,sqldb.financieelDb()), (const.DB_FINANCIEEL_MAAND_TAB,sqldb.financieelDb()), (const.DB_FINANCIEEL_JAAR_TAB,sqldb.financieelDb()),(const.DB_ENERGIEPRIJZEN_UUR_TAB, sqldb_pricing.PricingDb()) },
+            const.DB_PHASEINFORMATION : {(const.DB_FASE_REALTIME_TAB, sqldb.PhaseDB() ) ,(const.DB_FASE_MINMAX_DAG_TAB, sqldb.PhaseMaxMinDB()) },
+            const.DB_POWERPRODUCTION: { (const.DB_POWERPRODUCTION_TAB, sqldb.powerProductionDB() ) ,(const.DB_POWERPRODUCTION_SOLAR_TAB, sqldb.powerProductionSolarDB() ) },
+            const.DB_WATERMETERV2: {(const.DB_WATERMETERV2_TAB, sqldb.WatermeterDBV2())},
+            const.DB_WEER_HISTORY: { (const.DB_WEATHER_UUR_TAB,sqldb.historyWeatherDB()), (const.DB_WEATHER_DAG_TAB,sqldb.historyWeatherDB()), (const.DB_WEATHER_MAAND_TAB,sqldb.historyWeatherDB()), (const.DB_WEATHER_JAAR_TAB,sqldb.historyWeatherDB()) },
+            const.DB_WEER: {(const.DB_WEATHER_TAB,sqldb.currentWeatherDB()) },
+            const.DB_TEMPERATURE: {(const.DB_TEMPERATUUR_TAB,sqldb.temperatureDB())},
+            const.DB_STATUS: { (const.DB_STATUS_TAB, sqldb.rtStatusDb() )},
+            const.DB_CONFIGURATIE: { (const.DB_CONFIGURATIE, sqldb.configDB() ) }
+        }
+
+    ###########################################################
+    # list of all databases in use,derived from self.db_names #
+    ###########################################################
+    def list_of_all_db_file( self ):
+        db_list = []
+        for dbname in self.db_names.items():
+            db_list.append(dbname[0]+".db")
+            
+        return db_list
+
+    ######################################################
+    # creates all the databases in use with empty tables #
+    ######################################################
+    def create_all_database( self, db_pathfile=None ):
+        #self.flog.info( __class__.__name__  + " database folder is " +  str(db_pathfile) )
+        #self.flog.info( __class__.__name__  + " database name is " +  str(const.DB_SERIAL) )
+        #self.flog.info( __class__.__name__  + " const.DB_SERIAL_TAB  " +  str(const.DB_SERIAL_TAB) )
+        
+        for dbname in self.db_names.items():
+
+            db_recover_pathfile = db_pathfile + "/" + dbname[0] + ".db"
+            #print ("dbname = ", db_recover_pathfile )
+
+            msg_str =  " database " + db_recover_pathfile + " met tabellen gemaakt ("
+
+            for tab in dbname[1]:
+                #print ("tab = ", tab[0], " tab type = ",tab[1] )
+                try: 
+                    db_tmp = tab[1]
+                    db_tmp.init( db_recover_pathfile , tab[0] , flog=self.flog )
+                    msg_str = msg_str + str(tab[0]) + ","
+                except Exception as e:
+                    raise Exception("fout" + str(db_pathfile) + " tabel " + str(tab[0]) + " melding: " + str(e.args[0]) )
+            
+            msg_str = msg_str[:-1] + ")."
+            self.flog.info( __class__.__name__  +  msg_str )
 
 
 ####################################################################
@@ -99,7 +164,6 @@ class Sql2File():
         except Exception as e:
             raise Exception( "uitvoering gefaald -> " + str(e) )
 
-
 #########################################################
 # set the correct field format for the sql staments     #
 # make sure TEXT has single quotes and the numeric      #
@@ -138,9 +202,9 @@ class SqlSafeOpen():
                 filesystem_lib.rm_with_delay( filepath=db_pathfile, timeout=0, flog=flog )
                 filesystem_lib.file_system_sync()
                 time.sleep( 1 ) # time to remove file and create a new empty database file. 
-                db_class.init(db_pathfile , db_table )
+                db_class.init( db_pathfile , db_table )
             except Exception as e:
-                raise Exception("fout" + str(db_pathfile) + " tabel " + str(db_table) + " melding:" + str(e.args[0]) )
+                raise Exception("fout" + str(db_pathfile) + " tabel " + str(db_table) + " melding: " + str(e.args[0]) )
             
         #return db_class #all is well, but we lost some records :( 
         
@@ -161,7 +225,7 @@ class SqliteUtil():
 
 
     ###########################################
-    # make a query on the availabel columns   #
+    # make a query on the available columns   #
     ###########################################
     def query_str(self, table=None, flog=None, sortindex=None ):
         list_of_columns = self.table_structure_info( table=table )
@@ -243,6 +307,19 @@ class SqliteUtil():
         r = self.cursor.fetchall()
         self.close()
         return r
+    
+    def execute( self, sqlstr ):
+        self.con    = sqlite3.connect( self.db_pathfile )
+        self.cursor = self.con.cursor()
+        self.cursor.execute( sqlstr )
+        self.close()
+
+    def executescript( self,sqlscript ):
+        self.con = sqlite3.connect( self.db_pathfile )
+        self.cursor = self.con.cursor()
+        self.cursor.executescript( sqlscript )
+        self.con.commit()
+        self.close()
 
     ###########################################
     # close the database                      #
@@ -250,8 +327,4 @@ class SqliteUtil():
     def close( self ):
         if self.con:
             self.con.close()
-
-
-
-
 

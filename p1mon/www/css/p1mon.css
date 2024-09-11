@@ -1064,6 +1064,12 @@ div#right-wrapper-config-right-4 {
     font-weight: bold;
 }
 
+.text-33 {
+    color: #6E797C;
+    font-size: 0.82em;
+    height: 0px;
+}
+
 
 /* invoer veld */
 
@@ -1447,7 +1453,7 @@ a:hover {
     border-top: 1px solid #ffffff;
     background-color: #ffffff;
     /* overflow: hidden; */
-    height: 555px;
+    height: 565px;
 }
 
 .frame-3-top {
@@ -2162,6 +2168,12 @@ a:hover {
 .pos-54 {
     width: 198px;
     padding-right: 4px;
+}
+
+.pos-55 {
+    position: relative;
+    top: 260px;
+    right: 240px;
 }
 
 

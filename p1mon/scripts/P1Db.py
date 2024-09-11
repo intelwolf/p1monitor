@@ -200,7 +200,7 @@ def Main():
     #print "###### ->day =" + str( floatX3( float( datetime.now().timetuple().tm_yday)/365 )*100) 
 
    
-    financial_costs.init( 
+    financial_costs.init(
         financial_db=e_db_financieel_dag, 
         kwh_gas_db=e_db_history_min, 
         watermeter_db=watermeter_db, 

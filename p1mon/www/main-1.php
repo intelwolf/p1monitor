@@ -45,7 +45,7 @@ var wattageMaxValueProduction   = <?php echo config_read(53); ?>;
 var showPhaseInformation        = <?php echo config_read(61); ?>;
 //var faseVerbrTitle = 'fase<br>verdeling'
 var consumptionPowerPhase   = [ [0],[0],[0] ];
-var productionPowerPhase    = [ [0],[0],[0] ];
+var productionPowerPhase    = [ [0],[0],[0] ];            
 var watermeterRecords       = 1
 
 var phaseCategories         = [ 'L1', 'L2', 'L3' ]
@@ -223,7 +223,7 @@ function readJsonApiStatus(){
                 continue;
             }
 
-            if ( jsondata[j][0] == 74 ) { 
+            if ( jsondata[j][0] == 74 ) {
                 consumptionPowerPhase[0] = parseFloat( jsondata[j][1] )
                 continue;
             }
@@ -264,6 +264,25 @@ function readJsonApiStatus(){
                 continue;
             }
 
+            if ( jsondata[j][0] == 132 ) {
+
+                if (showPhaseInformation) {
+                    if ( jsondata[j][1] < 0 ) {
+                        $('#actVermogenFaseLeveringTotal').text( padXX( jsondata[j][1]*-1, 1, 3 ) );
+                        $('#actVermogenFaseLeveringID').show();
+                        $('#actVermogenFaseVerbruikID').hide();
+                    } else {
+                        $('#actVermogenFaseVerbruikTotal').text( padXX( jsondata[j][1], 1, 3 ) );
+                        $('#actVermogenFaseLeveringID').hide();
+                        $('#actVermogenFaseVerbruikID').show();
+                    }
+                } else {
+                    $('#actVermogenFaseVerbruikID').hide();
+                    $('#actVermogenFaseLeveringID').hide();
+                }
+                continue;
+            }
+
          }
 
         $('#peakKWConsumption').text(" " + peakConsumptionKw + " kW " + peakConsumptionKwTimestamp );
@@ -293,6 +312,10 @@ function readJsonApiStatus(){
             $("#actVermogenFaseLevering").highcharts().series[0].show();
             $("#actVermogenFaseLevering").highcharts().series[0].setData( productionPowerPhase );
         }
+
+        
+
+
       } catch(err) {
           console.log( err)
       }
@@ -927,6 +950,9 @@ $(function () {
         <div class="frame-2b-bot"> 
             <div class="pos-2"  id="actVermogenMeterVerbruik"></div>
             <div class="pos-46" id="actVermogenFaseVerbruik"></div>
+            <div class="pos-55 text-33" id="actVermogenFaseVerbruikID" title="<?php echo strIdx(720);?>">
+                <?php echo strIdx( 719 );?>:&nbsp;<span id="actVermogenFaseVerbruikTotal">0</span>&nbsp;kW
+            </div>
             <div class="pos-47 pad-2">
                 <div class="frame-3-top">
                 <span id="verbruikPiekHeader" class="text-3"><?php echo strIdx( 357 );?></span>
@@ -1010,7 +1036,7 @@ $(function () {
                 </div>
                 <div class="frame-2-bot"> 
                     <div id="actVermogenMeterGrafiekVerbruik" class="pos-4"></div>
-                </div>        
+                </div>
             </div>
         </div>
     </div>
@@ -1022,6 +1048,9 @@ $(function () {
         <div class="frame-2b-bot"> 
             <div class="pos-2" id="actVermogenMeterGeleverd"></div>
             <div class="pos-46" id="actVermogenFaseLevering"></div>
+            <div class="pos-55 text-33" id="actVermogenFaseLeveringID" title="<?php echo strIdx(720);?>">
+            <?php echo strIdx( 719 );?>:&nbsp;<span id="actVermogenFaseLeveringTotal">0</span>&nbsp;kW
+            </div>
             <div class="pos-47 pad-2">
                 <div class="frame-3-top">
                 <span id="geleverdPiekHeader" class="text-3"><?php echo strIdx( 357 );?></span>

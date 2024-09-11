@@ -1,16 +1,21 @@
 ####################################################################
 # shared lib for filessytem util                                   #
-# some functiions need sudo rights                                 #
+# some functions need sudo rights                                  #
 ####################################################################
 
+
+import datetime_lib
+import inspect
 import math
 import psutil
 import os
 import subprocess
 import random
 import string
+import time
 import tempfile
 import process_lib
+import pathlib 
 
 FILEPATH_SIZE = {
     'space_total' : 0,
@@ -22,6 +27,58 @@ FILEPATH_SIZE = {
 }
 
 
+##########################################################
+# removes files who are older then "age_in_seconds" from #
+# the root folder
+def clear_folder_by_age(rootfolder=None, age_in_seconds=None, flog=None):
+
+    files = list_files(rootfolder=rootfolder)
+
+    if age_in_seconds == None:
+        raise Exception('age in seconds not set, parameter forgotten?')
+
+    for file in files:
+        # index 7 is tmtime of file.
+        if file[7] > age_in_seconds:
+            try:
+                os.remove(file[0])
+                print(file[0], " removed." )
+            except Exception as e:
+                flog.warning( str(__name__) + ": bestand niet te wissen " + file[0] + " -> melding:" + str(e.args[0]) )
+
+
+##########################################################
+# list al files in a folder and report attributes        #
+# return value an array of arrays                        #
+# each entry:                                            #
+# 0: filepath: complete path and file name               #
+# 1: ctime: the time of the last metadata change.        #
+# 2: tmtime: time of last modification of path.          #
+# 3: atime: last access of path.                         #
+# 4: size: in bytes.                                     #
+# 5: bool : true is a file.                              #
+# 6: ctime age in seconds.                               #
+# 7: tmtime age in seconds.                              #
+# 8: atime age in seconds.                               #
+##########################################################
+def list_files(rootfolder=None ):
+     
+    utc_time = datetime_lib.utc_time(integer=True)
+    entries = []
+
+    for path, subdirs, files in os.walk( rootfolder ):
+        for name in files:
+            filePath = pathlib.PurePath(path, name)
+            file_item = [ str(filePath), os.path.getctime(filePath), os.path.getmtime(filePath), os.path.getatime(filePath), os.path.getsize(filePath), os.path.isfile(filePath) , abs(utc_time - os.path.getctime(filePath)), abs(utc_time - os.path.getmtime(filePath)), abs(utc_time - os.path.getatime(filePath)) ]
+            entries.append( file_item)
+
+    return entries
+
+
+ 
+##########################################################
+# generate a folder or skip when it allready exist       #
+########################################################## 
 def create_folder( filepath=None , flog=None ):
     try :
         cmd = "/usr/bin/sudo mkdir -p " + filepath
@@ -56,7 +113,6 @@ def rm_folder_with_delay( filepath=None, timeout=3600, flog=None ):
             flog=flog,
             timeout = None
         )
-
 
 
 ################################################
@@ -228,5 +284,5 @@ def filepath_use( filepath, unit='B' ):
     
     except Exception as e:
             raise Exception( "geen data gevonden " + str(e) )
-    
+
     return r

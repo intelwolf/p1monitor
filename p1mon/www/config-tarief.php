@@ -226,7 +226,7 @@ if( isset($_POST["tariff_provider"]))
                 <p></p>
                 <!--  tarieven gas start-->
                 <div class="frame-4-top">
-                    <span class="text-15"><?php echo strIdx( 618 )?></span>
+                    <span class="text-15"><?php echo strIdx( 619 )?></span>
                 </div>
                 <div class="frame-4-bot">
                     <div class="float-left pos-32">

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 PROG="p1mon"
 PHP_SESSIONS="/run/php/sessions"
 PYTHONENV="/p1mon/p1monenv"
@@ -41,6 +40,7 @@ PRG18="niet meer in gebruik"
 PRG19="P1UpgradeAide"
 PRG20="P1Notifier"
 PRG21="P1DbCopy"
+PRG22="P1DatabaseOptimizer"
 P1FILE="p1msg.txt"
 
 # make a symbolic link for old /etc/nginx/sites-enabled/p1mon_80 config files added in version 2.0.0
@@ -113,7 +113,12 @@ start() {
     # set sticky bit for C program to run als p1mon 
     # sudo /bin/chmod +s /p1mon/scripts/p1monExec # verwijderd in versie 2.0.0
     # remove status file(s) if they exists.
-    sudo /bin/rm $RAMDISK$STATUS_FILE &>/dev/null 
+    sudo /bin/rm $RAMDISK$STATUS_FILE &>/dev/null
+
+    # Database fix
+    # do flash disk, before the copy to ram.
+    echo "[*] $PRG22 gestart. watermeter fix."
+    $PRG_PATH$PRG22 -ws -d 2>&1 >/dev/null
 
     # Start P1 port reader.
     $PRG_PATH$PRG1 2>&1 >/dev/null &
