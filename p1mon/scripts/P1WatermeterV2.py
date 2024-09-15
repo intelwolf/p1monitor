@@ -16,6 +16,7 @@ import sqldb
 import multiprocessing
 import process_lib
 import util
+import p1_port_shared_lib
 
 # programme name.
 prgname = 'P1WatermeterV2'
@@ -79,37 +80,72 @@ def Main(argv):
     # set proces gestart timestamp
     rt_status_db.timestamp( 98,flog )
 
-    try:
-        gpioWaterPuls.init( 97, config_db ,flog )
-    except Exception as e:
-        flog.warning( inspect.stack()[0][3] + ": GPIO pin voor watermeter niet te openen. " + str(e.args[0])  ) 
-
     setFileFlags()
     delete_records() 
     startBackgroundDeamon() 
 
     while True:
+        # get GPIO pin number
+        _id, gpio_pin_value , _label = config_db.strget( 97 , flog )
+        flog.info(inspect.stack()[0][3]+": GPIO pin nummer is : " + gpio_pin_value)
 
         _id, run_status, _label = config_db.strget( 96, flog )
         if int(run_status) == 0: # stop process
             flog.info(inspect.stack()[0][3]+": programma is niet als actief geconfigureerd, programma wordt gestopt.")
             stop()
 
-        #flog.debug( inspect.stack()[0][3]+": loop " )
+        flog.info( inspect.stack()[0][3]+": loop " )
         checkAndInsertMinuteRecord()
-        
-        #check if GPIO pin is set or else wait for a valid pin
-        while gpioWaterPuls.gpio_pin == None:
-            flog.debug( inspect.stack()[0][3] + ": GPIO pin wordt opnieuw geprobeerd.") 
-            time.sleep( 30 ) # wait to limit load
+
+        #check if pin is GPIO or P1 data
+        if gpio_pin_value != '99':
+            flog.info(inspect.stack()[0][3]+" pin is niet 99")
+
             try:
                 gpioWaterPuls.init( 97, config_db ,flog )
-            except:
-                pass
+            except Exception as e:
+                flog.warning( inspect.stack()[0][3] + ": GPIO pin voor watermeter niet te openen. " + str(e.args[0])  )
+            
+            flog.info(inspect.stack()[0][3]+" gpioWaterPuls  ")
+            #check if GPIO pin is set or else wait for a valid pin
+            while gpioWaterPuls.gpio_pin == None:
+                flog.debug( inspect.stack()[0][3] + ": GPIO pin wordt geprobeerd.") 
+                try:
+                    gpioWaterPuls.init( 97, config_db ,flog )
+                except:
+                    # get GPIO pin number
+                    _id, gpio_pin_value , _label = config_db.strget( 97 , flog )
+                    #flog.info(inspect.stack()[0][3]+": GPIO pin nummer is : " + gpio_pin_value)
+                    if gpio_pin_value == '99':
+                        break
+                    time.sleep( 30 ) # wait to limit load
+                    pass
+            if gpio_pin_value == '99':
+                break    
+            waitForPuls()
 
-        
-        waitForPuls()
-        
+
+
+        else:
+            flog.debug( inspect.stack()[0][3] + ": Lees data P1 uit ramfile.")
+            tmp_buff = []
+            flog.debug(inspect.stack()[0][3]+": buffer gemaakt ")
+            p1_port_shared_lib.read_p1_telegram_from_ram(tmp_buff,flog)
+            flog.debug(inspect.stack()[0][3]+": Buffer gevuld:")
+            usage, ts = p1_port_shared_lib.parse_watermeter_from_serial_buffer(tmp_buff,flog)
+            
+            flog.info(inspect.stack()[0][3]+": usage waarde : " + usage)
+
+            insertTotalUsage(usage,ts)
+
+            # get GPIO pin number
+            _id, gpio_pin_value_new , _label = config_db.strget( 97 , flog )
+            if gpio_pin_value != gpio_pin_value_new:
+                flog.info(inspect.stack()[0][3]+": GPIO pin nummer is veranderd naar : " + gpio_pin_value)
+            else:
+                time.sleep (30)
+
+    flog.warning(inspect.stack()[0][3]+"Exited endless while loop")
 
 #######################################################
 # set the file rights of the database files           #
@@ -529,6 +565,43 @@ def minuteProcessing( timestamp, puls_value_per_liter ):
     watermeter_db.replace_rec_with_values( rec_values )
     flog.debug( inspect.stack()[0][3] + "replace record values = " + str(rec_values) )
 
+
+########################################################
+# Insert data from P1 telegram into Watermeter DB      #
+########################################################
+def insertTotalUsage(total_water_usage, timestamp):
+    flog.debug(inspect.stack()[0][3]+": Start van toevoegen van totaal waterverbruik in m³.")
+    
+    rt_status_db.timestamp( 90, flog ) # set timestamp of puls detected
+    flog.debug(inspect.stack()[0][3]+": timestamp toegevoegd aan status_db") 
+
+    rec_values = sqldb.WATERMETER_REC
+    timestamp_min = timestamp[0:16]+":00"
+    flog.debug(inspect.stack()[0][3]+": rec_values worden ingevuld")
+    total_water_usage = float(total_water_usage)
+    rec_values['TIMESTAMP']             = timestamp_min
+    rec_values['TIMEPERIOD_ID']         = sqldb.INDEX_MINUTE
+    rec_values['PULS_PER_TIMEUNIT']     = 0
+    rec_values['VERBR_PER_TIMEUNIT']    = 0
+    flog.debug(inspect.stack()[0][3]+": bijna alles gevuld" + str(total_water_usage))
+    rec_values['VERBR_IN_M3_TOTAAL']    = format(total_water_usage, '.6f')
+    flog.debug(inspect.stack()[0][3]+": rec_values zijn gevuld.")
+
+    #watermeter_db.replace_rec_with_values( rec_values, sqldb.INDEX_MINUTE )
+    watermeter_db.replace_rec_with_values( rec_values )
+    flog.debug( inspect.stack()[0][3] + "replace record values = " + str(rec_values) )
+
+    # add the other time periods
+    replaceRecordForAPeriod( timestamp, sqldb.INDEX_HOUR )
+    replaceRecordForAPeriod( timestamp, sqldb.INDEX_DAY )
+    replaceRecordForAPeriod( timestamp, sqldb.INDEX_MONTH )
+    replaceRecordForAPeriod( timestamp, sqldb.INDEX_YEAR )
+
+    # clean the database
+    delete_records()
+
+
+
 ########################################################
 # wait until a puls is detected and proces the puls    #
 ########################################################
@@ -605,6 +678,7 @@ def saveExit(signum, frame):
     stop()
 
 def stop():
+    flog.info( inspect.stack()[0][3] + " Service wordt gestopt." )
     gpioWaterPuls.close()
     backupData()
     sys.exit(0)
@@ -617,7 +691,8 @@ if __name__ == "__main__":
     try:
         os.umask( 0o002 )
         flog = logger.fileLogger( const.DIR_FILELOG + prgname + ".log" , prgname)    
-        flog.setLevel( logger.logging.INFO )
+        #flog.setLevel( logger.logging.INFO )
+        flog.setLevel( logger.logging.DEBUG )
         flog.consoleOutputOn( True ) 
     except Exception as e:
         print ("critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )

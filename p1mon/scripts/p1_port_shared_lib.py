@@ -141,6 +141,34 @@ def fqdn_from_config( verbose=False , configdb=None, data_set=None, flog=None):
         flog.warning( inspect.stack()[0][3]+" lezen van FQDN  melding: " + str(e.args[0]) )
 
 
+def parse_watermeter_from_serial_buffer( serialbuffer=None,flog=None ):
+    while len(serialbuffer) > 0:
+        line = serialbuffer.pop(0)
+        #print len(line)
+        if len(line) < 1: # we don't do empty lines
+            continue
+        try:
+            buf = line.split('(')
+            #print("#### "+str(buf[0]))
+            if len(buf) < 2: # verwijder velden die niet interessant zijn
+                continue
+
+            if buf[0] == '0-0:96.1.1': # verwijder slimme meter header 
+                continue
+
+            # parse watermeter data  0-1:24.2.1
+            elif buf[0] == '0-1:24.2.1':
+                usage = util.cleanDigitStr(buf[2])
+                ts = util.cleanDigitStr(buf[1])
+                timestamp = telegram_timestr_conversion(ts,flog)
+                flog.info( inspect.stack()[0][3]+ "Watermeter waardes gedetecteerd " )
+                return usage,timestamp
+
+        except Exception as e:
+            flog.error(inspect.stack()[0][3]+": fout in P1 data. Regel="+\
+            line+" melding:"+str(e.args[0]))
+
+
 ###########################################################
 # read the values from the P1 telegram and convert them   #
 # to the data structure *data_set                         #
@@ -163,7 +191,9 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
         #print len(line)
         if len(line) < 1: # we don't do empty lines
             continue
+        
         try:
+            #flog.info( inspect.stack()[0][3]+ "Started parsing " )
             buf = line.split('(')
             #print("#### "+str(buf[0]))
             if len(buf) < 2: # verwijder velden die niet interessant zijn
@@ -283,6 +313,7 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
                 data_set['peak_month_peak_160'] = util.cleanDigitStr(content[0])
                 #print( data_set['peak_month_peak_160_ts'] )
                 #print( data_set['peak_month_peak_160'] )
+ 
 
             # specific codes for large users
             if status['large_consumption_user'] == True:
@@ -1000,3 +1031,20 @@ def write_p1_telegram_to_ram( buffer=None, flog=None ):
 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": p1 berichten buffer wegschrijven naar file " + str(e.args[0]) )
+
+
+###########################################################
+# write the serial data in the buffer array to a ram file #
+###########################################################
+def read_p1_telegram_from_ram ( buffer=None, flog=None):
+    #lees bestand naar buffer voor watermeter
+    try:
+        filename = const.FILE_P1MSG
+        with open(filename) as fp:
+            for line in fp:
+                buffer.append( line )
+        flog.info(inspect.stack()[0][3]+": ram naar buffer gelezen")
+
+    except Exception as e:
+        flog.error(inspect.stack()[0][3]+": ramfile lezen naar p1 berichten buffer" + str(e.args[0]) )
+        
