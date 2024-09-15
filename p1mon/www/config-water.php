@@ -53,6 +53,11 @@ function makeSelectortGPIO( $id ) {
         echo '<option ' . $selected. ' value="'. $i . '" >GPIO' . $i .'</option>';
     }
 
+    if ($configValue == 99) {
+      echo '<option selected="selected" value="99" >P1 Data</option>';
+    } else {
+      echo '<option value="99" >P1 Data</option>';
+    }
 }
 
 if ( isset( $_POST["fs_rb_watermeter"] ) ) { //ok
