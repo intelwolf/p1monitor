@@ -16,6 +16,9 @@ Run the container using the following run command:
 ## Docker repository
 A docker image is available from docker hub at https://hub.docker.com/r/mclaassen/p1mon. An example docker-compose is included mapping external port 81 to the container.
 
+##  Internet exposure
+Note that although the UI provides a password protected interface you should not expose it publicly to the internet without addional security measures. The password is intended to protect changes to the system, not to protect the system from e.g. exfiltrating data
+
 ## Updating
 Shut down the container using 'docker-compose down' and use 'docker-compose pull' to update to the latest image version. Start the container as mentioned above
 
