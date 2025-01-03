@@ -531,6 +531,7 @@ $(function() {
         lang: <?php hc_language_json(); ?>
     });
 
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
     DataLoop();

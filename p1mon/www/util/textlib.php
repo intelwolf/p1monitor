@@ -2557,6 +2557,38 @@ $arr = array (
     "Puissance électrique nette de la différence entre l'offre et la consommation de toutes les phases L1,L2,L3."
 ),
 /* 721 */ array(
+    'EnergyZero berekening<BR>
+Bij verbruik: bij een negatieve kWh prijs levert het tarief geld op bij een positieve prijs worden er kosten in rekening gebracht.  Bij levering: bij een negatieve kWh prijs worden er kosten in rekening gebracht en bij een positieve  kWh prijs levert het tarief geld op. Het tarief is gebaseerd op de kWh uur prijs en de inkoopvergoeding inclusief BTW. Vastrecht per maand wordt meegenomen in de berekening als dit is ingevuld anders op nul zetten. Dit zijn altijd kosten. ',
+'EnergyZero calculation<BR>
+For consumption: with a negative kWh price the rate yields money, with a positive price costs are charged. For production: with a negative kWh price costs are charged and with a positive kWh price the rate yields money. The rate is based on the kWh hourly price and the purchase fee including VAT. Fixed fee per month is included in the calculation if this is filled in, otherwise set to zero. These are always costs.',
+"Calcul ÉnergieZéro<BR>
+Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'argent, avec un prix positif, des coûts sont facturés. Pour la production : avec un prix du kWh négatif, des coûts sont facturés et avec un prix du kWh positif, le tarif rapporte de l'argent. Le tarif est basé sur le prix horaire du kWh et les frais d'achat TTC. Le forfait mensuel est inclus dans le calcul si ce champ est renseigné, sinon mis à zéro. Ce sont toujours des coûts."
+),
+/* 722 */ array(
+    'dyamische uur tarieven','dynamic hourly rates','taux horaires dynamiques'
+),
+/* 723 */ array(
+    'dynamische tarieven','dynamic rates','taux dynamiques'
+),
+/* 724 */ array(
+    'zet de systeemtijd gelijk via het internet.','set the system time via the Internet.',"régler l'heure du système via Internet."
+),
+/* 725 */ array(
+    'Vergeet niet te saven rechtsboven aan de pagina',"Don't forget to save at the top right of the page","N'oubliez pas de sauvegarder en haut à droite de la page"
+),
+/* 726 */ array(
+    'besturingssysteem tijd','operating system time',"heure du système d'exploitation"
+),
+/* 727 */ array(
+    'internet tijd','internet time','temps Internet'
+),
+/* 728 */ array(
+    'Tijdsverschil (sec.)','Time difference (sec.)','Décalage horaire (sec.)'
+),
+/* 729 */ array(
+    '','',''
+),
+/* 730 */ array(
     '','',''
 ),
 

@@ -36,6 +36,18 @@ $fr      = strIdx( 486 );
 $sa      = strIdx( 487 );
 $su      = strIdx( 488 );
 
+$timeslot_p_overshoot  = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
+$timeslot_p_undershoot = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
+$timeslot_c_overshoot  = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
+$timeslot_c_undershoot = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
+
+$err_cnt = -1;
+
+$timeslot_p_overshoot   = explode( '.', config_read( 209 ));
+$timeslot_p_undershoot  = explode( '.', config_read( 210 ));
+$timeslot_c_overshoot   = explode( '.', config_read( 211 ));
+$timeslot_c_undershoot  = explode( '.', config_read( 212 ));
+
 function timestampSequenceCheck( &$timeslot ){
     // hour check
     if ( (int)$timeslot[2] < (int)$timeslot[0] ) {
@@ -57,21 +69,8 @@ function timestampSequenceCheck( &$timeslot ){
 }
 
 
-$timeslot_p_overshoot  = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
-$timeslot_p_undershoot = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
-$timeslot_c_overshoot  = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
-$timeslot_c_undershoot = array( '', '', '', '', '' ,'' , '', '', '', '', '' );
-
-$err_cnt = -1;
-
-$timeslot_p_overshoot   = explode( '.', config_read( 209 ));
-$timeslot_p_undershoot  = explode( '.', config_read( 210 ));
-$timeslot_c_overshoot   = explode( '.', config_read( 211 ));
-$timeslot_c_undershoot  = explode( '.', config_read( 212 ));
-
 
 // timeslot production overshoot start
-
 if ( isset($_POST["fs_rb_watt_po"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["fs_rb_watt_po"] == '1' ) {

@@ -268,11 +268,11 @@ function readJsonApiStatus(){
 
                 if (showPhaseInformation) {
                     if ( jsondata[j][1] < 0 ) {
-                        $('#actVermogenFaseLeveringTotal').text( padXX( jsondata[j][1]*-1, 1, 3 ) );
+                        $('#actVermogenFaseLeveringTotal').text( padXX( jsondata[j][1]*-1, 2, 3 ) );
                         $('#actVermogenFaseLeveringID').show();
                         $('#actVermogenFaseVerbruikID').hide();
                     } else {
-                        $('#actVermogenFaseVerbruikTotal').text( padXX( jsondata[j][1], 1, 3 ) );
+                        $('#actVermogenFaseVerbruikTotal').text( padXX( jsondata[j][1], 2, 3 ) );
                         $('#actVermogenFaseLeveringID').hide();
                         $('#actVermogenFaseVerbruikID').show();
                     }

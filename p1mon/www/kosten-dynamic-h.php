@@ -7,15 +7,16 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(19) == false) { return; }
 
 ?>
 <!doctype html>
-<html lang="nl">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1monitor dyamische uur tarieven</title>
+<title>P1-monitor <?php echo strIdx( 722 )?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
@@ -23,9 +24,11 @@ if ( checkDisplayIsActive(19) == false) { return; }
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
+
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
 <script src="./js/highstock-link/modules/accessibility.js"></script>
+
 <script src="./js/hc-global-options.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
@@ -115,18 +118,18 @@ function readJsonApiTariffHour(){
 
     $.getScript( "/api/v1/financial/dynamic_tariff?" + url_parameters , function( data, textStatus, jqxhr ) {
         try {
-        var jsondata = JSON.parse(data); 
-        var item;
-        GkwhData.length = 0;
-        GgasData.length = 0;
-        recordsLoaded   = jsondata.length;
-        for (var j = jsondata.length; j > 0; j--){
-            item    = jsondata[ j-1 ];
-            item[1] = item[1] * 1000; // highchart likes millisecs.
-            GkwhData.push ( [item[1], item[2] ]);
-            GgasData.push ( [item[1], item[3] ]);
-        }
-        updateData();
+            var jsondata = JSON.parse(data); 
+            var item;
+            GkwhData.length = 0;
+            GgasData.length = 0;
+            recordsLoaded   = jsondata.length;
+            for (var j = jsondata.length; j > 0; j--){
+                item    = jsondata[ j-1 ];
+                item[1] = item[1]* 1000; // highchart likes millisecs.
+                GkwhData.push ( [item[1], item[2] ]);
+                GgasData.push ( [item[1], item[3] ]);
+            }
+            updateData();
       } catch(err) {}
    });
 }
@@ -347,6 +350,7 @@ function DataLoop() {
     x = $('#TariffChart').highcharts()
     if (recordsLoaded !== 0 && $('#TariffChart').highcharts() == null) {
       hideStuff('loading-data');
+      console.log( Highcharts.getOptions() );
       createTariffChart();
       readJsonApiTariffHour();
     }
@@ -362,11 +366,19 @@ $(function() {
     GseriesVisibilty[0] =JSON.parse(getLocalStorage('cost-dynamic-h-day-kwh'));  // #PARAMETER
     GseriesVisibilty[1] =JSON.parse(getLocalStorage('cost-dynamic-h-day-gas'));  // #PARAMETER
 
+   
     Highcharts.setOptions({
-    global: {
-        useUTC: false
-        }
+        global: {
+            useUTC: false
+        },
+        time: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
     });
+
+    console.log( Highcharts.getOptions() );
+
     secs = 0;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
@@ -402,7 +414,7 @@ $(function() {
     <div class="mid-content-2 pad-13">
     <!-- links -->
         <div class="frame-2-top">
-            <span class="text-2">Dynamische tarieven</span>&nbsp;<span class="text-2" id="title_date"></span>
+            <span class="text-2"><?php echo ucfirst(strIdx( 723 ))?></span>&nbsp;<span class="text-2" id="title_date"></span>
             <span class="float-right">
             <button id="yesterday_button" onclick="setDateRange(0)" class="button-4 bold-font color-menu"></button>
             <button id="today_button"     onclick="setDateRange(1)" class="button-4 bold-font color-menu"></button>
@@ -415,7 +427,7 @@ $(function() {
         </div>
 </div>
 </div>
-<div id="loading-data"><img src="./img/ajax-loader.gif" alt="Even geduld aub." height="15" width="128"></div>
+<div id="loading-data"><img src="./img/ajax-loader.gif" alt="<?php echo strIdx( 295 )?>" height="15" width="128"></div>
 
 </body>
 </html>

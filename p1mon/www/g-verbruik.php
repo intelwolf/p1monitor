@@ -276,7 +276,7 @@ function createDailytUseChart() {
             tickWidth: 0,
             title: {
             y: 30,
-            useHTML: true,
+            useHTML: false,
             text: "m<sup>3</sup>/dag",
             style: {
                 color: "#6E797C",
@@ -361,7 +361,7 @@ function creatCurrentUseChart() {
         tickWidth: 0,
         title: {
             y: 40,
-            useHTML: true,
+            useHTML: false,
             text: "m<sup>3</sup>/uur",
             style: {
                 color: "#6E797C",

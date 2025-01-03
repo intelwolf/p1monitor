@@ -15,8 +15,6 @@ import sqldb
 import re
 
 from ftplib import FTP_TLS
-#from sqldb import configDB,rtStatusDb
-#from logger import *
 from util import setFile2user,getUtcTime
 from subprocess import check_output
 
@@ -79,16 +77,16 @@ def Main(argv):
     flog.debug(inspect.stack()[0][3]+": parameters uit de DB:"+str(ftp_para))
 
     parser = argparse.ArgumentParser(description="ftp....")
-    parser.add_argument('-u'    , '--user',         required=False)
-    parser.add_argument('-pw'    , '--password',     required=False)
-    parser.add_argument('-dir'    , '--directory',    required=False)
-    parser.add_argument('-srv'    , '--server',       required=False)
-    parser.add_argument('-fname', '--filename',     required=False)    
-    parser.add_argument('-mfcnt', '--maxfilecount', required=False)
-    parser.add_argument('-pt'    , '--port',         required=False)
-    parser.add_argument('-ftps'    , '--ftps',         required=False, action="store_true") # flag only
-    parser.add_argument('-sftp'    , '--sftp',         required=False, action="store_true") # flag only
-    parser.add_argument('-ftp'  , '--ftp',          required=False, action="store_true") # flag only
+    parser.add_argument('-u',       '--user',         required=False)
+    parser.add_argument('-pw',      '--password',     required=False)
+    parser.add_argument('-dir',     '--directory',    required=False)
+    parser.add_argument('-srv',     '--server',       required=False)
+    parser.add_argument('-fname',   '--filename',     required=False)    
+    parser.add_argument('-mfcnt',   '--maxfilecount', required=False)
+    parser.add_argument('-pt',      '--port',         required=False)
+    parser.add_argument('-ftps',    '--ftps',         required=False, action="store_true") # flag only
+    parser.add_argument('-sftp',    '--sftp',         required=False, action="store_true") # flag only
+    parser.add_argument('-ftp',     '--ftp',          required=False, action="store_true") # flag only
 
     args = parser.parse_args()
     if args.user != None:
@@ -192,9 +190,9 @@ def Main(argv):
             #flog.setLevel( logging.DEBUG )
 
             _head,tail = os.path.split( ftp_para['filename'] ) 
-            changed_filename    = '//p1mon/mnt/ramdisk/' + fileprefix + str(getUtcTime()) + '-' + tail
+            changed_filename  = '//p1mon/mnt/ramdisk/' + fileprefix + str(getUtcTime()) + '-' + tail
             #server              = "ftps://"+ftp_para['server']
-            server              = "ftp://"+ftp_para['server'] #+ ":990"
+            server            = "ftp://"+ftp_para['server'] + ":" + ftp_para['port']
             if len(ftp_para['directory']) > 0:
                 server  = server + "/" + ftp_para['directory'] + "/" # checked can handle // and / in path.
             
@@ -209,8 +207,10 @@ def Main(argv):
                 universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60 )
             """
             
-            cp = subprocess.run([ "curl", "--ftp-ssl-control", "--ftp-ssl" ,"--globoff", "--insecure", "-sSv", server, "--user", ftp_para['user']+":"+ftp_para['password'], "-T", changed_filename  ], \
-                universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60 )
+            cmd = [ "curl", "--ftp-ssl-control", "--ftp-ssl" ,"--globoff", "--insecure", "-sSv", server, "--user", ftp_para['user']+":"+ftp_para['password'], "-T", changed_filename ]
+            flog.debug( inspect.stack()[0][3]+": cmd ="        + str(cmd) )
+
+            cp = subprocess.run(cmd, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60 )
 
             flog.debug( inspect.stack()[0][3]+": cp.stdout="        + str(cp.stdout) )
             flog.debug( inspect.stack()[0][3]+": cp.stderr="        + str(cp.stderr) )
@@ -269,15 +269,17 @@ def Main(argv):
 
     # do sftp FTP with SSH
     if int(ftp_para['sftp']) == 1:
-        
+
         #################################################################
         # STEP 1 copy the file                                          #
         #################################################################
         try: # copying file
-            _head,tail = os.path.split( ftp_para['filename'] ) 
+            _head,tail = os.path.split( ftp_para['filename'] )
+
             tmp_path = '/var/log/p1monitor/'
             changed_filename    = tmp_path + fileprefix + str(getUtcTime()) + '-' + tail
-            server              = "sftp://"+ftp_para['server'] + "/"
+            server              = "sftp://"+ftp_para['server'] + ":" + ftp_para['port'] + "/"
+
             if len(ftp_para['directory']) > 0:
                 server  = server + ftp_para['directory'] + "/" # checked can handle // and / in path.
             else:
@@ -299,8 +301,10 @@ def Main(argv):
             # --globoff This option switches off the "URL globbing parser"specify URLs that contain the letters {}[]
             # --insecure For SFTP and SCP, this option makes curl skip the known_hosts verification
 
-            cp = subprocess.run([ "curl","--globoff", "--insecure", "-sSv", server, "--user", ftp_para['user']+":"+ftp_para['password'], "-T", changed_filename ], \
-                universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60 )
+            cmd = [ "curl","--globoff", "--insecure", "-sSv", server, "--user", ftp_para['user']+":"+ftp_para['password'], "-T", changed_filename ]
+            flog.debug( inspect.stack()[0][3]+": sftp cmd ="        + str(cmd) )
+
+            cp = subprocess.run( cmd, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60 )
 
             flog.debug( inspect.stack()[0][3]+": cp.stdout="        + str(cp.stdout) )
             flog.debug( inspect.stack()[0][3]+": cp.stderr="        + str(cp.stderr) )
@@ -327,7 +331,8 @@ def Main(argv):
             #_head,tail = os.path.split( ftp_para['filename'] ) 
             #changed_filename    = '//p1mon/mnt/ramdisk/' + fileprefix + str(getUtcTime()) + '-' + tail
 
-            server = "sftp://"+ftp_para['server'] + "/"
+            server = "sftp://" +ftp_para['server'] + ":" + ftp_para['port'] + "/" 
+            
             if len(ftp_para['directory']) > 0:
                 server  = server + ftp_para['directory'] + "/" # checked can handle // and / in path.
             else:
@@ -511,7 +516,7 @@ def ftpRemoveOldFiles(ftpConnection, filelist):
     for item in filtered_file_list[ int(ftp_para['maxfilecount']):]:
         ftpRemoveFile(ftpConnection,item)
 
-def    ftpChangeDirectory(ftpConnection, directory):
+def ftpChangeDirectory(ftpConnection, directory):
     try:
         ftpConnection.cwd(directory)
     except Exception as e:
@@ -531,7 +536,7 @@ def ftpConnect():
 
 def grep(pattern,word_list):
     expr = re.compile(pattern)
-    return [elem for elem in word_list if expr.match(elem)]        
+    return [elem for elem in word_list if expr.match(elem)]
      
 #-------------------------------
 if __name__ == "__main__":
@@ -540,7 +545,7 @@ if __name__ == "__main__":
         setFile2user(logfile,'p1mon')
         flog = logger.fileLogger( logfile,prgname )
         #### aanpassen bij productie
-        flog.setLevel( logger.logging.INFO )
+        flog.setLevel( logger.logging.DEBUG )
         flog.consoleOutputOn( True )
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )

@@ -19,6 +19,9 @@ ROUTE_PHASE_MINMAX_DAY_HELP = ROUTE_PHASE_MINMAX_DAY  + '/help'
 ROUTE_P1_PORT_TELEGRAM      = '/api/v1/p1port/telegram'
 ROUTE_P1_PORT_TELEGRAM_HELP = ROUTE_P1_PORT_TELEGRAM  + '/help'
 
+ROUTE_DATETIME              = '/api/v1/datetime'
+ROUTE_DATETIME_HELP         = ROUTE_DATETIME + '/help'
+
 ROUTE_STATUS         = '/api/v1/status'
 ROUTE_STATUS_HELP    = ROUTE_STATUS    + '/help'
 ROUTE_STATUS_ID      = ROUTE_STATUS    + '/{id}'
@@ -250,6 +253,10 @@ JSON_API_PHS_L3_V           = 'L3_V'                                 # Voltage p
 JSON_API_PHS_L1_A           = 'L1_A'                                 # Amperage phase L1
 JSON_API_PHS_L2_A           = 'L2_A'                                 # Amperage phase L2
 JSON_API_PHS_L3_A           = 'L3_A'                                 # Amperage phase L3
+JSON_API_PHS_L1_A_CALC      = 'L1_A_CALC'                            # Amperage phase L1 calculated
+JSON_API_PHS_L2_A_CALC      = 'L2_A_CALC'                            # Amperage phase L2 calculated
+JSON_API_PHS_L3_A_CALC      = 'L3_A_CALC'                            # Amperage phase L3 calculated
+
 
 JSON_API_PHS_CNSMPTN_L1_W_MAX  = 'CONSUMPTION_L1_W_MAX'              # Consumption of W for phase L1 maximum
 JSON_API_PHS_CNSMPTN_L2_W_MAX  = 'CONSUMPTION_L2_W_MAX'              # Consumption of W for phase L2 maximum
@@ -290,6 +297,12 @@ JSON_API_PROD_W_PSEUDO      = 'PRODUCTION_PSEUDO_W'                  # total Wat
 
 JSON_API_FNCL_DYN_TRFF_KWH  = 'DYNAMIC_TARIFF_KWH'                   # dynamic tariff kwh.
 JSON_API_FNCL_DYN_TRFF_GAS  = 'DYNAMIC_TARIFF_GAS'                   # dynamic tariff gas.
+
+JSON_API_SYSTEM_DT          = 'SYSTEM_DATETIME'                      # time and date as reported by the host OS where P1-monitor is running (format yyyy-mm-dd hh:mm:ss).
+JSON_API_SYSTEM_DT_UTC     = 'SYSTEM_DATETIME_UTC'                 # system time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT).
+JSON_API_INET_DT            = 'INET_DATETIME'                        # time and date from the internet (format yyyy-mm-dd hh:mm:ss).
+JSON_API_INET_DT_UTC       = 'INET_DATETIME_UTC'                   # internet time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT)
+JSON_API_VARIANCE           = 'TIME_VARIANCE'                        # variance between system and inet time (inet - system) in seconds.
 
 
 #JSON field explained.
@@ -384,6 +397,9 @@ EXPL_API_PHS_L3_V           = 'Voltage phase L3'
 EXPL_API_PHS_L1_A           = 'Amperage phase L1'
 EXPL_API_PHS_L2_A           = 'Amperage phase L2'
 EXPL_API_PHS_L3_A           = 'Amperage phase L3'
+EXPL_API_PHS_L1_A_CALC      = 'Amperage phase L1 calculated'
+EXPL_API_PHS_L2_A_CALC      = 'Amperage phase L2 calculated'
+EXPL_API_PHS_L3_A_CALC      = 'Amperage phase L3 calculated'
 
 
 EXPL_API_PHS_CNSMPTN_L1_W_MAX = 'Consumption of W for phase L1 maximum'
@@ -427,6 +443,12 @@ EXPL_API_PROD_W_PSEUDO      = 'Total Watt calculated during the period, this is 
 
 EXPL_API_FNCL_DYN_TRFF_KWH  = 'Dynamic tariff kwh.'
 EXPL_API_FNCL_DYN_TRFF_GAS  = 'Dynamic tariff gas.'
+
+EXPL_API_SYSTEM_DT          = 'time and date as reported by the host OS where P1-monitor is running (format yyyy-mm-dd hh:mm:ss).'
+EXPL_API_INET_DT            = 'time and date from the internet (format yyyy-mm-dd hh:mm:ss).'
+EXPL_API_SYSTEM_DT_UTC     = 'system time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT).'
+EXPL_API_INET_DT_UTC       = 'internet time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT)'
+EXPL_API_VARIANCE           = 'variance between system and inet time (inet - system) in seconds.'
 
 #json types
 TYPE_JSON_STRING         = 'string'
@@ -506,6 +528,111 @@ HELP_ROUTE_FINANCIAL_DYNAMIC_TARIFF_JSON = {
 }
 
 
+HELP_ROUTE_SMARTMETER_JSON = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP,
+    "api_description"   : "The standardised and verified data that the smart meter can deliver. The number of entries returned is optional. The data is added with a frequency of 10 seconds. Data is ordered on timestamp.",
+    "api_usage"         : "<ip>" + ROUTE_SMARTMETER + '?'+ API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2018-01-03 12:03:55, <ip>' + ROUTE_SMARTMETER + ", <ip>" + ROUTE_SMARTMETER_HELP,
+    "fields": [
+        {
+           "name" : JSON_TS_LCL,
+           "description" : EXPL_TS_LCL,
+           "type": TYPE_JSON_STRING
+        },
+        { 
+           "name" : JSON_TS_LCL_UTC,
+           "description" : EXPL_TS_LCL_UTC,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_REC_PRCSSD,
+           "description" : EXPL_API_REC_PRCSSD,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_CNSMPTN_KWH_L,
+           "description" : EXPL_API_CNSMPTN_KWH_L,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_CNSMPTN_KWH_H,
+           "description" : EXPL_API_CNSMPTN_KWH_H,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_PRDCTN_KWH_L,
+           "description" : EXPL_API_PRDCTN_KWH_L,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_PRDCTN_KWH_H,
+           "description" : EXPL_API_PRDCTN_KWH_H,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_TRFCD ,
+           "description" : EXPL_API_TRFCD,
+           "type": TYPE_JSON_STRING
+        }
+        ,
+        { 
+           "name" : JSON_API_CNSMPTN_W,
+           "description" : EXPL_API_CNSMPTN_W,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_PRDCTN_W,
+           "description" : EXPL_API_PRDCTN_W,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_CNSMPTN_GAS_M3,
+           "description" : EXPL_API_CNSMPTN_GAS_M3,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        }
+    ]
+}
+
+
+# Datetime
+HELP_ROUTE_DATETIME = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_JSON,
+    "api_description"   : "Display the current date and time of the operating system (rpi) and of the Internet in the format YYYY-DD-MM HH:M:SS and in the Epoc format (seconds) elapsed since January 1 1970.",
+    "api_usage"         : "<ip>" + ROUTE_DATETIME + "?" + API_PARAMETER_JSON_TYPE + "=object",
+    "fields": [
+        {
+           "name" : JSON_API_SYSTEM_DT,
+           "description" : EXPL_API_SYSTEM_DT,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_API_SYSTEM_DT_UTC,
+           "description" : EXPL_API_SYSTEM_DT_UTC,
+           "type": TYPE_JSON_INTEGER
+         },
+        {
+           "name" : JSON_API_INET_DT,
+           "description" : EXPL_API_INET_DT,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_API_SYSTEM_DT_UTC,
+           "description" : EXPL_API_INET_DT_UTC,
+           "type": TYPE_JSON_INTEGER
+         },
+         { 
+           "name" : JSON_API_VARIANCE ,
+           "description" : EXPL_API_VARIANCE ,
+           "type": TYPE_JSON_INTEGER
+         },
+    ]
+}
+
+
+
 
 # help data
 # SQL AS Reference
@@ -578,9 +705,12 @@ HELP_ROUTE_SMARTMETER_JSON = {
 }
 
 
-# config data
-# SQL AS Reference
-# 'select ID,PARAMETER,LABEL from config order by id'
+# Datetime 
+
+
+
+
+# P1 port telegram '
 HELP_ROUTE_P1_PORT_TELEGRAM = {
     "api_version"       : 1,
     "api_status"        : API_STATUS_PRODUCTION,

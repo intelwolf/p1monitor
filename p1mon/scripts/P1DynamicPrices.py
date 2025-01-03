@@ -65,7 +65,7 @@ def main(argv):
         required=False,
         default=False,
         action="store_true",
-        help="update de database onachte de aanwezig data.")
+        help="update de database ongachte de aanwezig data.")
 
     args = parser.parse_args()
 
@@ -73,15 +73,6 @@ def main(argv):
     ###################################
     # init stuff                      #
     ###################################
-
-    """
-    try:
-        config_db.init(const.FILE_DB_CONFIG,const.DB_CONFIG_TAB)
-    except Exception as e:
-        flog.critical( inspect.stack()[0][3] + ": database niet te openen(1)." + const.FILE_DB_CONFIG + ") melding:" + str(e.args[0]) )
-        sys.exit(1)
-    flog.debug(inspect.stack()[0][3] + ": database tabel " + const.DB_CONFIG_TAB + " succesvol geopend.")
-    """
 
     try:
         price_db.init(const.FILE_DB_FINANCIEEL ,const.DB_ENERGIEPRIJZEN_UUR_TAB)
@@ -171,10 +162,10 @@ def clean_database(mode="old"):
         flog.error(inspect.stack()[0][3]+": verwijderen van records gefaald. Melding = " + str(e.args[0]) )
         return False
 
-################################################
-# get energyzero data via the API.             #
-# return true is ok, false is an error occured #
-################################################
+#################################################
+# get energyzero data via the API.              #
+# return true is ok, false is an error occurred #
+#################################################
 def process_energyzero() -> bool:
 
     r_value = True
@@ -213,10 +204,10 @@ def process_energyzero() -> bool:
 
     return r_value
 
-################################################
-# update prices database                       #
-# return true is ok, false is an error occured #
-################################################
+#################################################
+# update prices database                        #
+# return true is ok, false is an error occurred #
+#################################################
 def update_db( json_data=None, db_field=None, message_label="onbekend" ):
     
     r_value = True
@@ -227,7 +218,7 @@ def update_db( json_data=None, db_field=None, message_label="onbekend" ):
 
             local_datetime = utc_to_local_timestamp(entry["readingDate"][0:19])
 
-            #print ("local_datetime = ", local_datetime )
+            flog.debug( inspect.stack()[0][3] + "local_datetime = " + str(local_datetime) + " API timestamp = " + str(entry["readingDate"][0:19]) )
 
             try:
                 sqlstr = "insert into " + const.DB_ENERGIEPRIJZEN_UUR_TAB + " (TIMESTAMP," + db_field + ") values ('" + \
@@ -239,6 +230,7 @@ def update_db( json_data=None, db_field=None, message_label="onbekend" ):
                 flog.debug(inspect.stack()[0][3]+": sql " + message_label + " prijs(insert) = " + sqlstr )
             except Exception as e:
                 flog.debug( inspect.stack()[0][3] + ": sql: " + sqlstr + " verwachte fout melding: "+ str(e) )
+                price_db.close_db() #lock fix
                 try:
                     sqlstr = "update " + const.DB_ENERGIEPRIJZEN_UUR_TAB + " set " + db_field + " = " + str(entry["price"])\
                     + " where TIMESTAMP = '" + str(local_datetime) + "';"
@@ -362,7 +354,7 @@ def get_data_from_energyzero_api(usage_typ=1, interval=4, btw=True, mode="today"
         flog.critical(inspect.stack()[0][3]+": energyzero melding: " + str(e.args[0]))
         return None
     else:
-        flog.debug(inspect.stack()[0][3]+": api query succesvol: " + str(r.url) )
+        flog.info(inspect.stack()[0][3]+": api query succesvol: " + str(r.url) )
         return r.json()
 
 ########################################################

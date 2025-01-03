@@ -1,14 +1,15 @@
 ########################################
-# lib for financial fuctions           #
+# lib for financial functions          #
 ########################################
 import const
 import inspect
 import sys
 import util
+import logging
 
 ####################################################################
 # calculate financial cost for kwh, gas, water                     #
-# the hour values are used, maken sure the source tabels kwh,gas,  #
+# the hour values are used, maken sure the source tables kwh,gas,  #
 # water are updated.                                               #
 ####################################################################
 class Cost2Database():
@@ -174,7 +175,7 @@ class Cost2Database():
 
 
     ##############################################################
-    # convert water conumption to actual costs                   #
+    # convert water consumption to actual costs                  #
     ##############################################################
     def _calculate_water_prices( self, timestamp=None, data=None ):
         self.flog.debug( __class__.__name__ + ": water berekening gestart. " )
@@ -204,26 +205,12 @@ class Cost2Database():
         except Exception as e:
             self.flog.warning( __class__.__name__ + ": fout bij het bereken van de dag kosten water " + str(e) )
 
-        """
-        for rec in records:
-            try:
-                print("#", rec )
-                ##data['verbr_water'] += self.prices_dict[rec[0]]['water_consumption']
-            except Exception as e:
-                self.flog.warning( __class__.__name__ + ": fout bij het aanpassen water gebruik voor uur " + str(e) )
-        """
-
-        """
-        try:
-            data['verbr_water'] += self.fixed_fee_water_day
-        except Exception as e:
-            self.flog.error( __class__.__name__ + ": fout bij het aanpassen water vastrecht." + str(e) )
-        """
-
     ##############################################################
     # convert kwh and gas consumption/production to actual costs #
     ##############################################################
     def _calculate_kwh_gas_prices( self, timestamp=None, data=None ):
+
+        #self.flog.setLevel( logging.DEBUG )
 
         self.flog.debug( __class__.__name__ + ": kwh en gas berekening gestart. " )
 
@@ -257,11 +244,16 @@ class Cost2Database():
                 data['verbr_gas']   += ( self.prices_dict[rec[0]]['gas_consumption']            * rec[4])
             except Exception as e:
                 self.flog.warning( __class__.__name__ + ": fout bij het aanpassen gas en kwh gebruik voor uur " + str(e) )
+
         try:
             data['verbr_d'] += self.fixed_fee_kwh_day
             data['verbr_gas'] += self.fixed_fee_gas_day
         except Exception as e:
-            self.flog.error( __class__.__name__ + ": fout bij het aanpassen gas en kwh vastrecht." + str(e) )
+              self.flog.error( __class__.__name__ + ": fout bij het aanpassen gas en kwh vastrecht." + str(e) )
+        
+
+        #self.flog.setLevel( logging.INFO )
+
 
     ##############################################################
     # fill the dictonary with prices for every day               #
@@ -331,12 +323,14 @@ class Cost2Database():
         #################### DYNAMIC COSTS ###################
         else: # dynamic costs
 
+            #self.flog.setLevel( logging.DEBUG )
+
             try:
                 sqlstr = "select CAST( substr(timestamp,12,2) as INT),PRICE_KWH, PRICE_GAS from " + const.DB_ENERGIEPRIJZEN_UUR_TAB +\
                 "  where substr(timestamp,1,10) = '" + timestamp[0:10] + "'"
                 sqlstr = " ".join( sqlstr.split() )
                 self.flog.debug( __class__.__name__ + ": sql(kosten dynamic)=" + sqlstr )
-                records =self.financial_db.select_rec(sqlstr)
+                records = self.financial_db.select_rec(sqlstr)
                 self.flog.debug( __class__.__name__ + ": waarde van tarieven record" + str(records) )
             except Exception as e:
                 self.flog.error( __class__.__name__ + ": sql error( dynamische kosten )"+str(e))
@@ -348,35 +342,38 @@ class Cost2Database():
                         tmp_dict['kwh_low_tariff_consumption']  = float(rec[1])
                         tmp_dict['kwh_high_tariff_production']  = float(rec[1])
                         tmp_dict['kwh_low_tariff_production']   = float(rec[1])
+
                     if rec[2] != None:
                         tmp_dict['gas_consumption']             = float(rec[2]) + self.dynamic_fee_gas
 
-                    if tmp_dict['kwh_high_tariff_consumption'] > 0:
+                    if tmp_dict['kwh_high_tariff_consumption'] >=0:
                         tmp_dict['kwh_high_tariff_consumption'] += self.dynamic_fee_kwh
                     else: 
                         tmp_dict['kwh_high_tariff_consumption'] -= self.dynamic_fee_kwh
 
-                    if tmp_dict['kwh_low_tariff_consumption'] > 0:
+                    if tmp_dict['kwh_low_tariff_consumption'] >=0:
                         tmp_dict['kwh_low_tariff_consumption'] += self.dynamic_fee_kwh
                     else: 
                         tmp_dict['kwh_low_tariff_consumption'] -= self.dynamic_fee_kwh
 
-                    if tmp_dict['kwh_high_tariff_production'] > 0:
+                    if tmp_dict['kwh_high_tariff_production'] >=0:
                         tmp_dict['kwh_high_tariff_production'] += self.dynamic_fee_kwh
                     else: 
                         tmp_dict['kwh_high_tariff_production'] -= self.dynamic_fee_kwh
 
-                    if tmp_dict['kwh_low_tariff_production'] > 0:
+                    if tmp_dict['kwh_low_tariff_production'] >=0:
                         tmp_dict['kwh_low_tariff_production'] += self.dynamic_fee_kwh
                     else: 
                         tmp_dict['kwh_low_tariff_production'] -= self.dynamic_fee_kwh
-
+                    
                     new_dict = tmp_dict.copy()
                     self.prices_dict[rec[0]] = new_dict
 
                 except Exception as e:
                    self.flog.warning( __class__.__name__ + ": probleem met de prijzen (dynamische) -> " + str(e))
 
+            #self.flog.debug( __class__.__name__ + ": self.prices_dict =" + str(self.prices_dict) )
+            #self.flog.setLevel( logging.INFO )
 
     ##############################################################
     # set the mode for using prices                              #

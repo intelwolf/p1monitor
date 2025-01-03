@@ -12,6 +12,7 @@ include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(62) == false) { return; }
 ?>
+
 <html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
@@ -553,6 +554,7 @@ $(function() {
 
 </script>
 </head>
+
 <body title="<?php echo strIdx( 99 ); #PARAMETER ?>"> 
 
 <?php page_header();?>

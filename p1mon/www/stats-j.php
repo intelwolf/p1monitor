@@ -12,7 +12,7 @@ include_once '/p1mon/www/util/highchart.php';
 if ( checkDisplayIsActive(19) == false) { return; }
 ?>
 <!doctype html>
-<html lang="<?php echo strIdx( 531 )?>">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
 <title>P1-monitor <?php echo strIdx( 424 )?></title>
@@ -480,12 +480,14 @@ $(function() {
     GseriesVisibilty[1] =JSON.parse(getLocalStorage('stat-j-gelvr-visible'));  // #PARAMETER
     GseriesVisibilty[2] =JSON.parse(getLocalStorage('stat-j-netto-visible'));  // #PARAMETER
     GseriesVisibilty[3] =JSON.parse(getLocalStorage('stat-j-temp-visible'));   // #PARAMETER
+    
     Highcharts.setOptions({
         global: {
             useUTC: false
         },
         lang: <?php hc_language_json(); ?>
     });
+    
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
     DataLoop();

@@ -1,5 +1,11 @@
 # run manual with ./P1PowerProductionS0
 
+import warnings
+# suppres GPIO warning
+# PinFactoryFallback: Falling back from lgpio: No module named 'lgpio'
+warnings.simplefilter('ignore')
+
+
 import const
 import datetime
 import filesystem_lib

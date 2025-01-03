@@ -321,7 +321,7 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '203','0'               ,'vlag voor recover van graaddagen')")
 
         # dynamic pricing 
-        # 0 means used fixed prices > 0 use one of the source for delevering the data.
+        # 0 means used fixed prices > 0 use one of the source for delivering the data.
         # 1 = energyzero
         # 2 = ???
         # 3 = ???
@@ -330,8 +330,8 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '205','0.0212'          ,'flexible kosten per kWh inkoop.')")
         self.insert_rec( "insert or ignore into " + table + " values ( '206','1'               ,'UI piek kw verbergen (1/0)')")
 
-        self.insert_rec( "insert or ignore into " + table + " values ( '207','6'                ,'UI gas-verbruik dag maximaal')")
-        self.insert_rec( "insert or ignore into " + table + " values ( '208','0.851'            ,'flexible kosten per gas inkoop.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '207','6'               ,'UI gas-verbruik dag maximaal')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '208','0.851'           ,'flexible kosten per gas inkoop.')")
 
         # notificatie
         self.insert_rec( "insert or ignore into " + table + " values ( '209','0.0.23.59.0.0.0.0.0.0.0' ,'notificatie alarm levering bovengrenswaarde Watt format hh.mm.hh.mm.ma.di.wo.do.vr.za.zo (weekdagen 1 is aan)')" )
@@ -347,6 +347,8 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '218','0'                ,'notificatie Watt levering ondergrenswaarde.') ")
         self.insert_rec( "insert or ignore into " + table + " values ( '219','0'                ,'notificatie Watt verbruik bovengrenswaarde.') ")
         self.insert_rec( "insert or ignore into " + table + " values ( '220','0'                ,'notificatie Watt verbruik ondergrenswaarde.') ")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '221','0'               ,'vlag voor het triggeren van het aanpassen van de tijd via het internet.')")
 
         # you need an account on www.noip.com before this can be used
         #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")

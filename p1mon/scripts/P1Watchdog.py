@@ -177,6 +177,18 @@ def MainProg():
             check_and_run_backup()
             run_patch()
 
+
+            # Set time via the internet
+            trigger_function(
+                prg_name="/p1mon/scripts/P1SetTime", 
+                prg_parameters="--internet",
+                db_config_index=221,
+                start_msg="Tijd instellen via het internet gestart.",
+                stop_msg="Tijd instellen via het internet gereed.",
+                err_msg="Tijd instellen via het internet gefaald.",
+                use_python_launcer=False
+            )
+
             # debug dump 
             trigger_function(
                 prg_name="sudo nohup /p1mon/scripts/in_ex_custom_www.sh export", 
@@ -607,7 +619,6 @@ def update_weather_data():
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": sql error(config API key)"+str(e))
 
-
 ########################################################
 # update the network status and status database        #
 ########################################################
@@ -813,109 +824,6 @@ def P1NginxSetApiTokens():
         config_db.strset(0, 149, flog) # fail save to stop
     
     #flog.setLevel( logging.INFO )
-
-
-"""
-removed in version 2.4.0
-#############################################################################
-# 1: check if there is a export file to import with the extention zip.pu1a  #
-# 2: rename the file to see if we have full access                          #
-# 3: check if there is data in the database before doing a import.          #
-# 4: start the import by running import script                              #
-#############################################################################
-def checkAutoImport(): #180ok
-    global auto_import_is_active ,msg_import_busy 
-    
-    #flog.setLevel( logging.DEBUG )
-    try:
-        import_filename_zip         = const.DIR_FILEDISK  + const.EXPORT_PREFIX + "-" + const.P1_UPGRADE_ASSIST + ".zip"
-        import_filename_zip_pu1a    = import_filename_zip + ".p1ua"
-        import_filename_status      = const.DIR_RAMDISK + const.EXPORT_PREFIX + "-" + const.P1_UPGRADE_ASSIST + ".zip.status"
-        
-        flog.debug( inspect.stack()[0][3] + ":controle of het auto import bestand bestaat -> " + str( import_filename_zip_pu1a ) )
-
-        if os.path.isfile( import_filename_zip_pu1a ):
-            os.rename( import_filename_zip_pu1a, import_filename_zip )
-            if os.path.isfile( import_filename_zip ):
-                flog.info( inspect.stack()[0][3] + ":auto import gevonden en klaar voor import -> " + str( import_filename_zip) )
-                rt_status_db.strset("gereed voor import",93,flog)
-                rt_status_db.timestamp( 94,flog )
-                return # not needed bug give the user 10 secs (cyle time to see the message)
-            else:
-                flog.error( inspect.stack()[0][3] + ": bestandnaam aanpassen van " + str( import_filename_zip_pu1a ) + " gefaald." )
-        else:
-            flog.debug( inspect.stack()[0][3] + ": geen import bestand gevonden-> " + str( import_filename_zip_pu1a ) )
-
-        #check if we have data in the database
-        if auto_import_is_active == False and os.path.isfile( import_filename_zip ) == True:
-            flog.debug( inspect.stack()[0][3] + ": check if we have data in the database" )
-            e_db_history_min = sqldb.SqlDb2()
-            try:
-                e_db_history_min.init(const.FILE_DB_E_HISTORIE,const.DB_HISTORIE_MIN_TAB)
-                sqlstr = "select count() from " + const.DB_HISTORIE_MIN_TAB
-                sqlstr=" ".join(sqlstr.split())
-                flog.debug(inspect.stack()[0][3]+": sql(1)="+sqlstr)
-                rec_p = e_db_history_min.select_rec( sqlstr )
-                flog.debug( inspect.stack()[0][3] + ": waarde van count record " + str(rec_p) )
-                if int(rec_p[0][0]) < 2: # wait until there is 2 minutes of data available
-                    msg = "wacht op slimme meter data"
-                    rt_status_db.strset( msg, 93, flog )
-                    rt_status_db.timestamp( 94,flog )
-                    flog.info(inspect.stack()[0][3] + ": " + msg )
-                    return # do noting until there is data
-            except Exception as e:
-                flog.critical(inspect.stack()[0][3]+": database niet te openen(4)." + const.FILE_DB_E_HISTORIE + ") melding:"+str(e.args[0]))
-                return 
-
-        if os.path.isfile( import_filename_zip ) == False and auto_import_is_active == True :
-            msg = "SQL import gereed"
-            rt_status_db.strset( msg, 93, flog )
-            rt_status_db.timestamp( 94,flog )
-            flog.info(inspect.stack()[0][3] + ": " + msg )
-            auto_import_is_active = False
-            #clean status file
-            os.remove( import_filename_status )
-            
-        if os.path.isfile( import_filename_zip ):
-            flog.debug( inspect.stack()[0][3] + ": import zipfile gevonden ->"  + str(import_filename_zip ) ) 
-            if auto_import_is_active == False:
-                rt_status_db.strset( "SQL import wordt gestart", 93, flog )
-                rt_status_db.timestamp( 94,flog )
-                auto_import_is_active = True
-                rt_status_db.strset( "SQL import gestart", 93, flog )
-                rt_status_db.timestamp( 94,flog )
-
-                cmd = "/p1mon/scripts/P1SqlImport -i " + import_filename_zip + " > /dev/null 2>&1 &" 
-                r = process_lib.run_process( 
-                    cms_str = cmd,
-                    use_shell=True,
-                    give_return_value=True,
-                    flog=flog,
-                    timeout = None
-                )
-                if r[2] > 0:
-                    msg = "P1SqlImport gefaalt"
-                    flog.error(inspect.stack()[0][3] + msg  )
-                    rt_status_db.strset( msg, 93, flog )
-                    rt_status_db.timestamp( 94,flog )
-       
-        if auto_import_is_active == True:
-                #update the status
-                if len( msg_import_busy ) < 60:
-                    msg_import_busy = msg_import_busy + "."
-                flog.info(inspect.stack()[0][3] + ": " + msg_import_busy  )
-                rt_status_db.strset( msg_import_busy , 93, flog )
-                rt_status_db.timestamp( 94,flog )
-                
-    
-        #print ( "auto_import_is_active =  " + str(auto_import_is_active) )
-        #print (" os.path.isfile( import_filename_zip ) = " + str( os.path.isfile( import_filename_zip ) ) )
-    except Exception as e:
-        flog.error(inspect.stack()[0][3]+" Onverwachte fout: " + str( e ) )
-    
-    #flog.setLevel( logging.INFO )
-"""
-
 
 #########################################################
 # start the process to export a DB to an Excel workbook #
@@ -1600,8 +1508,6 @@ def makeDebugDump( id ): #180ok
         )
     if ( r[2] ) > 0:
         flog.error(inspect.stack()[0][3]+" debug dump gefaald.")
-
-
 
 def check_and_run_backup(): #2.0.0
 

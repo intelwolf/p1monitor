@@ -14,6 +14,8 @@ include_once '/p1mon/www/util/pageclock.php';
 loginInit();
 passwordSessionLogoutCheck();
 
+$err_cnt = -1;
+
 $noInetCheck = isInternetIPAllowed();
 $localip     = validLocalIpAdress(getClientIP());
 //$localip        = False;

@@ -52,7 +52,6 @@ if ( useKw ) {
     var wattText = 'W'
 }
 
-
 function readJsonApiPhaseInformationFromStatus(){ 
 
     $.getScript( "./api/v1/status", function( data, textStatus, jqxhr ) {
@@ -539,12 +538,15 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -37,
+                y: 0,
                 color: '#6E797C',
-                format:
-                    '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} A</span><br/>' +
-                    '</div>',
+                borderWidth: 0,
+                format: '{point.y}A',
+                style: {
+                    fontWeight: 'bold',
+                    fontSize: '25px',
+                    color: "#6e797c"
+                }
             }, 
         }],
         title: null,
@@ -615,13 +617,15 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -37,
+                y: 0,
                 color: '#6E797C',
                 borderWidth: 0,
-                format:
-                    '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} V</span><br/>' +
-                    '</div>'
+                format: '{point.y}V',
+                style: {
+                    fontWeight: 'bold',
+                    fontSize: '25px',
+                    color: "#6e797c"
+                }
             },
         }],
         title: null,
@@ -668,12 +672,15 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -35,
+                y: 0,
                 color: '#6E797C',
-                format:
-                    '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} '+ wattText + '</span><br/>' +
-                    '</div>',
+                borderWidth: 0,
+                format: '{point.y}W',
+                style: {
+                    fontWeight: 'bold',
+                    fontSize: '25px',
+                    color: "#6e797c"
+                }
             },
         }]
     }));
@@ -701,12 +708,16 @@ function readGraphVisibilityFromBrowserMemory(){
                 }
             ],
             dataLabels: {
-                y: -35,
+                useHTML: true,
+                y: 0,
                 color: '#6E797C',
-                format:
-                    '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} '+ wattText + '</span><br/>' +
-                    '</div>',
+                borderWidth: 0,
+                format: '{point.y}W',
+                style: {
+                    fontWeight: 'bold',
+                    fontSize: '25px',
+                    color: "#6e797c"
+                }
             },
         }]
     }));
@@ -734,12 +745,15 @@ function readGraphVisibilityFromBrowserMemory(){
             ],
             dataLabels: {
                 useHTML: true,
-                y: -35,
+                y: 0,
                 color: '#6E797C',
-                format:
-                    '<div style="text-align:center">' +
-                    '<span style="font-size:25px">{point.y} '+ wattText + '</span><br/>' +
-                    '</div>',
+                borderWidth: 0,
+                format: '{point.y}W',
+                style: {
+                    fontWeight: 'bold',
+                    fontSize: '25px',
+                    color: "#6e797c"
+                }
             },
         }]
     }));

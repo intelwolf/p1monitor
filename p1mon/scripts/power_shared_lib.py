@@ -455,6 +455,7 @@ class WattTresholdNotification():
 
         FUNCTION_TAG = __class__.__name__ + "." + __name__ + "."+ inspect.currentframe().f_code.co_name
 
+
         try:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             # multply by 1000 to get Watt from Kw and cast as integer.

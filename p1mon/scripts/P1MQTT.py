@@ -139,6 +139,7 @@ mqtt_payload_indoor_temperature = {
     7:  float( 0 ),
 }
 
+# 14-15 Amperage calculated 
 mqtt_payload_phase = {
     0:  str( '' ),
     1:  int( 0 ),
@@ -154,6 +155,9 @@ mqtt_payload_phase = {
     11: int( 0 ),
     12: int( 0 ),
     13: int( 0 ),
+    14: float( 0 ),
+    15: float( 0 ),
+    16: float( 0 ),
 }
 
 mqtt_payload_powerproduction = {
@@ -372,6 +376,9 @@ def setConfigFromDb():
         11: mqtt_para['topicprefix'] + '/' + os.path.basename( apiconst.ROUTE_PHASE )  + '/' + apiconst.JSON_API_PHS_L1_A.lower(),
         12: mqtt_para['topicprefix'] + '/' + os.path.basename( apiconst.ROUTE_PHASE )  + '/' + apiconst.JSON_API_PHS_L2_A.lower(),
         13: mqtt_para['topicprefix'] + '/' + os.path.basename( apiconst.ROUTE_PHASE )  + '/' + apiconst.JSON_API_PHS_L3_A.lower(),
+        14: mqtt_para['topicprefix'] + '/' + os.path.basename( apiconst.ROUTE_PHASE )  + '/' + apiconst.JSON_API_PHS_L1_A_CALC.lower(),
+        15: mqtt_para['topicprefix'] + '/' + os.path.basename( apiconst.ROUTE_PHASE )  + '/' + apiconst.JSON_API_PHS_L2_A_CALC.lower(),
+        16: mqtt_para['topicprefix'] + '/' + os.path.basename( apiconst.ROUTE_PHASE )  + '/' + apiconst.JSON_API_PHS_L3_A_CALC.lower(),
     }
 
     mqtt_topics_powerproduction = {
@@ -934,23 +941,57 @@ def checkBrokerConnection( rc ):
 
 # because of the multi records needed from the status DB a specfic function
 def getPhasePayloadFromDB( mqtt_payload ):
+
     _id, mqtt_payload[ 0  ], _label, _security = rt_status_db.strget( 106, flog)
     datetime_object = datetime.strptime( mqtt_payload[ 0  ], '%Y-%m-%d %H:%M:%S' )
+
     unixtime = int( time.mktime( datetime_object .timetuple() ) )
     mqtt_payload[1] = str( unixtime )
+
     _id, mqtt_payload[ 2  ], _label, _security = rt_status_db.strget( 74,  flog) #L1 Watt consuption
-    _id, mqtt_payload[ 3  ], _label, _security = rt_status_db.strget( 75,  flog) #L1 Watt consuption
-    _id, mqtt_payload[ 4  ], _label, _security = rt_status_db.strget( 76,  flog) #L1 Watt consuption
+    _id, mqtt_payload[ 3  ], _label, _security = rt_status_db.strget( 75,  flog) #L2 Watt consuption
+    _id, mqtt_payload[ 4  ], _label, _security = rt_status_db.strget( 76,  flog) #L3 Watt consuption
     _id, mqtt_payload[ 5  ], _label, _security = rt_status_db.strget( 77,  flog) #L1 Watt production
-    _id, mqtt_payload[ 6  ], _label, _security = rt_status_db.strget( 78,  flog) #L1 Watt production
-    _id, mqtt_payload[ 7  ], _label, _security = rt_status_db.strget( 79,  flog) #L1 Watt production
+    _id, mqtt_payload[ 6  ], _label, _security = rt_status_db.strget( 78,  flog) #L2 Watt production
+    _id, mqtt_payload[ 7  ], _label, _security = rt_status_db.strget( 79,  flog) #L3 Watt production
     _id, mqtt_payload[ 8  ], _label, _security = rt_status_db.strget( 103, flog) #L1 Volt
-    _id, mqtt_payload[ 9  ], _label, _security = rt_status_db.strget( 104, flog) #L1 Volt
-    _id, mqtt_payload[ 10 ], _label, _security = rt_status_db.strget( 105, flog) #L1 Volt
+    _id, mqtt_payload[ 9  ], _label, _security = rt_status_db.strget( 104, flog) #L2 Volt
+    _id, mqtt_payload[ 10 ], _label, _security = rt_status_db.strget( 105, flog) #L3 Volt
     _id, mqtt_payload[ 11 ], _label, _security = rt_status_db.strget( 100, flog) #L1 Ampere
-    _id, mqtt_payload[ 12 ], _label, _security = rt_status_db.strget( 101, flog) #L1 Ampere
-    _id, mqtt_payload[ 13 ], _label, _security = rt_status_db.strget( 102, flog) #L1 Ampere
+    _id, mqtt_payload[ 12 ], _label, _security = rt_status_db.strget( 101, flog) #L2 Ampere
+    _id, mqtt_payload[ 13 ], _label, _security = rt_status_db.strget( 102, flog) #L3 Ampere
+
+    #mqtt_payload[ 3  ]  = 1
+    #mqtt_payload[ 9  ]  = 250
+    #mqtt_payload[ 4  ]  = 0.5
+    #mqtt_payload[ 10  ]  = 180
+
+    # calc A when W and V are available  
+    mqtt_payload[ 14 ] = _calc_amparage(mqtt_payload, index=2) # L1
+    mqtt_payload[ 15 ] = _calc_amparage(mqtt_payload, index=3) # L2
+    mqtt_payload[ 16 ] = _calc_amparage(mqtt_payload, index=4) # L3
+
     #print  (mqtt_payload )
+
+# calculates the amparage when for a phase
+# volts and watts are available. 
+def _calc_amparage(mqtt_payload, index=2 ):
+
+    watt_c = float(mqtt_payload[index])
+    watt_p = float(mqtt_payload[index+3])
+    volt = float(mqtt_payload[index+6])
+    amp = 0.0
+
+    if watt_p > watt_c: 
+        watt_c = watt_p
+
+    if watt_c > 0 and volt > 0:
+        amp = (watt_c*1000) / volt
+
+    #print( watt_c, volt, amp )
+    return str(round(amp, 2))
+    
+
 
 def getPayloadFromDB( mqtt_payload, database, db_index=None ):
     try:

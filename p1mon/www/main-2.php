@@ -217,7 +217,7 @@ function readJsonApiStatus(){
 
             if ( jsondata[j][0] == 132 ) {
                 if ( showPhaseInformation && jsondata[j][1] > 0 ) {
-                        $('#actVermogenFaseVerbruikTotal').text( padXX( jsondata[j][1], 1, 3 ) );
+                        $('#actVermogenFaseVerbruikTotal').text( padXX( jsondata[j][1], 2, 3 ) );
                         $('#actVermogenFaseVerbruikID').show();
                     } else {
                         $('#actVermogenFaseVerbruikID').hide();

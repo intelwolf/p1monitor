@@ -38,6 +38,13 @@ $sw_on   = strIdx( 192 );
 $newVersionLink = "";
 $newSoftwareVersionP1monitor = "";
 
+
+if ( isset($_POST["fs_cb_set_time"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    echo "on<br>";
+    if ( updateConfigDb("update config set parameter = '1' where ID = 221"))$err_cnt += 1;
+}
+
 if ( isset($_POST["udp_deamon_active"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["udp_deamon_active"] == '1' ) {
@@ -162,6 +169,34 @@ if  ( strlen( readStatusDb(66)) > 0 ) {
                 <div id="right-wrapper-config-left-2">
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
+
+
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo ucfirst(strIdx( 726 ))?></span>
+                        </div>
+                        <div class="frame-4-bot">
+                            <div class="float-left text-10">
+                                <div><?php echo ucfirst(strIdx( 726 ))?>:&nbsp;<span id="systemtime">????-??-?? ??:??:??</span></div>
+                                <div><?php echo ucfirst(strIdx( 727 ))?>:&nbsp;<span id="inettime">????-??-?? ??:??:??</span></div>
+                                <div><?php echo ucfirst(strIdx( 728 ))?>:&nbsp;<span id="timevariance">?</span></div>
+                                <p></p>
+                                <div class='pad-12x'>
+                                    <div>
+                                        <!-- left side -->
+                                        <div class="float-left" title="<?php echo strIdx(725);?>">
+                                            <div class="text-10"><?php echo ucfirst(strIdx( 724 ))?>&nbsp;</div>
+                                        </div>
+                                        <!-- right side -->
+                                        <div class="float-right">
+                                            <div>
+                                                <input class="cursor-pointer" id="fs_cb_set_time" name="fs_cb_set_time" type="checkbox">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div> 
+                        <p></p>
 
                         <div class="frame-4-top">
                             <span class="text-15"><?php echo ucfirst(strIdx( 376 ))?></span>
@@ -318,6 +353,21 @@ if  ( strlen( readStatusDb(66)) > 0 ) {
 <script> 
 
 
+function readJsonApiDateTime(){
+
+    $.getScript( "./api/v1/datetime", function( data, textStatus, jqxhr ) {
+        try {
+            var jsonarr = JSON.parse(data); 
+            //console.log( jsonarr)
+            $('#systemtime').text( jsonarr[0] );
+            $('#inettime').text( jsonarr[2] );
+            $('#timevariance').text( jsonarr[4] );
+        } catch(err) {
+            console.log( err );
+        }
+    });
+}
+
 
 function readJsonApiConfigurationToStop( id ){
 
@@ -331,8 +381,6 @@ function readJsonApiConfigurationToStop( id ){
           console.log( err );
       }
    });
-   
-
 }
 
 function readPatchStatusLogging(){ 
@@ -371,7 +419,17 @@ $('#patch_status_message_close').click(function() {
 PatchMessagesShow=getCookie("patch_messages_show"); 
 
 
+function DataLoop() {
+    readJsonApiDateTime();
+    setTimeout('DataLoop()',5000);
+}
+
+
 $(function() {
+
+    //readJsonApiDateTime();  
+    DataLoop();
+
     hideStuff('dump_dl_link')
     centerPosition('#cancel_bar');
     centerPosition('#system_dump');
@@ -390,9 +448,10 @@ $(function() {
     if ( jsNewSoftwareVersion.length > 0 ) {
         newP1SoftwareVersion = jsNewSoftwareVersion;
         showStuff('p1newdownload');
+        $('#newp1mon').text( newP1SoftwareVersion )
     }
-    $('#newp1mon').text( newP1SoftwareVersion )
     
+
 });
 
 

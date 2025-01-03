@@ -351,7 +351,7 @@ if( isset($_POST["tariff_provider"]))
                         <div class="frame-2-bot pos-11"> 
 
                         <div class="rTable"> 
-                            <div class="rTableRow" title="">
+                            <div class="rTableRow">
                                 <div class="rTableCell">
                                     <label class="text-10"><?php echo strIdx( 632 )?></label>
                                 </div>
@@ -367,7 +367,6 @@ if( isset($_POST["tariff_provider"]))
                 </div>
                 
 
-                
                 </div>
                 <p></p>
             
@@ -417,6 +416,8 @@ if( isset($_POST["tariff_provider"]))
                         <?php echo strIdx(4);?>
                         <p></p>
                         <?php echo strIdx(28);?>
+                        <p></p>
+                        <?php echo strIdx(721);?>
                     </div>
                 </div>
             </div>    

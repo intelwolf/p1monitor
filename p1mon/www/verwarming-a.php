@@ -142,16 +142,18 @@ function createChartIn() {
                 }],
         }],
         yAxis: [{
+            //tickPositions: [-30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90],
             min: -30,
-            //max: 60,
             max: 90,
-            minorTickPosition: 'inside',
-            minorTickLength: 30,
-            minorTickColor: '#F5F5F5',
-            tickPosition: 'inside',
-            tickLength: 35,
-            tickColor: '#F5F5F5',
-            tickInterval: 10,
+            //minorTickPosition: 'inside',
+            //minorTickLength: 30,
+            minorTickLength: 0,
+            //minorTickColor: '#F5F5F5',
+            //tickPosition: 'inside',
+            //tickLength: 35,
+            tickLength: 0,
+            //tickColor: '#F5F5F5',
+            //tickInterval: 10,
             labels: {
                 rotation: 'auto',
                 distance: 10,
@@ -179,11 +181,10 @@ function createChartIn() {
             pane: 0,
             title: {
                 text: '<span style="font-size:20px">' + ui_in_label + '<br></span>',
-                y: 130,
+                y: 120,
                 x: 0
             }
         }
-    
         ],
         plotOptions: {
         gauge: {
@@ -200,7 +201,7 @@ function createChartIn() {
                 padding: 5,
                 borderRadius: 5,
                 verticalAlign: 'center',
-                y: 45,
+                y: 75,
                 x: 0,
                 style: {
                     fontWeight: 'bold',
@@ -288,14 +289,16 @@ function createChartOut() {
         min: -30,
         max: 90,
 
-        minorTickPosition: 'inside',
-        minorTickLength: 30,
-        minorTickColor: '#F5F5F5',
+        //minorTickPosition: 'inside',
+        //minorTickLength: 30,
+        minorTickLength: 0,
+        //minorTickColor: '#F5F5F5',
 
-        tickPosition: 'inside',
-        tickLength: 35,
-        tickColor: '#F5F5F5',
-        tickInterval: 10,
+        //tickPosition: 'inside',
+        //tickLength: 35,
+        tickLength: 0,
+        //tickColor: '#F5F5F5',
+        //tickInterval: 10,
 
         labels: {
             rotation: 'auto',
@@ -324,7 +327,7 @@ function createChartOut() {
         pane: 0,
         title: {
           text: '<span style="font-size:20px">' + ui_uit_label + '<br></span>',
-          y: 130,
+          y: 120,
           x: 0
         }
         }
@@ -344,7 +347,7 @@ function createChartOut() {
                     padding: 5,
                     borderRadius: 5,
                     verticalAlign: 'center',
-                    y: 45,
+                    y: 75,
                     x: 0,
                     style: {
                         fontWeight: 'bold',

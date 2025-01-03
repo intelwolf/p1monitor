@@ -48,6 +48,9 @@ switch ( $lang_idx ) {
 }
 
 
+//debugLog( 'init  lang='.$lang );
+
+
 if ( isset($_POST["API_key"]) ) { 
     #echo "<br>processing</br>\n";
 
@@ -91,7 +94,7 @@ if ( isset($_POST["API_key"]) ) {
         ##$sql = "update config set parameter = '".$city_name."' where ID = 14";
         ##debugLog( 'sql update ='. $sql );
 
-        if ( updateConfigDb($sql)) $err_cnt += 1;
+        #if ( updateConfigDb($sql)) $err_cnt += 1;
 
         $busy_indicator = '';
         if ( strlen(trim($_POST["API_key"])) == 0 ) { # to prevent error on a empty input
@@ -99,7 +102,7 @@ if ( isset($_POST["API_key"]) ) {
             die;
         }
 
-        getJsonGetWeatherData(); // setting the weather id from the city name.
+        getJsonGetWeatherData( $lang ); // setting the weather id from the city name.
 }
 
 # set id by city id by name is skipped.
@@ -111,7 +114,10 @@ if ( isset($_POST["stad_id"]) ) {
             updateConfigDb("update config set parameter = '0' where ID = 25");
             return false; # could not update ID
         }
-        setCityNameByID( $stad_id_clean );
+
+        //debugLog( 'post stad_id lang='.$lang);
+
+        setCityNameByID( $stad_id_clean, $lang );
     }
 }
 
@@ -129,9 +135,13 @@ if( isset($_POST["roomtemperature"]) ) {
     if ( updateConfigDb("update config set parameter = '" . inputCleanDigitsOnly($_POST["roomtemperature"]) . "' where ID = 202"))  $err_cnt += 1;
 }
 
-function setCityNameByID( $city_id ) {
+function setCityNameByID( $city_id, $lang ) {
     #echo "setCityNameByID id ". $city_id ."<br>";
-    
+
+    $api_key = decodeString( 13, 'weatherapikey'); # fix in version > 2.4.2
+
+    //debugLog( 'setCityNameByID  lang='.$lang. " api_key=".$api_key);
+
     $api_key = decodeString(13, 'weatherapikey');
     $url = 'https://api.openweathermap.org/data/2.5/weather?id=' . strval($city_id) .'&units=metric&lang='. $lang. '&appid=' . $api_key;
     $json = @file_get_contents( $url );
@@ -166,11 +176,11 @@ function setCityNameByID( $city_id ) {
 }
 
 
-function getJsonGetWeatherData() {
+function getJsonGetWeatherData( $lang ) {
     global $weather_api;
     //$api_key = decodePassword(13);
 
-    #echo "<br> stad="+config_read(14)."<br>";
+   // echo "<br> stad=" + config_read(14)."<br>";
 
     # only set the ID by name when city ID is not set.
     if ( isset($_POST["stad_id"]) ) {
@@ -182,9 +192,11 @@ function getJsonGetWeatherData() {
 
     $api_key = decodeString( 13, 'weatherapikey');
 
+    //debugLog( 'getJsonGetWeatherData  lang='.$lang. " api_key=".$api_key); 
+
     $url = 'https://api.openweathermap.org/data/2.5/weather?q='.config_read(14).'&units=metric&lang='.$lang.'&appid='.$api_key; 
 
-    #debugLog( '$url ='.$url );
+    //debugLog( '$url ='.$url );
 
     #echo '<br>'.$url.'<br>';
     $json = @file_get_contents($url);

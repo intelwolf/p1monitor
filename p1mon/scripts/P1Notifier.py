@@ -86,9 +86,12 @@ def Main( argv ):
         #fase_max_min_notication.run()
         #flog.setLevel( logger.logging.INFO )
 
+
         if timer%3 == 0: # every 30 seconds
             fase_max_min_notication.run()
+            #flog.setLevel( logger.logging.DEBUG )
             power_nottification.run()
+            #flog.setLevel( logger.logging.INFO )
 
         timer += 1
         time.sleep( 10 ) # don't change!

@@ -1,6 +1,5 @@
 ####################################################################
 # shared lib for procces related functions functions               #
-# !!! TODO migrate other scripts to this lib.                      #
 ####################################################################
 #import const
 import inspect

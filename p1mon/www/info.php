@@ -6,12 +6,13 @@ include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
+include_once '/p1mon/www/util/highchart.php';
 
 if ( checkDisplayIsActive(22) == false) { return; }
 
 ?> 
 <!doctype html>
-<html lang="<?php echo strIdx( 531 )?>">
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
 <title>P1-monitor <?php echo strIdx( 114 )?></title>
@@ -546,7 +547,7 @@ function createChartCpuLoad() {
         animation: true,
         dataLabels: {
             useHTML: true,
-            format: '{point.y:.1f} %',
+            format: '{point.y:.1f}%',
             borderColor: '#384042',
             padding: 4,
             borderRadius: 5,
@@ -619,7 +620,7 @@ function createChartRamdiskLoad() {
         animation: true,
         dataLabels: {
             useHTML: true,
-            format: '{point.y:.1f} %',
+            format: '{point.y:.1f}%',
             borderColor: '#384042',
             padding: 4,
             borderRadius: 5,
@@ -693,7 +694,7 @@ function createChartRamLoad() {
         animation: true,
         dataLabels: {
             useHTML: true,
-            format: '{point.y:.1f} %',
+            format: '{point.y:.1f}%',
             borderColor: '#384042',
             padding: 4,
             borderRadius: 5,
@@ -726,6 +727,13 @@ function DataLoop() {
 
 $(function () {
 
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        },
+        lang: <?php hc_language_json(); ?>
+    });
+
     if ( getLocalStorage('info-sound-on') === 'true' ) {
         //console.log("storage is on")
         soundIsOn = true;
@@ -737,10 +745,12 @@ $(function () {
         $('#sound_on').hide();
         $('#sound_off').show();
     }
+    
     createChartCpuLoad();
     createChartCpuTemperature();
     createChartRamdiskLoad();
     createChartRamLoad();
+
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();
 });
