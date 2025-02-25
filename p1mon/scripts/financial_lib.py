@@ -197,13 +197,15 @@ class Cost2Database():
         except Exception as e:
             self.flog.error( __class__.__name__ + ": sql error(water)" +str(e) )
 
-        try:
-            data['verbr_water'] = self.prices_dict[0]['water_consumption'] * float(records[0][0])
-            self.flog.debug(__class__.__name__ +  ": water kosten zonder vastrecht " + str(data['verbr_water']))
-            data['verbr_water'] += self.fixed_fee_water_day
-            self.flog.debug(__class__.__name__ +  ": water kosten inclusief vastrecht " + str(data['verbr_water']))
-        except Exception as e:
-            self.flog.warning( __class__.__name__ + ": fout bij het bereken van de dag kosten water " + str(e) )
+        if records[0][0] != None: # Only calculate when there is a water value.
+            try:
+                data['verbr_water'] = self.prices_dict[0]['water_consumption'] * float(records[0][0])
+                self.flog.debug(__class__.__name__ +  ": water kosten zonder vastrecht " + str(data['verbr_water']))
+                data['verbr_water'] += self.fixed_fee_water_day
+                self.flog.debug(__class__.__name__ +  ": water kosten inclusief vastrecht " + str(data['verbr_water']))
+            except Exception as e:
+                self.flog.warning( __class__.__name__ + ": fout bij het bereken van de dag kosten water " + str(e) )
+           
 
     ##############################################################
     # convert kwh and gas consumption/production to actual costs #

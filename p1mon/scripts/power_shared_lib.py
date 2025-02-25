@@ -71,7 +71,7 @@ class WattTresholdNotification():
             return 
 
         if self._power_values() == False:
-            self.flog.warning( FUNCTION_TAG + ": verbruik en geleverde Watt waarden zijn niet te lezen, gestopt.") 
+            #self.flog.warning( FUNCTION_TAG + ": verbruik en geleverde Watt waarden zijn niet te lezen, gestopt.") 
             return
 
         self._consumption_overshoot()
@@ -455,7 +455,6 @@ class WattTresholdNotification():
 
         FUNCTION_TAG = __class__.__name__ + "." + __name__ + "."+ inspect.currentframe().f_code.co_name
 
-
         try:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             # multply by 1000 to get Watt from Kw and cast as integer.
@@ -466,8 +465,8 @@ class WattTresholdNotification():
             self.flog.debug( FUNCTION_TAG + ": sql record = " +  str(record) )
 
             if( record[0][0] == None or record[0][1] == None ):
-                msg = "Watt waarde zijn niet te lezen."
-                self.flog.warning( FUNCTION_TAG + ": " + msg)
+                #msg = "Watt waarde zijn niet te lezen."
+                #self.flog.warning( FUNCTION_TAG + ": " + msg)
                 return False
 
             self.watt_consumption = record[0][0]

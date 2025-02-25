@@ -285,6 +285,12 @@ function readJsonApiStatus(){
 
          }
 
+
+        // DEBUG
+        //consumptionPowerPhase[1] = 0.001
+        //consumptionPowerPhase[2] = 1
+        //productionPowerPhase[0] = 0.71
+
         $('#peakKWConsumption').text(" " + peakConsumptionKw + " kW " + peakConsumptionKwTimestamp );
         $('#lowKWConsumption').text(" " + lowConsumptionKw + " kW " + lowConsumptionKwTimestamp );
         $('#peakKWProduction').text(" " + peakProductionKw + " kW " + peakProductionKwTimestamp );
@@ -313,12 +319,11 @@ function readJsonApiStatus(){
             $("#actVermogenFaseLevering").highcharts().series[0].setData( productionPowerPhase );
         }
 
-        
-
-
       } catch(err) {
           console.log( err)
       }
+
+      
    });
 }
 
@@ -347,6 +352,7 @@ function autoHideNonPresentPhaseInformation() {
 
 }
 
+
 function readJsonApiFinancial(){ 
     $.getScript( "./api/v1/financial/day?limit=1", function( data, textStatus, jqxhr ) {
         try {
@@ -362,13 +368,11 @@ function readJsonApiFinancial(){
 function createChartPhaseProduction(){
     $('#actVermogenFaseLevering').highcharts({
         chart: {
-            margin: [0, 20, 0, 30],
             style: {
-                fontFamily: 'robotomedium',
+                fontFamily: 'robotomedium'
             },
             type: 'column',
             inverted: true,
-            width: 200,
             height: 80
         },
         tooltip: { enabled: false },
@@ -381,6 +385,13 @@ function createChartPhaseProduction(){
             lineColor: 'transparent',
             minorTickLength: 0,
             tickLength: 0,
+            labels: {
+                style: {
+                    color: '#6E797C',
+                    fontWeight: 'bold',
+                    fontSize: '13px',
+                }
+            }
         },
         yAxis: {
             title: { text: null },
@@ -391,14 +402,20 @@ function createChartPhaseProduction(){
             minorTickLength: 0,
             tickLength: 0,
             gridLineColor: 'transparent',
+            
         },
         plotOptions: {
             column: {
                 dataLabels: {
-                    useHTML: true,
+                    align: 'center',
                     enabled: true,
                     format: '{y:.3f} kW',
-                    color: '#6E797C',
+                        style: {
+                            color: '#000000',
+                            fontWeight: 'bold',
+                            fontSize: '12px',
+                            textOutline: '#FFFFFF'
+                        }
                 }
             },
             series: {
@@ -416,13 +433,11 @@ function createChartPhaseProduction(){
 function createChartPhaseConsuming(){
     $('#actVermogenFaseVerbruik').highcharts({
         chart: {
-            margin: [0, 20, 0, 30],
             style: {
                 fontFamily: 'robotomedium'
             },
             type: 'column',
             inverted: true,
-            width: 200,
             height: 80
         },
         tooltip: { enabled: false },
@@ -434,7 +449,14 @@ function createChartPhaseConsuming(){
             minorGridLineWidth: 0,
             lineColor: 'transparent',
             minorTickLength: 0,
-            tickLength: 0
+            tickLength: 0,
+            labels: {
+                style: {
+                    color: '#6E797C',
+                    fontWeight: 'bold',
+                    fontSize: '13px',
+                }
+            }
         },
         yAxis: {
             title: { text: null },
@@ -445,14 +467,22 @@ function createChartPhaseConsuming(){
             minorTickLength: 0,
             tickLength: 0,
             gridLineColor: 'transparent',
+            
         },
         plotOptions: {
             column: {
                 dataLabels: {
-                    useHTML: true,
+                    align: 'center',
                     enabled: true,
-                    format: '{y} kW',
-                    color: '#6E797C',
+                    format: '{y:.3f} kW',
+                        style: {
+                            color: '#000000',
+                            fontWeight: 'bold',
+                            fontSize: '12px',
+                            textOutline: '#FFFFFF'
+                            
+                        }
+
                 }
             },
             series: {
@@ -814,7 +844,7 @@ function DataLoop() {
 function setDynamicTitles() {
 
     $.getScript( "./api/v1/configuration", function( data, textStatus, jqxhr ) {
-    // emode is de wijze waarop de Belgische of Nederlands slimme meter met de 1.8.1 codes omgaan
+    // mode is de wijze waarop de Belgische of Nederlands slimme meter met de 1.8.1 codes omgaan
     // 0 = Nederland
     // 1 = Belgie 
     var e_mode = -1

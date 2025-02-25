@@ -249,27 +249,13 @@ $(function () {
                 formatterParams:{
                     allowEmpty:true,
                     allowTruthy:true,
-                    crossElement:"<i class='far fas fa-database color-menu'></i>",
-                    tickElement:"<i class='fas  fa-trash-alt color-warning'></i>",
+                    crossElement:"<i class='fa-solid fa-database color-menu'></i>",
+                    tickElement: "<i class='far fas fa-trash-alt color-warning'></i>",  
                 },
                 hozAlign: "center", 
                 cellClick:function(e, cell) { setDbAttributeActive( cell.getRow().getData().ID, cell, 'DB_DELETE' ) } 
             },
         ],
-        /*
-        dataLoaded:function( data ){
-            logfiles_list_inital_data_loaded = true; // used to prevent pesky error message when intial load is not finshed
-        },
-        rowClick:function( e, row ){
-            //console.log ( row.getData().filename );
-            //selected_logfile = row.getData().filename 
-            //loadLogFileContent( selected_logfile );
-        },
-        rowTap:function(e, row){   // Ipad and sutch 
-            //selected_logfile = row.getData().filename 
-            //loadLogFileContent( selected_logfile );
-        },
-        */
     });
 
     LoadData();

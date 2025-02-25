@@ -128,6 +128,7 @@ if  ( strlen( readStatusDb(66)) > 0 ) {
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/download2.js"></script>
+<script src="./js/crc32.js"></script>
 <script src="/fine-uploader/fine-uploader.min.js"></script>
 
 <script type="text/template" id="qq-template">
@@ -352,6 +353,7 @@ if  ( strlen( readStatusDb(66)) > 0 ) {
 
 <script> 
 
+var tmp_scroll_crc32_hash = -1;
 
 function readJsonApiDateTime(){
 
@@ -390,6 +392,7 @@ function readPatchStatusLogging(){
             $("#scroll_window").html("<?php echo strIdx( 395 );?>.");
         }
         
+        /*
         if ( response.length > 0 ) {
             
             $('#scroll_window').html( response );
@@ -399,6 +402,21 @@ function readPatchStatusLogging(){
         } else {
             $('#scroll_window').html( "<b><?php echo strIdx( 396 );?>.</b><br>" );
         }
+        */
+
+        tmp_local_hash = crc32( response );
+        if ( tmp_local_hash != tmp_scroll_crc32_hash ) {
+            tmp_scroll_crc32_hash = tmp_local_hash;
+            $('#scroll_window').html( response );
+            // keep scroll window scrolled down.
+            $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
+        } else {
+            if ( response.length < 1 ) {
+                $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
+            }
+        }
+
+
 
     });
 }

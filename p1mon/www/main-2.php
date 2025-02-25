@@ -265,16 +265,15 @@ function autoHideNonPresentPhaseInformation() {
 
 }
 
+
 function createChartPhaseConsuming(){
     $('#actVermogenFaseVerbruik').highcharts({
         chart: {
-            margin: [0, 20, 0, 30],
             style: {
                 fontFamily: 'robotomedium'
             },
             type: 'column',
             inverted: true,
-            width: 200,
             height: 80
         },
         tooltip: { enabled: false },
@@ -286,7 +285,14 @@ function createChartPhaseConsuming(){
             minorGridLineWidth: 0,
             lineColor: 'transparent',
             minorTickLength: 0,
-            tickLength: 0
+            tickLength: 0,
+            labels: {
+                style: {
+                    color: '#6E797C',
+                    fontWeight: 'bold',
+                    fontSize: '13px',
+                }
+            }
         },
         yAxis: {
             title: { text: null },
@@ -297,14 +303,22 @@ function createChartPhaseConsuming(){
             minorTickLength: 0,
             tickLength: 0,
             gridLineColor: 'transparent',
+            
         },
         plotOptions: {
             column: {
                 dataLabels: {
-                    useHTML: true,
+                    align: 'center',
                     enabled: true,
                     format: '{y:.3f} kW',
-                    color: '#6E797C',
+                        style: {
+                            color: '#000000',
+                            fontWeight: 'bold',
+                            fontSize: '12px',
+                            textOutline: '#FFFFFF'
+                            
+                        }
+
                 }
             },
             series: {

@@ -208,7 +208,7 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
                     tooltip: "<?php echo strIdx( 284 );?>",
                     formatter:"tickCross",
                     formatterParams:{
-                        crossElement:"<i class='far fas fa-qrcode color-menu'></i>",  
+                        crossElement:"<i class='fa-solid fa-qrcode color-menu'></i>",  
                     },
                     hozAlign: "center",
                     width:50,
