@@ -58,9 +58,9 @@ def get_cpu_info():
                     result['Serial'] = line.split(':')[1].strip()
 
         #model = list(open('/proc/device-tree/model', 'r'))
-        model = {0:'Docker'}
-        result['Hardware'] = 'Docker Container'
-        result['Revision'] = 'Docker'
+        model = {0:'Container'}
+        result['Hardware'] = 'Container'
+        result['Revision'] = '1'
         result['Serial'] = '-'
         clean_str = "".join(filter( lambda x: x in string.printable, model[0] ))
         result['Pi-model'] = clean_str
