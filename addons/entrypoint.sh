@@ -2,8 +2,9 @@
 
 if [ ! -f /var/tmp/.firstrun ]; then 
 	echo Modifying scripts..
-	# sudo sed -i "s/^ *network_lib.regenerate/#&/" /p1mon/scripts/P1NetworkConfig.py
-	# Remove logspacecleaner
+	# Remove networkmanager settings
+	sed -i "s/\$PRG_PATH\$PRG18/#&/" /p1mon/scripts/p1mon.sh
+	# Remove logspacecleaner from config
 	sed -i "s/sudo \$PRG_PATH\$PRG11/#&/" /p1mon/scripts/p1mon.sh
 	sed -i "s/crontab_lib.set_crontab_logcleaner/pass #&/" /p1mon/scripts/P1Watchdog.py
 	# remove activate script

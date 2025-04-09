@@ -26,7 +26,7 @@ class PricingDb():
     def select_rec( self, sqlstr ):
         self.con = sqlite3.connect(self.dbname)
         self.cur = self.con.cursor()
-        self.cur.execute(sqlstr)
+        self.cur.execute( sqlstr )
         r=self.cur.fetchall()
         self.close_db()
         return r 

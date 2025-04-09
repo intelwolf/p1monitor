@@ -1,16 +1,14 @@
 # run manual with ./P1WatermeterV2
 
-import warnings
+#import warnings
 # suppres GPIO warning
 # PinFactoryFallback: Falling back from lgpio: No module named 'lgpio'
-warnings.simplefilter('ignore')
+#warnings.simplefilter('ignore')
 
 
 import const
 import datetime
-import filesystem_lib
 import inspect
-import gpio
 import logger
 import os
 import signal
@@ -21,6 +19,8 @@ import datetime
 import sqldb
 import multiprocessing
 import process_lib
+import gpio_lib
+import filesystem_lib
 import util
 
 # programme name.
@@ -30,7 +30,7 @@ rt_status_db            = sqldb.rtStatusDb()
 config_db               = sqldb.configDB()
 watermeter_db           = sqldb.WatermeterDBV2()
 
-gpioWaterPuls           = gpio.gpioDigtalInput()
+gpioWaterPuls           = gpio_lib.gpioDigtalInput()
 
 timestamp               = util.mkLocalTimeString()
 
@@ -591,7 +591,6 @@ def backupData():
     )
 
 
-
 ########################################################
 # copy from ram to (flash)disk if the file does not    #
 # exist.                                               #
@@ -629,6 +628,6 @@ if __name__ == "__main__":
         print ("critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(1)
     
-    original_sigint = signal.getsignal(signal.SIGINT)
+    original_sigint = signal.getsignal( signal.SIGINT )
     signal.signal( signal.SIGINT, saveExit )
     Main(sys.argv[1:])

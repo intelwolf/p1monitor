@@ -2,7 +2,8 @@
 
 import argparse
 import const
-import crypto3
+#import crypto3 
+import crypto_lib
 import dropbox_lib
 import inspect
 import logger
@@ -70,8 +71,14 @@ def Main(argv):
             flog.debug ( inspect.stack()[0][3]+": oauth_result.access_token  = " + str(oauth_result.access_token) )
             flog.debug ( inspect.stack()[0][3]+": oauth_result.refresh_token = " + str(oauth_result.refresh_token) )
 
-            access_token_crypt  = crypto3.p1Encrypt( str(oauth_result.access_token),  dropbox_lib.CRYPT_KEY_ACCESS  )
-            refresh_token_crypt = crypto3.p1Encrypt( str(oauth_result.refresh_token), dropbox_lib.CRYPT_KEY_REFRESH )
+            # replaced crypto3 for crypto_lib in version 3.0.0
+            #access_token_crypt  = crypto3.p1Encrypt( str(oauth_result.access_token),  dropbox_lib.CRYPT_KEY_ACCESS  )
+            #refresh_token_crypt = crypto3.p1Encrypt( str(oauth_result.refresh_token), dropbox_lib.CRYPT_KEY_REFRESH )
+
+            # version 3.0.0 crypto
+            cb = crypto_lib.CryptoBase64()
+            access_token_crypt  = cb.p1Encrypt( plain_text=str(oauth_result.access_token),  seed=dropbox_lib.CRYPT_KEY_ACCESS )
+            refresh_token_crypt = cb.p1Encrypt( plain_text=str(oauth_result.refresh_token), seed=dropbox_lib.CRYPT_KEY_REFRESH )
 
             flog.debug ( inspect.stack()[0][3]+": oauth_result.access_token_crypt  = " + str( access_token_crypt ) )
             flog.debug ( inspect.stack()[0][3]+": oauth_result.refresh_token_crypt = " + str( refresh_token_crypt ) )

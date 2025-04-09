@@ -125,7 +125,7 @@ def Main( argv ):
         flog.info( inspect.stack()[0][3] + msg )
         stop ( 3 )
 
-    # detect sigend or non signen patch file
+    # detect signed or non signend patch file
 
     data['tmp_zip_filepath'] = filesystem_lib.generate_temp_filename() + patch_lib.UNSIGNED_ZIP_EXTENTION
     
@@ -185,7 +185,7 @@ def Main( argv ):
 
 ###################################################
 # run the patch when the start file exist in the  #
-# path and is excutable. return true when all is  #
+# path and is executable. return true when all is #
 # well.                                           #
 ###################################################
 def run_patch( extract_folderpath=None ):
@@ -351,6 +351,12 @@ def stop( exit=0 ):
     # reset the run flag
     # this also used in the UI to stop reading the status log
     config_db.strset( 0, 194, flog) 
+
+    # trigger de P1Watchdog to reread the version status. 
+    config_db.strset( 1, 222, flog) 
+    msg = ": controle van de versie op ztatz.nl wordt uitgevoerd."
+    writeLineToStatusFile( msg )
+    flog.info( inspect.stack()[0][3] + msg )
 
     sys.exit( exit )
 

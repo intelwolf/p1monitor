@@ -28,14 +28,16 @@ if( $localip == False ){
 $sw_off    = strIdx( 193 );
 $sw_on     = strIdx( 192 );
 
-$WIFI_ESSID_FILE  = '/p1mon/mnt/ramdisk/wifi_essid.txt';
+//$WIFI_ESSID_FILE  = '/p1mon/mnt/ramdisk/wifi_essid.txt';
 
-$ethO_previous_ip   = config_read( 164 );
-$wlan0_previous_ip  = config_read( 165 );
-$router_previous_ip = config_read( 166 );
-$dns_previous_ip    = config_read( 167 );
-$wifi_previous_ssd  = config_read( 11  );
-$wifi_previous_pw   = config_read( 12  );
+$eth0_previous_ip           = config_read( 164 );
+$wlan0_previous_ip          = config_read( 165 );
+$router_previous_ip         = config_read( 166 );
+$router_previous_ip_wlan0   = config_read( 223 );
+$dns_previous_ip            = config_read( 167 );
+$dns_previous_ip_wlan0      = config_read( 224 );
+$wifi_previous_ssd          = config_read( 11  );
+$wifi_previous_pw           = config_read( 12  );
 
 #echo $ethO_previous_ip."<br>";
 #echo $wlan0_previous_ip."<br>";
@@ -43,14 +45,12 @@ $wifi_previous_pw   = config_read( 12  );
 #echo $dns_previous_ip."<br>";
 
 $err_cnt = -1;
-$watchdog_flag = intval( config_read( 168 ) );
 
 if( isset($_POST["ip_eth0"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
-    if ( $_POST["ip_eth0"] != $ethO_previous_ip ) {
+    if ( $_POST["ip_eth0"] != $eth0_previous_ip ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_eth0"]."' where ID = 164")) $err_cnt += 1;
-        $watchdog_flag = $watchdog_flag | 1;
-        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
     }
 }
 
@@ -58,8 +58,7 @@ if( isset($_POST["ip_wlan0"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( $_POST["ip_wlan0"] != $wlan0_previous_ip ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_wlan0"]."' where ID = 165")) $err_cnt += 1;
-        $watchdog_flag = $watchdog_flag | 2;
-        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
     }
 }
 
@@ -67,21 +66,39 @@ if( isset($_POST["ip_router"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( $_POST["ip_router"] != $router_previous_ip ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_router"]."' where ID = 166")) $err_cnt += 1;
-        $watchdog_flag = $watchdog_flag | 4;
-        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
+        #if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
     }
 }
+
+if( isset($_POST["ip_router_wlan0"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["ip_router_wlan0"] != $router_previous_ip_wlan0  ) {
+        if ( updateConfigDb("update config set parameter = '".$_POST["ip_router_wlan0"]."' where ID = 223")) $err_cnt += 1;
+        #if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
+    }
+}
+
 
 if( isset($_POST["ip_dns"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( $_POST["ip_dns"] != $dns_previous_ip ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_dns"]."' where ID = 167")) $err_cnt += 1;
-        $watchdog_flag = $watchdog_flag | 8;
-        if ( updateConfigDb("update config set parameter = '".$watchdog_flag."' where ID = 168")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
+        #if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
     }
 }
 
-#echo "watchdog_flag=".$watchdog_flag."<br>";
+if( isset($_POST["ip_dns_wlan0"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["ip_dns_wlan0"] != $dns_previous_ip_wlan0 ) {
+        if ( updateConfigDb("update config set parameter = '".$_POST["ip_dns_wlan0"]."' where ID = 224")) $err_cnt += 1;
+        #if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
+    }
+}
+
 
 if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
 {
@@ -92,8 +109,9 @@ if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
 
     if ( updateConfigDb("update config set parameter = '".$_POST["wifi_essid"]."' where ID = 11")) $err_cnt += 1;
     if ( updateConfigDb("update config set parameter = '".$crypto_wifi_pw."' where ID = 12"))      $err_cnt += 1;
-    
-    if ( strcmp( $wifi_previous_ssd, $_POST["wifi_essid"]) != 0 or strcmp( $wifi_previous_pw , $crypto_wifi_pw) ) {
+
+    if ( strcmp( $wifi_previous_ssd, $_POST["wifi_essid"]) != 0 OR strcmp( $wifi_previous_pw , $crypto_wifi_pw) !=0 ) {
+        #echo("set wifi<br>");
         if ( updateConfigDb("update config set parameter = '1' where ID = 183") ) $err_cnt += 1;
     } 
 
@@ -129,28 +147,6 @@ if ( isset($_POST[ "fs_rb_duckdns_force" ]) ) {
     }
 }
 
-
-function makeSelector($id) {
-    
-    global $WIFI_ESSID_FILE;
-    
-    // WiFi SSID list
-     if ( $id == 11 ) {
-        $configValueWifiEssid = config_read(11);
-        $array = explode("\n", file_get_contents($WIFI_ESSID_FILE));
-         foreach ($array as $val) {
-             if (strlen($val) != 0) {
-                if (strcmp($configValueWifiEssid,$val) == 0) {
-                    $selected = 'selected="selected"';
-                } else {
-                    $selected = '';
-                }
-                echo '<option ' . $selected . ' value="'.$val.'">'.$val.'</option>';
-             }
-        }
-     }
-     
-}
 ?>
 <!doctype html>
 <html lang="nl">
@@ -161,10 +157,12 @@ function makeSelector($id) {
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
+<link type="text/css" rel="stylesheet" href="./css/p1mon-1-tabulator.css" >
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/tabulator-dist/js/tabulator.min.js"></script>
 <script src="./js/jquery-validate-link/jquery.validate.min.js"></script>
 <script src="./js/jquery-validate-link/additional-methods.min.js"></script>
 
@@ -173,28 +171,26 @@ function makeSelector($id) {
 <script>
 var initloadtimer;
 var suggestie_text = "<?php echo strIdx( 286 );?>";
+var wifiJsonObject = [];
+var wifiTable;
+//var ShowWifiTable  = false
 
-function wifiSelectClick() {
-    //console.log('wifi click');
-    if( $("#wifi_selector").css('display') == 'block' ) {
-        hideStuff('wifi_selector');
-        return;
-    }
+
+function hideWifiList() {
+    hideStuff('wifi-list');
+}
+
+function showWifiList() {
+
+    readJsonWifSSID();
     var p = $( "#wifi_search" );
     var position = p.position();
-    $('#wifi_selector').css({
+    $('#wifi-list').css({
             position:'absolute',
             left: p.position().left+10,
             top: p.position().top+30
-         });
-    showStuff('wifi_selector');
-}
-
-function wifiSelect() {
-    //console.log('wifi select');
-    var v = $("#wifi_selector option:selected" ).val()
-    $("#wifi_essid").val(v);
-    hideStuff('wifi_selector');
+        });
+    showStuff('wifi-list');
 }
 
 function readJsonApiStatus(){ 
@@ -231,11 +227,31 @@ function readJsonApiStatus(){
             case 122:
                 document.getElementById("ip_router").placeholder = suggestie_text + " " + jsonarr[j][1]
                 document.getElementById("ip_dns").placeholder    = suggestie_text + " " + jsonarr[j][1]
+                document.getElementById("ip_router_wlan0").placeholder = suggestie_text + " " + jsonarr[j][1]
+                document.getElementById("ip_dns_wlan0").placeholder    = suggestie_text + " " + jsonarr[j][1]
                 break;
             default:
                 break;
             }
          }
+      } catch(err) {
+          console.log( err );
+      }
+   });
+}
+
+function readJsonWifSSID(){ 
+    $.getScript( "./api/v1/wifi/ssid", function( data, textStatus, jqxhr ) {
+      try {
+        var jsonarr = JSON.parse(data); 
+       
+        jsonStr = "[" 
+        for (var j=0;  j<jsonarr[2].length; j++){   
+            jsonStr =  jsonStr + '{"id":' + j + ',"SSID":"' + jsonarr[2][j] + '"},'
+        }
+        jsonStr = jsonStr.slice(0, -1); // get rid of the last , char.
+        jsonStr = jsonStr + ']' 
+        wifiTable.replaceData(jsonStr);
       } catch(err) {
           console.log( err );
       }
@@ -260,6 +276,37 @@ function readJsonApiConfiguration(){
    });
 }
 
+function buildWiFiTable() {
+
+    wifiTable = new Tabulator("#wifi-list-table", {
+            data:wifiJsonObject,
+            height:"210px",
+            minWidth: "250px",
+            placeholder:"<?php echo strIdx( 732 );?>",
+            tooltipGenerationMode:"hover",
+            clipboard:true,
+            columns:[
+                { title:"SSID", field:"SSID", sorter:"string"},
+            ],
+            initialSort:[
+                {column:"SSID", dir:"asc"}
+            ]   
+        });
+
+        wifiTable.on("rowClick", function(e, row){
+            
+            //console.log ( "rowClick show", row.getData().SSID );
+            $("#wifi_essid").val(row.getData().SSID); 
+	    });
+
+        wifiTable.on("rowTap", function(e, row){
+            //console.log ( row.getData().SSID);
+            $("#wifi_essid").val(row.getData().SSID);
+        });
+
+}
+
+
 function LoadData() {
     clearTimeout(initloadtimer);
     readJsonApiStatus();
@@ -268,9 +315,11 @@ function LoadData() {
 }
 
 $(function () {
-    centerPosition('#wifi_selector');
-    LoadData(); 
-    
+    buildWiFiTable();
+    readJsonWifSSID();
+    document.getElementById("wifi_list_close").addEventListener("click", hideWifiList, true );
+    document.getElementById("wifi_search").addEventListener("click", showWifiList, true );
+    LoadData();
 });
 
 </script>
@@ -314,17 +363,34 @@ $(function () {
                                 <p class="p-1"></p>
                             </div>
                             <div class="float-right">
-                                <div id="wifi_search" onclick=wifiSelectClick() class="float-left pad-1 cursor-pointer">
+
+                                <!-- <div id="wifi_search" onclick=showWifiList() class="float-left pad-1 cursor-pointer"> -->
+                                <div id="wifi_search" class="float-left pad-1 cursor-pointer">
                                     <span><i class="color-menu pad-7 fas fa-search"></i></span>
+
+                                    <div id="wifi-list">
+
+                                        <!-- <div class='close_button-3' id="wifi_list_close" onclick=hideWifiList()> -->
+                                        <div class='close_button-3' id="wifi_list_close">
+                                            <i class="color-select fas fa-times-circle fa-2x" aria-hidden="true"></i>
+                                        </div>
+
+                                        <div id="wifi-list-table"></div>
+                                    </div>
                                 </div>
+                               
+
                                 <p class="p-1"></p>
                                 <div id="wifi_password" onclick="toggelPasswordVisibility('wifi_pw')" class="float-left pad-21 cursor-pointer">
                                     <span><i class="color-menu pad-7 fas fa-eye"></i></span>
                                 </div>
                             </div>
+
                             <p class="p-1"></p>
                             
+
                         </div>
+                        
                         <p></p>
 
                         <div class="frame-4-top">
@@ -480,9 +546,10 @@ $(function () {
                             </div>
                         </div>
 
+                        <!-- ethernet -->
                         <p></p>
                         <div class="frame-4-top">
-                            <span class="text-15"><?php echo strIdx( 281 );?></span>
+                            <span class="text-15"><?php echo strIdx( 281 );?> ethernet</span>
                         </div>
                         <div class="frame-4-bot">
 
@@ -500,18 +567,7 @@ $(function () {
                                     </div>
                                 </div>
 
-                                <div class="rTableRow" title="<?php echo strIdx( 274 );?>">
-                                    <div class="rTableCell width-22">
-                                        <i class="pad-7 text-10 fas fa-wifi"></i>
-                                    </div>
-                                    <div class="rTableCell">
-                                        <label class="text-10 pad-1"><?php echo strIdx( 278 );?></label> 
-                                    </div>
-                                    <div class="rTableCell"> 
-                                        <input class="input-14 color-settings color-input-back" id="ip_wlan0" name="ip_wlan0" type="text" value="<?php echo config_read( 165 );?>">
-                                    </div>
-                                </div>
-
+                              
                                 <div class="rTableRow" title="<?php echo strIdx( 275 );?>">
                                     <div class="rTableCell width-22">
                                         <i class="pad-7 text-10 fas fa-project-diagram"></i>
@@ -533,6 +589,58 @@ $(function () {
                                     </div>
                                     <div class="rTableCell"> 
                                         <input class="input-14 color-settings color-input-back" id="ip_dns" name="ip_dns" type="text" value="<?php echo config_read( 167 );?>">
+                                    </div>
+                                </div>
+
+                            </div>
+                            
+                            <p></p>
+
+                        </div>
+
+                        <!-- wifi -->
+                        <p></p>
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo strIdx( 281 );?> wifi</span>
+                        </div>
+                        <div class="frame-4-bot">
+
+                            <div class="rTable">
+
+                              
+                                <div class="rTableRow" title="<?php echo strIdx( 274 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-wifi"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10 pad-1"><?php echo strIdx( 278 );?></label> 
+                                    </div>
+                                    <div class="rTableCell"> 
+                                        <input class="input-14 color-settings color-input-back" id="ip_wlan0" name="ip_wlan0" type="text" value="<?php echo config_read( 165 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 275 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-project-diagram"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10 pad-1"><?php echo strIdx( 279 );?></label> 
+                                    </div>
+                                    <div class="rTableCell"> 
+                                        <input class="input-14 color-settings color-input-back" id="ip_router_wlan0" name="ip_router_wlan0" type="text" value="<?php echo config_read( 223 );?>">
+                                    </div>
+                                </div>
+
+                                <div class="rTableRow" title="<?php echo strIdx( 276 );?>">
+                                    <div class="rTableCell width-22">
+                                        <i class="pad-7 text-10 fas fa-globe"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10 pad-1"><?php echo strIdx( 280 );?></label>
+                                    </div>
+                                    <div class="rTableCell"> 
+                                        <input class="input-14 color-settings color-input-back" id="ip_dns_wlan0" name="ip_dns_wlan0" type="text" value="<?php echo config_read( 224 );?>">
                                     </div>
                                 </div>
 
@@ -575,17 +683,22 @@ $(function () {
       
     <?php echo div_err_succes();?>
 
+
+    <!--
     <div class="pos-39" id="wifi_selector">
         <select onchange=wifiSelect() class="select-2 color-select color-input-back" name="wifi_select" id="wifi_select">
-            <?php makeSelector(11);?>
+         php makeSelector(11);?>
         </select>
     </div>
+    -->
 
 <script>
 
 jQuery.validator.addMethod( "ztatz_NotEqualTo", function( value, element) {
+
     eth0  = document.getElementById ( 'ip_eth0' ).value.trim();
     wlan0 =  document.getElementById( 'ip_wlan0' ).value.trim();
+
     if ( eth0.length == 0 || wlan0.length == 0 ) { 
         return true;
     }
@@ -594,6 +707,30 @@ jQuery.validator.addMethod( "ztatz_NotEqualTo", function( value, element) {
     }
     return true;
 }, '');
+
+jQuery.validator.addMethod( "ztatz_ipset", function( value, element) {
+
+    eth0            = document.getElementById ( 'ip_eth0' ).value.trim();
+    wlan0           = document.getElementById( 'ip_wlan0' ).value.trim();
+    wlan0_router    = document.getElementById( 'ip_router_wlan0' ).value.trim();
+    eth0_router     = document.getElementById ( 'ip_router' ).value.trim();
+    
+    if (element.id == 'ip_router_wlan0') {
+        if (wlan0.length > 6 || wlan0_router.length == 0 ) {
+            return true
+        }
+    }
+
+    if ( element.id == 'ip_router') {
+        if (eth0.length  > 6 || eth0_router.length == 0) {
+            return true
+        }
+
+    }
+
+    return false
+}, '');
+
 
 $(function() {
     $("#formvalues").validate({
@@ -607,12 +744,19 @@ $(function() {
                 ztatz_NotEqualTo: true
             },
             'ip_router': {
-                ipv4: true
+                ipv4: true,
+                ztatz_ipset: true 
             },
             'ip_dns': {
                 ipv4: true
             },
-        
+            'ip_router_wlan0': {
+                ipv4: true,
+                ztatz_ipset: true 
+            },
+            'ip_dns_wlan0': {
+                ipv4: true
+            },
         },
         invalidHandler: function(e, validator) { 
             var errors = validator.numberOfInvalids();
@@ -628,6 +772,6 @@ $(function() {
 </script>
 
 
-    <?php echo autoLogout(); ?>
+<?php echo autoLogout(); ?>
 </body>
 </html>

@@ -26,7 +26,7 @@ config_db                   = sqldb.configDB()
 rt_status_db                = sqldb.rtStatusDb()
 power_production_solar_db   = sqldb.powerProductionSolarDB()
 
-LOOP_TIMEOUT_IN_SEC         = 30
+LOOP_TIMEOUT_IN_SEC         = 1 #30
 
 def Main( argv ): 
 
@@ -150,7 +150,18 @@ def Main( argv ):
             # do check to see if parameter(s) or settings have   #
             # changed.                                           #
             ######################################################
+            #flog.setLevel( logger.logging.DEBUG )
             apikey, api = check_and_set_api_key( apikey=apikey, api=api )
+            #flog.setLevel( logger.logging.INFO )
+
+            #print("api", api )
+            #print("apikey", apikey )
+
+            if len(apikey) == 0:
+                flog.warning( inspect.stack()[0][3] + ": apikey is not set.")
+                time_out_in_seconds = LOOP_TIMEOUT_IN_SEC
+                continue
+            
 
             ######################################################
             # minute processing                                  #
@@ -191,6 +202,7 @@ def Main( argv ):
                                  " met DB index " +  str( db_sql_index_number ) + " voor periode " +  str(date_set[0]) + " - "  + str(date_set[1]))
                             data_set = data['sitesEnergy']['siteEnergyList'][idx ]['energyValues']['values']
                             #print ( "data_set = ", data_set )
+
 
                             for i in range( len(data_set) ):
 
@@ -887,7 +899,7 @@ def Main( argv ):
 
         #sys.exit()
 
-        if time_out_in_seconds < LOOP_TIMEOUT_IN_SEC: # the timeout is inital set to zero (0) and now set to the normal looptime.
+        if time_out_in_seconds < LOOP_TIMEOUT_IN_SEC: # the timeout is initial set to zero (0) and now set to the normal loop time.
             time_out_in_seconds = LOOP_TIMEOUT_IN_SEC
 
 
@@ -937,7 +949,7 @@ def set_api_timestamps( meta_data ):
 
 ##########################################################
 # only read the active sites and return a list of active #
-# sites with the atributes from the ENTRY dict.          #
+# sites with the attributes from the ENTRY dict.         #
 ##########################################################
 def get_meta_site_data():
 
@@ -1099,6 +1111,7 @@ def check_and_set_api_key( apikey="", api=None ):
 
     try:
         apikey_from_config = solaredge_shared_lib.read_api_key( config_db )
+
         flog.debug( inspect.stack()[0][3] + ": solaredge_apikey=" + apikey_from_config )
         if apikey != apikey_from_config:
             apikey = apikey_from_config

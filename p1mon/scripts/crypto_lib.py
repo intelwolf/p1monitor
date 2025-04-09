@@ -4,7 +4,7 @@
 ####################################################################
 
 import base64
-#import cryptography
+import string
 import inspect
 import system_info_lib
 #import os
@@ -18,7 +18,11 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
 
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
+
 MAGIC_SEED = 'ab64e67aac269d'
+AES_MODE    = AES.MODE_CBC
 
 digital_signing_verify_keys_b64 = {
     '1' : 'fDJE5j7z+yaCsnLuNLWj0uZLt7drR00z/rl0flNLzSo=',
@@ -172,9 +176,6 @@ class DigitalSignature():
         if self.debug:
             print ( "DEBUG: signing_key = " + str( self.signing_key )  + "\nDEBUG: verify_key = " + str( self.verify_key ) + "\n" )
 
-
-
-
 class P1monCrypto():
 
     ###########################################
@@ -247,4 +248,85 @@ class P1monCrypto():
             self.flog.error( inspect.stack()[0][3] + ": symmetric key = " + str( e ) )
             raise Exception( "decryptie van bestand " + source_pathfile  + " gefaald " )
 
-          
+class CryptoBase64():
+
+    # decrypt the base64 string to plaintext string.
+    # on problem an empty string wil be returned.
+    # the output is sanitized for printable chars., when the string is not printable only
+    # then there is problem.
+    def p1Decrypt( self, cipher_text, seed=MAGIC_SEED ):
+        try:
+            decryption_suite= AES.new(self._p1CryptoGetKey(), AES_MODE, self._seedGenerator(seed))
+            raw_text = base64.b64decode(cipher_text)
+            str_raw  = decryption_suite.decrypt(raw_text).decode('utf-8')
+            idx_right = int(str_raw[-16:])
+            str_return = str_raw[:-16].rstrip() # remove space counter
+            for _i in range(0, idx_right):
+                str_return += ' '
+            # make sure we only return printable chars when decryption goes south.
+            filtered_string = ''.join( filter(lambda x: x in string.printable, str_return) )
+            return (filtered_string)
+        except Exception as _e:
+            #print('error decrypt='+str(e))
+            return ''
+
+
+    # encrypt a plaintext string to a base64 string
+    # on problem an empty string wil be returned.	
+    def p1Encrypt( self, plain_text, seed=MAGIC_SEED ):
+        try:
+            data = (self._padding16(plain_text) + self._spaceIndexer(plain_text)).encode() 
+            cipher = AES.new( self._p1CryptoGetKey(), AES_MODE, self._seedGenerator(seed))
+            return str(base64.b64encode(cipher.encrypt(data)).decode())
+        except Exception as _e:
+            print('error encrypt='+str(_e))
+            return ''
+    
+    def _p1CryptoGetKey(self,seed=MAGIC_SEED):
+        result = system_info_lib.get_cpu_info() # get cpu specific id to generate crypto key
+        hash_in = seed
+        hash_in = hash_in + result['Serial'] + seed
+        hash = SHA256.new(hash_in.encode('utf-8'))
+        return( hash.hexdigest().encode()[:32])
+
+    def _padding16(self, _in):
+        _in     = _in + '                 ' # padding to make multiply of 16
+        _out = _in[ :len(_in)-len(_in)%16 ]
+        return _out
+
+    # return in the format [SSSSS:EEEEE] number of leading and trailing spaces in text
+    def _spaceIndexer(self, _in):
+        idx_right = len(_in) - len(_in.rstrip()) # find padding spaces
+        return "%16d" % (idx_right)
+ 
+    def _seedGenerator( self, _seed ):
+        hash = SHA256.new()
+        hash.update( _seed.encode('utf-8') ) # utf-8 to binary
+        return ( hash.hexdigest().encode()[:16]) #str to binary
+
+    # test function normally not used in production.
+    def testP1CryptoSuite( self ):
+    
+        words = ['  p1mon   ', '    p1monitor ', '  p1monitor & spaces              ', 'a   ', '    1', 'ztatz.nl']
+        print("==========================================================")
+        print( "Default crypto key '            = '"+str(self._p1CryptoGetKey()) )
+        print( "Seeded (p1monitor) crypto key ' = '"+str(self._p1CryptoGetKey('p1monitor') ))
+        print( "seedGenerator('p1monitor')  '   = '"+str(self._seedGenerator('p1monitor') ))
+
+        print("----------------------------------------------------------")
+        for i in range(len(words)):
+            encrypted = self.p1Encrypt(words[i])
+            print("test encrypt van plaintext    '"+words[i]+"' = '"+encrypted)
+            print("test decrypt van encrypted text '"+words[i]+"' = '"+str(self.p1Decrypt(encrypted))+"'")
+            print("no seed --------------------------------------------------")
+        encrypted = self.p1Encrypt('p1monitor')
+        print("test encrypt van plaintext    'p1monitor' = '"+encrypted)
+        print("test decrypt van encrypted text 'p1monitor' = '"+self.p1Decrypt(encrypted)+"'")
+        print("with seed ----------------------------------------------------")
+        encrypted = self.p1Encrypt('p1monitor','a')
+        print("test encrypt van plaintext    'p1monitor' = '"+encrypted)
+        print("test decrypt van encrypted text 'p1monitor' = '"+self.p1Decrypt(encrypted,'a')+"'")
+        encrypted = self.p1Encrypt('p1monitor','1234567890123456789123456789')
+        print("test encrypt van plaintext    'p1monitor' = '"+encrypted)
+        print("test decrypt van encrypted text 'p1monitor' = '"+self.p1Decrypt(encrypted,'1234567890123456789123456789')+"'")
+

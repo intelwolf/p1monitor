@@ -173,7 +173,7 @@ delete_from_dir(){
             do
                 #echo "$var"
                 if [ -f "$var" ]; then
-                   rm -fvr  "$var"
+                   rm -fr  "$var"
                    #echo "dummy rm ""$var"
                 fi
             done
@@ -234,11 +234,6 @@ ACTIVE_DIR=$CLONE/etc/nginx/sites-enabled
 echo "=> wacht 10 seconden."
 sleep 10
 
-DHCPCDFILE=$CLONE/etc/dhcpcd.conf
-echo "=> default dhcpcd config file naar clone schrijven : $DHCPCDFILE"
-/p1mon/scripts/P1NetworkConfig --defaultdhcpconfig -fp $DHCPCDFILE
-echo "=> wacht 10 seconden."
-sleep 10
 
 ACTIVE_DIR=$CLONE/p1mon/data
 if [ -d "$ACTIVE_DIR" ]; then
@@ -501,15 +496,41 @@ fi
 
 CLOCK_FILE=$CLONE/etc/fake-hwclock.data
 echo "=> verwijderden van realtime klok bestand $CLOCK_FILE"
-rm  $CLOCK_FILE
+rm -f $CLOCK_FILE
 
 CRONTAB_FILE=$CLONE/var/spool/cron/crontabs/p1mon
 echo "=> verwijderden van crontab van p1mon $CRONTAB_FILE"
-rm $CRONTAB_FILE
+rm -f $CRONTAB_FILE
 
+# no longer needed from version 3.0.0 due to the use of NetworkManager
 WPA_SUPPLICANT_FILE=$CLONE/etc/wpa_supplicant/wpa_supplicant.conf* 
-echo "=> verwijderden van wpa_supplicant bestand $WPA_SUPPLICANT_FILE"
-rm $WPA_SUPPLICANT_FILE
+echo "=> verwijderden van bestand $WPA_SUPPLICANT_FILE"
+rm -f $WPA_SUPPLICANT_FILE
+
+# added on version 3.0.0.
+NM_ETHERNET_FILE=$CLONE/etc/NetworkManager/system-connections/p1monEthernet.nmconnection
+echo "=> verwijderden van bestand $NM_ETHERNET_FILE"
+rm -f $NM_ETHERNET_FILE
+
+# added on version 3.0.0.
+NM_WIFI_FILE=$CLONE/etc/NetworkManager/system-connections/p1monWifi.nmconnection
+echo "=> verwijderden van bestand $NM_WIFI_FILE"
+rm -f $NM_WIFI_FILE
+
+# added on version 3.0.0.
+NM_WIFI_FILE=$CLONE/etc/NetworkManager/system-connections/p1monWifi.nmconnection
+echo "=> verwijderden van bestand $NM_WIFI_FILE"
+rm -f $NM_WIFI_FILE
+
+# added on version 3.0.0.
+VAR_NETWORKMANAGER=$CLONE/var/lib/NetworkManager/*
+echo "=> verwijderden van NetworkManager files : $VAR_NETWORKMANAGER"
+rm -f $VAR_NETWORKMANAGER
+
+# added on version 3.0.0.
+RESOLV_FILE=$CLONE/etc/resolv.conf
+echo "=> verwijderden van wpa_supplicant bestand $RESOLV_FILE"
+rm -f $RESOLV_FILE
 
 API_TOKENS_FILE=$CLONE/etc/nginx/conf.d/api-tokens.conf
 echo "=> verwijderden van API tokens bestand $API_TOKENS_FILE"
@@ -520,14 +541,14 @@ echo "=> verwijderden van socat service bestand $SOCAT_SERVICE_FILE"
 rm $SOCAT_SERVICE_FILE
 
 # deze regel zorgt ervoor dat wpa_supplicant start en een reboot niet nodig is om wifi in stellen.
-echo "=> leeg wpa_supplicant bestand wegschrijven "
-cp $P1MON_SCRIPTS/wpa_supplicant.conf.empty $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
-chmod 660 $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
-chown root:p1mon $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
+#echo "=> leeg wpa_supplicant bestand wegschrijven "
+#cp $P1MON_SCRIPTS/wpa_supplicant.conf.empty $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
+#chmod 660 $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
+#chown root:p1mon $CLONE/etc/wpa_supplicant/wpa_supplicant.conf
 
 DEV_FOLDER=$CLONE/p1mon/dev
 echo "=> verwijderden van dev folder: $DEV_FOLDER"
-rm  -r $DEV_FOLDER
+rm -fr $DEV_FOLDER
 
 EDITOR=$CLONE/p1mon
 echo "=> verwijderden van editor cache files: $EDITOR"
@@ -545,8 +566,7 @@ echo "=> unmounting $CLONE"
 umount $CLONE
 
 #echo "=> lege ruimte vullen van /boot met 0 om de SDHC image te verkleinen. dit duurt een paar minuten en de fout No space left on device is ok"
-#cat /dev/zero > /boot/zero_file
-#rm /boot/zero_file
+# zerofree does not work on FATxx filesystemes! 
 echo "=> lege ruimte vullen van $DST_ROOT_PARTITION met 0 om de SDHC image te verkleinen."
 echo $DST_ROOT_PARTITION
 zerofree -v $DST_ROOT_PARTITION

@@ -1,6 +1,6 @@
 # run manual with ./P1Watchdog
 import const
-import crypto3
+import crypto_lib
 import crontab_lib
 import filesystem_lib
 import findProcessIdByName
@@ -29,7 +29,7 @@ import time
 import urllib
 import urllib.request
 import util
-import wifi_lib
+#import wifi_lib
 
 prgname = 'P1Watchdog'
 
@@ -47,15 +47,15 @@ def MainProg():
 
     flog.info("Start van programma.")
 
+    # set_ethernet( forced=True ) to do in script is een betere plek.
+    
+    DiskRestore()
+
     try:
         crontab_lib.set_crontab_logcleaner( flog=flog )
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": crontab log cleaner fout: " + str(e.args[0]) )
     flog.info(inspect.stack()[0][3]+": crontab log cleaner ge(re)activeerd." )
-
-    # check_and_clean_log_folder() #clean the /var/log folder when the space is more then 80% 2.0.0 removed.
-
-    DiskRestore()
 
     # open van status database
     try:
@@ -73,23 +73,24 @@ def MainProg():
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_CONFIG_TAB+" succesvol geopend.")
 
-    #dhcpconfig = network_lib.DhcpcdConfig(config_db=config_db, flog=flog )
-    #dhcpconfig.set_config_from_db()
-    #sys.exit()
-
     rt_status_db.timestamp( 17, flog )
 
     # lees systeem ID uit en zet deze in de config database. 
     # versleuteld om dat deze data in een back-up bestand terecht kan komen.
     try:  
         flog.info(inspect.stack()[0][3]+': System ID zetten in configuratie database: ' + str( systemid.getSystemId() ) )
-        sysid_encrypted  = crypto3.p1Encrypt( systemid.getSystemId(),"sysid" ).encode('utf-8').decode('utf-8')
+
+        # crypto3 upgrade to crypto_lib version 3.0.0.
+        #sysid_encrypted  = crypto3.p1Encrypt( systemid.getSystemId(),"sysid" ).encode('utf-8').decode('utf-8')
+        cb = crypto_lib.CryptoBase64()
+        sysid_encrypted = cb.p1Encrypt( plain_text=systemid.getSystemId(), seed="sysid" ).encode('utf-8').decode('utf-8')
+
         config_db.strset( sysid_encrypted ,58, flog ) 
     except Exception as e:
         flog.warning(inspect.stack()[0][3]+": System ID zetten mislukt -> " + str(e.args[0]))
 
     # get WLAN SSID (init the wifi essids bij het starten)
-    wifi_lib.list_wifi_ssid( output_path=const.FILE_WIFISSID, flog=flog )
+    ## wifi_lib.list_wifi_ssid( output_path=const.FILE_WIFISSID, flog=flog ) # removed 3.0.0
 
     # set CPU info
     cpu_info = system_info_lib.get_cpu_info()
@@ -104,12 +105,13 @@ def MainProg():
     #rt_status_db.strset( '', 68,  flog )
     #rt_status_db.strset( '', 110, flog )
 
+    
     check_for_new_p1monitor_version()
     get_cpu_temperature()
     DuckDNS()
     get_default_gateway()
     ntp_status()
-    check_and_set_samba_mode( setforced=True )
+    check_and_set_samba_mode( forced=True )
     
     ## Internet IP adres
     rt_status_db.strset( network_lib.get_public_ip_address(),26,flog )
@@ -168,15 +170,16 @@ def MainProg():
             DuckDNS()
             P1NginxSetApiTokens()
             P1NginxConfigApi()
-            P1NetworkConfig()
+            #network_config()
             DropboxAuthenticationRequest()
             check_upgrade_aide_save_run()
             export_db_to_excel_run()
-            check_and_set_samba_mode( setforced=False )
-            set_wifi( setforced=False )
+            check_and_set_samba_mode( forced=False )
+            set_ethernet()
+            set_wifi()
             check_and_run_backup()
             run_patch()
-
+            check_for_new_p1monitor_version(forced=True)
 
             # Set time via the internet
             trigger_function(
@@ -309,13 +312,10 @@ def MainProg():
             lan_info  = network_lib.get_nic_info( 'eth0' )
             get_default_gateway()
 
-            #get WLAN SSID
-            wifi_lib.list_wifi_ssid( output_path=const.FILE_WIFISSID, flog=flog )
             ## get lan IP en Wifi adres
             if lan_info['ip4'] != None:
                 rt_status_db.strset(lan_info['ip4'],20,flog)
                 ## get LAN hostnaam
-                #rt_status_db.strset(  getHostname(lan_info['ip4']),28,flog) 
                 rt_status_db.strset( network_lib.get_host_name_by_ip( lan_info['ip4']), 28, flog )
             else:
                 rt_status_db.strset('onbekend',20,flog)
@@ -397,15 +397,70 @@ def DiskRestore(): #180ok
         flog=flog 
     )
 
-def set_wifi( setforced=False ):
+
+"""
+########################################################
+# config wifi and Ethernet                             #
+########################################################
+def network_config():
+    try:
+        _id, needs_to_run_status, _label = config_db.strget( 168, flog )
+        if int( needs_to_run_status ) > 0: # start process
+
+            flog.info( inspect.stack()[0][3] + ": netwerk configuratie gestart." )
+            set_ethernet()
+            set_wifi()
+            config_db.strset( '0', 168, flog ) 
+            flog.info( inspect.stack()[0][3] + ": netwerk configuratie afgerond." )
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+        config_db.strset( '0', 168, flog ) # reset run bit # fail save to stop
+"""
+
+
+##################################################
+# set Ethernet configuration                     #
+##################################################
+def set_ethernet( forced=False ):
+ 
+    try:
+
+        _id, needs_to_run_status, _label = config_db.strget( 168, flog )
+        if int( needs_to_run_status ) == 1 or forced == True: # start process
+
+            flog.info( inspect.stack()[0][3] + ": Ethernet configuratie activeren." )
+            cmd = "/p1mon/scripts/P1EthernetConfig -c "
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+            if r[2] > 0:
+                flog.error(inspect.stack()[0][3]+" Ethernet aanpassen gefaald.")
+                
+            config_db.strset( '0', 168, flog ) # reset run bit # fail save to stop
+        
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " Ethernet onverwachte fout: " + str( e ) )
+        config_db.strset( '0', 168, flog ) # reset run bit # fail save to stop
+
+
+##################################################
+# set wifi configuration                         #
+##################################################
+def set_wifi( forced=False ):
 
     try:
         _id, run_status, _label = config_db.strget( 183, flog )
 
-        if int( run_status ) == 1 or setforced == True: # start process
+        if int( run_status ) == 1 or forced == True: # start process
             config_db.strset( 0, 183, flog ) # reset the flag to prevent an endless loop.
 
-            cmd = "/p1mon/scripts/P1SetWifi &"
+            flog.info( inspect.stack()[0][3] + ": Wifi configuratie activeren." )
+            cmd = "/p1mon/scripts/P1WifiConfig -c "
             r = process_lib.run_process( 
                 cms_str = cmd,
                 use_shell=True,
@@ -419,6 +474,10 @@ def set_wifi( setforced=False ):
     except Exception as e:
         flog.error( inspect.stack()[0][3] + " Wifi onverwachte fout: " + str( e ) )
         config_db.strset( 0, 183, flog ) # fail save.
+
+    
+
+
 
 ######################################################
 # check and start or stop the socat systemd service  #
@@ -509,12 +568,12 @@ def trigger_function(
 
     #flog.setLevel( logger.logging.INFO )
 
-def check_and_set_samba_mode( setforced=False ):
+def check_and_set_samba_mode(forced=False ):
 
     try:
         _id, run_status, _label = config_db.strget( 182, flog )
 
-        if int( run_status ) == 1 or setforced == True: # start process
+        if int( run_status ) == 1 or forced == True: # start process
             
             config_db.strset( 0, 182, flog ) # reset the flag to prevent an endless loop.
 
@@ -588,7 +647,7 @@ def run_patch():
             )
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
-        config_db.strset( '0', 194, flog) # fail save to stop and suppres no integer settings
+        config_db.strset( '0', 194, flog) # fail save to stop and suppress no integer settings
 
 
 def check_cron_backup():
@@ -642,28 +701,12 @@ def get_default_gateway(): #180ok
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
 
-########################################################
-# config static Ip address when flags are set          #
-########################################################
-def P1NetworkConfig():
-    try:
-        _id, needs_to_run_status, _label = config_db.strget( 168, flog )
-        if int( needs_to_run_status ) > 0: # start process
-            flog.info( inspect.stack()[0][3] + ": dhcp daemon configuratie aanpassen gestart." )
-            config_db.strset( '0', 168, flog ) # reset run bit
-            dhcpconfig = network_lib.DhcpcdConfig(config_db=config_db, flog=flog )
-            if dhcpconfig.set_config_from_db() == False:
-                raise Exception( "dhcp configuratie aanpassen.")
-            flog.info( inspect.stack()[0][3] + ": dhcp daemon configuratie aanpassen succesvol." )
 
-    except Exception as e:
-        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
-        config_db.strset( '0', 168, flog ) # reset run bit # fail save to stop
 
 
 ########################################################
 # start set or reset the NGINX config file and install #
-# or deinstall the Lets Encrypt certifcates            #
+# or de-install the Lets Encrypt certificates          #
 ########################################################
 def P1NginxConfigApi(): #180ok
     #flog.setLevel( logging.DEBUG )
@@ -1437,8 +1480,10 @@ def get_cpu_temperature(): #2.0.0
 # checks there is a new P1 sofware version available   #
 # by an https url request to www.ztatz.nl              #
 ########################################################
-def check_for_new_p1monitor_version():  #180ok
-    #flog.setLevel(logging.DEBUG)
+def check_for_new_p1monitor_version(forced=False):
+
+    #flog.setLevel(logger.logging.DEBUG)
+
     global next_version_timestamp
     random.seed() # change random time for retry
 
@@ -1448,43 +1493,80 @@ def check_for_new_p1monitor_version():  #180ok
         next_version_timestamp = 0 # forces to read the version information on toggle.
         return
 
-    # time out check.
-    if next_version_timestamp > util.getUtcTime(): 
+    if forced == True: 
+        # check if the check must be performed. 
+        _id, run_status, _label = config_db.strget( 222, flog )
+        #print ("#", int(run_status), run_status)
+        if int(run_status) == 1:
+            forced=True
+        else:
+            forced=False
+
+    flog.debug(inspect.stack()[0][3]+': forced check status is = ' + str( forced ) )
+
+    # time out check, when forced ingore the time.
+    if next_version_timestamp > util.getUtcTime() and forced == False:
         flog.debug(inspect.stack()[0][3]+': nog ' + str ( abs( util.getUtcTime() - next_version_timestamp) ) + ' seconden te gaan voor volgende poging.')
         #flog.setLevel(logging.INFO)
         return
+
+    # disable forced check as failsave
+    config_db.strset( 0, 222, flog) 
 
     try :
         # timeout in seconds
         socket.setdefaulttimeout( 5 )
 
         url = const.ZTATZ_P1_VERSION_URL
-        #url =  "https://www.ztatz.nl/p1monitor/version-test.json
+        #url =  "https://www.ztatz.nl/p1monitor/version-test.json" #TODO
         request = urllib.request.Request( url + "?" + const.P1_VERSIE  )
         response = urllib.request.urlopen(request)
         data = json.loads( response.read().decode('utf-8') )
-        if data[const.ZTATZ_P1_VERSION] != const.P1_VERSIE:
+        #print ( data )
+        msg_version = 1
+
+        if data[const.ZTATZ_P1_VERSION] != const.P1_VERSIE or data[const.ZTATZ_P1_VERSION_PATCH_VERSION] != const.P1_PATCH_LEVEL:
+
+            msg_version = data[const.ZTATZ_P1_VERSION_MSG_VERSION ]
             flog.info(inspect.stack()[0][3]+': nieuwe versie ' + str(data[const.ZTATZ_P1_VERSION]) +\
-            ' beschikbaar van de P1 monitor software met versie serienummer ' + str(data[const.ZTATZ_P1_SERIAL_VERSION]) + '.' )
-            rt_status_db.strset( data[const.ZTATZ_P1_VERSION],              66,  flog )
-            rt_status_db.strset( data[const.ZTATZ_P1_VERSION_TIMESTAMP],    67,  flog )
-            rt_status_db.strset( data[const.ZTATZ_P1_VERSION_TEXT],         68,  flog )
-            rt_status_db.strset( data[const.ZTATZ_P1_VERSION_DOWNLOAD_URL], 86,  flog )
-            rt_status_db.strset( data[const.ZTATZ_P1_SERIAL_VERSION],       110, flog )
+            ' beschikbaar van de P1 monitor software met versie serienummer ' + str(data[const.ZTATZ_P1_SERIAL_VERSION]) + ' JSON message versie ' +  str( msg_version) + ".")
+
+            rt_status_db.strset( data[const.ZTATZ_P1_VERSION],                      66,  flog )
+            rt_status_db.strset( data[const.ZTATZ_P1_VERSION_TIMESTAMP],            67,  flog )
+            rt_status_db.strset( data[const.ZTATZ_P1_VERSION_TEXT],                 68,  flog )
+            rt_status_db.strset( data[const.ZTATZ_P1_VERSION_DOWNLOAD_URL],         86,  flog )
+            rt_status_db.strset( data[const.ZTATZ_P1_SERIAL_VERSION],               110, flog )
+            if int(msg_version) > 1: # to prevent error from versions before 3.0.0
+                rt_status_db.strset( data[const.ZTATZ_P1_VERSION_PATCH_VERSION],        133, flog )
+                rt_status_db.strset( data[const.ZTATZ_P1_VERSION_DOWNLOAD_URL_PATCH],   134, flog )
+                rt_status_db.strset( data[const.ZTATZ_P1_VERSION_COMMENT],              135, flog )
+
+        if data[const.ZTATZ_P1_VERSION] != const.P1_VERSIE:
+            rt_status_db.strset( 1, 136, flog )
         else:
-            flog.info(inspect.stack()[0][3]+': geen nieuwe versie aanwezig, huidige versie is '+ str(data[const.ZTATZ_P1_VERSION]) + ' met versie serienummer ' + str(data[const.ZTATZ_P1_SERIAL_VERSION]) )
-            #init P1 new version check. Empty status records
+            rt_status_db.strset( 0, 136, flog )
             rt_status_db.strset( '', 66,  flog )
             rt_status_db.strset( '', 67,  flog )
             rt_status_db.strset( '', 68,  flog )
             rt_status_db.strset( '', 110, flog )
-        
+
+        if int(msg_version) > 1:
+            if data[const.ZTATZ_P1_VERSION_PATCH_VERSION] != const.P1_PATCH_LEVEL:
+                rt_status_db.strset( 1, 137, flog )
+            else:
+                rt_status_db.strset( 0,  137, flog )
+                rt_status_db.strset( '', 133, flog )
+                rt_status_db.strset( '', 134, flog )
+                rt_status_db.strset( '', 135, flog )
+
         next_version_timestamp = util.getUtcTime() + 82800 + random.randint(300, 3600) #82800 = 23 uur. random add 5 to 60 min before repeat.
+
+        #flog.setLevel(logger.logging.INFO)
 
     except Exception as e:
          flog.error(inspect.stack()[0][3]+': ophalen remote versie informatie gefaald -> ' + str(e) )
 
-    # flog.setLevel(logging.INFO)
+    #flog.setLevel(logger.logging.INFO)
 
 def databaseRam2Disk(): #180ok
     cmd = "/p1mon/scripts/P1DbCopy --allcopy2disk --forcecopy"

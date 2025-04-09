@@ -1,13 +1,12 @@
 # run manual with ./P1GPIO
 
-import warnings
+#import warnings
 # suppres GPIO warning
 # PinFactoryFallback: Falling back from lgpio: No module named 'lgpio'
-warnings.simplefilter('ignore')
+#warnings.simplefilter('ignore')
 
 import const
 import datetime
-import gpio
 import inspect
 import logger
 import signal
@@ -15,13 +14,14 @@ import sqldb
 import sys
 import time 
 import util
+import gpio_lib
 
 prgname             = 'P1GPIO'
 config_db           = sqldb.configDB()
 rt_status_db        = sqldb.rtStatusDb()
 e_db_serial         = sqldb.SqlDb1()
-gpioPowerSwitcher   = gpio.gpioDigtalOutput()
-gpioTarifSwitcher   = gpio.gpioDigtalOutput()
+gpioPowerSwitcher   = gpio_lib.gpioDigtalOutput()
+gpioTarifSwitcher   = gpio_lib.gpioDigtalOutput()
 
 powerswitcher_active                    = False
 powerswitcher_last_action_utc_timestamp = 0
@@ -223,19 +223,24 @@ def powerSwitcherSql( minute_value ):
     try:
         sqlstr = "select round( avg( ACT_GELVR_KW_270 * 1000) ) from " + const.DB_SERIAL + " where timestamp > \
                 datetime( (select max(timestamp) from " + const.DB_SERIAL + " ) , '-" + str(minute_value) + " minutes' );"
-        sqlstr=" ".join(sqlstr.split())
-        flog.debug(inspect.stack()[0][3]+": sql(powerSwitcher)=" + sqlstr )
-        avg_rec=e_db_serial.select_rec( sqlstr )
-        r = int(avg_rec[0][0])
-        flog.debug( inspect.stack()[0][3] + ": waarde record" + str(avg_rec) )
+        sqlstr =" ".join(sqlstr.split())
+
+        avg_rec = e_db_serial.select_rec( sqlstr )
+
+        if avg_rec[0][0] != None:
+            r = int(avg_rec[0][0])
+            flog.debug( inspect.stack()[0][3] + ": waarde record" + str(avg_rec) )
+
     except Exception as e:
-            flog.error( inspect.stack()[0][3]+": (powerSwitcher )" + str(e) )
+            flog.error( inspect.stack()[0][3]+": (powerSwitcher)" + str(e) )
+
     if r == None:
-        flog.warning( inspect.stack()[0][3]+ ": PowerSwitcher sql query is mislukt." )
+        flog.debug( inspect.stack()[0][3]+ ": PowerSwitcher sql query is mislukt." )
+
     return r
 
 ###########################################################################################
-# tarif switcher                                                                          #
+# tariff switcher                                                                         #
 # last switch timestamp is status.db id 89, status on=1,0=of on status id 88              #
 # 1: check if forced is on and enable or disable GPIO.                                    #
 # 2: check if user enabled or disabled the tarif switcher, GPIO to off when not selected. #

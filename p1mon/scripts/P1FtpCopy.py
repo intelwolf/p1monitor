@@ -3,7 +3,8 @@
 import argparse
 import base64
 import const
-import crypto3
+#import crypto3
+import crypto_lib
 import ftplib
 import inspect
 import logger
@@ -97,7 +98,11 @@ def Main(argv):
         flog.debug( "password van commandline ontvangen -> " + ftp_para['password'] )
     else: #decode password from database
         try:
-            ftp_para['password'] = base64.standard_b64decode(crypto3.p1Decrypt(ftp_para['password'],'ftppw') ).decode('utf-8')
+            # version 3.0.0 upgrade from crypto3 to crypto_lib 
+            cb = crypto_lib.CryptoBase64() 
+            ftp_para['password'] = base64.standard_b64decode(cb.p1Decrypt( cipher_text=ftp_para['password'], seed='ftppw' )).decode('utf-8')
+            # below the crypto3 version 
+            #ftp_para['password'] = base64.standard_b64decode(crypto3.p1Decrypt(ftp_para['password'],'ftppw') ).decode('utf-8')
             #  added by Aad
             if ftp_para['password'] == '':
                 ftp_para['password'] = "''"
@@ -545,7 +550,7 @@ if __name__ == "__main__":
         setFile2user(logfile,'p1mon')
         flog = logger.fileLogger( logfile,prgname )
         #### aanpassen bij productie
-        flog.setLevel( logger.logging.DEBUG )
+        flog.setLevel( logger.logging.INFO )
         flog.consoleOutputOn( True )
     except Exception as e:
         print ( "critical geen logging mogelijke, gestopt.:"+str(e.args[0]) )

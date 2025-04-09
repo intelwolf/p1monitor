@@ -261,8 +261,8 @@ class configDB():
         # static IP addresses 
         self.insert_rec("insert or ignore into " + table + " values ( '164',''                 ,'eth0 static IP adres.')")
         self.insert_rec("insert or ignore into " + table + " values ( '165',''                 ,'wlan0 static IP adres.')")
-        self.insert_rec("insert or ignore into " + table + " values ( '166',''                 ,'default gateway static IP adres.')")
-        self.insert_rec("insert or ignore into " + table + " values ( '167',''                 ,'domain name server static IP adres.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '166',''                 ,'eth0 default gateway static IP adres.')")
+        self.insert_rec("insert or ignore into " + table + " values ( '167',''                 ,'eth0 domain name server static IP adres.')")
 
         # values of 168 0=do noting 1=eth0, wlan0=2, default gateway=4, DNS=8
         self.insert_rec("insert or ignore into " + table + " values ( '168','0'                ,'vlag voor static IP adressen, default gateway en DNS.')")
@@ -349,13 +349,11 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '220','0'                ,'notificatie Watt verbruik ondergrenswaarde.') ")
 
         self.insert_rec( "insert or ignore into " + table + " values ( '221','0'               ,'vlag voor het triggeren van het aanpassen van de tijd via het internet.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '222','0'               ,'vlag voor forceren van software en patch versies.')")
+        
+        self.insert_rec( "insert or ignore into " + table + " values ( '223',''                 ,'wlan0 default gateway static IP adres.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '224',''                 ,'wlan0 domain name server static IP adres.')")
 
-        # you need an account on www.noip.com before this can be used
-        #self.insert_rec("insert or ignore into " + table + " values ( '150',''                 ,'no-ip password')")
-        #self.insert_rec("insert or ignore into " + table + " values ( '151',''                 ,'no-ip account name')")
-        #self.insert_rec("insert or ignore into " + table + " values ( '152','eth0'             ,'no-ip netwerk device (eth0/wifi).')")
-        #self.insert_rec("insert or ignore into " + table + " values ( '153','30'               ,'no-ip update timeout in seconden.')")
-        #self.insert_rec("insert or ignore into " + table + " values ( '154','0'                ,'no-ip is aan(1) of uit(0).')")
 
         # fix typo's from versions higer then 0.1.5
         sql_update = "update " + table + " set label ='Publieke dynamische DNS naam (FQDN).' where id=150"
@@ -817,6 +815,13 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '130','0','Huidige KW verbruik L1,L2,L3 totaal',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '131','0','Huidige KW levering L1,L2,L3 totaal',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '132','0','Netto levering/verbruik L1,L2,L3 totaal',0)")
+
+        self.insert_rec("insert or ignore into " + table + " values ( '133','0','Laatste P1 monitor patch nummer:',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '134','','Laatste P1 monitor patch URL:',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '135','','Laatste P1 monitor version comment:',0)") 
+
+        self.insert_rec("insert or ignore into " + table + " values ( '136','0','Nieuwe versie van P1 monitor software beschikbaar:',0)") 
+        self.insert_rec("insert or ignore into " + table + " values ( '137','0','Nieuwe versie van P1 monitor software patch beschikbaar:',0)") 
 
         # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"

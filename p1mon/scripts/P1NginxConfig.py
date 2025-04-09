@@ -4,7 +4,8 @@ import argparse
 import base64
 import const
 import crontab
-import crypto3
+#import crypto3
+import crypto_lib
 import filesystem_lib
 import glob
 import inspect
@@ -472,7 +473,12 @@ def Main( argv ):
 
         try:
             _id, crypto_data, _label = config_db.strget( 160, flog )
-            full_json = base64.standard_b64decode( crypto3.p1Decrypt( crypto_data,'20210731apikey') )
+
+            # crypt3 replaced by crypto_lib in version 3.0.0
+            #full_json = base64.standard_b64decode( crypto3.p1Decrypt( crypto_data,'20210731apikey') )
+            cb = crypto_lib.CryptoBase64()  
+            full_json = base64.standard_b64decode(cb.p1Decrypt( cipher_text=crypto_data, seed='20210731apikey' ))
+
             flog.debug( inspect.stack()[0][3]+": decrypted json = " + full_json.decode( 'utf-8' ) )
 
             tokens = [] 
@@ -685,7 +691,7 @@ def set_nginx_https_config():
     try:
         _id, fqdn, _label = config_db.strget( 150, flog )
         if len( fqdn.strip() ) == 0:
-            raise Exception("geen domain naam ingsteld.")
+            raise Exception("geen domain naam ingesteld.")
     except Exception as e:
         flog.critical( inspect.stack()[0][3] + ": FQDN (domain naam) is niet te lezen of niet gezet: " + str(e.args) )
         sys.exit(1) # things went wrong.
@@ -696,7 +702,7 @@ def set_nginx_https_config():
     # port 80   #
     #############
 
-    # this is normaly the internal IP adres of your inet router
+    # this is normally the internal IP adres of your inet router
     def_gateway_router_ip = None
     rec_list = network_lib.get_default_gateway()
     for rec in rec_list:

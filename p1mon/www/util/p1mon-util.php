@@ -20,20 +20,22 @@ function readStatusDb($id){
 }
 
 function debugLog($string) {
-    error_log($string."\n", 3, "/var/tmp/php-debug.log");
+    error_log($string."\n", 3, "/var/log/p1monitor/php-debug.log");
 }
 
-function encodeString ( $input, $seed ) { # nog niet getest met zonder p1monExec
+function encodeString ( $input, $seed ) {
         $encoded_string = '';
         $command = "/p1mon/scripts/P1CryptoV2 --enc ".base64_encode( $input )." --seed ".$seed;
-       
+        //$command = "/usr/bin/ls";
+
         #debugLog('$input='.$input); 
         #debugLog('$seed='.$seed);
 
         $arr_execoutput_enc = []; // make sure old stuff is cleared.
         exec( $command ,$arr_execoutput_enc, $exec_ret_value );
 
-        #debugLog('$encodeString output='.$arr_execoutput_enc);
+        #debugLog('$encodeString $command='.$command );
+        #debugLog('$encodeString output='.implode( $arr_execoutput_enc) );
         #debugLog('$encodeString return value='.$exec_ret_value);
 
         if (empty($arr_execoutput_enc)) { return ''; } // nothing to decode.

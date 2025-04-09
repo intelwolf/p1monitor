@@ -3,7 +3,8 @@ import argparse
 import base64
 import const
 import datetime
-import crypto3
+#import crypto3
+import crypto_lib
 import graaddagen_lib
 import json
 import inspect
@@ -644,7 +645,10 @@ def getUrlParameters():
     #decode api_key
     
     try:
-        decoded_api_key = base64.standard_b64decode(crypto3.p1Decrypt(api_key,'weatherapikey')).decode('utf-8')
+        # crypto3 upgrade to crypt_lib versin 3.0.0
+        #decoded_api_key = base64.standard_b64decode(crypto3.p1Decrypt(api_key,'weatherapikey')).decode('utf-8')
+        cb = crypto_lib.CryptoBase64()
+        decoded_api_key = base64.standard_b64decode(cb.p1Decrypt( cipher_text=api_key, seed='weatherapikey' )).decode('utf-8')
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": api decodering gefaald. coded password=" +\
             api_key + " Gestopt. melding:" + str(e.args[0]) )

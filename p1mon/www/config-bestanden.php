@@ -362,7 +362,7 @@ $('#db_erase_button').click( function(event) {
 
 
 function progressIndicator() {
-    console.log( progressPct )
+    //console.log( progressPct )
     if ( progressPct >95 ) {
         if ( action === 'db_erase' ) {
             //console.log("db_erase do");

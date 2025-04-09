@@ -3,8 +3,8 @@
 import argparse
 import base64
 import const
-import crypto3
-#import email
+#import crypto3
+import crypto_lib
 import inspect
 import logger
 import makeLocalTimeString
@@ -120,7 +120,11 @@ def Main(argv):
         smtp_para['mailuserpassword'] = args.mailuserpassword 
     else: #decode password
         try:
-            smtp_para ['mailuserpassword'] = base64.standard_b64decode(crypto3.p1Decrypt(smtp_para ['mailuserpassword'],'mailpw') ).decode('utf-8')
+            #crypto3 to crypto_lib upgrade version 3.0.0
+            #smtp_para ['mailuserpassword'] = base64.standard_b64decode(crypto3.p1Decrypt(smtp_para ['mailuserpassword'],'mailpw') ).decode('utf-8')
+            cb = crypto_lib.CryptoBase64()
+            smtp_para ['mailuserpassword']= base64.standard_b64decode(cb.p1Decrypt( cipher_text=smtp_para ['mailuserpassword'], seed='mailpw' )).decode('utf-8')
+
         except Exception as e:
             flog.error(inspect.stack()[0][3]+": password decodering gefaald. Decoded password=" +\
                 smtp_para ['mailuserpassword']+" Gestopt. melding:" + str(e.args[0]) )

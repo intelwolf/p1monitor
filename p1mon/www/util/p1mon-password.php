@@ -75,8 +75,9 @@ function getPasswordSession() {
 
 function passwdHashValue($passwd) {
     // from PHP 5.5> version change to password_hash()
-    $salt = 'fPv7zGH@!qDrUow5678X2qwSyN3cscgasds%3dqaztatzrules!';
-    return md5($salt.$passwd);
+    $salt = 'fPv7zGH@!qDrUow5678X2qwSyN3cscgasds%3dqaztatzrules!2025';
+    return hash( 'sha512', $passwd.$salt );
+    #return md5($salt.$passwd);
 }
 
 function writePwFile($pw){

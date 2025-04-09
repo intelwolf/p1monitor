@@ -26,11 +26,11 @@ def Main( argv ):
     flog.info( inspect.stack()[0][3] + ": wordt uitgevoerd als user -> " + pwd.getpwuid( os.getuid() ).pw_name )
 
     parser = argparse.ArgumentParser(description='help informatie')
-    parser = argparse.ArgumentParser(add_help=False) # suppress default UK help text
+    #parser = argparse.ArgumentParser(add_help=False) # suppress default UK help text
 
-    parser.add_argument('-h', '--help', 
-        action='help', default=argparse.SUPPRESS,
-        help='Laat dit bericht zien en stop.')
+    #parser.add_argument('-h', '--help', 
+    #    action='help', default=argparse.SUPPRESS,
+    #    help='Laat dit bericht zien en stop.')
 
     parser.add_argument( '-e', '--enable',
         required=False,

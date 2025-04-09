@@ -27,7 +27,7 @@ SuccessExitStatus=143
 Type=simple
 StandardOutput=inherit
 StandardError=inherit
-ExecStart=/usr/bin/socat -T60 pty,link=###SOCATDEVICE##,rawer,group-late=dialout,mode=660 tcp:###SOCATREMOTEIP###:###SOCATREMOTEPORT###,retry=forever,interval=30
+ExecStart=/usr/bin/socat -T60 pty,link=###SOCATDEVICE##,rawer,group-late=dialout,mode=660 tcp:###SOCATREMOTEIP###:###SOCATREMOTEPORT###,interval=30,forever
 ExecStartPost=/usr/bin/sudo -u p1mon /p1mon/scripts/P1SocatConfig --succestimestamp
 Restart=always
 RestartSec=10s

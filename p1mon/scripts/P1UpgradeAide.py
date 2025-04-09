@@ -3,7 +3,6 @@
 import argparse
 import const
 import crontab_lib
-import crypto3
 import crypto_lib
 import filesystem_lib
 import glob
@@ -167,9 +166,35 @@ def restore( args=None ):
             except Exception as e:
                  flog.warning ( inspect.stack()[0][3] + ": database bestand " + str( source_file_name ) + " naar ram probleem -> " + str(e) )
 
-        # step 1.1 restore the socat config, when enabled.
-        socat_restore()
+        
 
+        # step 2 Ethernet config
+        cmd = "/p1mon/scripts/P1EthernetConfig -c "
+        proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
+        stdout, stderr  = proc.communicate()
+        returncode = int( proc.wait( timeout=60 ) )
+
+        if returncode != 0:
+            flog.warning( inspect.stack()[0][3] + ": P1EthernetConfig stdout " + str(stdout) )
+            flog.warning( inspect.stack()[0][3] + ": PP1EthernetConfig stderr " + str(stderr) )
+            raise Exception( 'Ethernet configuratie lijkt niet correct!' )
+        else:
+            flog.info( inspect.stack()[0][3] + ": Ethernet configuratie is geconfigureerd.")
+
+        # step 3 Wifi config
+        cmd = "/p1mon/scripts/P1WifiConfig -c "
+        proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
+        stdout, stderr  = proc.communicate()
+        returncode = int( proc.wait( timeout=60 ) )
+
+        if returncode != 0:
+            flog.warning( inspect.stack()[0][3] + ": P1WifiConfig stdout " + str(stdout) )
+            flog.warning( inspect.stack()[0][3] + ": P1WifiConfig stderr " + str(stderr) )
+            raise Exception( 'Wifi configuratie lijkt niet correct!' )
+        else:
+            flog.info( inspect.stack()[0][3] + ": Wifi configuratie is geconfigureerd.")
+
+        """ # versie 2.3.4 and older
         # step 2 copy wifi config files
         try:
             wifi_usb_pathfile = base_usb_pathfile + AIDE_DIR_WIFI
@@ -196,6 +221,13 @@ def restore( args=None ):
         except Exception as e:
             flog.warning( inspect.stack()[0][3] +": Probleem met WiFi configuratie, probeer dit te herstellen door de WiFi opnieuw in te stellen -> " + str(e) )
 
+        """
+
+        # step 4 restore the SOCAT config, when enabled.
+        socat_restore()
+
+
+        """
         # step 3 copy DHCP config files
         try:
             #raise Exception( "TEST" )
@@ -215,7 +247,9 @@ def restore( args=None ):
 
         except Exception as e:
             flog.warning( inspect.stack()[0][3] +": probleem met DNS configuratie, probeer dit te herstellen door het netwerk opnieuw in te stellen -> " + str(e) )
-           
+        """
+
+
         # step 5 copy crontab config files
         try:
 
@@ -267,7 +301,7 @@ def restore( args=None ):
             nginx_usb_filepath = base_usb_pathfile + AIDE_DIR_NGINX + '/' +AIDE_NGINX_CONFIG + AIDE_EXT_CRYPTO
 
             if not os.path.exists( nginx_usb_filepath ):
-                 raise Exception( 'geen NGINX configuartie gevonden!' )
+                 raise Exception( 'geen NGINX configuratie gevonden!' )
 
             flog.debug ( inspect.stack()[0][3] +": NGINX crypto bestand " + nginx_usb_filepath + " gevonden.")
 
@@ -318,10 +352,6 @@ def restore( args=None ):
             flog.warning( inspect.stack()[0][3] +": probleem met eigen gemaakte webpagina's -> " + str(e) )
 
  
-
-
-
-
         # change the restore folder to done status.
         rename_pathfile = base_usb_pathfile.rpartition('.')[0] + AIDE_EXT_DONE
         os.rename( base_usb_pathfile,  rename_pathfile )
@@ -526,26 +556,39 @@ def save( ):
             flog.info( msg )
 
         except Exception as e:
-            flog.error( "Wifi configuratie niet te kopiëren (" + wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH + ") ->" + str(e) )
+            flog.warning( "Wifi configuratie niet te kopiëren (" + wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH + ") ->" + str(e) )
             write_status_to_file( str(e) )
 
             #raise Exception( str(e) )
 
-        # step 5 copy dhcp config file
-        destination_file = restore_path_dhcp + "/" + pathlib.PurePath( network_lib.DHCPCONFIG ).name 
-        flog.debug ( "source file =" + network_lib.DHCPCONFIG + " destination_file = " + destination_file )
-        shutil.copy2( network_lib.DHCPCONFIG, destination_file )
-        msg = "bestand " + pathlib.PurePath( network_lib.DHCPCONFIG ).name + " gekopieerd naar folder " + restore_path_dhcp + " op de usb drive."
-        write_status_to_file( msg )
-        flog.info( msg )
+        try:
+            # step 5 copy dhcp config file
+            destination_file = restore_path_dhcp + "/" + pathlib.PurePath( network_lib.DHCPCONFIG ).name 
+            flog.debug ( "source file =" + network_lib.DHCPCONFIG + " destination_file = " + destination_file )
+            shutil.copy2( network_lib.DHCPCONFIG, destination_file )
+            msg = "bestand " + pathlib.PurePath( network_lib.DHCPCONFIG ).name + " gekopieerd naar folder " + restore_path_dhcp + " op de usb drive."
+            write_status_to_file( msg )
+            flog.info( msg )
+        
+        except Exception as e:
+            flog.warning( "DHCP configuratie niet te kopiëren (" + network_lib.DHCPCONFIG + ") ->" + str(e) )
+            write_status_to_file( str(e) )
+        
+        #print("exit")
+        #sys.exit()
 
-        # step 6 save dns file
-        destination_file = restore_path_dns + "/" + pathlib.PurePath( network_lib.RESOLVCONFIG ).name 
-        flog.debug ( "source file =" + network_lib.RESOLVCONFIG + " destination_file = " + destination_file )
-        shutil.copy2( network_lib.RESOLVCONFIG , destination_file )
-        msg = "bestand " + pathlib.PurePath( network_lib.RESOLVCONFIG ).name + " gekopieerd naar folder " + restore_path_dns + " op de usb drive."
-        write_status_to_file( msg )
-        flog.info( msg )
+        try:
+            # step 6 save dns file
+            destination_file = restore_path_dns + "/" + pathlib.PurePath( network_lib.RESOLVCONFIG ).name 
+            flog.debug ( "source file =" + network_lib.RESOLVCONFIG + " destination_file = " + destination_file )
+            shutil.copy2( network_lib.RESOLVCONFIG , destination_file )
+            msg = "bestand " + pathlib.PurePath( network_lib.RESOLVCONFIG ).name + " gekopieerd naar folder " + restore_path_dns + " op de usb drive."
+            write_status_to_file( msg )
+            flog.info( msg )
+        except Exception as e:
+            flog.warning( "DNS configuratie niet te kopiëren (" + network_lib.RESOLVCONFIG + ") ->" + str(e) )
+            write_status_to_file( str(e) )
+        
 
         # step 7 save crontab file
         try:
@@ -750,7 +793,7 @@ def mount():
 ######################
 
 #############################################
-# socat install                             #
+# SOCAT install                             #
 # only run after the DB config file is      #
 # copied to the ram.                        #
 #############################################
@@ -767,7 +810,7 @@ def socat_restore():
     try:
         _id, socat_is_active, _label = config_db.strget( 200, flog )
         if ( int(socat_is_active) == 1):
-            flog.info( inspect.stack()[0][3] + ": socat is actief, service wordt geinstalleerd." )
+            flog.info( inspect.stack()[0][3] + ": SOCAT is actief, service wordt geïnstalleerd." )
             cmd = '/p1mon/scripts/P1SocatConfig --enable'
             flog.debug ( inspect.stack()[0][3] + ": cmd =" + cmd )
             proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
@@ -775,7 +818,7 @@ def socat_restore():
             returncode = int( proc.wait() )
             #print ( stdout, stderr)
     except Exception as e:
-        flog.error( inspect.stack()[0][3] + ": socat activering gefaald." + str(e) )
+        flog.error( inspect.stack()[0][3] + ": SOCAT activering gefaald." + str(e) )
         return
 
 #############################################
@@ -959,11 +1002,15 @@ def copy_and_crypto_file( mode='e' ,source_pathfile=None, destination_pathfile=N
             data = w_file.read()
 
         #flog.debug ( "source data " + str(data) ) 
+        # crypto3 upgrade to crypto_lib version 3.0.0
+        cb = crypto_lib.CryptoBase64()
 
         if mode == 'encrypt':
-            result = crypto3.p1Encrypt( str(data), cryptoseed )
+            result = cb.p1Encrypt( plain_text=str(data), seed=cryptoseed )
+            #result = crypto3.p1Encrypt( str(data), cryptoseed )
         elif mode == 'decrypt':
-            result = crypto3.p1Decrypt( str(data), cryptoseed )
+            result = cb.p1Decrypt( cipher_text=str(data), seed=cryptoseed )
+            #result = crypto3.p1Decrypt( str(data), cryptoseed )
         else:
             raise Exception( " geen goed crypto mode opgegeven, valide opties (encrypt of decrypt)." )
 

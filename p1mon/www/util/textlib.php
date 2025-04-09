@@ -2586,11 +2586,41 @@ Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'arge
     'Tijdsverschil (sec.)','Time difference (sec.)','Décalage horaire (sec.)'
 ),
 /* 729 */ array(
-    '','',''
+    'een moment a.u.b. Shutdown wordt uitgevoerd.','one moment please. shutdown is in progress.',"Un instant s'il vous plaît. L'arrêt est en cours."
 ),
 /* 730 */ array(
+    'De rpi is bijna klaar met de shutdown','The rpi is almost ready with the shutdown',"Le rpi est presque terminé avec l'arrêt"
+),
+/* 731 */ array(
+    'Als de groene led op de RPI niet meer knippert dan is de shutdown gereed.',
+    'When the green LED on the RPI stops flashing, the shutdown is complete.',
+    "Lorsque la LED verte du RPI cesse de clignoter, l'arrêt est terminé."
+),
+/* 732 */ array(
+    'geen WiFi SSID gevonden','no WiFi SSID found','aucun SSID WiFi trouvé'
+),
+/* 733 */ array(
+    'Software versie','Software version','Version du logiciel'
+),
+/* 734 */ array(
+    'datum','date','la date'
+),
+/* 735 */ array(
+    'patch versie','patch version','version du correctif'
+),
+/* 736 */ array(
+    'Fijne Kerstdagen namens Security Brother.','happy Christmas from Security Brother.','Joyeux Noël de la part de Security Brother.'
+),
+/* 737 */ array(
     '','',''
 ),
+/* 738 */ array(
+    '','',''
+),
+
+
+
+
 
 );
 

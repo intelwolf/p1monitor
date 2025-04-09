@@ -19,6 +19,7 @@ import api_p1_port_lib
 import api_weather_history_lib
 import api_financial_lib
 import api_time_lib 
+import api_wifi_lib
 
 from apiutil import p1_serializer, validate_timestamp, clean_timestamp_str, list_filter_to_str, validate_timestamp_by_length
 
@@ -280,6 +281,17 @@ time_date_help = api_time_lib.DateTimeHelp()
 time_date_help.set_flog( flog )
 app.add_route( apiconst.ROUTE_DATETIME_HELP, time_date_help )
 
+#added in version 3.0.0
+wifi  = api_wifi_lib.Wifi()
+wifi.set_flog( flog )
+app.add_route( apiconst.ROUTE_WIFI_SSID, wifi )
+
+wifi_help  = api_wifi_lib.WifiHelp()
+wifi_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_WIFI_SSID_HELP, wifi_help )
+
+
+
 
 ################ alles hier onder nog omzetten !!!!!!!!!!! naar api_lib_nnnnn functies. 
 
@@ -492,7 +504,7 @@ class PowerProductionS0( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                    titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -740,7 +752,7 @@ class IndoorTemperature( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                   titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -932,7 +944,7 @@ class CurrentWeather( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                   titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -1136,7 +1148,7 @@ class PowerGasHistoryDayMonthYear( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                   titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr)) ,
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -1338,7 +1350,7 @@ class PowerGasHistoryHour( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                   titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -1545,7 +1557,7 @@ class PowerGasHistoryMin( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                    titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] +  apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -1654,7 +1666,7 @@ class Status( object ):
         except Exception as _e:
             raise falcon.HTTPError( 
                 status=apierror.API_DB_ERROR['status'], 
-                titel=apierror.API_DB_ERROR['title'], 
+                title=apierror.API_DB_ERROR['title'], 
                 description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ),
                 code=apierror.API_DB_ERROR['code'] 
                 )
@@ -1762,7 +1774,7 @@ class Config( object ):
         except Exception as _e:
             raise falcon.HTTPError( 
                 status=apierror.API_DB_ERROR['status'], 
-                titel=apierror.API_DB_ERROR['title'], 
+                title=apierror.API_DB_ERROR['title'], 
                 description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                 code=apierror.API_DB_ERROR['code'] 
                 )
@@ -1933,7 +1945,7 @@ class SmartMeter( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                    titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -2131,7 +2143,7 @@ class Watermeter( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                   titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )
@@ -2318,7 +2330,7 @@ class Phase( object ):
             except Exception as _e:
                 raise falcon.HTTPError( 
                     status=apierror.API_DB_ERROR['status'], 
-                   titel=apierror.API_DB_ERROR['title'], 
+                    title=apierror.API_DB_ERROR['title'], 
                     description=apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] + " query used: " + sqlstr) ), 
                     code=apierror.API_DB_ERROR['code'] 
                     )

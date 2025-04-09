@@ -1,5 +1,5 @@
 ####################################################################
-# solaredge lib based on solaredge version 0.0.4 from Bert Outtier #
+# SolarEdge lib based on solaredge version 0.0.4 from Bert Outtier #
 ####################################################################
 
 import requests

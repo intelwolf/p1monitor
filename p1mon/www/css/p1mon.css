@@ -193,7 +193,6 @@ div#aide_status {
 }
 
 
-
 div#scroll_window {
     overflow: auto;
     background-color: #FFFFFF;
@@ -264,6 +263,7 @@ div#qrcode {
     font-size: 1em;
     display: none;
 }
+
 div#dialog {
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
@@ -345,25 +345,20 @@ div#help_detail {
     z-index: 99;
 }
 
-
-div#wifi_selector {
-    position: absolute;
-    left: 1px;
-    top: 1px;
+div#wifi-list {
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
     border: 1px solid #DCE1E3;
     padding: 5px 5px 5px 5px;
-    /* width: 20em; */
     text-align: left;
     color: #6E797C;
     background-color: #F5F5F5;
     box-shadow: 0px 5px 8px -2px #eaeaea;
-    font-size: 1em;
     display: none;
     z-index: 99;
 }
+
 
 .api_detail {
     /* position: absolute; */
@@ -460,6 +455,15 @@ select {
     margin-right: 8px;
 }
 
+.close_button-3 {
+    float: right;
+    margin-top: 4px;
+    margin-right: 8px;
+    margin-left: 8px;
+}
+
+
+
 .color-back {
     color: #DCE1E3;
 }
@@ -483,7 +487,6 @@ select {
 .color-menu {
     color: #10D0E7;
 }
-
 
 .color-menu-not-active {
     color: #aaaaaa;
@@ -556,8 +559,6 @@ select {
 .color-dynamic-price-gas {
     color: #cc5637;
 }
-
-cc5637
 
 .container {
     display: flex;
@@ -1351,6 +1352,11 @@ div#right-wrapper-config-right-4 {
     height: 75px;
 }
 
+.but-4 {
+    width: 60px;
+    height: 60px;
+}
+
 .menu-left {
     padding: 0px 0px 0px 0px;
     text-align: center;
@@ -1838,7 +1844,6 @@ a:hover {
 }
 
 
-
 .pos-9 {
     width: 780px;
 }
@@ -2175,6 +2180,12 @@ a:hover {
     top: 260px;
     right: 240px;
 }
+
+.pos-56 {
+    position: relative;
+    top: 5px;
+}
+
 
 
 .fieldset-1 {
