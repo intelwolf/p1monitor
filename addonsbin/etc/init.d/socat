@@ -14,7 +14,7 @@
 NAME=socat
 DAEMON=/usr/bin/socat
 #SOCAT_DEFAULTS='-d -d -d -lf /var/log/socat.log'
-SOCAT_DEFAULTS='-d -lf /var/log/socat.log'
+SOCAT_DEFAULTS='-d -d -lf /var/log/socat.service.log'
 
 . /lib/lsb/init-functions
 . /etc/default/socat
