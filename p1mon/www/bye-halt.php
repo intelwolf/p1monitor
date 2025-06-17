@@ -1,8 +1,12 @@
+<?php
+include_once '/p1mon/www/util/config_read.php';
+include_once '/p1mon/www/util/textlib.php';
+?>
 <!doctype html>
-<html>
+<html lang="<?php echo strIdx( 370 )?>">
 <head>
 <meta name="robots" content="noindex">
-<title>P1 monitor</title>
+<title>P1-monitor</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
@@ -37,7 +41,7 @@ function readJsonApiSmartMeter(){
         clearTimeout(initloadtimer);
     
         if ( alive_cnt > 10 ) {
-            console.log( "alive_cnt=" + alive_cnt )
+            //console.log( "alive_cnt=" + alive_cnt )
             if ( $('#indicator').hasClass('color-ok') ) {
 
                 $('#indicator').removeClass('color-ok');
@@ -51,12 +55,12 @@ function readJsonApiSmartMeter(){
                 $('#indicator').addClass('fas fa-power-off');
                 $('#indicator').removeClass('color-warning');
                 $('#indicator').addClass('color-ok');
-                $('#text').html("De rpi is bijna klaar met de shutdown");
+                $('#text').html("<?php echo strIdx( 730 )?>");
         }
         if ( alive_cnt < -5 ) {
             $('#indicator').removeClass('color-warning');
             $('#indicator').addClass('color-text');
-            $('#text').html("Als de groene led op de RPI niet meer knippert dan is de shutdown gereed.");
+            $('#text').html("<?php echo strIdx( 731 )?>");
         }
 
 
@@ -75,7 +79,7 @@ function readJsonApiSmartMeter(){
    <p></p>
    <p></p>
    <center>
-       <div id="text" class="text-30">Een moment a.u.b. Shutdown wordt uitgevoerd.<div>
+       <div id="text" class="text-30"><?php echo strIdx( 729 )?><div>
    </center>
    <center>
         <img id='logo' alt="ztatz logo" src="./img/p1mon-logo.svg" width="512" height="512">

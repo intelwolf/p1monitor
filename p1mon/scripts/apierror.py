@@ -21,7 +21,7 @@ API_DB_ERROR =  {
     "status"        : falcon.HTTP_500,
     "title"         : "ERROR: database query.",
     "description"   : "Could not query the database got the following message: ",
-    "code"         : "00002"
+    "code"          : "00002"
 }
 
 API_PARAMETER_ERROR =  {  

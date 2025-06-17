@@ -17,7 +17,8 @@ import sqldb_pricing
 import sys
 import systemid
 import time
-import crypto3
+#import crypto3
+import crypto_lib
 import util
 import listOfPidByName
 import process_lib
@@ -293,7 +294,14 @@ def Main(argv):
     try: 
         msgToInfoLogAndStatusFile( 'System ID zetten in configuratie database: ' + str( systemid.getSystemId() ) )
         #flog.info(inspect.stack()[0][3]+': System ID zetten in configuratie database: ' + str( systemid.getSystemId() ) )
-        sysid_encrypted  = crypto3.p1Encrypt( systemid.getSystemId(),"sysid" ).encode('utf-8').decode('utf-8')
+        
+        # crypto upgrade crypto3 changed to crypto_lib
+        #sysid_encrypted  = crypto3.p1Encrypt( systemid.getSystemId(),"sysid" ).encode('utf-8').decode('utf-8')
+        
+        # crypto_lib 3.0.0 version TODO why encode and decode? 
+        cb = crypto_lib.CryptoBase64()
+        sysid_encrypted = cb.p1Encrypt( plain_text=systemid.getSystemId(), seed="sysid" ).encode('utf-8').decode('utf-8')
+
         config_db.strset( sysid_encrypted ,58, flog ) 
     except Exception as e:
         msg = " System ID zetten mislukt -> " + str(e.args[0])
@@ -303,7 +311,8 @@ def Main(argv):
     setSoftwareVersionInformation()
 
     msgToInfoLogAndStatusFile( 'WiFi wordt aangepast.' )
-    cmd = "sudo /p1mon/scripts/P1SetWifi"
+   
+    cmd = "sudo /p1mon/scripts/P1WifiConfig -c" # changed in version 3.0.0
     r = process_lib.run_process( 
         cms_str = cmd,
         use_shell=True,
@@ -317,8 +326,24 @@ def Main(argv):
     else:
         msgToInfoLogAndStatusFile( 'WiFi aanpassingen gereed.' )
 
-    msgToInfoLogAndStatusFile( 'CRON wordt aangepast.' )
+    msgToInfoLogAndStatusFile( 'Ethernet wordt aangepast.' )
 
+    cmd = "sudo /p1mon/scripts/P1EthernetConfig -c" # changed in version 3.0.0
+    r = process_lib.run_process( 
+        cms_str = cmd,
+        use_shell=True,
+        give_return_value=True,
+        flog=flog 
+    )
+    if r[2] > 0:
+        msg = "Ethernet aanpassen gefaald."
+        writeLineToStatusFile( msg )
+        flog.error( inspect.stack()[0][3] + ": " + msg )
+    else:
+        msgToInfoLogAndStatusFile( 'Ethernet aanpassingen gereed.' )
+
+
+    msgToInfoLogAndStatusFile( 'CRON wordt aangepast.' )
     try:
         crontab_lib.update_crontab_backup( flog=flog )
         msgToInfoLogAndStatusFile( 'CRON aanpassingen gereed.' )
@@ -357,15 +382,17 @@ def Main(argv):
         writeLineToStatusFile( msg )
         flog.error( inspect.stack()[0][3] + ": " + msg )
 
-    msgToInfoLogAndStatusFile( 'Vaste IP adressen worden aangepast als deze actief zijn.' )
-    config_db.strset( 3, 168, flog ) # set the flag so the watchdog processes the changes
+    msgToInfoLogAndStatusFile( 'Ethernet aanpassingen doorvoeren' )
+    config_db.strset( 1, 168, flog ) # set the flag so the watchdog processes the changes
+
+    msgToInfoLogAndStatusFile( 'Wifi aanpassingen doorvoeren' )
+    config_db.strset( 1, 183, flog ) # set the flag so the watchdog processes the changes
 
     msgToInfoLogAndStatusFile( 'SAMBA fileshares worden gezet.' )
     config_db.strset( 1, 182, flog ) # set the flag so the watchdog processes the changes
 
     msgToInfoLogAndStatusFile( 'SOCAT aanpassingen, als deze actief is.' )
     config_db.strset( 1, 201, flog ) # set the flag so the watchdog processes the changes
-
 
     timestop = time.time()
     m, s = divmod( timestop - timestart , 60 ) # make minutes and seconds from total secs count

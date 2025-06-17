@@ -36,8 +36,9 @@ $sw_off  = strIdx( 193 );
 $sw_on   = strIdx( 192 );
 
 $newVersionLink = "";
+$newVersionLinkPatch = "";
 $newSoftwareVersionP1monitor = "";
-
+$newSoftwarePatchVersionP1monitor = "";
 
 if ( isset($_POST["fs_cb_set_time"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -108,12 +109,19 @@ if ( isset($_POST["patchfilepath"]) ) {
 }
 
 
-// check if the watchdog has set an new version available when status idx 66 is not empty there is a new version
-if  ( strlen( readStatusDb(66)) > 0 ) {
+// check if the watchdog has set an new version available when status idx 136 is 1
+if  ( readStatusDb(136) == 1 ) {
     $newSoftwareVersionP1monitor = ucfirst(strIdx( 375 )) . ' ' . readStatusDb(66); 
     $download_url = readStatusDb(86);
     $newVersionLink = '<a class="text-10" target="_blank" href="'. $download_url .'"><i class="menu-active-control fas fa-globe"></i>&nbsp;download</a>';
 }
+
+if  ( readStatusDb(137) == 1 ) {
+    $newSoftwarePatchVersionP1monitor = ucfirst(strIdx( 375 )) . ' ' . readStatusDb(133); 
+    $download_url_patch = readStatusDb(134);
+    $newVersionLinkPatch = '<a class="text-10" target="_blank" href="'. $download_url_patch .'"><i class="menu-active-control fa-solid fa-bandage"></i>&nbsp;download</a>';
+}
+
 
 ?>
 <head>
@@ -173,7 +181,7 @@ if  ( strlen( readStatusDb(66)) > 0 ) {
 
 
                         <div class="frame-4-top">
-                            <span class="text-15"><?php echo ucfirst(strIdx( 726 ))?></span>
+                            <span class="text-15"><?php echo ucfirst(strIdx( 726 ))?></span><span id="busy_indicator">&nbsp;&nbsp;&nbsp;<i class="fas fa-spinner fa-pulse fa-1x fa-fw"></i></span>
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left text-10">
@@ -204,12 +212,47 @@ if  ( strlen( readStatusDb(66)) > 0 ) {
                         </div>
                         <div class="frame-4-bot">
                             <div class="float-left text-10">
-                                <div><?php echo ucfirst(strIdx( 371 ))?>:&nbsp;<?php echo config_read(0); ?></div>
-                                <div><?php echo ucfirst(strIdx( 372 ))?>:&nbsp;<?php echo config_read(128); ?></div>
-                                <div><?php echo ucfirst(strIdx( 369 ))?>:&nbsp;<?php echo config_read(133); ?></div>
-                                <div><?php echo ucfirst(strIdx( 373 ))?>:&nbsp;<span id="newp1mon"><?php echo strIdx( 377 )?>.</span></div>
-                                <div id="p1newdownload" class="display_none"><?php echo $newVersionLink ?></div>
-                            </div> 
+
+                                
+                                <div class="rTable">
+                                   
+                                    <div class="rTableRow">
+                                        <div class="rTableCell">
+                                            <?php echo ucfirst(strIdx( 371 ))?>:&nbsp;<?php echo config_read(0); ?>
+                                        </div>
+                                    </div>
+                                    <div class="rTableRow">
+                                        <div class="rTableCell">
+                                            <?php echo ucfirst(strIdx( 372 ))?>:&nbsp;<?php echo config_read(128); ?>
+                                        </div>
+                                    </div>
+                                    <div class="rTableRow">
+                                        <div class="rTableCell">
+                                            <?php echo ucfirst(strIdx( 369 ))?>:&nbsp;<?php echo config_read(133); ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="rTableRow">
+                                        <div class="rTableCell">
+                                            <?php echo ucfirst(strIdx( 373 ))?>:&nbsp;<span id="newp1mon"><?php echo strIdx( 377 )?>.</span>&nbsp;
+                                        </div>
+                                        <div class="rTableCell">
+                                            <span id="p1newdownload" class="display_none"><?php echo $newVersionLink ?></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="rTableRow">
+                                        <div class="rTableCell">
+                                            <?php echo ucfirst(strIdx( 394 ))?>:&nbsp;<span id="newp1monpatch"><?php echo strIdx( 377 )?>.</span>&nbsp;
+                                        </div>
+                                        <div class="rTableCell">
+                                            <span id="p1newdownloadpatch" class="display_none"><?php echo $newVersionLinkPatch ?></span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                
+                            </div>
                         </div> 
                         <p></p>
                         <div class="frame-4-top">
@@ -364,6 +407,7 @@ function readJsonApiDateTime(){
             $('#systemtime').text( jsonarr[0] );
             $('#inettime').text( jsonarr[2] );
             $('#timevariance').text( jsonarr[4] );
+            hideStuff('busy_indicator');
         } catch(err) {
             console.log( err );
         }
@@ -469,6 +513,12 @@ $(function() {
         $('#newp1mon').text( newP1SoftwareVersion )
     }
     
+    var jsNewPatchVersion = "<?php echo $newSoftwarePatchVersionP1monitor ?>"
+    if ( jsNewPatchVersion.length > 0 ) {
+        newP1SoftwarePatchVersion = jsNewPatchVersion;
+        showStuff('p1newdownloadpatch');
+        $('#newp1monpatch').text( newP1SoftwarePatchVersion )
+    }
 
 });
 

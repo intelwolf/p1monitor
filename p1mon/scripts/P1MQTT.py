@@ -4,7 +4,8 @@
 import apiconst
 import base64
 import const
-import crypto3
+#import crypto3
+import crypto_lib
 import inspect
 import json
 import logger
@@ -276,7 +277,8 @@ def setConfigFromDb():
 
         _id, parameter, _label = config_db.strget( 108, flog )
         if len(parameter) > 0:
-            decoded_password = str( base64.standard_b64decode( crypto3.p1Decrypt( parameter, 'mqttclpw') ).decode('utf-8') )
+            cb = crypto_lib.CryptoBase64()
+            decoded_password  = base64.standard_b64decode(cb.p1Decrypt( cipher_text=parameter, seed='mqttclpw')).decode( 'utf-8' )
             flog.debug( inspect.stack()[0][3] + " encoded password=" + parameter + " decoded password=" + decoded_password )
             mqtt_para['brokerpassword'] = decoded_password
         else:
@@ -700,7 +702,7 @@ def Main(argv):
                             mqtt_para['phaseprocessedtimestamp'] = timestamp
 
             except Exception as e:
-                flog.warning(inspect.stack()[0][3]+": onverwachte fout bij binnen fase publish van melding:"+str(e))  
+                flog.warning(inspect.stack()[0][3]+": onverwachte fout bij fase publish van melding:" + str(e) )  
 
         flog.debug( inspect.stack()[0][3] + ": sleeping... mqtt_para['brokerconnectionisok'] = "  +  str(mqtt_para['brokerconnectionisok']) )
 

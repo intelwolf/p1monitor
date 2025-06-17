@@ -1,16 +1,19 @@
-import glob
+#import glob
+import const
 import subprocess
 import inspect
-import io
+#import io
 import ipaddress
-import os
+#import os
 import random
 #import string
 import socket
 #import tempfile
+import time
 import util 
 import urllib
-import process_lib
+#import process_lib
+import sqldb
 import filesystem_lib
 import data_struct_lib
 
@@ -503,38 +506,51 @@ def get_nic_info(nic="eth0"):
     return result
 
 
-""" wordt niet meer gebruikt ter referentie
-def regenerate_resolv_config( flog=None ):
+#######################################################################
+# update the status DB with the IP address of the ethernet connection #
+# connection                                                          #
+# type: 1 = Ethernet, 2=Wifi                                          #
+#######################################################################
+def update_ip_in_status_db(network_type=1, flog=None):
 
-    flog.info( inspect.stack()[0][3] + ": resolv.conf regeneren. ")
-
-    # move to backup
-    FILE_BACKUP_EXT = ".p1mon.bak"
-    #if move_file_for_root_user( source=RESOLVCONFIG, destination=RESOLVCONFIG + FILE_BACKUP_EXT , flog=flog ) == False:
-    #    flog.warning( inspect.stack()[0][3] + ": backup bestand " + RESOLVCONFIG + FILE_BACKUP_EXT + " is niet te maken.")
-
-    if filesystem_lib.move_file_for_root_user( source_filepath=RESOLVCONFIG, destination_filepath=RESOLVCONFIG + FILE_BACKUP_EXT, flog=flog ):
-        flog.warning( inspect.stack()[0][3] + ": backup bestand " + RESOLVCONFIG + FILE_BACKUP_EXT + " is niet te maken.")
-
-    try:
-        cmd_str = "sudo resolvconf -u"
-        flog.debug( inspect.stack()[0][3] + ": cmd = " +  cmd_str )
-        #p = subprocess.Popen( cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
-        p = subprocess.Popen( cmd_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        stdout=subprocess.PIPE
-        (output, err) = p.communicate()
-        p_status = p.wait(timeout=10)
-    except Exception as e:
-        flog.error( inspect.stack()[0][3] + ": resolv.conf regeneren fout " +  str(e.args) )
-        return False
+    rt_status_db  = sqldb.rtStatusDb()
     
-    # if resolv.conf does not exist recover from backup 
-    if not os.path.isfile( RESOLVCONFIG ):
-        flog.warning( inspect.stack()[0][3] + ": resolv.conf is niet aangemaakt, recovery met vorige bestand." )
-        #move_file_for_root_user( source=RESOLVCONFIG + FILE_BACKUP_EXT, destination=RESOLVCONFIG, flog=flog )
-        filesystem_lib.move_file_for_root_user( source_filepath=RESOLVCONFIG + FILE_BACKUP_EXT, destination_filepath=RESOLVCONFIG, copyflag=True, flog=flog )
-        return False
-    # we leave the backup file as debug data and manual recovery.
+    name = "Ethernet"
+    ifname = P1MON_ETH0_TXT
+    db_idx = 20
 
-    return True
-"""
+    if network_type == 2:
+        name = "Wifi"
+        ifname = P1MON_WLAN0_TXT
+        db_idx = 42
+
+    # open van status database
+    try:    
+        rt_status_db.init( const.FILE_DB_STATUS,const.DB_STATUS_TAB)     
+    except Exception as e:
+        msg = inspect.stack()[0][3] + ": database could not be opened " + const.FILE_DB_STATUS + " message :" + str(e.args[0])
+        if flog != None:
+            flog.critical( msg )   
+        raise Exception( msg) 
+        
+    sec_count = 0
+    if flog != None:
+        flog.info(inspect.stack()[0][3]+": starting check if " + str(name) + " is active")
+
+    while ( sec_count < 180 ):
+        # try for maximum of 3 minutes (sleep is 5)
+        buf = get_nic_info( ifname )
+        if buf['ip4'] != None:
+            if flog != None:
+                flog.info( inspect.stack()[0][3]+": " + str(name) + " is active on IP adres " + buf['ip4'] )
+            rt_status_db.strset(buf['ip4'], db_idx, flog )
+            return # up and running
+        sec_count += 5
+        time.sleep( 5 )
+        if flog != None:
+            flog.info(inspect.stack()[0][3]+": waiting for " + str(name) + " to become active now for " + str(sec_count) + " seconds.")
+    
+    if flog != None:
+        flog.warning(inspect.stack()[0][3]+": " + str(name) + " is not active.") 
+
+    rt_status_db.strset( 'onbekend', db_idx, flog)

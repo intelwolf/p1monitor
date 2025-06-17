@@ -641,7 +641,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 y: 0,
                 color: '#6E797C',
                 borderWidth: 0,
-                format: '{point.y}W',
+                format: '{point.y}'+wattText,
                 style: {
                     fontWeight: 'bold',
                     fontSize: '25px',
@@ -688,7 +688,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 y: 0,
                 color: '#6E797C',
                 borderWidth: 0,
-                format: '{point.y}W',
+                format: '{point.y}'+wattText,
                 style: {
                     fontWeight: 'bold',
                     fontSize: '25px',
@@ -724,7 +724,7 @@ function readGraphVisibilityFromBrowserMemory(){
                 y: 0,
                 color: '#6E797C',
                 borderWidth: 0,
-                format: '{point.y}W',
+                format: '{point.y}'+wattText,
                 style: {
                     fontWeight: 'bold',
                     fontSize: '25px',

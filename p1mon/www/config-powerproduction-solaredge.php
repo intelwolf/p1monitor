@@ -143,13 +143,13 @@ function selectorTariffMode( $mode ) {
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
-<link type="text/css" rel="stylesheet" href="./css/p1mon-tabulator.css" >
-<link type="text/css" rel="stylesheet" href="./css/p1mon-tabulator-alt-2.css" >
+<link type="text/css" rel="stylesheet" href="./css/p1mon-1-tabulator.css" >
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script       src="./js/jquery.min.js"></script>
 <script       src="./js/p1mon-util.js"></script>
 <script       src="./js/tabulator-dist/js/tabulator.min.js"></script>
+
 </head>
 <body>
 <script>
@@ -305,8 +305,8 @@ function setDbAttributeActive( site_id, cell , attr ) {
                                 <!-- start of content -->
                                 <form name="formvalues" id="formvalues" method="POST">
                                             
-                                    <div class="frame-4-top"> <!--TODO spinner activeren. -->
-                                            <span class="text-15"><?php echo strIdx( 158 );?></span><span id="busy_indicator" class="display-nonex" >&nbsp;&nbsp;&nbsp;<i class="fas fa-spinner fa-pulse fa-1x fa-fw"></i></span>
+                                    <div class="frame-4-top">
+                                            <span class="text-15"><?php echo strIdx( 158 );?></span><span id="busy_indicator" >&nbsp;&nbsp;&nbsp;<i class="fas fa-spinner fa-pulse fa-1x fa-fw"></i></span>
                                     </div>
                                     <div class="frame-4-bot">
                                             <div title="<?php echo strIdx( 149 );?>" class="float-left">

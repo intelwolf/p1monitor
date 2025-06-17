@@ -527,6 +527,7 @@ $(function() {
     Highcharts.setOptions({
         global: {
             useUTC: false
+            
         },
         lang: <?php hc_language_json(); ?>
     });

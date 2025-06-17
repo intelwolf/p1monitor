@@ -276,7 +276,9 @@ var sqlImportFilename = '';
 var sqlExportChecking = false;
 var initloadtimer;
 
-var tmp_scroll_crc32_hash = -1;
+var tmp_scroll_crc32_hash_import = -1;
+var tmp_scroll_crc32_hash_aide   = -1;
+var tmp_import_start_time        = -1;
 
 sqlImportIsActive=getCookie("sqlImportIsActive"); 
 
@@ -433,10 +435,8 @@ function startSqlExport(exp_id, command){
 }
 
 
-
-
-
 function readSqlImportStatusLogging(){
+
     $.get( "/txt/txt-sql-import-status.php", function( response, status, xhr ) {
         
         if ( status == "error" ) {
@@ -444,11 +444,22 @@ function readSqlImportStatusLogging(){
         }
 
         tmp_local_hash = crc32( response );
-        if ( tmp_local_hash != tmp_scroll_crc32_hash ) {
-            tmp_scroll_crc32_hash = tmp_local_hash;
+
+        if ( tmp_local_hash == tmp_scroll_crc32_hash_import ) {
+            if ( (Date.now() - tmp_import_start_time) > 10000 ) {
+                sqlImportIsActive = undefined;
+            }
+        }
+
+        if ( tmp_local_hash != tmp_scroll_crc32_hash_import && response.length > 80 ) {
+           
+            tmp_import_start_time = Date.now()
+            tmp_scroll_crc32_hash_import = tmp_local_hash;
+            
             $('#scroll_window').html( response );
             // keep scroll window scrolled down.
             $('#scroll_window').scrollTop($('#scroll_window')[0].scrollHeight);
+             
         } else {
             if ( response.length < 1 ) {
                 $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
@@ -466,17 +477,26 @@ function readAideLogging(){
         }
 
         tmp_local_hash = crc32( response );
-        if ( tmp_local_hash != tmp_scroll_crc32_hash ) {
-            tmp_scroll_crc32_hash = tmp_local_hash;
+
+        /*
+        if ( tmp_local_hash == tmp_scroll_crc32_hash_aide ) {
+            if ( (Date.now() - tmp_aide_start_time ) > 10000 ) {
+                sqlImportIsActive = undefined;
+            }
+        }
+        */
+
+        if ( tmp_local_hash != tmp_scroll_crc32_hash_aide) {
             $('#scroll_window_2').html( response );
-            
             // keep scroll window scrolled down.
             $('#scroll_window_2').scrollTop($('#scroll_window_2')[0].scrollHeight);
+            tmp_scroll_crc32_hash_aide = tmp_local_hash;
         } else {
             if ( response.length < 1 ) {
                 $('#scroll_window_2').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
             }
         }
+
     }); 
 }
 

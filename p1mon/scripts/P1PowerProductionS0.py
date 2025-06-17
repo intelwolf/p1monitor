@@ -1,16 +1,15 @@
 # run manual with ./P1PowerProductionS0
 
-import warnings
+#import warnings
 # suppres GPIO warning
 # PinFactoryFallback: Falling back from lgpio: No module named 'lgpio'
-warnings.simplefilter('ignore')
+#warnings.simplefilter('ignore')
 
 
 import const
 import datetime
 import filesystem_lib
 import inspect
-import gpio
 import os
 import signal
 import logger
@@ -21,6 +20,7 @@ import random
 import time
 import sqldb
 import process_lib
+import gpio_lib
 import util
 
 # programme name.
@@ -30,7 +30,7 @@ rt_status_db            = sqldb.rtStatusDb()
 config_db               = sqldb.configDB()
 power_production_db     = sqldb.powerProductionDB()
 
-gpioPowerS0Puls         = gpio.gpioDigtalInput()
+gpioPowerS0Puls         = gpio_lib.gpioDigtalInput()
 
 timestamp               = util.mkLocalTimeString() 
 

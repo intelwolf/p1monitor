@@ -7,7 +7,8 @@
 # refresh_token_expiration_timeout = 171 #
 ##########################################
 import const
-import crypto3
+#import crypto3
+import crypto_lib
 import dropbox
 import inspect
 
@@ -51,15 +52,20 @@ def connection_is_valid( dbx=None, flog=None ):
 def authenticate_dbx(flog=None, config_db=None, rt_status_db=None ):
     
     flog.debug(inspect.stack()[0][3]+": authenticatie met dropbox start.")
+    # crypto3 upgrade crypto_lib for version 3.0.0
+    cb = crypto_lib.CryptoBase64()
 
     _id,access_token_crypted ,_label = config_db.strget( 47, flog )
     flog.debug(inspect.stack()[0][3]+": access_token(encrypted) = " + access_token_crypted )
-    access_token = crypto3.p1Decrypt( access_token_crypted, CRYPT_KEY_ACCESS )
+    #access_token = crypto3.p1Decrypt( access_token_crypted, CRYPT_KEY_ACCESS )
+    access_token = cb.p1Decrypt( cipher_text=access_token_crypted, seed=CRYPT_KEY_ACCESS )
+
     flog.debug(inspect.stack()[0][3]+": decrypted key = " + str(access_token)) 
 
     _id, refresh_token_crypted  ,_label = config_db.strget( 170, flog )
     flog.debug(inspect.stack()[0][3]+": refresh_token(encrypted) = " + refresh_token_crypted )
-    refresh_token = crypto3.p1Decrypt( refresh_token_crypted, CRYPT_KEY_REFRESH )
+    #refresh_token = crypto3.p1Decrypt( refresh_token_crypted, CRYPT_KEY_REFRESH )
+    refresh_token = cb.p1Decrypt( cipher_text=refresh_token_crypted, seed=CRYPT_KEY_REFRESH )
     flog.debug(inspect.stack()[0][3]+": decrypted refresh_token = " + str(refresh_token )) 
 
     try:

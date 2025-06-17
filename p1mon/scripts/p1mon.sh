@@ -1,4 +1,5 @@
 #!/bin/bash
+FOLDER_BASE="/p1mon"
 PROG="p1mon"
 PHP_SESSIONS="/run/php/sessions"
 PYTHONENV="/p1mon/p1monenv"
@@ -10,6 +11,7 @@ LOG_PATH="/var/log/p1monitor/"
 LOCK_PATH="/var/lock/"
 WWW_DOWLOAD_PATH="/p1mon/www/download"
 EXPORT_PATH="/p1mon/export/"
+TMP_PATH="/p1mon/var/tmp"
 RAMDISK="/p1mon/mnt/ramdisk/"
 DATADISK="/p1mon/data/"
 DBX_ROOT="/p1mon/mnt/ramdisk/dbx/"
@@ -36,24 +38,34 @@ PRG14="P1GPIO"
 PRG15="P1PowerProductionS0"
 PRG16="P1WatermeterV2"
 PRG17="P1SolarEdgeReader"
-PRG18="niet meer in gebruik"
+PRG18="P1EthernetConfig"
 PRG19="P1UpgradeAide"
 PRG20="P1Notifier"
 PRG21="P1DbCopy"
 PRG22="P1DatabaseOptimizer"
 P1FILE="p1msg.txt"
 
+
+# failsave folders
+sudo mkdir -p $FOLDER_BASE/data
+sudo mkdir -p $FOLDER_BASE/var/tmp
+sudo mkdir -p $FOLDER_BASE/export
+sudo mkdir -p $FOLDER_BASE/mnt/usb
+sudo mkdir -p $FOLDER_BASE/recovery
+
 # make a symbolic link for old /etc/nginx/sites-enabled/p1mon_80 config files added in version 2.0.0
 sudo ln -s /run/php/php-fpm.sock /run/php/php7.3-fpm.sock  2>/dev/null # /dev/null to be silent when link allready exits.
 
 ## reset rechten wegens dev werk en kopie acties.
-sudo /bin/chmod 775  $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE  &>/dev/null
-sudo /bin/chown p1mon:p1mon $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE &>/dev/null
+sudo /bin/chmod 775 $DATADISK $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE  &>/dev/null
+sudo /bin/chown p1mon:p1mon $TMP_PATH $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE &>/dev/null
+sudo /bin/chmod 770 $TMP_PATH
 
 cd $PRG_PATH
 sudo chmod 754 P1*.py*;sudo chown p1mon:p1mon P1*.py
 sudo chmod 754 *.sh;sudo chown p1mon:p1mon *.sh 
 sudo chmod 660 *_lib.py
+
 ## set de bash stub scripts
 sudo ls P1*|grep -v py|xargs -n 1 chmod 750
 
@@ -84,6 +96,9 @@ cd $PRG_PATH
 
 start() {
 
+    # Check if Ethernet is set and if not make a default DHCP configuration
+    $PRG_PATH$PRG18 --setupdefault
+
     # Upgrade Aide check if there is data on an USB drive
     # restore and enlarge the SDHC when there is data on
     # the drive.
@@ -96,12 +111,6 @@ start() {
     sudo /sbin/iw dev wlan0 set power_save off
     /sbin/iw wlan0 get power_save
     echo "[*] Wifi power save is uitgezet."
-
-    #upgrade assist start (vervallen vanaf versie 2.3.0)
-    #echo "Upgrade assist wordt gestart."
-    #eval "$MY_PYTHON $PRG10 --restore"
-    #echo "[*] $PRG10 gestart."
-    #$PRG_PATH$PRG10
 
     # note the watchdog does the import from /p1mon/data 
     # failsave stop of processed that may stil be running

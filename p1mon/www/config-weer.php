@@ -77,10 +77,9 @@ if ( isset($_POST["API_key"]) ) {
         $input = preg_replace('/[\x00-\x1F\x7F]/u', '',$_POST["API_key"]);
         $crypto_api_key = encodeString ($input, 'weatherapikey');
 
-        #debugLog( '$crypto_api_key api key plain ='.$input );
+        #debugLog( '$crypto_api_key api key plain   ='.$input );
         #debugLog( '$crypto_api_key api key encoded ='.$crypto_api_key );
-        #debugLog( '$crypto_api_key api key decoded ='. decodeString(13, 'weatherapikey') );
-
+        
         #debugLog( '$_POST["stad"](1) ='. $_POST["stad"] );
         
         # pre process city name
@@ -88,6 +87,8 @@ if ( isset($_POST["API_key"]) ) {
         $city_name = str_replace("'", "''", $city_name ); # done to handle city names with ' like Braine-l'Alleud
 
         if ( updateConfigDb("update config set parameter = '".$crypto_api_key."' where ID = 13")) $err_cnt += 1;
+        #debugLog( '$crypto_api_key api key decoded ='. decodeString(13, 'weatherapikey') );
+
         //if ( updateConfigDb("update config set parameter = '".preg_replace('/[\x00-\x1F\x7F]/u', '',$_POST["stad"])."' where ID = 14")) $err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '".$city_name ."' where ID = 14")) $err_cnt += 1;
 

@@ -1,5 +1,5 @@
 ####################################################################
-# shared lib for system/os functions                               #
+# shared lib for system/os functions system_info_lib               #
 ####################################################################
 import inspect
 import subprocess
@@ -65,8 +65,14 @@ def get_cpu_info():
         clean_str = "".join(filter( lambda x: x in string.printable, model[0] ))
         result['Pi-model'] = clean_str
 
+        # Bookworm used other way give CPU info 
+        if( len(result['Hardware']) == 0 ):
+            compatible = list(open('/proc/device-tree/compatible'))
+            result['Hardware']  = "".join(filter( lambda x: x in string.printable, str(compatible[0]).split(",")[2] ))
+
+
     except Exception as e:
-            print ("errror="+str(e))
+            print ("error="+str(e))
     return result
 
 ####################################################################
@@ -90,7 +96,7 @@ def get_os_version():
 
 
 ####################################################################
-# get percentange of ths sdhc card used                            #
+# get percentage of ths sdhc card used                             #
 ####################################################################
 def get_disk_pct_used( path ): #180ok
     try:
@@ -102,7 +108,7 @@ def get_disk_pct_used( path ): #180ok
 
 
 ####################################################################
-# get the time passsed since last reboot                           #
+# get the time passed since last reboot                            #
 ####################################################################
 def get_system_uptime( flog=None ): #180ok
     #flog.setLevel(logging.DEBUG)

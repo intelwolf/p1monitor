@@ -93,7 +93,6 @@ def writeManifestFile():
         flog.error(inspect.stack()[0][3]+": manifest bestand kon niet worden weggeschreven -> "+str(e))
 
 
-
 def Main( argv ):
 
     #print( argv )
@@ -226,16 +225,6 @@ def Main( argv ):
         flog.critical(inspect.stack()[0][3]+": database niet te openen(9)."+const.FILE_DB_FINANCIEEL+") melding:"+str(e.args[0]))
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_FINANCIEEL_JAAR_TAB+" succesvol geopend.")
-
-    """
-    try:
-        price_db.init(const.FILE_DB_FINANCIEEL ,const.DB_ENERGIEPRIJZEN_UUR_TAB)
-        updateStatusPct(statusfile, 12, record_cnt)
-    except Exception as e:
-        flog.critical(inspect.stack()[0][3]+": Database niet te openen(10)." + const.FILE_DB_FINANCIEEL + ") melding:" + str(e.args[0]))
-        sys.exit(1)
-    flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_ENERGIEPRIJZEN_UUR_TAB + " succesvol geopend.")
-    """
 
     # open van huidige weer database
     if os.path.exists ( const.FILE_DB_WEATHER ):

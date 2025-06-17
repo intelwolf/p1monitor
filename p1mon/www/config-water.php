@@ -243,7 +243,7 @@ $(function () {
                                 </select>
                                 <p class="p-1"></p>
                                 <div class=''>
-                                    <input class="cursor-pointer" id="fs_rb_watermeter_on"  name="fs_rb_watermeter" type="radio" value="1" <?php if ( config_read( 96 ) == 1 ) { echo 'checked'; }?>>A<?php echo $sw_on ?>
+                                    <input class="cursor-pointer" id="fs_rb_watermeter_on"  name="fs_rb_watermeter" type="radio" value="1" <?php if ( config_read( 96 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                     <input class="cursor-pointer" id="fs_rb_watermeter_off" name="fs_rb_watermeter" type="radio" value="0" <?php if ( config_read( 96 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                 </div>
                                 <p class="p-1"></p>

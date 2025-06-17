@@ -13,6 +13,11 @@ import time
 # programme name.
 prgname = 'P1TcpTestServer'
 
+# note test with
+# nc 127.0.0.1 2223 
+
+
+
 def Main( argv ):
 
     my_pid = os.getpid()
@@ -32,7 +37,7 @@ def Main( argv ):
                 s.listen()
                 conn, addr = s.accept()
                 with conn:
-                    flog.info( inspect.stack()[0][3] + ": server succesfull start sending dummy data, when connected." )
+                    flog.info( inspect.stack()[0][3] + ": server successfully started sending dummy data, when connected." )
                     while True:
                         conn.sendall( get_p1_data_encoded() )
                         flog.info( inspect.stack()[0][3] + ": send data. warning test data" )

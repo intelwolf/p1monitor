@@ -105,7 +105,7 @@ class P1PortTelegram( object ):
         except Exception as _e:
             raise falcon.HTTPError( 
                 status      = apierror.API_DB_ERROR['status'], 
-                titel       = apierror.API_DB_ERROR['title'], 
+                title       = apierror.API_DB_ERROR['title'], 
                 description = apierror.API_DB_ERROR['description'] + apiutil.santize_html( str(_e.args[0] ) ),
                 code        = apierror.API_DB_ERROR['code'] 
                 )

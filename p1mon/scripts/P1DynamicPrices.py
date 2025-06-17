@@ -154,7 +154,7 @@ def clean_database(mode="old"):
     sql_del_str = " ".join(sql_del_str.split())
     try:
         flog.debug(inspect.stack()[0][3]+": sql delete = " + sql_del_str)
-        price_db.execute(sql_del_str)
+        price_db.execute( sql_del_str )
         if mode == "all":
             flog.info(inspect.stack()[0][3]+": alle records zijn gewist.")
         return True

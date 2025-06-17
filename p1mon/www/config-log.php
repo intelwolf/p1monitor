@@ -33,9 +33,7 @@ if( $localip == False ){
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
-
-<link type="text/css" rel="stylesheet" href="./css/p1mon-tabulator-alt-1.css" >
-<link type="text/css" rel="stylesheet" href="./css/p1mon-tabulator.css" >
+<link type="text/css" rel="stylesheet" href="./css/p1mon-1-tabulator.css" >
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
@@ -50,12 +48,13 @@ if( $localip == False ){
 <script>
 var initloadtimer;
 var logfiles_list_inital_data_loaded = false;
-var logfiles_list_table;
-var logfile_content_table;
 var selected_logfile = "";
 var logfile_list_auto_refresh_is_on    = true; 
 var logfile_content_auto_refresh_is_on = true;
-
+var logfiles_list_table;
+var logfile_content_table;
+//var logfiles_list_table_is_ready        = false
+var logfiles_content_table_is_ready     = false
 
 function LoadData() {
 
@@ -66,20 +65,21 @@ function LoadData() {
     if ( logfiles_list_inital_data_loaded == true ) {
 
         if ( logfile_list_auto_refresh_is_on == true ) {
-            //console.log( "update list" );
+            //console.log( "auto update list" );
             logfiles_list_table.replaceData();
             
         }
 
-        if ( selected_logfile !== "" ) { // only reload when the filename is set
+        if (  logfiles_content_table_is_ready == true ) {
+            if ( selected_logfile !== "" ) { // only reload when the filename is set
 
-            if ( logfile_content_auto_refresh_is_on == true ) {
-                //console.log( "update content" );
-                logfile_content_table.replaceData();
+                if ( logfile_content_auto_refresh_is_on == true ) {
+                    //console.log( "auto update content for file = ", selected_logfile );
+                    loadLogFileContent(selected_logfile);
+                }
             }
-
         }
-        
+       
     }
 
     initloadtimer = setInterval( function(){ LoadData(); }, timeout_settings );
@@ -87,13 +87,15 @@ function LoadData() {
 
 
 function loadLogFileContent( filename ) {
-    //console.log ( filename );
-    selected_logfile = filename;
-    document.getElementById("logviewer").innerHTML = filename;
-    logfile_content_table.setData( "./json/logfiles.php", { file: filename });
+    //console.log ("loadLogFileContent =", filename );
     toLocalStorage( 'config-logfile-selected-file', filename ); 
-    showStuff( "logcontentframeheader" );
-    showStuff( "logcontentframe" );
+    document.getElementById("logviewer").innerHTML = filename;
+    if ( logfiles_content_table_is_ready == true )  {
+        logfile_content_table.setData( "./json/logfiles.php", { file: filename }); 
+        toLocalStorage( 'config-logfile-selected-file', filename ); 
+        showStuff( "logcontentframeheader" );
+        showStuff( "logcontentframe" );
+    }
 }
 
 
@@ -119,14 +121,19 @@ $(function () {
     hideStuff( "logcontentframe" );
     hideStuff( "logcontentframeheader" );
    
+    if ( getLocalStorage( 'config-logfile-selected-file' ) !== null ) {
+        selected_logfile = getLocalStorage( 'config-logfile-selected-file' );
+        //console.log("stored selected file selected_logfile = ", selected_logfile)
+    }
+
     // ###################################
     // Build Tabulator list of log files #
     // ###################################
     logfiles_list_table = new Tabulator("#logfile-list-table", {
         ajaxURL:"./json/logfiles.php", 
         ajaxParams:{ list:"" },
-        ajaxLoaderLoading: "<div><img src='./img/ajax-loader.gif' alt='Even geduld aub.' height='15' width='128' /></div>",
-        height:"400px",
+        dataLoaderLoading: "<div><img src='./img/ajax-loader.gif' alt='Even geduld aub.' height='15' width='128' /></div>",
+        height:"500px",
         layout:"fitColumns",
         tooltips:true,
         tooltipGenerationMode:"hover",
@@ -134,26 +141,31 @@ $(function () {
         clipboard:true,
         columns:[
             {title:"log bestandsnaam",  field:"filename",  sorter:"string" },
-            {title:"laatste wijziging", field:"timestamp", sorter:"string", width:170 },
+            {title:"laatste wijziging", field:"timestamp", sorter:"string", width:170  },
             {title:"bytes",             field:"filesize",  sorter:"number", width:100  },
         ],
-        dataLoaded:function(data){
-            logfiles_list_inital_data_loaded = true; // used to prevent pesky error message when intial load is not finshed
-        },
-        rowClick:function( e, row ){
-            //console.log ( row.getData().filename );
-            selected_logfile = row.getData().filename 
-            loadLogFileContent( selected_logfile );
-        },
-        rowTap:function(e, row){  
-            selected_logfile = row.getData().filename 
-            loadLogFileContent( selected_logfile );
-        },
+        initialSort:[
+            {column:"timestamp", dir:"desc"}
+        ]
     });
 
-    logfiles_list_table.setSort([
-        { column:"timestamp", dir:"desc" }, //sort by this first
-    ]);
+    
+    logfiles_list_table.on("dataLoaded", function(data){
+        logfiles_list_inital_data_loaded = true; 
+    }); 
+    
+    logfiles_list_table.on("rowClick", function(e, row){
+        //console.log ( row.getData().filename );
+        selected_logfile = row.getData().filename 
+        loadLogFileContent( selected_logfile );
+	});
+
+    logfiles_list_table.on("rowTap", function(e, row){
+        //console.log ( row.getData().filename );
+        selected_logfile = row.getData().filename 
+        loadLogFileContent( selected_logfile );
+	});
+
     
     // #####################################
     // Build Tabulator list of log content #
@@ -161,17 +173,20 @@ $(function () {
     logfile_content_table = new Tabulator("#logfile-content-table", {
         //virtualDomHoz:true,
         height:"400px",
-        layout:"fitDataFill",
-        ajaxLoaderLoading: "<div><img src='./img/ajax-loader.gif' alt='Even geduld aub.' height='15' width='128' /></div>",
+        layout:"fitDataStretch",
+        dataLoader: false,
         layoutColumnsOnNewData:true,
         tooltips:true,
         tooltipGenerationMode:"hover",
         placeholder:"geen log bestand geselecteerd of het bestand bevat geen data.",
         clipboard:true,
         columns:[
-            {title:"tijdstip", field:"timestamp", sorter:"string", }, //width:200  },
-            {title:"nivo",     field:"level",     sorter:"string", }, //width:90   },
-            {title:"regel",    field:"line",      sorter:"string", }  //width:1710 },
+            {title:"tijdstip", field:"timestamp", sorter:"string", }, 
+            {title:"nivo",     field:"level",     sorter:"string", }, 
+            {title:"regel",    field:"line",      sorter:"string", tooltip:true }
+        ],
+        initialSort:[
+            {column:"timestamp", dir:"desc"}
         ],
         rowFormatter:function( row ){
 
@@ -194,9 +209,13 @@ $(function () {
         }
     });
 
-    logfile_content_table.setSort([
-        { column:"timestamp", dir:"desc" }, //sort by this first
-    ]);
+    
+    logfile_content_table.on("tableBuilt", function(){
+        //console.log ( "tableBuilt content" );
+        logfiles_content_table_is_ready = true
+        loadLogFileContent( selected_logfile );
+        
+    });
 
     // trigger auto refresh list
     document.getElementById( "buttonLogFileListAutoRefresh" ).addEventListener("click", function(event) {
@@ -241,10 +260,6 @@ $(function () {
     setClassAutoRefresh( logfile_content_auto_refresh_is_on, 'textLogFileListContentRefresh' );
 
     LoadData();
-
-    if ( getLocalStorage( 'config-logfile-selected-file' ) !== null ) {
-        loadLogFileContent( getLocalStorage( 'config-logfile-selected-file' ) );
-    }
 
 });
 

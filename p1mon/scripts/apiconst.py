@@ -19,8 +19,11 @@ ROUTE_PHASE_MINMAX_DAY_HELP = ROUTE_PHASE_MINMAX_DAY  + '/help'
 ROUTE_P1_PORT_TELEGRAM      = '/api/v1/p1port/telegram'
 ROUTE_P1_PORT_TELEGRAM_HELP = ROUTE_P1_PORT_TELEGRAM  + '/help'
 
-ROUTE_DATETIME              = '/api/v1/datetime'
-ROUTE_DATETIME_HELP         = ROUTE_DATETIME + '/help'
+ROUTE_WIFI_SSID       = '/api/v1/wifi/ssid'
+ROUTE_WIFI_SSID_HELP  = ROUTE_WIFI_SSID + '/help'
+
+ROUTE_DATETIME        = '/api/v1/datetime'
+ROUTE_DATETIME_HELP   = ROUTE_DATETIME + '/help'
 
 ROUTE_STATUS         = '/api/v1/status'
 ROUTE_STATUS_HELP    = ROUTE_STATUS    + '/help'
@@ -94,24 +97,6 @@ ROUTE_INDOOR_TEMPERATURE_MONTH_HELP = ROUTE_INDOOR_TEMPERATURE_MONTH + '/help'
 
 ROUTE_INDOOR_TEMPERATURE_YEAR       = '/api/v1/indoor/temperature/year'
 ROUTE_INDOOR_TEMPERATURE_YEAR_HELP  = ROUTE_INDOOR_TEMPERATURE_YEAR + '/help'
-
-"""
-#BASE_WATERMETER                     = 'watermeter' # don't use in path in the code
-#ROUTE_WATERMETER_MIN                = '/api/v1/watermeter/min'
-#ROUTE_WATERMETER_MIN_HELP           = ROUTE_WATERMETER_MIN + '/help'
-
-#ROUTE_WATERMETER_HOUR               = '/api/v1/watermeter/hour'
-#ROUTE_WATERMETER_HOUR_HELP          = ROUTE_WATERMETER_HOUR + '/help'
-
-#ROUTE_WATERMETER_DAY                 = '/api/v1/watermeter/day'
-#ROUTE_WATERMETER_DAY_HELP           = ROUTE_WATERMETER_DAY + '/help'
-
-#ROUTE_WATERMETER_MONTH              = '/api/v1/watermeter/month'
-#ROUTE_WATERMETER_MONTH_HELP         = ROUTE_WATERMETER_MONTH + '/help'
-
-#ROUTE_WATERMETER_YEAR               = '/api/v1/watermeter/year'
-#ROUTE_WATERMETER_YEAR_HELP          = ROUTE_WATERMETER_YEAR + '/help'
-"""
 
 BASE_WATERMETER                     = 'watermeter' # don't use in path in the code
 ROUTE_WATERMETER_MIN_V2             = '/api/v2/watermeter/minute'
@@ -299,10 +284,12 @@ JSON_API_FNCL_DYN_TRFF_KWH  = 'DYNAMIC_TARIFF_KWH'                   # dynamic t
 JSON_API_FNCL_DYN_TRFF_GAS  = 'DYNAMIC_TARIFF_GAS'                   # dynamic tariff gas.
 
 JSON_API_SYSTEM_DT          = 'SYSTEM_DATETIME'                      # time and date as reported by the host OS where P1-monitor is running (format yyyy-mm-dd hh:mm:ss).
-JSON_API_SYSTEM_DT_UTC     = 'SYSTEM_DATETIME_UTC'                 # system time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT).
+JSON_API_SYSTEM_DT_UTC      = 'SYSTEM_DATETIME_UTC'                  # system time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT).
 JSON_API_INET_DT            = 'INET_DATETIME'                        # time and date from the internet (format yyyy-mm-dd hh:mm:ss).
-JSON_API_INET_DT_UTC       = 'INET_DATETIME_UTC'                   # internet time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT)
+JSON_API_INET_DT_UTC        = 'INET_DATETIME_UTC'                    # internet time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT)
 JSON_API_VARIANCE           = 'TIME_VARIANCE'                        # variance between system and inet time (inet - system) in seconds.
+
+JSON_API_SSID               = 'SSID'                                 # Service set identifier (SSID) for Wifi network (one or more).
 
 
 #JSON field explained.
@@ -446,15 +433,19 @@ EXPL_API_FNCL_DYN_TRFF_GAS  = 'Dynamic tariff gas.'
 
 EXPL_API_SYSTEM_DT          = 'time and date as reported by the host OS where P1-monitor is running (format yyyy-mm-dd hh:mm:ss).'
 EXPL_API_INET_DT            = 'time and date from the internet (format yyyy-mm-dd hh:mm:ss).'
-EXPL_API_SYSTEM_DT_UTC     = 'system time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT).'
-EXPL_API_INET_DT_UTC       = 'internet time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT)'
+EXPL_API_SYSTEM_DT_UTC      = 'system time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT).'
+EXPL_API_INET_DT_UTC        = 'internet time in the number of seconds that have elapsed since January 1, 1970 (midnight UTC/GMT)'
 EXPL_API_VARIANCE           = 'variance between system and inet time (inet - system) in seconds.'
+
+EXPL_API_SSID               = 'Service set identifier (SSID) for Wifi network (one or more).'
+
 
 #json types
 TYPE_JSON_STRING         = 'string'
 TYPE_JSON_INTEGER        = 'integer'
 TYPE_JSON_NUMBER         = 'number'  # int or floating point.
 TYPE_JSON_NUMBER_INTEGER =  TYPE_JSON_NUMBER + ' or ' + TYPE_JSON_INTEGER + ' depending on the format specifier used.'
+TYPE_JSON_ARRAY_STRING   = 'array of strings'
 
 #api parameter key words
 API_PARAMETER_LIMIT          = 'limit'
@@ -523,6 +514,32 @@ HELP_ROUTE_FINANCIAL_DYNAMIC_TARIFF_JSON = {
            "name" : JSON_API_FNCL_DYN_TRFF_GAS,
            "description" : EXPL_API_FNCL_DYN_TRFF_GAS,
            "type": TYPE_JSON_NUMBER_INTEGER
+        }
+    ]
+}
+
+
+HELP_ROUTE_WIFI_SSID_JSON = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       :  API_OPTION_JSON,
+    "api_description"   : "The list of Wifi SSID that is found by the network manager.",
+    "api_usage"         : "<ip>" + ROUTE_WIFI_SSID+ '?' + API_PARAMETER_JSON_TYPE + '=object',
+    "fields": [
+        {
+           "name" : JSON_TS_LCL,
+           "description" : EXPL_TS_LCL,
+           "type": TYPE_JSON_STRING
+        },
+        { 
+           "name" : JSON_TS_LCL_UTC,
+           "description" : EXPL_TS_LCL_UTC,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_SSID,
+           "description" : EXPL_API_SSID,
+           "type": TYPE_JSON_ARRAY_STRING 
         }
     ]
 }
@@ -1587,8 +1604,6 @@ HELP_ROUTE_POWER_PRODUCTION_SOLAR_MIN_DAY_MONTH_YEAR_JSON = {
          }
     ]
 }
-
-
 
 
 #help data 

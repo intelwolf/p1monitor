@@ -36,14 +36,16 @@
 # versie 2.4.1 Vertalingen uitgewerkt aangevuld.
 # versie 2.4.2 P1DatabaseOptimizer toegevoegd en fase informatie aan op de main schermen.
 # versie 2.4.3 P1SetTime toegevoegd en het instellen van de tijd via het systeem config pagina
+# versie 3.0.0 Upgrade naar Raspberry Pi OS Bookworm (Debian 12)
+# versie 3.0.1 Nginx opstart probleem /var/lib/nginx/proxy
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "2.4.3"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "5"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
-P1_SERIAL_VERSION               = "20241228"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "3.0.1"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
+P1_SERIAL_VERSION               = "20250610"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'
@@ -56,7 +58,10 @@ ZTATZ_P1_VERSION_TIMESTAMP      ='TIMESTAMP_LOCAL'
 ZTATZ_P1_VERSION                ='P1MON_VERSION'
 ZTATZ_P1_VERSION_TEXT           ='VERSION_TEXT'
 ZTATZ_P1_VERSION_DOWNLOAD_URL   ='DOWNLOAD_URL'
-ZTATZ_P1_SERIAL_VERSION         ='SERIAL_VERSION'
+ZTATZ_P1_SERIAL_VERSION         ='SERIAL_VERSION' 
+ZTATZ_P1_VERSION_PATCH_VERSION  ='PATCH_VERSION' # 3.0.0.  Status IDX: 
+ZTATZ_P1_VERSION_DOWNLOAD_URL_PATCH ='DOWNLOAD_URL_PATCH' # 3.0.0. Status IDX: 
+ZTATZ_P1_VERSION_COMMENT        ='COMMENT' # 3.0.0. Status IDX:
 API_BASIC_JSON_PREFIX           ='basic.'
 API_BASIC_JSON_SUFFIX           ='.json'
 API_BASIC_VERSION               = 7 # updated in version > 1.4.0
@@ -148,7 +153,7 @@ FILE_DB_FINANCIEEL              ="/p1mon/mnt/ramdisk/financieel.db"
 FILE_DB_WEATHER                 ="/p1mon/mnt/ramdisk/weer.db"
 FILE_DB_WEATHER_HISTORIE        ="/p1mon/mnt/ramdisk/01_weer_historie.db"
 FILE_P1MSG                      ="/p1mon/mnt/ramdisk/p1msg.txt"
-FILE_WIFISSID                   ="/p1mon/mnt/ramdisk/wifi_essid.txt"
+#FILE_WIFISSID                   ="/p1mon/mnt/ramdisk/wifi_essid.txt" # removed 3.0.0
 FILE_ETH0MAC                    ="/p1mon/mnt/ramdisk/eth0mac.txt"
 FILE_DB_WEER_FILENAME           ="/p1mon/mnt/ramdisk/weer.db"
 FILE_MQTT_TOPICS                ="/p1mon/mnt/ramdisk/mqtt_topics.json"

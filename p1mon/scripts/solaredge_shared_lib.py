@@ -4,11 +4,12 @@
 
 import base64
 import const
-import crypto3
+#import crypto3
 import datetime
 import inspect
 import json
 import json_lib
+import crypto_lib
 import makeLocalTimeString
 
 
@@ -347,68 +348,11 @@ def recalculate_totals( records_list, total_high_offset=0 ,total_low_offset=0, f
 def read_api_key( db , flog=None ):
     #raise Exception("test exception.")
     _id, encoded_api_key, _label = db.strget( 139 ,flog )
-    decoded_api_key = base64.standard_b64decode( crypto3.p1Decrypt( encoded_api_key, 'solaredgeapikey' )).decode('utf-8')
+
+    #decoded_api_key = base64.standard_b64decode( crypto3.p1Decrypt( encoded_api_key, 'solaredgeapikey' )).decode('utf-8') # version 2.4.3
+    # crypto_lib used for version 3.0.0
+    cb = crypto_lib.CryptoBase64()
+    decoded_api_key = base64.standard_b64decode(cb.p1Decrypt( cipher_text=encoded_api_key, seed='solaredgeapikey' )).decode('utf-8')
+
     return decoded_api_key
 
-
-
-""" kept for reference no longer used
-##########################################################################
-# totals calculation for high, low and total kWh values in the database  #
-# do this in memory for performance and SQL simplicty                    #
-##########################################################################
-def db_total_recalculate( db_object,  timeperiod_id=45, total_high_offset=0 ,total_low_offset=0, db_table=const.DB_POWERPRODUCTION_SOLAR_TAB, flog=None  ):
-
-        sql_query = "select \
-            TIMESTAMP,\
-            PRODUCTION_KWH_HIGH,\
-            PRODUCTION_KWH_LOW,\
-            PRODUCTION_KWH_HIGH_TOTAL,\
-            PRODUCTION_KWH_LOW_TOTAL,\
-            PRODUCTION_KWH_TOTAL\
-            from " + db_table + " where TIMEPERIOD_ID=" + str(timeperiod_id) + " and POWER_SOURCE_ID=1 order by TIMESTAMP"
-        # load records into buffer
-       
-        records_list = []
-        try:
-            records = db_object.select_rec( sql_query )
-            for record in records:
-                records_list.append( list(record) )
-
-        except Exception as e:
-            flog.error( inspect.stack()[0][3]+": sql error fase 1 totaal aanpassing ->" + str(e) )
-
-        if len(records_list) == 0:
-            flog.warning( inspect.stack()[0][3]+": geen records gevonden voor TIMEPERIOD_ID=" + str(timeperiod_id) )
-            return
-
-        try:
-            # set totals for first record
-            records_list[0][3] = round( records_list[0][1], 3 ) + total_high_offset
-            records_list[0][4] = round( records_list[0][2], 3 ) + total_low_offset
-            records_list[0][5] = round( records_list[0][3] + records_list[0][4], 3 )
-
-            idx=1
-            while idx < len(records_list):
-                #print ( idx )
-                records_list[idx][3] = round( records_list[idx-1][3] + records_list[idx][1], 3 )  # TOTAL HIGH
-                records_list[idx][4] = round( records_list[idx-1][4] + records_list[idx][2], 3 )  # TOTAL LOW
-                records_list[idx][5] = round( records_list[idx][3]   + records_list[idx][4], 3 )  # TOTAL HIGH + LOW
-                idx += 1
-
-        except Exception as e:
-            flog.error( inspect.stack()[0][3]+": sql error fase 2 totaal aanpassing ->" + str(e) )
-
-        # update database.
-        for record in records_list:
-            try:
-                sql_update = "UPDATE " + db_table +\
-                " set PRODUCTION_KWH_HIGH_TOTAL=" + str(record[3]) +\
-                ", PRODUCTION_KWH_LOW_TOTAL=" + str(record[4]) + \
-                ", PRODUCTION_KWH_TOTAL=" + str(record[5]) + " WHERE TIMESTAMP='" + str(record[0])+ "' and TIMEPERIOD_ID=" + str(timeperiod_id) + " and POWER_SOURCE_ID=1;"
-                flog.debug( inspect.stack()[0][3] + ": sql = " + sql_update )
-                db_object.excute( sql_update )
-            except Exception as e:
-                flog.error( inspect.stack()[0][3]+": sql error fase 3 totaal aanpassing voor timestamp " +\
-                     str(record[0]) + "en TIMEPERIOD_ID=" + str(timeperiod_id) + " -> " + str(e) )
-"""

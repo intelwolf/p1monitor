@@ -73,8 +73,7 @@ if ( isset($_POST[ "fs_inet_api_active" ]) ) {
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css" />
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css"/>
-<link type="text/css" rel="stylesheet" href="./css/p1mon-tabulator.css" >
-<link type="text/css" rel="stylesheet" href="./css/p1mon-tabulator-alt-2.css" >
+<link type="text/css" rel="stylesheet" href="./css/p1mon-1-tabulator.css" >
 
 <script defer src="./font/awsome/js/all.js"></script>
 <script src="./js/jquery.min.js"></script>
@@ -163,7 +162,6 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
     function LoadData() {
         clearTimeout(initloadtimer);
         readJsonStatus();
-        
         initloadtimer = setInterval(function(){LoadData();}, 5000);
     }
 
@@ -180,7 +178,8 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
         // Build Tabulator list for API authentication tokens #
         // ####################################################
         api_token_table = new Tabulator("#api-token-table", {
-            maxHeight:"100%",
+            //minHeight:"100px",
+            maxHeight:"400px",
             layout:"fitColumns",
             tooltips:true,
             tooltipGenerationMode:"hover",
@@ -225,22 +224,30 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
         });
 
 
+        api_token_table.on("tableBuilt", function(){
+            //console.log("tableBuilt done")
+            api_token_table.replaceData( api_keys_data )
+        });
+
         document.getElementById("add_token_button").addEventListener("click", function(){
             
+            console.log("add_token_button start");
+
             event.preventDefault();
 
-            api_token_table.updateOrAddData([ {TOKEN: getRandomHex( 20, seed ), TIMESTAMP:getTimestamp() }] );
+            //api_token_table.updateOrAddData([ {TOKEN: getRandomHex( 20, seed ), TIMESTAMP:getTimestamp() }] );
+            api_token_table.addData([ {TOKEN: getRandomHex( 20, seed ), TIMESTAMP:getTimestamp() }]) 
+
             document.formvalues.tokenupdate.value = JSON.stringify( api_token_table.getData() );
-            api_token_table.setSort("TIMESTAMP", "desc");
 
             if ( api_token_table.getDataCount() > 25 ) {
                 alert('<?php echo strIdx( 264 );?>');
             }
+            
         });
 
         readJsonApiList();
         LoadData();
-        api_token_table.replaceData( api_keys_data )
 
         FQDN = '<?php echo config_read( 150 );?>';
         if ( FQDN.length < 3 ) {
@@ -406,7 +413,7 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
                         <div class="frame-4-bot">
 
                             <div class="float-right" title="<?php echo strIdx( 262 );?>">
-                                <button class="input-2 but-1 cursor-pointer" id="add_token_button">
+                                <button class="input-2 but-4 cursor-pointer" id="add_token_button">
                                     <i class="color-menu fa-3x fas fa-plus"></i><br>
                                 </button>
                             </div>
