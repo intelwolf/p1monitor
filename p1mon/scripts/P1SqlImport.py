@@ -22,7 +22,7 @@ import crypto_lib
 import util
 import listOfPidByName
 import process_lib
-
+import sqldb_statistic
 
 #from datetime import datetime, timedelta
 #from util import setFile2user
@@ -45,6 +45,7 @@ fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
 power_production_db         = sqldb.powerProductionDB()
 power_production_solar_db   = sqldb.powerProductionSolarDB()
 price_db                    = sqldb_pricing.PricingDb()
+statistics_db               = sqldb_statistic.StatisticDb()
 
 no_status_messages    = False   # dont write to the status file. 
 
@@ -154,6 +155,7 @@ def Main(argv):
     util.setFile2user( const.FILE_DB_WATERMETERV2, 'p1mon' )
     util.setFile2user( const.FILE_DB_POWERPRODUCTION,'p1mon')
     util.setFile2user( const.FILE_DB_PHASEINFORMATION, 'p1mon')
+    util.setFile2user( const.FILE_DB_STATISTICS, 'p1mon')
     msgToInfoLogAndStatusFile( "file rechten van database bestanden correct gezet." )
 
     dbIntegrityCheck( config_db,           const.FILE_DB_CONFIG )
@@ -166,6 +168,7 @@ def Main(argv):
     dbIntegrityCheck( watermeter_db,       const.FILE_DB_WATERMETERV2 )
     dbIntegrityCheck( fase_db,             const.FILE_DB_PHASEINFORMATION )
     dbIntegrityCheck( power_production_db, const.FILE_DB_POWERPRODUCTION )
+    dbIntegrityCheck( statistics_db,       const.FILE_DB_STATISTICS )
 
     try:
        
@@ -275,6 +278,11 @@ def Main(argv):
             ############################################
             elif tail.startswith( const.DB_POWERPRODUCTION ):
                  processImportDataSet( const.DB_POWERPRODUCTION, power_production_db, zf, fname, 'replace into ' + const.DB_POWERPRODUCTION_TAB + '*' )
+
+            ############################################
+            elif tail.startswith( const.DB_STATISTICS ):
+                 processImportDataSet( const.DB_STATISTICS, statistics_db, zf, fname, 'replace into ' + const.DB_STATISTICS_TAB + '*' )
+
 
     except Exception as e:
         msg = "ZIP file verwerking globale fout -> " + str(e)
@@ -415,7 +423,7 @@ def msgToInfoLogAndStatusFile( msg ):
 # write to ramdisk file the progress for lines that    #
 # are replaced.                                        #
 # forced = true means to write always                  #
-# normaly only write when every 3 seconds              #
+# normally only write when every 3 seconds             #
 ########################################################
 def msgReplaceDb( db_name , forced=False ):
 
@@ -505,7 +513,7 @@ def replaceLastLineInStatusFile( msg ):
         initStatusFile()
 
 ########################################################
-# instert the sql lines from an export zip file        #
+# insert the sql lines from an export zip file         #
 # starts.                                              #
 ########################################################
 def processImportDataSet( db_tabel_name , db_pointer, zip_file, db_filename, sql_match_str ):
@@ -516,7 +524,7 @@ def processImportDataSet( db_tabel_name , db_pointer, zip_file, db_filename, sql
 
     try:
 
-        msgToInfoLogAndStatusFile( db_tabel_name + " wordt verwerkt." )
+        msgToInfoLogAndStatusFile(" table " + db_tabel_name + " wordt verwerkt." )
 
         #raise Exception("test-excep")
         data = zip_file.read( db_filename ).decode('utf-8')
@@ -666,50 +674,6 @@ def openDatabases():
         
     msgToInfoLogAndStatusFile( "database " + const.DB_TEMPERATUUR_TAB + " succesvol geopend." )
 
-    """
-    # open van watermeter databases (oud nodig voor import.)
-    try:
-        watermeter_db_uur.init( const.FILE_DB_WATERMETER, const.DB_WATERMETER_UUR_TAB, flog )
-    except Exception as e:
-        msg = ": database niet te openen (" + const.DB_WATERMETER_UUR_TAB+ ") melding: " + str(e.args[0] )
-        writeLineToStatusFile( msg )
-        flog.critical(inspect.stack()[0][3] + ": " + msg )
-        stop( 9 )
-        
-    msgToInfoLogAndStatusFile( "database " + const.DB_WATERMETER_UUR_TAB + " succesvol geopend." )
-    
-
-    try:
-        watermeter_db_dag.init( const.FILE_DB_WATERMETER ,const.DB_WATERMETER_DAG_TAB , flog )
-    except Exception as e:
-        msg = ": database niet te openen (" + const.DB_WATERMETER_DAG_TAB + ") melding: " + str(e.args[0] )
-        writeLineToStatusFile( msg )
-        flog.critical(inspect.stack()[0][3] + ": " + msg )
-        stop( 10 )
-
-    msgToInfoLogAndStatusFile( "database " + const.DB_WATERMETER_DAG_TAB + " succesvol geopend." )
-
-    try:
-        watermeter_db_maand.init( const.FILE_DB_WATERMETER ,const.DB_WATERMETER_MAAND_TAB ,flog )
-    except Exception as e:
-        msg = ": database niet te openen (" + const.DB_WATERMETER_MAAND_TAB + ") melding: " + str(e.args[0] )
-        writeLineToStatusFile( msg )
-        flog.critical(inspect.stack()[0][3] + ": " + msg )
-        stop( 11 )
-
-    msgToInfoLogAndStatusFile( "database " + const.DB_WATERMETER_MAAND_TAB + " succesvol geopend." )
-
-    try:
-        watermeter_db_jaar.init( const.FILE_DB_WATERMETER ,const.DB_WATERMETER_JAAR_TAB, flog )
-    except Exception as e:
-        msg = ": database niet te openen (" + const.DB_WATERMETER_JAAR_TAB + ") melding: " + str(e.args[0] )
-        writeLineToStatusFile( msg )
-        flog.critical(inspect.stack()[0][3] + ": " + msg )
-        stop( 12 )
-
-    msgToInfoLogAndStatusFile( "database " + const.DB_WATERMETER_JAAR_TAB + " succesvol geopend." )
-    """
-
     # open van watermeter V2 database 
     try:    
         watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
@@ -764,6 +728,19 @@ def openDatabases():
         stop( 17 )
 
     msgToInfoLogAndStatusFile( "database " + const.DB_FASE_MINMAX_DAG_TAB + " succesvol geopend." )
+
+    # open van statistiek database
+    try:
+        statistics_db.init( const.FILE_DB_STATISTICS ,const.DB_STATISTICS_TAB )
+    except Exception as e:
+        msg = ": database niet te openen (" + const.DB_STATISTICS_TAB + ") melding: " + str(e.args[0] )
+        writeLineToStatusFile( msg )
+        flog.critical(inspect.stack()[0][3] + ": " + msg )
+        stop( 18 )
+
+    msgToInfoLogAndStatusFile( "database " + const.DB_STATISTICS_TAB + " succesvol geopend." )
+
+
 
 #####################################################
 # exit the program as clean as possible by closing  #

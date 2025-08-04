@@ -5,7 +5,7 @@ if ( config_read($id) == 0 ) {
 echo <<< EOT
 <!doctype html>
 <html lang="nl">
-<title>P1 monitor scherm gedactiveerd</title>
+<title>P1 monitor scherm gedeactiveerd</title>
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 

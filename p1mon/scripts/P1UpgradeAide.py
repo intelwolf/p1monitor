@@ -41,9 +41,6 @@ AIDE_DIR_DATABASE           = '/db'
 AIDE_DIR_WIFI               = '/wifi'
 AIDE_DIR_CRONTAB            = '/cron'
 AIDE_DIR_NGINX              = '/nginx'
-#AIDE_DIR_NGINX_SITES_ENABELD = '/sites-enabled'
-#AIDE_DIR_NGINX_CONFD        = '/conf.d'
-AIDE_DIR_DHCP               = '/dhcp'
 AIDE_DIR_DNS                = '/dns'
 AIDE_DIR_LENCRYPT           = '/letsencrypt'
 AIDE_DIR_WWW                = '/www'
@@ -425,7 +422,7 @@ def save( ):
             msg = "Geen geschikte USB drive gevonden."
             raise Exception( msg )
 
-        # failsave unmount when there is still a mount lingering
+        # failsafe unmount when there is still a mount lingering
         status_text, status_code = usb_drive_lib.unmount_device( flog=flog )
         if status_code != 0:
             msg = "USB drive is niet te un-mounten, dit duidt op een drive probleem."
@@ -441,9 +438,9 @@ def save( ):
         path_base = const.DIR_USB_MOUNT + const.DIR_USB_ROOT + const.DIR_UPGRADE_AIDE
 
         # check for space on the usb drive. If there is not enough space remove 
-        # older restore folders with the .ingnore or .done extentions.
+        # older restore folders with the .ignore or .done extensions.
         sizedata = filesystem_lib.filepath_use( usb_drive_lib.MOUNTPOINT, unit='M' )
-        # check inore files
+        # check ignore files
         if sizedata ['space_free'] < AIDE_MIN_USB_SPACE_MB:
             msg = "Er is minder dan " + str(AIDE_MIN_USB_SPACE_MB) + " MB ruimte op de USB, probeer ruimte te maken."
             write_status_to_file( msg )
@@ -500,7 +497,7 @@ def save( ):
 
         # make the base and subfolders
         # the use of sub-folder is te avoid 
-        # namespace colisions
+        # namespace collisions
         os.makedirs( restore_path_folder, exist_ok=True )
         if not os.path.exists( restore_path_folder ):
             msg = "folder " + restore_path_folder + " kon niet worden aangemaakt"
@@ -588,7 +585,6 @@ def save( ):
         except Exception as e:
             flog.warning( "DNS configuratie niet te kopiëren (" + network_lib.RESOLVCONFIG + ") ->" + str(e) )
             write_status_to_file( str(e) )
-        
 
         # step 7 save crontab file
         try:
@@ -684,13 +680,13 @@ def save( ):
         # verification of data where possible #
         #######################################
 
-        # step 11 verfication
-        msg = "Verficatie van database gestart."
+        # step 11 verification
+        msg = "Verificatie van database gestart."
         write_status_to_file( msg )
         flog.info( msg )
 
         tmp_ram_filepath = generate_temp_ram_filename() + AIDE_EXT_VERIFY 
-        flog.debug ( "tmp ram filename voor verficatie is  =" + tmp_ram_filepath )
+        flog.debug ( "tmp ram filename voor verificatie is  =" + tmp_ram_filepath )
 
         for db_filename in glob.glob( restore_path_db + "/*.db" ):
             shutil.copy2( db_filename , tmp_ram_filepath )
@@ -835,12 +831,12 @@ def remove_file( pathfile=None, flog=None ):
         flog.warning( msg )
 
 
-######################################################
-# files are added to a tar archive                   #
-# the file is tempory stored in ram to improve speed #
-# and to make sure that only the encrypted file is   #
-# written to ram.                                    #
-######################################################
+########################################################
+# files are added to a tar archive                     #
+# the file is temporary stored in ram to improve speed #
+# and to make sure that only the encrypted file is     #
+# written to ram.                                      #
+########################################################
 def save_nginx( destination_pathfile=None, flog=None ):
     flog.debug ( inspect.stack()[0][3] + ": source file = " + destination_pathfile )
 
@@ -873,12 +869,12 @@ def save_nginx( destination_pathfile=None, flog=None ):
         flog.info( msg )
 
 
-######################################################
-# files are added to a tar archive                   #
-# the file is tempory stored in ram to improve speed #
-# and to make sure that only the encrypted file is   #
-# written to ram.                                    #
-######################################################
+########################################################
+# files are added to a tar archive                     #
+# the file is temporary stored in ram to improve speed #
+# and to make sure that only the encrypted file is     #
+# written to ram.                                      #
+########################################################
 def save_letsencrypt( destination_pathfile=None, flog=None ):
     flog.debug ( inspect.stack()[0][3] + ": source file = " + destination_pathfile )
 
@@ -914,9 +910,9 @@ def save_letsencrypt( destination_pathfile=None, flog=None ):
     ### TEST for restore 
     #c.decrypt_file( source_pathfile=tmp_ram_file + AIDE_EXT_CRYPTO, destination_pathfile=tmp_ram_file + ".debug" )
 
-##########################################################
-# generate a tempory file name in the default tmp folder #
-##########################################################
+############################################################
+# generate a temporary file name in the default tmp folder #
+############################################################
 def generate_temp_ram_filename() -> str:
     random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
     return os.path.join( const.DIR_RAMDISK, random_string)
@@ -1029,12 +1025,12 @@ def copy_and_crypto_file( mode='e' ,source_pathfile=None, destination_pathfile=N
 ############################################
 # find an USB drive that can be used       #
 # return device name or None for no drive  #
-# check for drive that may containt a      #
+# check for drive that may contain a       #
 # bootable image                           #
 ############################################
 def find_usable_usb_device( usb_list=usb_drive_lib.USB_LIST, flog=None ):
     for usb in usb_list:
-        usb_drive_lib.unmount_device( flog=flog ) #failsave unmount when there is still a mount lingering
+        usb_drive_lib.unmount_device( flog=flog ) # failsafe unmount when there is still a mount lingering
 
         status_text, status_code = usb_drive_lib.mount_device( device=usb, flog=flog )
 
@@ -1067,7 +1063,7 @@ def check_for_used_aide_drive( usb_list=usb_drive_lib.USB_LIST, flog=None ):
         msg = "Controle op eerder gebruikt drive " + str (usb) + " gestart."
         flog.info( msg )
         write_status_to_file( msg )
-        usb_drive_lib.unmount_device( flog=flog ) #failsave unmount when there is still a mount lingering
+        usb_drive_lib.unmount_device( flog=flog ) # failsafe unmount when there is still a mount lingering
         status_text, status_code = usb_drive_lib.mount_device( device=usb, flog=flog )
         if status_code == 0:
             path = const.DIR_UPGRADE_ASSIST_USB_MOUNT + const.DIR_USB_ROOT + const.DIR_UPGRADE_AIDE

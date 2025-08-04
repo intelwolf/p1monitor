@@ -94,7 +94,7 @@ function readJsonApiTariffHour(){
         url_parameters = "range=" + moment().add(1, 'days').format('YYYY-MM-DD');
         chartTitle = moment().add(1, 'days').format('dddd DD MMMM YYYY') + " (" + tomorrow_text + ")"
     } else if ( url == null ) {
-        url_parameters = "range=" + moment().format('YYYY-MM-DD'); // default failsave
+        url_parameters = "range=" + moment().format('YYYY-MM-DD'); // default failsafe
         chartTitle = moment().format('dddd DD MMMM YYYY')
     }
 
@@ -130,7 +130,9 @@ function readJsonApiTariffHour(){
                 GgasData.push ( [item[1], item[3] ]);
             }
             updateData();
-      } catch(err) {}
+      } catch(err) {
+        console.log(err);
+      }
    });
 }
 
@@ -196,10 +198,10 @@ function createTariffChart() {
                         legendItemClick: function (event) {
                             //console.log(this.index)
                             if  ( this.index === 0 ) {
-                                toLocalStorage('cost-dynamic-h-day-kwh',!this.visible);  // #PARAMETER
+                                toLocalStorage('cost-dynamic-h-day-kwh',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 1 ) {
-                                toLocalStorage('cost-dynamic-h-day-gas',!this.visible);  // #PARAMETER
+                                toLocalStorage('cost-dynamic-h-day-gas',this.visible);  // #PARAMETER
                             }
                         }
                     }
@@ -305,14 +307,14 @@ function createTariffChart() {
                     yAxis: 0,
                     id: 'verbruik',
                     visible: GseriesVisibilty[0],
-                    name: 'kWh tarief',
+                    name: '<?php echo strIdx(760);?>',
                     color: '#ff6f49',
                     data: GkwhData,
                 },{
                     yAxis: 0,
                     id: 'geleverd',
                     visible: GseriesVisibilty[1],
-                    name: 'gas tarief',
+                    name: '<?php echo strIdx(761);?>',
                     color: '#cc5637',
                     data: GgasData,
                 }
@@ -348,9 +350,10 @@ function DataLoop() {
     }
     // make chart only once and when we have data.
     x = $('#TariffChart').highcharts()
-    if (recordsLoaded !== 0 && $('#TariffChart').highcharts() == null) {
+    //if ( recordsLoaded !== 0 && $('#TariffChart').highcharts() == null) {
+    if ( $('#TariffChart').highcharts() == null) {
       hideStuff('loading-data');
-      console.log( Highcharts.getOptions() );
+      //console.log( Highcharts.getOptions() );
       createTariffChart();
       readJsonApiTariffHour();
     }
@@ -359,14 +362,16 @@ function DataLoop() {
 
 $(function() {
     set_language();
+
     toLocalStorage('cost-menu',window.location.pathname);
+
     if ( getLocalStorage('cost-dynamic-h-day') != null ) {
         displayPeriodID = getLocalStorage('cost-dynamic-h-day');
     }
+
     GseriesVisibilty[0] =JSON.parse(getLocalStorage('cost-dynamic-h-day-kwh'));  // #PARAMETER
     GseriesVisibilty[1] =JSON.parse(getLocalStorage('cost-dynamic-h-day-gas'));  // #PARAMETER
 
-   
     Highcharts.setOptions({
         global: {
             useUTC: false
@@ -377,7 +382,7 @@ $(function() {
         lang: <?php hc_language_json(); ?>
     });
 
-    console.log( Highcharts.getOptions() );
+    //console.log( Highcharts.getOptions() );
 
     secs = 0;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.

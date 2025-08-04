@@ -105,7 +105,7 @@ def Main( argv ):
         ######################################################
         #flog.setLevel( logger.logging.DEBUG )
         if ts_selector.timeslot() == True:
-        #if True:
+        #if True: # TEST
             
             #flog.setLevel( logger.logging.INFO )
 
@@ -115,6 +115,7 @@ def Main( argv ):
             meta_data = get_meta_site_data()
             flog.debug( inspect.stack()[0][3] + ": meta data set van actieve sites (basis)" + str( meta_data ) )
 
+        
             # check if we any site(s) id's else stop.
             if len( meta_data ) == 0:
                 flog.warning( inspect.stack()[0][3] + ": geen verwerking. Er zijn geen site(s) geconfigureerd." ) 
@@ -131,15 +132,28 @@ def Main( argv ):
             meta_data = set_api_timestamps( meta_data )
             flog.debug( inspect.stack()[0][3] + ": meta data set van actieve sites (timestamp) " + str( meta_data ) )
 
+            
             # get smallest start date from meta data, needed because we do one api calls for multiple sites that could have
             # different start dates 
             start_date = get_smalest_timestamp( meta_data )
-            end_date = makeLocalTimeString.makeLocalTimeString( mode='short' ) # use current time for the end date in the API call.
+            #end_date = makeLocalTimeString.makeLocalTimeString( mode='short' ) # use current time for the end date in the API call.
+            # add a day to make sure we get the minute data, the API seems to be changed.
+            end_date = (datetime.datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d") 
+            #
+            #end_date = a + relativedelta(days=1)
+            #.datetime.strftime("%Y-%m-%d")
+
+            #sys.exit() 
+
+            #t = time.localtime().relativedelta( days=1 )
+
             #flog.info( inspect.stack()[0][3] + ": gestart voor periode van " + start_date + " tot " + end_date )
 
             api_query_list_of_ids = get_site_ids( meta_data )
             #print( api_query_list_of_ids )
             #print ("#=", start_date, end_date )
+
+            #sys.exit()
 
             # DEBUG 
             #start_date = "2021-03-13"
@@ -169,17 +183,18 @@ def Main( argv ):
             tic = time.perf_counter()
             list_of_records = list()
             max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list 
-            # limit range to dates that exceed the rentention period.
+            # limit range to dates that exceed the retention period.
             # delete_limited_date = ( datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=1096) ).strftime('%Y-%m-%d')
             try:
 
                 list_of_sites   = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
-                date_list       = datetime_delta_lib.create_date_list( start_date, end_date, period = 'm', range=1, repeatdate=True )
+                date_list       = datetime_delta_lib.create_date_list( start_date, end_date, period = 'd', range=31, repeatdate=True )
                 flog.debug( inspect.stack()[0][3] + ": date_list=" + str( date_list) )
 
                 for date_set in date_list:
 
                     # start_date = "2016-10-25" #DEBUG om range fouten te testen
+                    #date_set[1] = "2025-06-09" # TEST DATA
                     flog.debug( inspect.stack()[0][3] + ": start date=" + str( date_set[0]) + " stop date=" + str( date_set[1]) )
 
                     data = api.get_energy( 
@@ -189,6 +204,9 @@ def Main( argv ):
                         time_unit=solaredge_lib.API_MINUTE #DIFF
                         )
                     rt_status_db.timestamp( 111, flog )
+
+                    #print( data )
+                    #sys.exit() 
 
                     for idx in range( data['sitesEnergy']['count'] ):
     
@@ -471,7 +489,7 @@ def Main( argv ):
             tic = time.perf_counter()
             list_of_records = list()
             max_timestamp   = '1970-01-01 00:00:00' # used to check that er no double records in the list 
-            # limit range to dates that exceed the rentention period.
+            # limit range to dates that exceed the retention period.
             # delete_limited_date = ( datetime.strptime(end_date,"%Y-%m-%d") - datetime.timedelta(days=1096) ).strftime('%Y-%m-%d')
             try:
 
@@ -914,7 +932,7 @@ def get_site_ids( meta_data ):
 
 
 ###########################################################################
-# get the smalest timestamp from the metadata set to yesterday            #
+# get the smallest timestamp from the metadata set to yesterday           #
 # if there is no metadata                                                 #
 ###########################################################################
 def get_smalest_timestamp( meta_data ):

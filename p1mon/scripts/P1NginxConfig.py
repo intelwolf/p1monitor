@@ -4,7 +4,6 @@ import argparse
 import base64
 import const
 import crontab
-#import crypto3
 import crypto_lib
 import filesystem_lib
 import glob
@@ -272,12 +271,12 @@ def Main( argv ):
     parser.add_argument( '-ht', '--http',
         required=False,
         action="store_true",
-        help="maak een basis configuratie bestand met alleen HTTP (fabrieks instelling) en herstart de webserver." )
+        help="maak een basis configuratie bestand met alleen HTTP (fabrieksinstelling) en herstart de webserver." )
 
     parser.add_argument( '-g', '--gateway',
         required=False,
         action="store_true",
-        help="configureer het config file voor de router/gatway. Nodig voor http naar https redirection." )
+        help="configureer het config file voor de router/gateway. Nodig voor http naar https redirection." )
 
     parser.add_argument( '-r', '--renewcerts',
         required=False,
@@ -380,7 +379,7 @@ def Main( argv ):
         try:
             _id, email, _label = config_db.strget( 159, flog )
             if len( email.strip() ) == 0:
-                raise Exception("geen email ingsteld voor LetsEncrypt!")
+                raise Exception("geen email ingesteld voor LetsEncrypt!")
         except Exception as e:
             flog.critical( inspect.stack()[0][3] + ": e-mail is niet te lezen of niet gezet: " + str(e.args) )
             sys.exit(1) # things went wrong.
@@ -402,7 +401,7 @@ def Main( argv ):
         flog.info( inspect.stack()[0][3] + ": antwoord van LetsEncrypt: "  + str( stdout.decode('utf-8').replace('\n', ' ') ) )
 
         ###############################################
-        # set nginx config files with new certifcate  #
+        # set nginx config files with new certificate #
         # and reload NGINX                            #
         ###############################################
         if certbot_exit_code == 0: # only make change after en succesfull cerbot run.
@@ -460,7 +459,7 @@ def Main( argv ):
         make_nginx_conf()
 
         if check_nginx_configuration( flog=flog ) == False:
-            flog.error( inspect.stack()[0][3] + ": gateway config bestands fout, gestopt!")
+            flog.error( inspect.stack()[0][3] + ": gateway config bestandsfout, gestopt!")
             sys.exit(1)
 
         nginx_restart()

@@ -17,16 +17,16 @@ import time
 import util
 import sqldb
 import sqldb_pricing
+import sqldb_statistic
 import sqlite_lib
 import process_lib
 
 ################## TODO ####################################################
 # sqlite_lib.Sql2File() voor de andere exports gebruiken en sqldb aanpassen
 
-#from util import mkLocalTimeString,setFile2user
-from datetime import datetime, timedelta
-from shutil import *
-from os     import umask
+from datetime   import datetime, timedelta
+from shutil     import *
+from os         import umask
 from subprocess import run
 
 prgname = 'P1SqlExport'
@@ -52,6 +52,7 @@ power_production_db         = sqldb.powerProductionDB()
 power_production_solar_db   = sqldb.powerProductionSolarDB()
 fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
 price_db                    = sqldb_pricing.PricingDb()
+statistics_db               = sqldb_statistic.StatisticDb()
 
 #e_db_financieel_dag_voorspel= financieelDb()
 
@@ -95,13 +96,10 @@ def writeManifestFile():
 
 def Main( argv ):
 
-    #print( argv )
-
     flog.info("Start van programma " + prgname + ".")
     flog.info(inspect.stack()[0][3]+": wordt uitgevoerd als user -> " + pwd.getpwuid( os.getuid() ).pw_name )
     flog.debug("argv = " + str(argv) )
 
-   
     #flog.info("PATH = " + str( os.environ.get("PATH")) )
 
     timestart = time.time()
@@ -111,9 +109,9 @@ def Main( argv ):
 
     parser = argparse.ArgumentParser( description="...." )
    
-    parser.add_argument( '-e'   , '--exportid',                         required=True  )
-    parser.add_argument( '-f'   , '--filename',                         required=False )
-    parser.add_argument( '-rm'  , '--rmstatus', action='store_true',    required=False )
+    parser.add_argument( '-e'   , '--exportid',                      required=True  )
+    parser.add_argument( '-f'   , '--filename',                      required=False )
+    parser.add_argument( '-rm'  , '--rmstatus', action='store_true', required=False )
 
     args = parser.parse_args()
     flog.info( str( args ) )
@@ -130,7 +128,7 @@ def Main( argv ):
     #timestamp = mkLocalTimestamp();
     zipfilename = const.DIR_EXPORT  + const.EXPORT_PREFIX + exportcode + ".zip"
     statusfile  = const.DIR_RAMDISK + const.EXPORT_PREFIX + exportcode + ".status"
-    updateStatusPct(statusfile, 2, record_cnt)
+    updateStatusPct(statusfile, 1, record_cnt)
 
     #########################################################
     # databases that are optional are checked if the exists #
@@ -140,7 +138,7 @@ def Main( argv ):
     # open van config database
     try:
         config_db.init( const.FILE_DB_CONFIG, const.DB_CONFIG_TAB)
-        updateStatusPct(statusfile, 3, record_cnt)
+        updateStatusPct(statusfile, 2, record_cnt)
     except Exception as e:
         flog.critical(inspect.stack()[0][3]+": database niet te openen(1)."+const.FILE_DB_CONFIG+") melding:"+str(e.args[0]))
         sys.exit(1)
@@ -149,7 +147,7 @@ def Main( argv ):
     try:
         config_db.strset( str(exportcode), 196, flog ) # set export ID
         config_db.strset( '1',             195, flog ) # set start export
-        updateStatusPct(statusfile, 1, record_cnt)
+        updateStatusPct(statusfile, 3, record_cnt)
     except Exception as e:
         flog.critical(inspect.stack()[0][3]+": export custom www gefaald :" + str(e.args[0]) )
         sys.exit(1)
@@ -230,7 +228,7 @@ def Main( argv ):
     if os.path.exists ( const.FILE_DB_WEATHER ):
         try:
             weer_db.init(const.FILE_DB_WEATHER ,const.DB_WEATHER_TAB)
-            updateStatusPct(statusfile, 13, record_cnt)
+            updateStatusPct(statusfile, 12, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+": database niet te openen(11)."+const.FILE_DB_WEATHER+") melding:"+str(e.args[0]))
             sys.exit(1)
@@ -240,7 +238,7 @@ def Main( argv ):
     if os.path.exists ( const.FILE_DB_WEATHER_HISTORIE ):
         try:
             weer_history_db_uur.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_UUR_TAB)
-            updateStatusPct(statusfile, 14, record_cnt)
+            updateStatusPct(statusfile, 13, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+": database niet te openen(12)."+const.DB_WEATHER_UUR_TAB+" melding:"+str(e.args[0]))
             sys.exit(1)
@@ -249,7 +247,7 @@ def Main( argv ):
         # open van weer database voor historische weer dag
         try:
             weer_history_db_dag.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_DAG_TAB)
-            updateStatusPct(statusfile, 15, record_cnt)
+            updateStatusPct(statusfile, 14, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+": database niet te openen(13)."+const.DB_WEATHER_DAG_TAB+") melding:"+str(e.args[0]))
             sys.exit(1)
@@ -258,7 +256,7 @@ def Main( argv ):
         # open van weer database voor historische weer maand
         try:
             weer_history_db_maand.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_MAAND_TAB)
-            updateStatusPct(statusfile, 16, record_cnt)
+            updateStatusPct(statusfile, 15, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+": database niet te openen(14)."+const.DB_WEATHER_MAAND_TAB+") melding:"+str(e.args[0]))
             sys.exit(1)
@@ -267,7 +265,7 @@ def Main( argv ):
         # open van weer database voor historische weer jaar
         try:
             weer_history_db_jaar.init(const.FILE_DB_WEATHER_HISTORIE ,const.DB_WEATHER_JAAR_TAB)
-            updateStatusPct(statusfile, 17, record_cnt)
+            updateStatusPct(statusfile, 16, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+": database niet te openen(15)."+const.DB_WEATHER_JAAR_TAB+") melding:"+str(e.args[0]))
             sys.exit(1)
@@ -277,7 +275,7 @@ def Main( argv ):
         # open van temperatuur database
         try:    
             temperature_db.init(const.FILE_DB_TEMPERATUUR_FILENAME ,const.DB_TEMPERATUUR_TAB )
-            updateStatusPct(statusfile, 18, record_cnt)
+            updateStatusPct(statusfile, 17, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+": Database niet te openen(16)."+const.FILE_DB_TEMPERATUUR_FILENAME+") melding:"+str(e.args[0]))
             sys.exit(1)
@@ -287,7 +285,7 @@ def Main( argv ):
         # open van watermeter database
         try:
             watermeter_db.init( const.FILE_DB_WATERMETERV2, const.DB_WATERMETERV2_TAB, flog )
-            updateStatusPct(statusfile, 19, record_cnt)
+            updateStatusPct(statusfile, 18, record_cnt)
         except Exception as e:
             flog.critical( inspect.stack()[0][3] + ": Database niet te openen(17)." + const.FILE_DB_WATERMETERV2 + " melding:" + str(e.args[0]) )
             sys.exit(1)
@@ -297,7 +295,7 @@ def Main( argv ):
         # open van fase database
         try:
             fase_db.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_REALTIME_TAB )
-            updateStatusPct(statusfile, 20, record_cnt)
+            updateStatusPct(statusfile, 19, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+" database niet te openen(18)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
             sys.exit(1)
@@ -306,6 +304,7 @@ def Main( argv ):
         # open van fase database voor min/max waarden.
         try:
             fase_db_min_max_dag.init( const.FILE_DB_PHASEINFORMATION ,const.DB_FASE_MINMAX_DAG_TAB )
+            updateStatusPct(statusfile, 20, record_cnt)
         except Exception as e:
             flog.critical(inspect.stack()[0][3]+" database niet te openen(19)." + const.FILE_DB_PHASEINFORMATION + ") melding:"+str(e.args[0]) )
             sys.exit(1)
@@ -330,14 +329,21 @@ def Main( argv ):
             sys.exit(1)
         flog.info( inspect.stack()[0][3] + ": database tabel " + const.DB_POWERPRODUCTION_SOLAR_TAB + " succesvol geopend." )
 
+    try:
+        statistics_db.init( const.FILE_DB_STATISTICS, const.DB_STATISTICS_TAB , flog=flog )
+        updateStatusPct(statusfile, 23, record_cnt)
+    except Exception as e:
+        flog.critical( inspect.stack()[0][3] + ":  database niet te openen(22)." + const.FILE_DB_STATISTICS + " melding: " + str(e.args[0]) )
+        sys.exit(1)
+    flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_STATISTICS_TAB + " succesvol geopend." )
 
-    updateStatusPct(statusfile,30, record_cnt)
 
+    ## exports start
     if os.path.exists ( const.FILE_DB_POWERPRODUCTION ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_POWERPRODUCTION )
         try:
             record_cnt = record_cnt + power_production_solar_db.sql2file( const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
-            updateStatusPct(statusfile, 31, record_cnt)
+            updateStatusPct(statusfile, 30, record_cnt)
             flog.info(inspect.stack()[0][3]+": kWh Solar levering sql geëxporteerd.")
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_POWERPRODUCTION + " -> " + str(e) )  
@@ -345,7 +351,7 @@ def Main( argv ):
     if os.path.exists ( const.FILE_DB_POWERPRODUCTION ):
         try:
             record_cnt = record_cnt + power_production_db.sql2file(  const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
-            updateStatusPct(statusfile, 32, record_cnt)
+            updateStatusPct(statusfile, 31, record_cnt)
             flog.info(inspect.stack()[0][3]+": kWh(S0) levering sql geëxporteerd.")
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_POWERPRODUCTION + " -> " + str(e) )  
@@ -358,75 +364,84 @@ def Main( argv ):
             flog.info(inspect.stack()[0][3]+": fase data sql geëxporteerd.")
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_PHASEINFORMATION + " -> " + str(e) )
-        updateStatusPct( statusfile, 33, record_cnt )
+        updateStatusPct( statusfile, 32, record_cnt )
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_E_HISTORIE_TAIL )
     try:
         record_cnt = record_cnt + e_db_history_min.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
-        updateStatusPct(statusfile, 34, record_cnt)
+        updateStatusPct(statusfile, 33, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
     
     try:
         record_cnt = record_cnt + e_db_history_uur.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
-        updateStatusPct(statusfile, 35, record_cnt)
+        updateStatusPct(statusfile, 34, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     try:
         record_cnt = record_cnt + e_db_history_dag.sql2file(  const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
-        updateStatusPct(statusfile, 36, record_cnt)
+        updateStatusPct(statusfile, 35, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     try:
         record_cnt = record_cnt + e_db_history_maand.sql2file(const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
-        updateStatusPct(statusfile, 37, record_cnt)
+        updateStatusPct(statusfile, 36, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     try:
         record_cnt = record_cnt + e_db_history_jaar.sql2file( const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
         flog.info(inspect.stack()[0][3]+": historie sql geëxporteerd.")
-        updateStatusPct(statusfile, 38, record_cnt)
+        updateStatusPct(statusfile, 37, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_E_HISTORIE_TAIL + " -> " + str(e) )
 
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_FINANCIEEL )
     try:
         record_cnt = record_cnt + e_db_financieel_dag.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
-        updateStatusPct(statusfile, 39, record_cnt)
+        updateStatusPct(statusfile, 38, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_FINANCIEEL + " -> " + str(e) )
 
     try:
         record_cnt = record_cnt + e_db_financieel_maand.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
-        updateStatusPct(statusfile, 40, record_cnt)
+        updateStatusPct(statusfile, 39, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_FINANCIEEL + " -> " + str(e) )
 
     try:
         record_cnt = record_cnt + e_db_financieel_jaar.sql2file( const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode )
-        updateStatusPct(statusfile, 41, record_cnt)
+        updateStatusPct(statusfile, 40, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_FINANCIEEL + " -> " + str(e) )
 
     try:
+        flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_FINANCIEEL )
         s2f = sqlite_lib.Sql2File()
         s2f.init( db_pathfile=const.FILE_DB_FINANCIEEL, table=const.DB_ENERGIEPRIJZEN_UUR_TAB, filename=const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode, flog=flog )
         record_cnt = record_cnt + s2f.execute()
-        updateStatusPct( statusfile, 42, record_cnt )
+        updateStatusPct( statusfile, 41, record_cnt )
+        flog.info(inspect.stack()[0][3]+": financieel sql geëxporteerd.")
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_ENERGIEPRIJZEN_UUR_TAB + " -> " + str(e) )
 
-    flog.info(inspect.stack()[0][3]+": financieel sql geëxporteerd.")
-    updateStatusPct(statusfile, 43, record_cnt) 
-
+    try:
+        flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_STATISTICS )
+        s2f = sqlite_lib.Sql2File()
+        s2f.init( db_pathfile=const.FILE_DB_STATISTICS, table=const.DB_STATISTICS_TAB, filename=const.DIR_EXPORT + const.DB_STATISTICS + exportcode, flog=flog )
+        record_cnt = record_cnt + s2f.execute()
+        updateStatusPct( statusfile, 42, record_cnt )
+        flog.info(inspect.stack()[0][3]+": statistische sql geëxporteerd.")
+    except Exception as e:
+        flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_ENERGIEPRIJZEN_UUR_TAB + " -> " + str(e) )
+    
     flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_CONFIG )
     try:
         record_cnt = record_cnt + config_db.sql2file(const.DIR_EXPORT + const.DB_CONFIG + exportcode)
         flog.info(inspect.stack()[0][3]+": configuratie sql geëxporteerd.")
-        updateStatusPct(statusfile, 44, record_cnt)
+        updateStatusPct(statusfile, 43, record_cnt)
     except Exception as e:
         flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_CONFIG + " -> " + str(e) )
 
@@ -435,7 +450,7 @@ def Main( argv ):
         try:
             record_cnt = record_cnt + weer_db.sql2file(const.DIR_EXPORT + const.DB_WEER + exportcode)
             flog.info(inspect.stack()[0][3]+": weer sql geëxporteerd.")
-            updateStatusPct(statusfile, 45 ,record_cnt)
+            updateStatusPct(statusfile, 44 ,record_cnt)
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER + " -> " + str(e) )
 
@@ -443,37 +458,37 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WEER_HISTORY )
         try:
             record_cnt = record_cnt + weer_history_db_uur.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-            updateStatusPct(statusfile, 50, record_cnt)
+            updateStatusPct(statusfile, 45, record_cnt)
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
         
         try:
             record_cnt = record_cnt + weer_history_db_dag.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-            updateStatusPct(statusfile, 52 ,record_cnt )
+            updateStatusPct(statusfile, 46 ,record_cnt )
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
 
         try:
             record_cnt = record_cnt + weer_history_db_maand.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-            updateStatusPct(statusfile, 54, record_cnt)
+            updateStatusPct(statusfile, 47, record_cnt)
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
         
         try:
             record_cnt = record_cnt + weer_history_db_jaar.sql2file(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-            updateStatusPct(statusfile, 56 , record_cnt)
+            updateStatusPct(statusfile, 48 , record_cnt)
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WEER_HISTORY + " -> " + str(e) )
 
         flog.info(inspect.stack()[0][3]+": weer historie sql geëxporteerd.")
-        updateStatusPct(statusfile, 58, record_cnt) 
+    
 
     if os.path.exists ( const.FILE_DB_TEMPERATUUR_FILENAME ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_TEMPERATURE )
         try:
             record_cnt = record_cnt + temperature_db.sql2file(const.DIR_EXPORT + const.DB_TEMPERATURE + exportcode )
             flog.info(inspect.stack()[0][3]+": temperatuur sql geëxporteerd.")
-            updateStatusPct(statusfile, 60, record_cnt)
+            updateStatusPct(statusfile, 49, record_cnt)
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_TEMPERATURE + " -> " + str(e) )
 
@@ -481,7 +496,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": verwerken van " + const.DB_WATERMETERV2 )
         try:
             record_cnt = record_cnt + watermeter_db.sql2file( const.DIR_EXPORT + const.DB_WATERMETERV2 + exportcode )
-            updateStatusPct(statusfile, 70, record_cnt)
+            updateStatusPct(statusfile, 50, record_cnt)
         except Exception as e:
             flog.error( inspect.stack()[0][3]+ ": export probleem met tabel " + const.DB_WATERMETERV2 + " -> " + str(e) )
 
@@ -498,14 +513,22 @@ def Main( argv ):
             time.sleep(1)
             cnt += 1
     
-    zf = zipfile.ZipFile(zipfilename, mode='w')
+    zf = zipfile.ZipFile( zipfilename, mode='w' )
+
+    try:
+        flog.info(inspect.stack()[0][3]+": statistiek sql aan zip file toevoegen")
+        zf.write(const.DIR_EXPORT + const.DB_STATISTICS + exportcode, compress_type=zipfile.ZIP_DEFLATED)
+        os.remove(const.DIR_EXPORT + const.DB_STATISTICS + exportcode)
+        updateStatusPct(statusfile, 60, record_cnt) 
+    except Exception as e:
+        flog.error(inspect.stack()[0][3]+": statistiek sql aan zip file toevoegen gefaald")
 
     try:
         flog.info(inspect.stack()[0][3]+": custom www aan zip file toevoegen")
         zf.write(const.FILE_PREFIX_CUSTOM_UI + exportcode + ".gz", compress_type=zipfile.ZIP_STORED) # geen nut om gz te zippen.
         os.remove(const.FILE_PREFIX_CUSTOM_UI + exportcode + ".gz")
         os.remove ( done_file )
-        updateStatusPct(statusfile, 80, record_cnt) 
+        updateStatusPct(statusfile, 61, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": custom UI aan zip file toevoegen gefaald")
 
@@ -513,7 +536,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": historie sql aan zip file toevoegen")
         zf.write(const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_E_HISTORIE_TAIL + exportcode)
-        updateStatusPct(statusfile, 82 ,record_cnt) 
+        updateStatusPct(statusfile, 62 ,record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": historie sql aan zip file toevoegen gefaald")
 
@@ -521,7 +544,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": financieel sql aan zip file toevoegen")
         zf.write(const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_FINANCIEEL + exportcode)
-        updateStatusPct(statusfile, 84, record_cnt) 
+        updateStatusPct(statusfile, 63, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": financieel sql aan zip file toevoegen gefaald")
 
@@ -529,7 +552,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": configuratie sql aan zip file toevoegen")
         zf.write(const.DIR_EXPORT + const.DB_CONFIG + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_CONFIG + exportcode)
-        updateStatusPct(statusfile, 86, record_cnt) 
+        updateStatusPct(statusfile, 64, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": configuratie sql aan zip file toevoegen gefaald")
 
@@ -537,7 +560,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": huidige weer sql aan zip file toevoegen")
         zf.write(const.DIR_EXPORT + const.DB_WEER + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_WEER + exportcode)
-        updateStatusPct(statusfile, 88 ,record_cnt) 
+        updateStatusPct(statusfile, 65 ,record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": huidige weer sql aan zip file toevoegen gefaald: "+str(e))
      
@@ -545,7 +568,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": historie weer sql aan zip file toevoegen")
         zf.write(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_WEER_HISTORY + exportcode)
-        updateStatusPct(statusfile, 90 ,record_cnt) 
+        updateStatusPct(statusfile, 66 ,record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": historie weer sql aan zip file toevoegen gefaald: "+str(e))
      
@@ -553,7 +576,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": temperatuur sql aan zip file toevoegen.")
         zf.write(const.DIR_EXPORT + const.DB_TEMPERATURE + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_TEMPERATURE + exportcode)
-        updateStatusPct(statusfile, 92, record_cnt) 
+        updateStatusPct(statusfile, 67, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": temperatuur sql aan zip file toevoegen gefaald: "+str(e))
 
@@ -562,7 +585,7 @@ def Main( argv ):
         writeManifestFile()
         zf.write(const.FILE_EXPORT_MANIFEST, compress_type=zipfile.ZIP_DEFLATED) 
         os.remove(const.FILE_EXPORT_MANIFEST)
-        updateStatusPct(statusfile, 93, record_cnt) 
+        updateStatusPct(statusfile, 68, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": custom UI aan zip file toevoegen gefaald")
 
@@ -570,7 +593,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": watermeter sql aan zip file toevoegen.")
         zf.write(const.DIR_EXPORT +  const.DB_WATERMETERV2 + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_WATERMETERV2 + exportcode)
-        updateStatusPct(statusfile, 94, record_cnt) 
+        updateStatusPct(statusfile, 69, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": watermeter sql aan zip file toevoegen gefaald")
 
@@ -578,7 +601,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": fase data sql aan zip file toevoegen.")
         zf.write(const.DIR_EXPORT +  const.DB_PHASEINFORMATION + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_PHASEINFORMATION + exportcode)
-        updateStatusPct(statusfile, 95, record_cnt) 
+        updateStatusPct(statusfile, 70, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": fase data sql aan zip file toevoegen gefaald")
 
@@ -586,7 +609,7 @@ def Main( argv ):
         flog.info(inspect.stack()[0][3]+": kWh levering data sql aan zip file toevoegen.")
         zf.write(const.DIR_EXPORT +  const.DB_POWERPRODUCTION + exportcode, compress_type=zipfile.ZIP_DEFLATED)
         os.remove(const.DIR_EXPORT + const.DB_POWERPRODUCTION + exportcode)
-        updateStatusPct(statusfile, 96, record_cnt) 
+        updateStatusPct(statusfile, 71, record_cnt) 
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": kWh levering data sql aan zip file toevoegen gefaald")
 
@@ -602,7 +625,8 @@ def Main( argv ):
 
     flog.info( inspect.stack()[0][3] + ": zip file naar folder kopieren ->" + downloadfilename )
     shutil.move( zipfilename, downloadfilename )
-    
+    updateStatusPct(statusfile, 90, record_cnt) 
+
     try:
         subprocess.run( ['sudo', 'chmod', '0666', downloadfilename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
         flog.info( inspect.stack()[0][3] + ": zip file rechten aangepast voor bestand " + downloadfilename )
@@ -612,9 +636,6 @@ def Main( argv ):
     statusdata['status_text'] = 'gereed'
     statusdata['status_code'] = 'klaar'
     updateStatusPct(statusfile, 100, record_cnt)
-    
-    #setFile2user(downloadfilename,'p1mon')
-    #setFile2user(statusfile,'p1mon')
     
     if args.rmstatus == True:
         flog.info(inspect.stack()[0][3]+": geforceerd verwijderen van status bestand " + statusfile )

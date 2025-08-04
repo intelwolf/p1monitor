@@ -6,7 +6,7 @@ include_once '/p1mon/www/util/textlib.php';
 function page_menu($id) {
     $noInetCheck = isInternetIPAllowed();
     $localip     = validLocalIpAdress(getClientIP());
-    $m0=$m1=$m2=$m3=$m4=$m5=$m6=$m7=$m8=$m9=$m10=$m11=$m12='';
+    $m0=$m1=$m2=$m3=$m4=$m5=$m6=$m7=$m8=$m9=$m10=$m11=$m12=$M13='';
 
     passwordSessionExpiredCheck();
 
@@ -49,6 +49,9 @@ function page_menu($id) {
             break;
         case 12: /* E levering Solar Edge */
             $m12 = "menu-active";
+            break;
+        case 13: /* Statistics */
+            $m13 = "menu-active";
             break;
     }
 
@@ -170,6 +173,15 @@ function page_menu($id) {
             </span>
         </a>"."\n";
     }
+
+
+    // statistics 
+    $t=ucfirst(strIdx(737));
+    echo "<a title=\"$t\" id=\"menu13\" href=\"statistics.php\">
+        <span class=\"fa-layers frame-1-mid $m13\">
+            <i class=\"fa-solid fa-chart-column\" data-fa-transform=\"grow-18\"></i>
+        </span>
+    </a>"."\n";
 
     // informatie pagina
     $t=ucfirst(strIdx(114));

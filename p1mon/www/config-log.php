@@ -18,9 +18,9 @@ passwordSessionLogoutCheck();
 $noInetCheck = isInternetIPAllowed();
 $localip     = validLocalIpAdress(getClientIP());
 if( $localip == False ){ 
-        if( $noInetCheck == False ) {
-            die();
-        }
+    if( $noInetCheck == False ) {
+        die();
+    }
 }
 
 ?>
@@ -67,7 +67,6 @@ function LoadData() {
         if ( logfile_list_auto_refresh_is_on == true ) {
             //console.log( "auto update list" );
             logfiles_list_table.replaceData();
-            
         }
 
         if (  logfiles_content_table_is_ready == true ) {
@@ -132,17 +131,17 @@ $(function () {
     logfiles_list_table = new Tabulator("#logfile-list-table", {
         ajaxURL:"./json/logfiles.php", 
         ajaxParams:{ list:"" },
-        dataLoaderLoading: "<div><img src='./img/ajax-loader.gif' alt='Even geduld aub.' height='15' width='128' /></div>",
+        dataLoaderLoading: "<div><img src='./img/ajax-loader.gif' alt='"+ "<?php echo strIdx( 370 )?>" + "' height='15' width='128' /></div>",
         height:"500px",
         layout:"fitColumns",
         tooltips:true,
         tooltipGenerationMode:"hover",
-        placeholder:"geen log bestanden beschikbaar.",
+        placeholder:"<?php echo strIdx( 753 )?>",
         clipboard:true,
         columns:[
-            {title:"log bestandsnaam",  field:"filename",  sorter:"string" },
-            {title:"laatste wijziging", field:"timestamp", sorter:"string", width:170  },
-            {title:"bytes",             field:"filesize",  sorter:"number", width:100  },
+            {title:"<?php echo strIdx( 755 )?>", field:"filename",  sorter:"string", headerTooltip: "<?php echo strIdx( 755 )?>" },
+            {title:"<?php echo strIdx( 756 )?>", field:"timestamp", sorter:"string", width:170, headerTooltip: "<?php echo strIdx( 756 )?>"},
+            {title:"<?php echo strIdx( 757 )?>", field:"filesize",  sorter:"number", width:100,headerTooltip: "<?php echo strIdx( 757 )?>" },
         ],
         initialSort:[
             {column:"timestamp", dir:"desc"}
@@ -178,12 +177,12 @@ $(function () {
         layoutColumnsOnNewData:true,
         tooltips:true,
         tooltipGenerationMode:"hover",
-        placeholder:"geen log bestand geselecteerd of het bestand bevat geen data.",
+        placeholder:"<?php echo strIdx( 754 )?>",
         clipboard:true,
         columns:[
-            {title:"tijdstip", field:"timestamp", sorter:"string", }, 
-            {title:"nivo",     field:"level",     sorter:"string", }, 
-            {title:"regel",    field:"line",      sorter:"string", tooltip:true }
+            {title:"<?php echo strIdx( 345 )?>", field:"timestamp", sorter:"string", headerTooltip: "<?php echo strIdx( 345 )?>" }, 
+            {title:"<?php echo strIdx( 758 )?>", field:"level", sorter:"string", headerTooltip: "<?php echo strIdx( 758 )?>"}, 
+            {title:"<?php echo strIdx( 759 )?>", field:"line", sorter:"string", tooltip:true, headerTooltip: "<?php echo strIdx( 759 )?>" }
         ],
         initialSort:[
             {column:"timestamp", dir:"desc"}

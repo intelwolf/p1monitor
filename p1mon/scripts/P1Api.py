@@ -11,6 +11,7 @@ import logger
 import os
 import sqldb
 import sqldb_pricing
+import sqldb_statistic
 import sys
 import api_phaseminmax_lib
 import api_solarpower_lib
@@ -20,6 +21,7 @@ import api_weather_history_lib
 import api_financial_lib
 import api_time_lib 
 import api_wifi_lib
+import api_statistics_lib
 
 from apiutil import p1_serializer, validate_timestamp, clean_timestamp_str, list_filter_to_str, validate_timestamp_by_length
 
@@ -40,6 +42,7 @@ fase_db                     = sqldb.PhaseDB()
 power_production_db         = sqldb.powerProductionDB()
 fase_db_min_max_dag         = sqldb.PhaseMaxMinDB()
 price_db                    = sqldb_pricing.PricingDb()
+statistics_db               = sqldb_statistic.StatisticDb()
 
 try:
     os.umask( 0o002 )
@@ -180,6 +183,15 @@ except Exception as e:
 flog.info( str(__name__) + ": database tabel " + const.DB_ENERGIEPRIJZEN_UUR_TAB + " succesvol geopend.")
 
 
+try:
+    #price_db.init(const.FILE_DB_FINANCIEEL ,const.DB_ENERGIEPRIJZEN_UUR_TAB)
+    statistics_db.init( const.FILE_DB_STATISTICS, const.DB_STATISTICS_TAB , flog=flog )
+except Exception as e:
+    flog.critical(inspect.stack()[0][3]+": Database niet te openen(15)." + const.FILE_DB_STATISTICS + ") melding:" + str(e.args[0]))
+    sys.exit(1)
+flog.info( str(__name__) + ": database tabel " + const.DB_STATISTICS_TAB + " succesvol geopend.")
+
+
 #TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # ********************************************************************************************
 ##############################################################################################
@@ -290,7 +302,15 @@ wifi_help  = api_wifi_lib.WifiHelp()
 wifi_help.set_flog( flog )
 app.add_route( apiconst.ROUTE_WIFI_SSID_HELP, wifi_help )
 
+#added in version 3.1.0 
+statistics = api_statistics_lib.Statistics()
+statistics.set_flog( flog )
+statistics.set_database( statistics_db )
+app.add_route( apiconst.ROUTE_STATISTICS, statistics )
 
+statistics_help  = api_statistics_lib.StatisticsHelp()
+statistics_help.set_flog( flog )
+app.add_route( apiconst.ROUTE_STATISTICS_HELP, statistics_help)
 
 
 ################ alles hier onder nog omzetten !!!!!!!!!!! naar api_lib_nnnnn functies. 
@@ -395,7 +415,7 @@ class PowerProductionS0( object ):
             v_limit = '' #means all records
             # sort (on timestamp) {default is desc, asc}
             v_sort = "DESC"
-            # round ( default is off, on) whole number rounded up or down depending the fraction ammount. 
+            # round ( default is off, on) whole number rounded up or down depending the fraction amount. 
             # json {default is array, object}
             v_json_mode = ''
             # starttime  =
@@ -433,7 +453,7 @@ class PowerProductionS0( object ):
                         v_json_mode = 'object'
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query json naar object type gezet." )
 
-                if key == apiconst.API_PARAMETER_ROUND: # round to the nearst value
+                if key == apiconst.API_PARAMETER_ROUND: # round to the nearest value
                     if value.lower() == 'on':
                         sqlstr = self.sqlstr_base_round
                         flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": sql query round aangezet." )

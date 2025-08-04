@@ -8,6 +8,7 @@ import time
 import const
 import sqldb
 import sqldb_pricing
+import sqldb_statistic
 
 #import sys
 
@@ -42,7 +43,8 @@ class SqlDatabase():
             const.DB_WEER: {(const.DB_WEATHER_TAB,sqldb.currentWeatherDB()) },
             const.DB_TEMPERATURE: {(const.DB_TEMPERATUUR_TAB,sqldb.temperatureDB())},
             const.DB_STATUS: { (const.DB_STATUS_TAB, sqldb.rtStatusDb() )},
-            const.DB_CONFIGURATIE: { (const.DB_CONFIGURATIE, sqldb.configDB() ) }
+            const.DB_CONFIGURATIE: { (const.DB_CONFIGURATIE, sqldb.configDB() ) },
+            const.DB_STATISTICS: { (const.DB_STATISTICS_TAB, sqldb_statistic.StatisticDb()) }
         }
 
     ###########################################################
@@ -88,14 +90,14 @@ class SqlDatabase():
 ####################################################################
 class Sql2File():
     
-    ############################################################################
-    # db_pathfile file that holds the database                                 #
-    # table: table in the datbase                                              #
-    # file: the file used to write the sql statments                           #
-    # sql_order_index: 0 tot max fields -1 used on the order select statment   #
-    # sql_update_mode, sql statment for the insert(0), update(1) or replace(2) #
-    # TODO insert and update ** use only lower case sql stamenents             #
-    ############################################################################
+    #############################################################################
+    # db_pathfile file that holds the database                                  #
+    # table: table in the datebase                                              #
+    # file: the file used to write the sql statements                           #
+    # sql_order_index: 0 tot max fields -1 used on the order select statement   #
+    # sql_update_mode, sql statement for the insert(0), update(1) or replace(2) #
+    # TODO insert and update ** use only lower case sql statements              #
+    #############################################################################
     def init( self, db_pathfile=None, table=None, filename=None, sql_order_index=0, sql_update_mode=2, flog=None ):
         self.db_pathfile     = db_pathfile
         self.table           = table
@@ -165,7 +167,7 @@ class Sql2File():
             raise Exception( "uitvoering gefaald -> " + str(e) )
 
 #########################################################
-# set the correct field format for the sql staments     #
+# set the correct field format for the sql statements   #
 # make sure TEXT has single quotes and the numeric      #
 # values do not                                         #
 #########################################################
@@ -230,7 +232,7 @@ class SqliteUtil():
     def query_str(self, table=None, flog=None, sortindex=None ):
         list_of_columns = self.table_structure_info( table=table )
 
-        sort_column_str = None # used to set the colum for sorting, if any
+        sort_column_str = None # used to set the column for sorting, if any
         sql_str = 'select '
         for idx, c in enumerate( list_of_columns ):
             sql_str = sql_str + c['column_name'] + ', '
@@ -298,7 +300,7 @@ class SqliteUtil():
         return str( count_value[0][0] )
 
     ###########################################
-    # select records from the datbase         #
+    # select records from the database        #
     ###########################################
     def select_rec( self, sqlstr ):
         self.con    = sqlite3.connect( self.db_pathfile )

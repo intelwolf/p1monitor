@@ -99,6 +99,22 @@ div#succes_msg {
     display: none;
 }
 
+div#processingdata {
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    padding: 10px 10px 10px 10px;
+    width: 20em;
+    text-align: center;
+    color: #83B31E;
+    background-color: #F5F5F5;
+    box-shadow: 0px 5px 8px -2px #eaeaea;
+    font-size: 1em;
+    display: none;
+}
+
+
 
 div#slider_dialog {
     border-radius: 5px 5px 5px 5px;
@@ -442,6 +458,18 @@ select {
     color: #6E797C;
   }
 
+.button-5 {
+    cursor: pointer;
+    margin: 5px 0px 5px 0px;
+    padding: 5px 5px 5px 5px;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #0C7DAD;
+    background-color: #F5F5F5;
+  }
+
+
 
 .close_button {
     float: right;
@@ -463,6 +491,9 @@ select {
 }
 
 
+.color-delete {
+    color: #ce1515;
+}
 
 .color-back {
     color: #DCE1E3;

@@ -3,7 +3,7 @@
 include_once '/p1mon/www/util/textlib.php';
 
 function menu_control($id) {
-    $m1=$m1=$m2=$m3=$m4=$m5=$m6=$m7=$m8=$m9=$m10=$m11=$m12=$m13=$m14=$m15=$m16=$m17='';
+    $m1=$m1=$m2=$m3=$m4=$m5=$m6=$m7=$m8=$m9=$m10=$m11=$m12=$m13=$m14=$m15=$m16=$m17=$m18='';
     
     switch ($id) {
         case 1: /* tarieven */
@@ -60,6 +60,9 @@ function menu_control($id) {
         case 16: /* watermeter config  */
             $m16= "menu-active-control";
             break;
+        case 18: /* statistics config  */
+            $m18= "menu-active-control";
+            break;
     }
     
     echo "<div><a href=\"config-tarief.php\"    class=\"text-14 $m1\"><i class=\"fas fa-euro-sign     fa-fw\"></i><span class=\"pad-6\">" . strIdx( 208 ). "</span></a></div>"."\n";
@@ -99,6 +102,9 @@ function menu_control($id) {
         </span>
         <span class=\"pad-6\">" . strIdx( 220 ). "</span>
         </a></div>"."\n";
+
+
+    echo "<div><a href=\"config-statistics.php\" class=\"text-14 $m18\"><i class=\"fa-solid fa-chart-column\"></i><span class=\"pad-6\">" . strIdx( 737 ). "</span></a></div>"."\n";
 
     echo "<div><a href=\"home.php\"             class=\"text-14\">     <i class=\"fas fa-sign-out-alt fa-fw\"></i><span class=\"pad-6\">" . strIdx( 221 ). "</span></a></div>"."\n";
     

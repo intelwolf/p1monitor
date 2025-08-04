@@ -249,8 +249,8 @@ $(function () {
                 formatterParams:{
                     allowEmpty:true,
                     allowTruthy:true,
-                    crossElement:"<i class='fa-solid fa-database color-menu'></i>",
-                    tickElement: "<i class='far fas fa-trash-alt color-warning'></i>",  
+                    crossElement:"<i class='fa-solid fa-trash-alt color-menu'></i>",
+                    tickElement: "<i class='fa-solid fa-trash-alt color-warning'></i>",  
                 },
                 hozAlign: "center", 
                 cellClick:function(e, cell) { setDbAttributeActive( cell.getRow().getData().ID, cell, 'DB_DELETE' ) } 
