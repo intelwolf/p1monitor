@@ -645,20 +645,20 @@ function setButtonVisbilty() {
 
                     var verbruikt = text_unknown;
                     var geleverd  = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GWattDataL1Consumed[i][0] ==  this.x ) { // timestamp
-                                if ( useKw ) {
+
+                    for (var i=0,  tot=GWattDataL1Consumed.length; i < tot; i++) {
+                        if ( GWattDataL1Consumed[i][0] ==  this.x ) { // timestamp
+                             if ( useKw ) {
                                     verbruikt = GWattDataL1Consumed[i][1].toFixed(1) + ' ' + wattText;
                                     geleverd  = (GWattDataL1Produced[i][1] * -1).toFixed(1) + ' ' + wattText;
                                 } else { 
                                     verbruikt = GWattDataL1Consumed[i][1].toFixed(0) + ' ' + wattText;
                                     geleverd  = (GWattDataL1Produced[i][1] * -1).toFixed(0) + ' ' + wattText;
                                 }
-                                break;
-                            }
+                            break;
                         }
-                    } catch{};
+                     }
+
                     s += '<br/><span style="color: #F2BA0F;">' + text_consumed + ' : </span>'+verbruikt;
                     s += '<br/><span style="color: #98D023;">' + text_produced + ' : </span>'+geleverd; 
                     return s;
@@ -686,20 +686,20 @@ function setButtonVisbilty() {
 
                     var verbruikt = text_unknown;
                     var geleverd  = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GWattDataL2Consumed[i][0] ==  this.x ) { // timestamp
-                                if ( useKw ) {
+
+                    for (var i=0,  tot=GWattDataL2Consumed.length; i < tot; i++) {
+                        if ( GWattDataL2Consumed[i][0] ==  this.x ) { // timestamp
+                             if ( useKw ) {
                                     verbruikt = GWattDataL2Consumed[i][1].toFixed(1) + ' ' + wattText;
                                     geleverd  = (GWattDataL2Produced[i][1] * -1).toFixed(1) + ' ' + wattText;
                                 } else { 
                                     verbruikt = GWattDataL2Consumed[i][1].toFixed(0) + ' ' + wattText;
                                     geleverd  = (GWattDataL2Produced[i][1] * -1).toFixed(0) + ' ' + wattText;
                                 }
-                                break;
-                            }
+                            break;
                         }
-                    }catch{};
+                     }
+
                     s += '<br/><span style="color: #F2BA0F;">' + text_consumed + ' : </span>'+verbruikt;
                     s += '<br/><span style="color: #98D023;">' + text_produced + ' : </span>'+geleverd; 
                     return s;
@@ -727,22 +727,22 @@ function setButtonVisbilty() {
 
                     var verbruikt = text_unknown;
                     var geleverd  = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GWattDataL3Consumed[i][0] ==  this.x ) { // timestamp
-                                if ( useKw ) {
+
+                    for (var i=0,  tot=GWattDataL3Consumed.length; i < tot; i++) {
+                        if ( GWattDataL3Consumed[i][0] ==  this.x ) { // timestamp
+                             if ( useKw ) {
                                     verbruikt = GWattDataL3Consumed[i][1].toFixed(1) + ' ' + wattText;
                                     geleverd  = (GWattDataL3Produced[i][1] * -1).toFixed(1) + ' ' + wattText;
                                 } else { 
                                     verbruikt = GWattDataL3Consumed[i][1].toFixed(0) + ' ' + wattText;
                                     geleverd  = (GWattDataL3Produced[i][1] * -1).toFixed(0) + ' ' + wattText;
                                 }
-                                break;
-                            }
+                            break;
                         }
-                    } catch{}
-                        s += '<br/><span style="color: #F2BA0F;">' + text_consumed + ' : </span>'+verbruikt;
-                        s += '<br/><span style="color: #98D023;">' + text_produced + ' : </span>'+geleverd; 
+                     }
+
+                    s += '<br/><span style="color: #F2BA0F;">' + text_consumed + ' : </span>'+verbruikt;
+                    s += '<br/><span style="color: #98D023;">' + text_produced + ' : </span>'+geleverd; 
                     return s;
                 }
         },
@@ -767,15 +767,15 @@ function setButtonVisbilty() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
                     var ampere = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GAmpereL1[i][0] ==  this.x ) { // timestamp
-                                ampere = GAmpereL1[i][1].toFixed(0) + " A";
-                                break;
-                            }
+
+                    for (var i=0,  tot=GAmpereL1.length; i < tot; i++) {
+                        if ( GAmpereL1[i][0] ==  this.x ) { // timestamp
+                            ampere = GAmpereL1[i][1].toFixed(0) + " A";
+                            break;
                         }
-                    } catch{}
-                        s += '<br/><span style="color: #CC6600;">ampere: </span>' + ampere;
+                     }
+
+                    s += '<br/><span style="color: #CC6600;">ampere: </span>' + ampere;
                     return s;
                 }
         },
@@ -796,15 +796,14 @@ function setButtonVisbilty() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
 
                     var ampere = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GAmpereL2[i][0] ==  this.x ) { // timestamp
-                                ampere = GAmpereL2[i][1].toFixed(0) + " A";
-                                break;
-                            }
+                    for (var i=0,  tot=GAmpereL2.length; i < tot; i++) {
+                        if ( GAmpereL2[i][0] ==  this.x ) { // timestamp
+                            ampere = GAmpereL2[i][1].toFixed(0) + " A";
+                            break;
                         }
-                    } catch{}
-                        s += '<br/><span style="color: #F2BA0F;">ampere: </span>' + ampere;
+                     }
+
+                    s += '<br/><span style="color: #F2BA0F;">ampere: </span>' + ampere;
                     return s;
                 }
         },
@@ -823,17 +822,16 @@ function setButtonVisbilty() {
         tooltip: {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
-
                     var ampere = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GAmpereL3[i][0] ==  this.x ) { // timestamp
-                                ampere = GAmpereL3[i][1].toFixed(0) + " A";
-                                break;
-                            }
+
+                    for (var i=0,  tot=GAmpereL3.length; i < tot; i++) {
+                        if ( GAmpereL3[i][0] ==  this.x ) { // timestamp
+                            ampere = GAmpereL3[i][1].toFixed(0) + " A";
+                            break;
                         }
-                    } catch{}
-                        s += '<br/><span style="color: #CC6600;">ampere: </span>' + ampere;
+                     }
+
+                    s += '<br/><span style="color: #CC6600;">ampere: </span>' + ampere;
                     return s;
                 }
         },
@@ -856,15 +854,15 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
                     var volt = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GVoltL1[i][0] ==  this.x ) { // timestamp
-                                volt = GVoltL1[i][1].toFixed(1) + " V";
-                                break;
-                            }
+
+                    for (var i=0,  tot=GVoltL1.length; i < tot; i++) {
+                        if ( GVoltL1[i][0] ==  this.x ) { // timestamp
+                            volt = GVoltL1[i][1].toFixed(0) + " V";
+                            break;
                         }
-                    } catch{}
-                        s += '<br/><span style="color: #55BF3B;">volt: </span>' + volt;
+                    }
+
+                    s += '<br/><span style="color: #55BF3B;">volt: </span>' + volt;
                     return s;
                 }
         },
@@ -887,15 +885,15 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
                     var volt = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GVoltL2[i][0] ==  this.x ) { // timestamp
-                                volt = GVoltL2[i][1].toFixed(1) + " V";
-                                break;
-                            }
+                   
+                    for (var i=0,  tot=GVoltL2.length; i < tot; i++) {
+                        if ( GVoltL2[i][0] ==  this.x ) { // timestamp
+                            volt = GVoltL2[i][1].toFixed(0) + " V";
+                            break;
                         }
-                    } catch{}
-                        s += '<br/><span style="color: #55BF3B;">volt: </span>' + volt;
+                    }
+
+                    s += '<br/><span style="color: #55BF3B;">volt: </span>' + volt;
                     return s;
                 }
         },
@@ -920,15 +918,15 @@ function setButtonVisbilty() {
                 formatter: function() {
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M:%S', this.x ) +'</b>';
                     var volt = text_unknown;
-                    try {
-                        for (var i=0,  tot=this.series.xData.length; i < tot; i++) {
-                            if ( GVoltL3[i][0] ==  this.x ) { // timestamp
-                                volt = GVoltL3[i][1].toFixed(1) + " V";
-                                break;
-                            }
+                   
+                    for (var i=0,  tot=GVoltL3.length; i < tot; i++) {
+                        if ( GVoltL3[i][0] ==  this.x ) { // timestamp
+                            volt = GVoltL3[i][1].toFixed(0) + " V";
+                            break;
                         }
-                    } catch{}
-                        s += '<br/><span style="color: #55BF3B;">volt: </span>' + volt;
+                    }
+
+                    s += '<br/><span style="color: #55BF3B;">volt: </span>' + volt;
                     return s;
                 }
         },

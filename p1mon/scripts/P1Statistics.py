@@ -195,8 +195,8 @@ def calc_water(mode=1):
         select_sql = "select DATA_ID, TIMESTAMP_START, TIMESTAMP_STOP from " + const.DB_STATISTICS_TAB + " WHERE MODE == " + str(mode) + " and ACTIVE == 1 and DATA_ID >14 and DATA_ID <20"
         flog.debug ( inspect.stack()[0][3] + ": sql: " + str(select_sql) )
    
-        recs = statistics_db.select_rec( select_sql  )
-        #flog.debug ( inspect.stack()[0][3] + ": sql query records found : " + str(recs) )
+        recs = statistics_db.select_rec( select_sql )
+        flog.debug ( inspect.stack()[0][3] + ": sql query records found : " + str(recs) )
         if len(recs) > 0: # some records are active 
 
             for rec in recs:
@@ -220,7 +220,6 @@ def calc_water(mode=1):
                 #print ( int(rec[0]) )
                 timeperiod_id = get_timeperiod_id(index=int(rec[0]))
 
-               
                 try:
                    
                     sql_query = "select " + aggregate + "(VERBR_PER_TIMEUNIT) from " + const.DB_WATERMETERV2_TAB + " where timeperiod_id = " + timeperiod_id + sql_timestamp_start + sql_timestamp_stop
@@ -228,7 +227,11 @@ def calc_water(mode=1):
                     rec_aggregate = watermeter_db.select_rec( sql_query )
                     #print ( rec_aggregate )
 
-                    update_statistic_db(value=str(rec_aggregate[0][0]), data_id=str(int(rec[0])), mode=mode) 
+                    value = rec_aggregate[0][0]
+                    if value == None:
+                        value = 0  # reset the value if no data is found, otherwise the data is misunderstood
+
+                    update_statistic_db(value=str(value), data_id=str(int(rec[0])), mode=mode) 
 
                 except Exception as e:
                     flog.warning( inspect.stack()[0][3] + ": sql update error average record for table " + str(sql_table_name) + " ." + str(e) )
@@ -251,7 +254,7 @@ def calc_kwh_gas(mode=1):
         flog.debug ( inspect.stack()[0][3] + ": sql: " + str(select_sql) )
    
         recs = statistics_db.select_rec( select_sql  )
-        #flog.debug ( inspect.stack()[0][3] + ": sql query records found : " + str(recs) )
+        flog.debug ( inspect.stack()[0][3] + ": sql query records found : " + str(recs) )
         if len(recs) > 0: # some records are active 
 
             for rec in recs:
@@ -275,14 +278,20 @@ def calc_kwh_gas(mode=1):
                      sql_timestamp_stop = " where TIMESTAMP <= '" + str(sql_timestamp_stop) + "'"
 
                 #print ( int(rec[0]) )
-                field = get_fields(index=int(rec[0]))
+                field = get_db_fields_kwh_gas(index=int(rec[0]))
 
                 try:
                     sql_query = "select " + aggregate + "(" + field + ") from " + sql_table_name + sql_timestamp_start + sql_timestamp_stop 
                     flog.debug ( inspect.stack()[0][3] + ": sql_query -> " + str(sql_query ) )
                     rec_aggregate = e_db_history.select_rec( sql_query )
 
-                    update_statistic_db(value=str(rec_aggregate[0][0]), data_id=str(int(rec[0])), mode=mode)
+                    flog.debug ( inspect.stack()[0][3] + ": rec_aggregate sql query records found : " + str(rec_aggregate) )
+
+                    value = rec_aggregate[0][0]
+                    if value == None:
+                        value = 0  # reset the value if no data is found, otherwise the data is misunderstood
+                    
+                    update_statistic_db(value=str(value), data_id=str(int(rec[0])), mode=mode)
 
                 except Exception as e:
                     flog.warning( inspect.stack()[0][3] + ": sql query error average record for table " + str(sql_table_name) + " ." + str(e) )
@@ -301,7 +310,7 @@ def update_statistic_db(value=None, data_id=None, mode=None):
         flog.debug ( inspect.stack()[0][3] + ": sql_update -> " + str(sql_update ))
         statistics_db.execute( sql_update )
     except Exception as e:
-            flog.warning( inspect.stack()[0][3] + ": sql update error average record for table " + str(sql_table_name) + " ." + str(e) )
+        flog.warning( inspect.stack()[0][3] + ": sql update error average record for table " + str(sql_update) + " ." + str(e) )
 
 
 ########################################################
@@ -335,25 +344,25 @@ def get_timeperiod_id(index=0):
         pass
 
     return ret_value
-     
+
 
 ########################################################
 # get database field name needed                       #
 ########################################################
-def get_fields(index=0):
+def get_db_fields_kwh_gas(index=0):
 
     ret_value = "FIELD_NOT_FOUND" 
 
     field_indexed = {
-        1:  "GELVR_KWH_X",
-        2:  "GELVR_KWH_X",
-        3:  "GELVR_KWH_X",
-        4:  "GELVR_KWH_X",
-        5:  "GELVR_KWH_X",
-        6:  "VERBR_KWH_X",
-        7:  "VERBR_KWH_X",
-        8:  "VERBR_KWH_X",
-        6:  "VERBR_KWH_X",
+        1:  "VERBR_KWH_X",
+        2:  "VERBR_KWH_X",
+        3:  "VERBR_KWH_X",
+        4:  "VERBR_KWH_X",
+        5:  "VERBR_KWH_X",
+        6:  "GELVR_KWH_X",
+        7:  "GELVR_KWH_X",
+        8:  "GELVR_KWH_X",
+        6:  "GELVR_KWH_X",
         7:  "GELVR_KWH_X",
         9:  "GELVR_KWH_X",
         10: "GELVR_KWH_X",

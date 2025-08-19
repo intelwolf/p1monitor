@@ -89,7 +89,7 @@ function createWaterUsageChart() {
                         legendItemClick: function (event) {
                             console.log(this.index)
                             if  ( this.index === 0 ) {
-                                toLocalStorage('watermeter-min-verbr-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('watermeter-min-verbr-visible',this.visible);  // #PARAMETER
                             }
                         }
                     }
@@ -213,8 +213,8 @@ function createWaterUsageChart() {
                 offset: 0,
                 opposite: false,
                 labels: {
-                    //useHTML: true,
-                    format: '{value} L',
+                    useHTML: true,
+                    format: '{value}&nbsp;L',
                     style: {
                         color: '#6E797C'
                     },
@@ -262,7 +262,12 @@ function createWaterUsageChart() {
             navigator: {
                 xAxis: {
                     dateTimeLabelFormats: {
-                        day: '%d %B'
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%B<br/>%Y',
+                        month: '%B<br/>%Y',
+                        year: '%Y'
                     }
                 },
                 enabled: true,
@@ -272,9 +277,6 @@ function createWaterUsageChart() {
                     backgroundColor: '#384042',
                     borderColor: '#6E797C',
                     enabled: false
-                },
-                series: {
-                    color: '#10D0E7'
                 }
             },
             series: [ 

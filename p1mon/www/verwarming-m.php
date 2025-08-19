@@ -126,33 +126,25 @@ function createChart() {
         title: {
             text: null
         },
-
         navigator: {
             xAxis: {
-                type: 'datetime',
                 dateTimeLabelFormats: {
-                    day: '%a.<br>%d %B<br/>%Y',
+                    second: '%H:%M:%S',
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: '%B<br/>%Y',
                     month: '%B<br/>%Y',
                     year: '%Y'
                 }
-            },  
+            },
             enabled: true,
             outlineColor: '#384042',
             outlineWidth: 1,
             handles: {
                 backgroundColor: '#384042',
-                borderColor: '#6E797C'
-            },
-            series:[
-                {
-                    color: '#507ABF'
-                }, 
-                {
-                    color: '#384042'
-                }
-            ]
+                borderColor: '#6E797C',
+            }
         },
-
         xAxis: {
             type: 'datetime', 
             minTickInterval: 600000, 
@@ -385,7 +377,6 @@ function createChart() {
         },
         series: [
             {
-                showInNavigator: true,
                 yAxis: 0,
                 dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[0],
@@ -404,7 +395,6 @@ function createChart() {
                 } 
             },{
                 visible: GseriesVisibilty[1],
-                showInNavigator: true,
                 name: GserieNames[1],
                 data: GrangeInAvg,
                 type: 'spline',
@@ -420,7 +410,6 @@ function createChart() {
             {
                 dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[2],
-                showInNavigator: true,
                 name: GserieNames[2],
                 data: GrangeOut,
                 type: 'areasplinerange',
@@ -437,7 +426,6 @@ function createChart() {
             },
             {
                 visible: GseriesVisibilty[3],
-                showInNavigator: true,
                 name: GserieNames[3],
                 data: GrangeOutAvg,
                 type: 'spline',
@@ -459,16 +447,16 @@ function createChart() {
                     legendItemClick: function () {
                         // console.log('legendItemClick index='+this.index);
                         if ( this.index === 0 ) {
-                            toLocalStorage('verwarming-m-in-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('verwarming-m-in-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 1 ) {
-                            toLocalStorage('verwarming-m-in-gem-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('verwarming-m-in-gem-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 2 ) {
-                            toLocalStorage('verwarming-m-uit-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('verwarming-m-uit-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 3 ) {
-                            toLocalStorage('verwarming-m-uit-gem-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('verwarming-m-uit-gem-visible',this.visible); // #PARAMETER
                         }
                     }
                 }

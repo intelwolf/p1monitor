@@ -170,31 +170,22 @@ function createGasChart() {
         },
         navigator: {
             xAxis: {
-            //min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
-            //minTickInterval:       24 * 3600000,  
-            //maxRange:         30 * 24 * 3600000,
-            type: 'datetime',
-            dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
-                month: '%B<br/>%Y',
-                year: '%Y'
-            }
+                dateTimeLabelFormats: {
+                    second: '%H:%M:%S',
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: '%B<br/>%Y',
+                    month: '%B<br/>%Y',
+                    year: '%Y'
+                }
             },
             enabled: true,
             outlineColor: '#384042',
             outlineWidth: 1,
             handles: {
-            backgroundColor: '#384042',
-            borderColor: '#6E797C'
-            },
-            series:[ 
-                {
-                    color: '#507ABF'
-                }, 
-                {
-                    color: '#384042'
-                }
-            ]
+                backgroundColor: '#384042',
+                borderColor: '#6E797C',
+            }
         },
         xAxis: {
             type: 'datetime',
@@ -451,7 +442,6 @@ function createGasChart() {
         {
             yAxis: 0,
             visible: GseriesVisibilty[0],
-            showInNavigator: true,
             name: 'm3 ' + text_gas,
             type: 'column',
             color: '#507ABF',
@@ -461,7 +451,6 @@ function createGasChart() {
         {
             yAxis: 1,
             visible: GseriesVisibilty[1],
-            showInNavigator: true,
             name: text_temperature,
             data: Gaverages,
             type: 'spline',
@@ -496,7 +485,6 @@ function createGasChart() {
         {
             yAxis: 2,
             visible: GseriesVisibilty[3],
-            showInNavigator: false,
             name: text_graaddagen,
             data: GDegreeDays,
             type: 'spline',
@@ -517,13 +505,13 @@ function createGasChart() {
                     legendItemClick: function () {
                         // console.log('legendItemClick index='+this.index);
                         if ( this.index === 0 ) {
-                        toLocalStorage('stat-h-gas-visible',!this.visible); // #PARAMETER
+                        toLocalStorage('stat-h-gas-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 1 ) {
-                        toLocalStorage('stat-h-gas-temp-visible',!this.visible); // #PARAMETER
+                        toLocalStorage('stat-h-gas-temp-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 3 ) {
-                        toLocalStorage('stat-h-gas-graaddagen-visible',!this.visible); // #PARAMETER
+                        toLocalStorage('stat-h-gas-graaddagen-visible',this.visible); // #PARAMETER
                         }
                     }
                 }

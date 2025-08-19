@@ -356,7 +356,6 @@ function createMeterReadingsChart() {
             id: 'dal_ver',
             yAxis: 0,
             visible: GseriesVisibilty[0],
-            showInNavigator: true,
             name: text_low_consumption,
             type: 'spline',
             color: '#CEA731',
@@ -366,7 +365,6 @@ function createMeterReadingsChart() {
             id: 'piek_ver',
             yAxis: 0,
             visible: GseriesVisibilty[1],
-            showInNavigator: true,
             name: text_high_consumption,
             type: 'spline',
             color: '#FFC311',
@@ -377,7 +375,6 @@ function createMeterReadingsChart() {
             yAxis: 0,
             dashStyle: 'ShortDashDotDot',
             visible: GseriesVisibilty[2],
-            showInNavigator: true,
             name: text_total_consumed,
             type: 'spline',
             color: '#E9B620',
@@ -387,7 +384,6 @@ function createMeterReadingsChart() {
             id: 'netto_dal_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[3],
-            showInNavigator: true,
             name: text_net_low_produced,
             type: 'spline',
             color: '#7FAD1D',
@@ -397,7 +393,6 @@ function createMeterReadingsChart() {
             id: 'netto_piek_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[4],
-            showInNavigator: true,
             name: text_net_high_produced,
             type: 'spline',
             color: '#98D023',
@@ -408,7 +403,6 @@ function createMeterReadingsChart() {
             yAxis: 0,
             dashStyle: 'ShortDashDotDot',
             visible: GseriesVisibilty[5],
-            showInNavigator: true,
             name: text_net_total_produced,
             type: 'spline',
             color: '#8ABD20',
@@ -418,7 +412,6 @@ function createMeterReadingsChart() {
             id: 'bruto_dal_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[6],
-            showInNavigator: true,
             name: text_gross_low_produced,
             type: 'spline',
             color: '#7FAD1D',
@@ -429,7 +422,6 @@ function createMeterReadingsChart() {
             id: 'bruto_piek_geleverd',
             yAxis: 0,
             visible: GseriesVisibilty[7],
-            showInNavigator: true,
             name: text_gross_high_produced,
             type: 'spline',
             color: '#98D023',
@@ -440,7 +432,6 @@ function createMeterReadingsChart() {
             yAxis: 0,
             dashStyle: 'ShortDashDotDot',
             visible: GseriesVisibilty[8],
-            showInNavigator: true,
             name: text_gross_total_produced,
             type: 'spline',
             color: '#8ABD20',
@@ -448,36 +439,37 @@ function createMeterReadingsChart() {
     }],
     plotOptions: {
         series: {
+            showInNavigator: true,
             events: {
             legendItemClick: function () {
                 //console.log('legendItemClick index='+this.index);
                 
                 if ( this.index === 0 ) {
-                    toLocalStorage('meterreadings-d-consumptionKwhLow',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-consumptionKwhLow',this.visible); // #PARAMETER
                 }
                 if ( this.index === 1 ) {
-                    toLocalStorage('meterreadings-d-consumptionKwhHigh',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-consumptionKwhHigh',this.visible); // #PARAMETER
                 }
                 if ( this.index === 2 ) {
-                    toLocalStorage('meterreadings-d-consumptionKwhTotal',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-consumptionKwhTotal',this.visible); // #PARAMETER
                 }
                 if ( this.index === 3 ) {
-                    toLocalStorage('meterreadings-d-productionKwhLow',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-productionKwhLow',this.visible); // #PARAMETER
                 }
                 if ( this.index === 4 ) {
-                    toLocalStorage('meterreadings-d-productionKwhHigh',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-productionKwhHigh',this.visible); // #PARAMETER
                 }
                 if ( this.index === 5 ) {
-                    toLocalStorage('meterreadings-d-productionKwhTotal',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-productionKwhTotal',this.visible); // #PARAMETER
                 }
                 if ( this.index === 6 ) {
-                    toLocalStorage('meterreadings-d-productionKwhLowGross',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-productionKwhLowGross',this.visible); // #PARAMETER
                 }
                 if ( this.index === 7 ) {
-                    toLocalStorage('meterreadings-d-productionKwhHighGross',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-productionKwhHighGross',this.visible); // #PARAMETER
                 }
                 if ( this.index === 8 ) {
-                    toLocalStorage('meterreadings-d-productionKwhHTotalGross',!this.visible); // #PARAMETER
+                    toLocalStorage('meterreadings-d-productionKwhTotalGross',this.visible); // #PARAMETER
                 }
             }
             }
@@ -536,6 +528,8 @@ $(function() {
     GseriesVisibilty[6] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhLowGross'));   // #PARAMETER
     GseriesVisibilty[7] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhHighGross'));  // #PARAMETER
     GseriesVisibilty[8] = JSON.parse(getLocalStorage('meterreadings-d-productionKwhTotalGross')); // #PARAMETER
+
+    
 
     Gselected = parseInt(getLocalStorage('select-meterreadings-d-kwh-index'),10); // #PARAMETER
 

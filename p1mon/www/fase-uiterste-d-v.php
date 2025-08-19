@@ -138,10 +138,12 @@ function createChart() {
         },
         navigator: {
             xAxis: {
-                type: 'datetime',
                 dateTimeLabelFormats: {
-                    day:  '%a.<br>%d %B<br/>%Y',
-                    month:'%B<br/>%Y',
+                    second: '%H:%M:%S',
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: '%B<br/>%Y',
+                    month: '%B<br/>%Y',
                     year: '%Y'
                 }
             },
@@ -150,8 +152,8 @@ function createChart() {
             outlineWidth: 1,
             handles: {
                 backgroundColor: '#384042',
-                borderColor: '#6E797C'
-            },
+                borderColor: '#6E797C',
+            }
         },
         xAxis: {
             type: 'datetime', 
@@ -344,7 +346,6 @@ function createChart() {
         },
         series: [
             {
-                showInNavigator: true,
                 yAxis: 0,
                 dashStyle: 'Solid',
                 visible: GseriesVisibilty[0],
@@ -356,7 +357,6 @@ function createChart() {
                 fillOpacity: 0.33,
             },
             {
-                showInNavigator: true,
                 yAxis: 0,
                 dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[1],
@@ -368,7 +368,6 @@ function createChart() {
                 fillOpacity: 0.33,
             },
             {
-                showInNavigator: true,
                 yAxis: 0,
                 dashStyle: 'ShortDash',
                 visible: GseriesVisibilty[2],
@@ -400,13 +399,16 @@ function createChart() {
                     legendItemClick: function () {
                         // console.log('legendItemClick index='+this.index);
                         if ( this.index === 0 ) {
-                            toLocalStorage('fase-uiterste-d-v-L1',!this.visible); // #PARAMETER
+                            toLocalStorage('fase-uiterste-d-v-L1',this.visible); // #PARAMETER
                         }
                         if ( this.index === 1 ) {
-                            toLocalStorage('fase-uiterste-d-v-L2',!this.visible); // #PARAMETER
+                            toLocalStorage('fase-uiterste-d-v-L2',this.visible); // #PARAMETER
                         }
                         if ( this.index === 2 ) {
-                            toLocalStorage('fase-uiterste-d-v-L3',!this.visible); // #PARAMETER
+                            toLocalStorage('fase-uiterste-d-v-L3',this.visible); // #PARAMETER
+                        }
+                        if ( this.index === 3 ) {
+                            toLocalStorage('fase-uiterste-d-v-limits',this.visible); // #PARAMETER
                         }
                     }
                 }
@@ -453,6 +455,9 @@ $(function() {
     GseriesVisibilty[0] = JSON.parse(getLocalStorage('fase-uiterste-d-v-L1'));
     GseriesVisibilty[1] = JSON.parse(getLocalStorage('fase-uiterste-d-v-L2'));
     GseriesVisibilty[2] = JSON.parse(getLocalStorage('fase-uiterste-d-v-L3'));
+    GseriesVisibilty[3] = JSON.parse(getLocalStorage('fase-uiterste-d-v-limits'));
+
+    
     Gselected = parseInt(getLocalStorage('fase-uiterste-d-select-v-index'),10);
 
     Highcharts.setOptions({

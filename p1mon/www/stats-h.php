@@ -128,16 +128,16 @@ function createKwhChart() {
                         legendItemClick: function (event) {
                             //console.log(this.index)
                             if  ( this.index === 0 ) {
-                                toLocalStorage('stat-h-verbr-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-h-verbr-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 1 ) {
-                                toLocalStorage('stat-h-gelvr-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-h-gelvr-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 2 ) {
-                                toLocalStorage('stat-h-netto-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-h-netto-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 3 ) {
-                                toLocalStorage('stat-h-temp-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-h-temp-visible',this.visible);  // #PARAMETER
                             }
                         }
                     }
@@ -371,15 +371,17 @@ function createKwhChart() {
             borderColor: '#DCE1E3',
             crosshairs: [true, true],
             borderWidth: 1
-            },  
+            },
             navigator: {
                 xAxis: {
-                    //min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
-                    //minTickInterval:       24 * 3600000,  
-                    //maxRange:         30 * 24 * 3600000,
                     dateTimeLabelFormats: {
-                        day: '%d %B'
-                    }    
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%B<br/>%Y',
+                        month: '%B<br/>%Y',
+                        year: '%Y'
+                    }
                 },
                 enabled: true,
                 outlineColor: '#384042',
@@ -388,9 +390,6 @@ function createKwhChart() {
                     backgroundColor: '#384042',
                     borderColor: '#6E797C'
                 },
-                series: {
-                    color: '#10D0E7'
-                }
             },
             series: [ 
                 {

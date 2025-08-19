@@ -134,23 +134,23 @@ function createMeterReadingsChart() {
     },
     navigator: {
         xAxis: {
-            minTickInterval:  1 * 24 * 3600000, 
-            maxRange:        25 * 365 * 24 * 3600000,
-            type: 'datetime',
             dateTimeLabelFormats: {
-                day: '%a.<br>%d %B<br/>%Y',
+                second: '%H:%M:%S',
+                minute: '%H:%M',
+                hour: '%H:%M',
+                day: '%B<br/>%Y',
                 month: '%B<br/>%Y',
                 year: '%Y'
-            } 
-        },  
+            }
+        },
         enabled: true,
         outlineColor: '#384042',
         outlineWidth: 1,
         handles: {
             backgroundColor: '#384042',
-            borderColor: '#6E797C'
-        },
-    },   
+            borderColor: '#6E797C',
+        }
+    },
     xAxis: {
         type: 'datetime',
         minTickInterval: 1   * 24 * 3600000, 
@@ -292,12 +292,11 @@ function createMeterReadingsChart() {
             },
             itemDistance: 5
         },
-        series: [ 
+        series: [
             {
                 id: 'gas_ver',
                 yAxis: 0,
                 visible: GseriesVisibilty[0],
-                showInNavigator: true,
                 name: text_gas_consumed,
                 type: 'spline',
                 color: '#507ABF',
@@ -308,7 +307,6 @@ function createMeterReadingsChart() {
                 id: 'water_ver',
                 yAxis: 0,
                 visible: GseriesVisibilty[1],
-                showInNavigator: true,
                 name: text_water_consumption,
                 type: 'spline',
                 color: '#6699FF',
@@ -316,19 +314,20 @@ function createMeterReadingsChart() {
             },
         ],
         plotOptions: {
-        series: {
-            events: {
-            legendItemClick: function () {
-                //console.log('legendItemClick index='+this.index);
-                if ( this.index === 0 ) {
-                    toLocalStorage('meterreadings-d-consumptionKwhGas',!this.visible); // #PARAMETER
+            series: {
+                showInNavigator: true,
+                events: {
+                legendItemClick: function () {
+                    //console.log('legendItemClick index='+this.index);
+                    if ( this.index === 0 ) {
+                        toLocalStorage('meterreadings-d-consumptionKwhGas',this.visible); // #PARAMETER
+                    }
+                    if ( this.index === 1 ) {
+                        toLocalStorage('meterreadings-d-consumptionWater',this.visible); // #PARAMETER
+                    }
                 }
-                if ( this.index === 1 ) {
-                    toLocalStorage('meterreadings-d-consumptionWater',!this.visible); // #PARAMETER
                 }
             }
-            }
-        }
         },
   });
   

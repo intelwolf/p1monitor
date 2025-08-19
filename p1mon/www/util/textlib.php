@@ -2700,8 +2700,19 @@ Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'arge
     'dynamisch tarieven','dynamic tariffs','tarifs dynamiques'
 ),
 /* 763 */ array(
+    'geen statistiek berekeningen ingesteld.','no statistics calculations set.','aucun calcul statistique défini.'
+),
+/* 764 */ array(
     '','',''
 ),
+/* 765 */ array(
+    '','',''
+),
+/* 766 */ array(
+    '','',''
+),
+
+
 );
 
     $language_index = languageIndex();

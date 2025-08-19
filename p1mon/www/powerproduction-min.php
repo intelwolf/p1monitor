@@ -100,16 +100,16 @@ function createKwhChart() {
                     events: {
                         legendItemClick: function (event) {
                             if  ( this.index === 0 ) {
-                                toLocalStorage('powerprod-min-high-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-min-high-tariff-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 1 ) {
-                                toLocalStorage('powerprod-min-low-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-min-low-tariff-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 2 ) {
-                                toLocalStorage('powerprod-min-high-prognose-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-min-high-prognose-tariff-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 3 ) {
-                                toLocalStorage('powerprod-min-low-prognose-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-min-low-prognose-tariff-visible',this.visible);  // #PARAMETER
                             }
                         }
                     }
@@ -309,8 +309,13 @@ function createKwhChart() {
             navigator: {
                 xAxis: {
                     dateTimeLabelFormats: {
-                        day: '%d %B'    
-                    }    
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%B<br/>%Y',
+                        month: '%B<br/>%Y',
+                        year: '%Y'
+                    }
                 },
                 enabled: true,
                 outlineColor: '#384042',
@@ -320,9 +325,6 @@ function createKwhChart() {
                     borderColor: '#6E797C',
                     enabled: false
                 },
-                series: {
-                    color: '#10D0E7'
-                }
             },
             series: [
             {

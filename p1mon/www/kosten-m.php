@@ -190,28 +190,28 @@ function createCostChart() {
                         //console.log(event);
                         
                         if  ( this.index === 0 ) {
-                            toLocalStorage('cost-m-verbr-piek-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-verbr-piek-visible',this.visible); // #PARAMETER
                         }
                         if  ( this.index === 1 ) {
-                            toLocalStorage('cost-m-verbr-dal-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-verbr-dal-visible',this.visible); // #PARAMETER
                         }
                         if  ( this.index === 2 ) {
-                            toLocalStorage('cost-m-gelvr-piek-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-gelvr-piek-visible',this.visible); // #PARAMETER
                         }
                         if  ( this.index === 3 ) {
-                            toLocalStorage('cost-m-gelvr-dal-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-gelvr-dal-visible',this.visible); // #PARAMETER
                         }
                         if  ( this.index === 4 ) {
-                            toLocalStorage('cost-m-gelvr-gas-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-gelvr-gas-visible',this.visible); // #PARAMETER
                         }
                         if  ( this.index === 5 ) {
-                            toLocalStorage('cost-m-gelvr-water-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-gelvr-water-visible',this.visible); // #PARAMETER
                         }
                         if  ( this.index === 6 ) {
-                            toLocalStorage('cost-m-max-cost-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-max-cost-visible',this.visible); // #PARAMETER
                         }  
                         if  ( this.index === 7 ) {
-                            toLocalStorage('cost-m-netto-cost-visible',!this.visible); // #PARAMETER
+                            toLocalStorage('cost-m-netto-cost-visible',this.visible); // #PARAMETER
                         } 
                         //updateData();
                     }
@@ -363,12 +363,8 @@ function createCostChart() {
                 color: '#6E797C'
             }]
         },
- 
         navigator: {
             xAxis: {
-                min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
-                minTickInterval:       30 * 24 * 3600000,  
-                maxRange:        120 * 30 * 24 * 3600000,
                 type: 'datetime',
                 dateTimeLabelFormats: {
                     day: '%B<br/>%Y',
@@ -383,9 +379,6 @@ function createCostChart() {
                 backgroundColor: '#384042',
                 borderColor: '#6E797C'
             },
-            series: {
-                color: '#10D0E7'
-            }
         },
         series: [
         {
@@ -430,6 +423,7 @@ function createCostChart() {
             data: GWaterDataGelvr
         },
         {
+            showInNavigator: false,
             id: 'cost_max',
             visible: GseriesVisibilty[6],
             type: 'line',

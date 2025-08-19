@@ -42,17 +42,16 @@ if ( isset($_POST[ "records"]) ) {
 <link type="text/css" rel="stylesheet" href="./css/p1mon.css">
 <link type="text/css" rel="stylesheet" href="./font/roboto/roboto.css">
 <link type="text/css" rel="stylesheet" href="./css/p1mon-1-tabulator.css" >
-<link type="text/css" rel="stylesheet" href="./js/flatpickr-link/flatpickr.min.css">
 <link type="text/css" rel="stylesheet" href="./js/flatpickr-link/p1monitor.css">
 
-<script defer src="./font/awsome/js/all.js"></script>
+<script src="./js/flatpickr-link/flatpickr.js"></script>
+<script src="./js/flatpickr-link/fr.js"></script>
+<script src="./js/flatpickr-link/nl.js"></script>
+<script src="./font/awsome/js/all.js"></script>
 <script src="./js/p1mon-selectors.js"></script>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
 <script src="./js/tabulator-dist/js/tabulator.min.js"></script>
-<script src="./js/flatpickr-link/flatpickr.js"></script>
-<script src="./js/flatpickr-link/fr.js"></script>
-<script src="./js/flatpickr-link/nl.js"></script>
 
 </head>
 <body>
@@ -62,6 +61,7 @@ if ( isset($_POST[ "records"]) ) {
     let languageIndex = <?php echo languageIndex();?>;
     var mylocale = 'nl';
     var dataProcessedCount = 0;
+    
 
     if ( languageIndex == 1) {
         mylocale = null
@@ -76,9 +76,11 @@ if ( isset($_POST[ "records"]) ) {
             const  jsonarr = JSON.parse(data);
 
             if ( jsonarr[0][1].length > 2 ) { // 2 is empty array
+                //console.log("readJsonApiStatus array is not empty.")
                 showStuff('processingdata');
                 setTimeout( function() { readJsonApiStatus() }, 500 );
             } else {
+                //console.log("readJsonApiStatus array empty.")
                 setTimeout( function() { records_table.replaceData(); }, 3000 ); // delay to prevent error messages.
                 setTimeout( function() { hideStuff('processingdata'); }, 5000 );
             }
@@ -95,7 +97,7 @@ if ( isset($_POST[ "records"]) ) {
         const MyRound = (n, decimals = 0) => Number(`${Math.round(`${n}e${decimals}`)}e-${decimals}`);
         const modeValidationText = 'in:' + selectorModeToText( mode=1, languageIndex=languageIndex ) + '|' + selectorModeToText( mode=2, languageIndex=languageIndex ) + '|' + selectorModeToText( mode=3, languageIndex=languageIndex ) + '|' + selectorModeToText( mode=4, languageIndex=languageIndex )
 
-        var dateEditor = (cell, onRendered, success, cancel, editorParams) => {
+         var dateEditor = (cell, onRendered, success, cancel, editorParams) => {
 
             var editor = document.createElement("input");
             editor.value = cell.getValue();
@@ -111,6 +113,7 @@ if ( isset($_POST[ "records"]) ) {
                 dateFormat: "Y-m-d H:i",
                 defaultDate: [current_timestamp],
                 time_24hr: true,
+                defaultHour: 0,
                 locale:mylocale,
                 onReady: function ( dateObj, dateStr, instance ) {
                     const $clear = $( '<div><button class="input-2-weg button-5"><i class="color-menu fas fa-xl fa-trash-alt"></i><br><span class="color-menu text-27">&nbsp;wissen</span></button></div>' )
@@ -121,24 +124,33 @@ if ( isset($_POST[ "records"]) ) {
                 },
              });
 
-
             onRendered(() => {
-                //console.log("onRendered")
                 editor.focus();
             });
 
             function successFunc(){
+
+                if ( cell.getElement()== false ) {
+                    console.log("debug: false cell");
+                    return;
+                }
+
                 cell.setValue( editor.value );
                 success( cell.getValue() );
             }
 
+            function cancelFunction(){
+
+            }
+
             editor.addEventListener("change", successFunc );
-            editor.addEventListener("blur", successFunc );
+            editor.addEventListener("blur", cancelFunction );
 
             return editor;
 
         };
 
+        
         var modeMutator = function(value, data, type, params, component ) {
             return selectorTextToMode(text=data.mode_set, languageIndex=languageIndex)
         }
@@ -167,7 +179,7 @@ if ( isset($_POST[ "records"]) ) {
             ajaxURL:"./api/v1/statistics?json=object", 
             layout:"fitDataFill",
             maxHeight:"400px",
-            groupBy:"UPDATED",
+            //groupBy:"UPDATED",
             groupHeader: function(value, count, data, group){
                 return "<?php echo strIdx( 750 )?> " + value + "<span style='color:#0C7DAD; margin-left:10px;'>" + count +  " <?php echo strIdx( 751 )?> " + "</span>";
             },
@@ -193,7 +205,9 @@ if ( isset($_POST[ "records"]) ) {
                 {title:"type",
                     field:"type_set",
                     tooltip:function(e, cell, onRendered){
-                        return cell.getValue();
+                        //return cell.getValue();
+                        row = cell.getRow();
+                        return cell.getValue() + "( Data ID: " + row.getCell("DATA_ID").getValue() + ")"
                     },
                     width:160,
                     headerTooltip: "<?php echo strIdx( 743 )?>",
@@ -229,6 +243,7 @@ if ( isset($_POST[ "records"]) ) {
                     headerTooltip: "<?php echo strIdx( 744 )?>",
                     editor:dateEditor,
                     cellEdited:function(cell){
+                        dateFixer( cell );
                         checkTimestampSequence( cell );
                     },
                     tooltip:function(e, cell, onRendered){
@@ -237,12 +252,16 @@ if ( isset($_POST[ "records"]) ) {
                 },
                 {title:"<?php echo strIdx( 380 )?>",
                     field:"TIMESTAMP_STOP", 
-                    editor:"datetime", 
+                    //editor:"datetime", 
                     width: 160,
                     headerTooltip: "<?php echo strIdx( 745 )?>",
                     editor:dateEditor,
                     cellEdited:function( cell ){
+                        dateFixer( cell );
                         checkTimestampSequence( cell );
+                    },
+                    tooltip:function(e, cell, onRendered){
+                        return cell.getValue()
                     },
                 },
                 { title:"Mode #",
@@ -269,10 +288,12 @@ if ( isset($_POST[ "records"]) ) {
                     width:90,
                     headerTooltip: "<?php echo strIdx( 747 )?>",
                     tooltip:function(e, cell, onRendered){
-                        return MyRound(cell.getValue(), 3)
+                        //return MyRound(cell.getValue(), 3)
+                        return MyRound(cell.getValue(), 3) + " (" + row.getCell("UPDATED").getValue() + ")"
                     },
                     formatter:function(cell, formatterParams, onRendered){
-                        return MyRound(cell.getValue(), 3)
+                        row = cell.getRow();
+                        return MyRound(cell.getValue(), 3);
                     },
                 },
                 {title:"<?php echo strIdx( 750 )?>",
@@ -330,23 +351,36 @@ if ( isset($_POST[ "records"]) ) {
             ],
         });
 
+
+
         var dataProcessedEvent = function( data ){
                 //data has been loaded
                 dataProcessedCount++; 
     
                 if ( dataProcessedCount > 1 ) { // only do if after the reload, so only the real changes are processed.
                     // only activated after the data is initially is loaded
+
                     records_table.on("cellEdited", function( cell) {
                       
+                        //console.log( "dataProcessedEvent");
+
                         row = cell.getRow();
-    
+
+                        var start_timestamp = row.getCell("TIMESTAMP_START").getValue();
+                        var stop_timestamp = row.getCell("TIMESTAMP_STOP").getValue();
+                        if ( start_timestamp.length > 0) {
+                            start_timestamp = start_timestamp + ":00";
+                        }
+                        if ( stop_timestamp.length > 0 ) {
+                            stop_timestamp = stop_timestamp + ":00";
+                        }
                         var record = {
                             "temp_id":row.getCell("temp_id").getValue(),
                             "ID":row.getCell("ID").getValue(),
                             "DATA_ID":row.getCell("DATA_ID").getValue(),
                             //"type_set":row.getCell("type_set").getValue(),
-                            "TIMESTAMP_START":row.getCell("TIMESTAMP_START").getValue(),
-                            "TIMESTAMP_STOP":row.getCell("TIMESTAMP_STOP").getValue(),
+                            "TIMESTAMP_START":start_timestamp ,
+                            "TIMESTAMP_STOP":stop_timestamp,
                             "MODE":row.getCell("MODE").getValue(),
                             //"VALUE":row.getCell("VALUE").getValue(),
                             //"UPDATED":row.getCell("UPDATED").getValue(),
@@ -354,7 +388,6 @@ if ( isset($_POST[ "records"]) ) {
                             "DELETE":row.getCell("DELETE").getValue()
                         }
                         
-
                         var index = -1; // location of the record, if any
 
                         if ( record["ID"] !== undefined ) { // process existing records
@@ -380,20 +413,64 @@ if ( isset($_POST[ "records"]) ) {
                         }
 
                     });
+
+                    
+
                 }
         }
 
         records_table.on("dataProcessed", dataProcessedEvent);
+
+    }
+
+
+    // cut not needed timestamp values.
+    function dateFixer( cell ) {
+    
+        try {
+            row = cell.getRow();
+             const data_id= row.getCell("DATA_ID").getValue()
+             //console.log( data_id );
+
+            var timestamp = cell.getValue();
+
+            //console.log ( timestamp.length, timestamp  );
+
+            if ( timestamp.length != 16) {
+                return //not a valid timestamp 
+            }
+
+            if ( data_id == 4 || data_id == 9 || data_id == 13 || data_id == 18 ) { 
+                //console.log("maand");
+                cell.setValue( timestamp.substring(0, 7) + "-01 00:00");
+            } else if ( data_id == 5 || data_id == 10 || data_id == 14 || data_id == 19 ) {
+                //console.log("jaar");
+                cell.setValue( timestamp.substring(0, 5) + "01-01 00:00");
+            }  else if ( data_id == 3 || data_id == 8 || data_id == 12 || data_id == 17 ) {
+                //console.log("dag");
+                cell.setValue( timestamp.substring(0, 10) + " 00:00");
+            } else if ( data_id == 2 || data_id == 7 || data_id == 11 || data_id == 16 ) {
+                //console.log("uur");
+                cell.setValue( timestamp.substring(0, 13) + ":00");
+            } 
+        } catch (error) {
+            console.error(error);
+        }
     }
 
 
     function checkTimestampSequence( cell ) {
         row = cell.getRow();
+
         cell_start = row.getCell("TIMESTAMP_START");
         cell_stop = row.getCell("TIMESTAMP_STOP");
+
         const start = cell_start.getValue();
         const stop  = cell_stop .getValue();
     
+        
+
+
         if ( start.length == 0 || stop.length == 0 ) {
             return
         } 
