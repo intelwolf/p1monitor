@@ -105,7 +105,7 @@ def MainProg():
     #rt_status_db.strset( '', 68,  flog )
     #rt_status_db.strset( '', 110, flog )
 
-    
+
     check_for_new_p1monitor_version()
     get_cpu_temperature()
     DuckDNS()
@@ -1552,16 +1552,19 @@ def check_for_new_p1monitor_version(forced=False):
         socket.setdefaulttimeout( 5 )
 
         url = const.ZTATZ_P1_VERSION_URL
-        #url =  "https://www.ztatz.nl/p1monitor/version-test.json" #TODO
+        #url =  "https://www.ztatz.nl/p1monitor/version-test.json"
         request = urllib.request.Request( url + "?" + const.P1_VERSIE  )
         response = urllib.request.urlopen(request)
         data = json.loads( response.read().decode('utf-8') )
-        #print ( data )
         msg_version = 1
+        msg_version = data[const.ZTATZ_P1_VERSION_MSG_VERSION ]
+        
+        #print ( data )
+
+        flog.info(inspect.stack()[0][3] + ' msg_version (1) = '+  str(msg_version) )
 
         if data[const.ZTATZ_P1_VERSION] != const.P1_VERSIE or data[const.ZTATZ_P1_VERSION_PATCH_VERSION] != const.P1_PATCH_LEVEL:
 
-            msg_version = data[const.ZTATZ_P1_VERSION_MSG_VERSION ]
             flog.info(inspect.stack()[0][3]+': nieuwe versie ' + str(data[const.ZTATZ_P1_VERSION]) +\
             ' beschikbaar van de P1 monitor software met versie serienummer ' + str(data[const.ZTATZ_P1_SERIAL_VERSION]) + ' JSON message versie ' +  str( msg_version) + ".")
 
@@ -1575,20 +1578,30 @@ def check_for_new_p1monitor_version(forced=False):
                 rt_status_db.strset( data[const.ZTATZ_P1_VERSION_DOWNLOAD_URL_PATCH],   134, flog )
                 rt_status_db.strset( data[const.ZTATZ_P1_VERSION_COMMENT],              135, flog )
 
+        flog.debug(inspect.stack()[0][3] + ' msg_version(2)  = '+  str(msg_version) )
+
+        # check version 
         if data[const.ZTATZ_P1_VERSION] != const.P1_VERSIE:
-            rt_status_db.strset( 1, 136, flog )
+            rt_status_db.strset( '1', 136, flog )
+            flog.debug(inspect.stack()[0][3] + ' url versie is anders = '+  str(data[const.ZTATZ_P1_VERSION]) )
         else:
-            rt_status_db.strset( 0, 136, flog )
+            flog.debug(inspect.stack()[0][3] + ' url versie is gelijk = '+  str(data[const.ZTATZ_P1_VERSION]) )
+            rt_status_db.strset( '0', 136, flog )
             rt_status_db.strset( '', 66,  flog )
             rt_status_db.strset( '', 67,  flog )
             rt_status_db.strset( '', 68,  flog )
             rt_status_db.strset( '', 110, flog )
 
-        if int(msg_version) > 1:
+        flog.debug(inspect.stack()[0][3] + ' const.ZTATZ_P1_VERSION_PATCH_VERSION]  = '+  str(data[const.ZTATZ_P1_VERSION_PATCH_VERSION]) )
+        flog.debug(inspect.stack()[0][3] + ' const.P1_PATCH_LEVEL  = ' +  str(const.P1_PATCH_LEVEL) )
+
+        if int( msg_version ) > 1:
             if data[const.ZTATZ_P1_VERSION_PATCH_VERSION] != const.P1_PATCH_LEVEL:
-                rt_status_db.strset( 1, 137, flog )
+                flog.debug(inspect.stack()[0][3] + ' url patch versie is anders = '+  str(data[const.ZTATZ_P1_VERSION_PATCH_VERSION]) )
+                rt_status_db.strset( '1', 137, flog )
             else:
-                rt_status_db.strset( 0,  137, flog )
+                flog.debug(inspect.stack()[0][3] + ' url patch versie is gelijk = '+  str(data[const.ZTATZ_P1_VERSION_PATCH_VERSION]) )
+                rt_status_db.strset( '0',137, flog )
                 rt_status_db.strset( '', 133, flog )
                 rt_status_db.strset( '', 134, flog )
                 rt_status_db.strset( '', 135, flog )

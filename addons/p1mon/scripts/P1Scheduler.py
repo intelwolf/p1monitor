@@ -66,7 +66,7 @@ def Main(argv):
 			
 		deleteJob(my_cron,ftp_backup_cronlabel)
 		try:
-			job = my_cron.new(command='/p1mon/scripts/pythonlaunch.sh P1Backup.py >/dev/null 2>&1', comment=ftp_backup_cronlabel)
+			job = my_cron.new(command='/p1mon/scripts/P1Backup >/dev/null 2>&1', comment=ftp_backup_cronlabel)
 			#job = my_cron.new(command='/p1mon/scripts/P1Backup.py', comment=ftp_backup_cronlabel)
 			job.setall(str(parts[0]), str(parts[1]), str(parts[2]), str(parts[3]), str(parts[4]))
 			my_cron.write()

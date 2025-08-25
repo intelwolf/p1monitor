@@ -41,6 +41,7 @@ AIDE_DIR_DATABASE           = '/db'
 AIDE_DIR_WIFI               = '/wifi'
 AIDE_DIR_CRONTAB            = '/cron'
 AIDE_DIR_NGINX              = '/nginx'
+AIDE_DIR_DHCP               = '/dhcp'
 AIDE_DIR_DNS                = '/dns'
 AIDE_DIR_LENCRYPT           = '/letsencrypt'
 AIDE_DIR_WWW                = '/www'
@@ -163,7 +164,6 @@ def restore( args=None ):
             except Exception as e:
                  flog.warning ( inspect.stack()[0][3] + ": database bestand " + str( source_file_name ) + " naar ram probleem -> " + str(e) )
 
-        
 
         # step 2 Ethernet config
         cmd = "/p1mon/scripts/P1EthernetConfig -c "
@@ -537,20 +537,22 @@ def save( ):
             write_status_to_file( msg )
             flog.info( msg )
 
-        # step 4: copy wifi config files
+        # step 4: copy wifi config files when the exists, to prevent warning messages do a check
+        # if the files exists. 
         try:
-            destination_filename_wifi = restore_path_wifi + "/" + pathlib.PurePath( wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH ).name + AIDE_EXT_CRYPTO
-            copy_and_crypto_file(
-                mode='encrypt',
-                source_pathfile=wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH, 
-                destination_pathfile=destination_filename_wifi,
-                flog=flog,
-                cryptoseed=CRYPTO_SEED,
-                )
+            if os.path.exists( wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH ):
+                destination_filename_wifi = restore_path_wifi + "/" + pathlib.PurePath( wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH ).name + AIDE_EXT_CRYPTO
+                copy_and_crypto_file(
+                    mode='encrypt',
+                    source_pathfile=wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH, 
+                    destination_pathfile=destination_filename_wifi,
+                    flog=flog,
+                    cryptoseed=CRYPTO_SEED,
+                    )
 
-            msg = "bestand " + pathlib.PurePath( wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH ).name + " gekopieerd naar folder " + restore_path_wifi + " op de usb drive."
-            write_status_to_file( msg )
-            flog.info( msg )
+                msg = "bestand " + pathlib.PurePath( wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH ).name + " gekopieerd naar folder " + restore_path_wifi + " op de usb drive."
+                write_status_to_file( msg )
+                flog.info( msg )
 
         except Exception as e:
             flog.warning( "Wifi configuratie niet te kopiëren (" + wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH + ") ->" + str(e) )
@@ -560,13 +562,13 @@ def save( ):
 
         try:
             # step 5 copy dhcp config file
-            destination_file = restore_path_dhcp + "/" + pathlib.PurePath( network_lib.DHCPCONFIG ).name 
-            flog.debug ( "source file =" + network_lib.DHCPCONFIG + " destination_file = " + destination_file )
-            shutil.copy2( network_lib.DHCPCONFIG, destination_file )
-            msg = "bestand " + pathlib.PurePath( network_lib.DHCPCONFIG ).name + " gekopieerd naar folder " + restore_path_dhcp + " op de usb drive."
-            write_status_to_file( msg )
-            flog.info( msg )
-        
+            if os.path.exists( network_lib.DHCPCONFIG ):
+                destination_file = restore_path_dhcp + "/" + pathlib.PurePath( network_lib.DHCPCONFIG ).name 
+                flog.debug ( "source file =" + network_lib.DHCPCONFIG + " destination_file = " + destination_file )
+                shutil.copy2( network_lib.DHCPCONFIG, destination_file )
+                msg = "bestand " + pathlib.PurePath( network_lib.DHCPCONFIG ).name + " gekopieerd naar folder " + restore_path_dhcp + " op de usb drive."
+                write_status_to_file( msg )
+                flog.info( msg )
         except Exception as e:
             flog.warning( "DHCP configuratie niet te kopiëren (" + network_lib.DHCPCONFIG + ") ->" + str(e) )
             write_status_to_file( str(e) )
@@ -576,12 +578,13 @@ def save( ):
 
         try:
             # step 6 save dns file
-            destination_file = restore_path_dns + "/" + pathlib.PurePath( network_lib.RESOLVCONFIG ).name 
-            flog.debug ( "source file =" + network_lib.RESOLVCONFIG + " destination_file = " + destination_file )
-            shutil.copy2( network_lib.RESOLVCONFIG , destination_file )
-            msg = "bestand " + pathlib.PurePath( network_lib.RESOLVCONFIG ).name + " gekopieerd naar folder " + restore_path_dns + " op de usb drive."
-            write_status_to_file( msg )
-            flog.info( msg )
+            if os.path.exists( network_lib.RESOLVCONFIG ):
+                destination_file = restore_path_dns + "/" + pathlib.PurePath( network_lib.RESOLVCONFIG ).name 
+                flog.debug ( "source file =" + network_lib.RESOLVCONFIG + " destination_file = " + destination_file )
+                shutil.copy2( network_lib.RESOLVCONFIG , destination_file )
+                msg = "bestand " + pathlib.PurePath( network_lib.RESOLVCONFIG ).name + " gekopieerd naar folder " + restore_path_dns + " op de usb drive."
+                write_status_to_file( msg )
+                flog.info( msg )
         except Exception as e:
             flog.warning( "DNS configuratie niet te kopiëren (" + network_lib.RESOLVCONFIG + ") ->" + str(e) )
             write_status_to_file( str(e) )
