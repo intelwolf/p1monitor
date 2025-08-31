@@ -301,11 +301,11 @@ class Device():
             self.flog.debug( FUNCTION_TAG + ": ifname = " + str(ifname))
             self.flog.debug( FUNCTION_TAG + ": wifi_name = " + str(name))
             self.flog.debug( FUNCTION_TAG + ": key_type = " + str(key_type))
-            if ip4gateway !=None:  
+            if ip4gateway != None:
                 self.flog.debug( FUNCTION_TAG + ": ip4 gateway = " + str(ip4gateway))
             else:
                 self.flog.debug( FUNCTION_TAG + ": ip4 gateway not set")
-            if ip4 !=None:  
+            if ip4 != None:
                 self.flog.debug( FUNCTION_TAG + ": ip4 address = " + str(ip4))
             else:
                 self.flog.debug( FUNCTION_TAG + ": ip4 address is not set")
@@ -327,10 +327,14 @@ class Device():
             if ip4gateway != None :
                   if len(ip4gateway) > 0:
                     cmd = cmd + ' gw4 ' + str(ip4gateway)
-            if ip4 != None :
+            
+            if ip4 != None:
                 if len(ip4) > 0:
-                    cmd = cmd + ' ip4 ' + str(ip4)
-            if ip4dns != None:   
+                    cmd = cmd + ' ip4 ' + str(ip4) + ' ipv4.method manual '
+                else:
+                    cmd = cmd + ' ipv4.method auto '
+
+            if ip4dns != None:
                 #print("#",len(ip4dns) ) 
                 if len(ip4dns) > 0 :
                     if len(ip4dns[0]) > 0:
@@ -388,9 +392,16 @@ class Device():
             if ip4gateway != None :
                   if len(ip4gateway) > 0:
                     cmd = cmd + ' gw4 ' + str(ip4gateway)
-            if ip4 != None :
+            #if ip4 != None :
+            #    if len(ip4) > 0:
+            #        cmd = cmd + ' ip4 ' + str(ip4)
+
+            if ip4 != None:
                 if len(ip4) > 0:
-                    cmd = cmd + ' ip4 ' + str(ip4)
+                    cmd = cmd + ' ip4 ' + str(ip4) + ' ipv4.method manual '
+                else:
+                    cmd = cmd + ' ipv4.method auto '
+
             if ip4dns != None:    
                 if len(ip4dns) > 0 :
                     if len(ip4dns[0]) > 0:

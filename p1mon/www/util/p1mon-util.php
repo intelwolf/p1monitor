@@ -1,6 +1,6 @@
 <?php 
 
-// lees de config database uit om de fileshare status te lezen
+// lees de config database uit om de file share status te lezen
 // op basis van uit,data of dev word niets of checked terug gegeven.
 function readStatusDb($id){
     $sqlstr = "select id, status, label, security from status where id=$id";

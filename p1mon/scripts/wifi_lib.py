@@ -6,6 +6,7 @@ import base64
 import const
 import inspect
 import sqldb
+import time
 import crypto_lib
 import nmcli_lib
 
@@ -46,7 +47,7 @@ class WifiConfigure():
             self.flog.debug( FUNCTION_TAG + ": key = " + key)
 
         nmcli = nmcli_lib.Device( flog=self.flog )
-    
+
         if nmcli.is_active_connection( name=nmcli_lib.WIFI_NAME ) == True: # check if the connection is set, only then remove
             nmcli.remove_connection( name=nmcli_lib.WIFI_NAME ) # needed to make sure there is only one connection 
 
@@ -86,7 +87,8 @@ class WifiConfigure():
             return
 
         list_ip4 = [ ip4 ]
-        nmcli.change_setting( name=nmcli_lib.WIFI_NAME, setting= "ip4", property=list_ip4 )   
+        nmcli.change_setting( name=nmcli_lib.WIFI_NAME, setting= "ip4", property=list_ip4 )
+        nmcli.change_setting( name=nmcli_lib.WIFI_NAME, setting="ipv4.method", property=["manual"] )
 
         # needs reset to make new IP active
         if ( self.flog != None ):

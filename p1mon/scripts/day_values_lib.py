@@ -98,7 +98,7 @@ class dayMinMaxkW():
                 self.dbstatus.strset( rec_time[0][0], 2, self.flog )
                 self.kw_max_min['max_verbr_KW_170_change']    = False
                 self.kw_max_min['max_verbr_KW_170_timestamp'] = str(rec_time[0][0])
-                self.flog.info(inspect.stack()[0][3]+": max_verbr_KW_170 aangepast naar " + str( self.kw_max_min['max_verbr_KW_170']) + " kW. Voor tijdstip " + str(self.kw_max_min['max_verbr_KW_170_timestamp']) )
+                self.flog.debug(inspect.stack()[0][3]+": max_verbr_KW_170 aangepast naar " + str( self.kw_max_min['max_verbr_KW_170']) + " kW. Voor tijdstip " + str(self.kw_max_min['max_verbr_KW_170_timestamp']) )
 
 
             if self.kw_max_min['min_verbr_KW_170_change'] == True:
@@ -115,7 +115,7 @@ class dayMinMaxkW():
                 self.dbstatus.strset( rec_time[0][0], 114, self.flog )
                 self.kw_max_min['min_verbr_KW_170_change']    = False
                 self.kw_max_min['min_verbr_KW_170_timestamp'] = str(rec_time[0][0])
-                self.flog.info(inspect.stack()[0][3]+": min_verbr_KW_170 aangepast naar " + str( self.kw_max_min['min_verbr_KW_170'] ) + " kW. Voor tijdstip " + self.kw_max_min['min_verbr_KW_170_timestamp'] )
+                self.flog.debug(inspect.stack()[0][3]+": min_verbr_KW_170 aangepast naar " + str( self.kw_max_min['min_verbr_KW_170'] ) + " kW. Voor tijdstip " + self.kw_max_min['min_verbr_KW_170_timestamp'] )
 
 
             if self.kw_max_min['max_gelvr_KW_270_change'] == True:
@@ -132,7 +132,7 @@ class dayMinMaxkW():
                 self.dbstatus.strset( rec_time[0][0], 4, self.flog )
                 self.kw_max_min['max_gelvr_KW_270_change']    = False
                 self.kw_max_min['max_gelvr_KW_270_timestamp'] = str(rec_time[0][0])
-                self.flog.info(inspect.stack()[0][3]+": max_gelvr_KW_270 aangepast naar " + str( self.kw_max_min['max_gelvr_KW_270']) + " kW. Voor tijdstip " + str(self.kw_max_min['max_gelvr_KW_270_timestamp']) )
+                self.flog.debug(inspect.stack()[0][3]+": max_gelvr_KW_270 aangepast naar " + str( self.kw_max_min['max_gelvr_KW_270']) + " kW. Voor tijdstip " + str(self.kw_max_min['max_gelvr_KW_270_timestamp']) )
             
             if self.kw_max_min['min_gelvr_KW_270_change'] == True:
                 sql = self.__create_sql_timestamp( 
@@ -148,7 +148,7 @@ class dayMinMaxkW():
                 self.dbstatus.strset( rec_time[0][0], 116, self.flog )
                 self.kw_max_min['min_gelvr_KW_270_change']    = False
                 self.kw_max_min['min_gelvr_KW_270_timestamp'] = str(rec_time[0][0])
-                self.flog.info(inspect.stack()[0][3]+": min_gelvr_KW_270 aangepast.naar " + str( self.kw_max_min['min_gelvr_KW_270']) + " kW. Voor tijdstip " + str(self.kw_max_min['min_gelvr_KW_270_timestamp']) )
+                self.flog.debug(inspect.stack()[0][3]+": min_gelvr_KW_270 aangepast.naar " + str( self.kw_max_min['min_gelvr_KW_270']) + " kW. Voor tijdstip " + str(self.kw_max_min['min_gelvr_KW_270_timestamp']) )
 
         except Exception as e:
             self.flog.error( inspect.stack()[0][3]+": Melding= "+ str (e.args[0]) )

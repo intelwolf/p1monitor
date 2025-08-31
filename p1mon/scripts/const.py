@@ -38,14 +38,15 @@
 # versie 2.4.3 P1SetTime toegevoegd en het instellen van de tijd via het systeem config pagina
 # versie 3.0.0 Upgrade naar Raspberry Pi OS Bookworm (Debian 12)
 # versie 3.0.1 Nginx opstart probleem /var/lib/nginx/proxy
+# versie 3.1.0 added statistic option
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "3.0.1"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
-P1_SERIAL_VERSION               = "20250610"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "3.1.0"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "2"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
+P1_SERIAL_VERSION               = "20250824"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'
@@ -85,6 +86,9 @@ DB_WATERMETER                   ="03_watermeter"
 DB_PHASEINFORMATION             ="04_faseinformatie"
 DB_POWERPRODUCTION              ="05_powerproduction"
 DB_WATERMETERV2                 ="06_watermeter"
+DB_STATISTICS                   ="07_statistics" # 3.1.0
+
+DB_STATISTICS_TAB               ="statistics" # 3.1.0
 DB_SERIAL_TAB                   ="e_serial"
 DB_HISTORIE_MIN_TAB             ="e_history_min"
 DB_HISTORIE_UUR_TAB             ="e_history_uur"
@@ -140,6 +144,7 @@ EXPORT_PREFIX                   ="p1mon-sql-export"
 IMPORT_PREFIX                   ="p1mon-sql-import"
 FILE_DBX_AUTH_REDIRECT          ="dbx_auth_redirect.txt"
 
+FILE_DB_STATISTICS              ="/p1mon/mnt/ramdisk/07_statistics.db" # 3.1.0
 FILE_DB_POWERPRODUCTION         ="/p1mon/mnt/ramdisk/05_powerproduction.db"
 FILE_DB_PHASEINFORMATION        ="/p1mon/mnt/ramdisk/04_faseinformatie.db"
 FILE_DB_WATERMETER              ="/p1mon/mnt/ramdisk/03_watermeter.db"

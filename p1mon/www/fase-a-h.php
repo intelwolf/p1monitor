@@ -426,7 +426,6 @@ function readGraphVisibilityFromBrowserMemory(){
                         </div>
                     </div>
 
-
                 </div>
 
                 <div>
@@ -439,15 +438,17 @@ function readGraphVisibilityFromBrowserMemory(){
                         </div>
                     </div>
                     <div class="frame-5-bot"> 
-                        <div class="rTableRow" title="">
-                            <div class="rTableCell width-290">
-                                <div id="L3Watt"></div>
-                            </div>
-                            <div class="rTableCell width-290">
-                                <div id="L3Amperage"></div>
-                            </div>
-                            <div class="rTableCell width-290">
-                                <div id="L3Voltage"></div>
+                        <div class="rTable"> 
+                            <div class="rTableRow" title="">
+                                <div class="rTableCell width-290">
+                                    <div id="L3Watt"></div>
+                                </div>
+                                <div class="rTableCell width-290">
+                                    <div id="L3Amperage"></div>
+                                </div>
+                                <div class="rTableCell width-290">
+                                    <div id="L3Voltage"></div>
+                                </div>
                             </div>
                         </div>
                     </div>

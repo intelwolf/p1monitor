@@ -109,19 +109,19 @@ function createKwhChart() {
                             //console.log( event );
 
                             if  ( this.index === 0 ) {
-                                toLocalStorage('stat-verbr-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-verbr-visible',this.visible);  // #PARAMETER
                             }
 
                             if  ( this.index === 1 ) {
-                                toLocalStorage('stat-gelvr-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-gelvr-visible',this.visible);  // #PARAMETER
                             }
 
                             if  ( this.index === 2 ) {
-                                toLocalStorage('stat-verbr-visible-prognose',!this.visible);
+                                toLocalStorage('stat-verbr-visible-prognose',this.visible);
                             }
 
                             if  ( this.index === 3 ) {
-                                toLocalStorage('stat-gelvr-visible-prognose',!this.visible);
+                                toLocalStorage('stat-gelvr-visible-prognose',this.visible);
                             }
                         }
                     }
@@ -313,12 +313,13 @@ function createKwhChart() {
             },  
             navigator: {
                 xAxis: {
-                    //min: 915145200000, //vrijdag 1 januari 1999 00:00:00 GMT+01:00
-                    //range:                6000 * 3600000,
-                    //minTickInterval:      60 * 60000,  
-                    //maxRange:             24 * 60 * 60000,
                     dateTimeLabelFormats: {
-                        day: '%d %B'
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%B<br/>%Y',
+                        month: '%B<br/>%Y',
+                        year: '%Y'
                     }
                 },
                 enabled: true,
@@ -328,9 +329,6 @@ function createKwhChart() {
                     backgroundColor: '#384042',
                     borderColor: '#6E797C',
                     enabled: false
-                },
-                series: {
-                    color: '#10D0E7'
                 }
             },
             series: [ 

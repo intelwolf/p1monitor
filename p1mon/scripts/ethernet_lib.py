@@ -5,6 +5,7 @@
 import const
 import inspect
 import sqldb
+import time
 import nmcli_lib
 #import sys
 
@@ -52,11 +53,13 @@ class EthernetConfigure():
         nmcli = nmcli_lib.Device( flog=self.flog )
 
         #check if ethernet is already set.
-        connection_UUID = nmcli.get_connection_UUID_by_device( nmcli_lib.ETH_IFNAME)
-        if connection_UUID != None:
-            if len( connection_UUID  ) > 0: # Ethernet is use.
-                self.flog.info( FUNCTION_TAG + ": Ethernet is in use, removing "  + str(nmcli_lib.ETH_IFNAME) + " with id " + str(connection_UUID) )
-                nmcli.remove_connection( uuid=connection_UUID )
+        for _ in range(5):
+            connection_UUID = nmcli.get_connection_UUID_by_device( nmcli_lib.ETH_IFNAME)
+            if connection_UUID != None:
+                if len( connection_UUID  ) > 0: # Ethernet is use.
+                    self.flog.info( FUNCTION_TAG + ": Ethernet is in use, removing "  + str(nmcli_lib.ETH_IFNAME) + " with id " + str(connection_UUID) )
+                    nmcli.remove_connection( uuid=connection_UUID )
+                    time.sleep(3)
     
         #if nmcli.is_active_connection( name=nmcli_lib.ETH_NAME ) == True: # check if the connection is set, only then remove
         #    self.flog.info( FUNCTION_TAG + ": Ethernet is in use, removing "  +str(nmcli_lib.ETH_IFNAME) )

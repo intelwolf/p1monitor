@@ -24,7 +24,8 @@ filelist = [
     #const.FILE_DB_WATERMETER,
     const.FILE_DB_PHASEINFORMATION,
     const.FILE_DB_POWERPRODUCTION,
-    const.FILE_DB_WATERMETERV2
+    const.FILE_DB_WATERMETERV2,
+    const.FILE_DB_STATISTICS
 ]
 
 def Main(argv):
@@ -208,7 +209,7 @@ def copyFile( sourcefile, destinationfolder, forcecopy ):
 
     if forcecopy == False: # only copy when forced
         if fileExist( destinationfolder + file ):
-            flog.debug(inspect.stack()[0][3]+": bestand "  + destinationfolder + file + " bestaat en niet gekopierd van " +  sourcefile ) 
+            flog.debug(inspect.stack()[0][3]+": bestand "  + destinationfolder + file + " bestaat en niet gekopieerd van " +  sourcefile ) 
             return
     try:
         if fileExist ( destinationfolder + file  ):

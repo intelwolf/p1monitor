@@ -639,7 +639,7 @@ class rtStatusDb():
         " values ( '58','onbekend','Tijdstip laatste verwerkte verwarming gegevens:',0)")
 
         self.insert_rec("insert or ignore into "+table+\
-        " values ( '59','onbekend','Tijdstip laatste dropbox successvolle authenticatie:',0)")
+        " values ( '59','onbekend','Tijdstip laatste dropbox succesvolle authenticatie:',0)")
 
         self.insert_rec("insert or ignore into "+table+\
         " values ( '60','onbekend','Tijdstip laatste Dropbox back-up:',0)")
@@ -711,7 +711,7 @@ class rtStatusDb():
         " values ( '82','onbekend','Tijdstip laatste succesvolle email:',0)")
 
         self.insert_rec("insert or ignore into "+table+\
-        " values ( '83','0','gemiddele watt waarde voor terug levering schakeling, 0 betekent niet actief.',0)")
+        " values ( '83','0','gemiddelde watt waarde voor terug levering schakeling, 0 betekent niet actief.',0)")
 
         self.insert_rec("insert or ignore into "+table+\
         " values ( '84','onbekend','Tijdstip terug levering, laatste schakeling:',0)")
@@ -801,7 +801,7 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '123','0','P1 data is actief(timeout)',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '124','','JSON status van NTP netwerktijd',0)")
         # geeft het verschil weer tussen de P1 poort telegram en de systeemtijd 1 tussen de 11 seconden is normaal. 
-        # afhangelijk van de een P1 poort snelheid van 1 of 10 seconden.
+        # afhankelijk van de een P1 poort snelheid van 1 of 10 seconden.
         self.insert_rec("insert or ignore into " + table + " values ( '125','0','P1 telegram tijd delta',0)")
 
         self.insert_rec("insert or ignore into " + table + " values ( '126','onbekend','Tijdstip start notificatie:',0)")
@@ -822,6 +822,8 @@ class rtStatusDb():
 
         self.insert_rec("insert or ignore into " + table + " values ( '136','0','Nieuwe versie van P1 monitor software beschikbaar:',0)") 
         self.insert_rec("insert or ignore into " + table + " values ( '137','0','Nieuwe versie van P1 monitor software patch beschikbaar:',0)") 
+
+        self.insert_rec("insert or ignore into " + table + " values ( '138','','JSON formaat statistiek instellingen:',0)") 
 
         # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"
@@ -898,7 +900,7 @@ class rtStatusDb():
             flog.error(inspect.stack()[1][3]+" DB status update gefaald voor id="+str(idn)+". Melding="+str(e.args[0]))
 
     def strget(self, idn, flog):
-        sql_select = "select id, status, label, security from "+self.table+" where id="+str(idn)
+        sql_select = "select id, status, label, security from " + self.table + " where id="+str(idn)
         try:
             set = self.select_rec(sql_select)
             #flog.debug(inspect.stack()[1][3]+": config db select per id: sql="+sql_select)

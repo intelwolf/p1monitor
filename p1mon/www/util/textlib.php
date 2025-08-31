@@ -1133,7 +1133,7 @@ $arr = array (
     'importstatus','import status','état de l&apos;importation'
     ),
 /* 295 */ array(
-    'Even geduld aub.','Please wait.','S&aposil vous plaît, attendez.'
+    "Even geduld aub.","Please wait.","S'il vous plaît, attendez."
     ),
 /* 296 */ array(
     'De berekende Ampère waarde (W/V), de slimme meter geeft de waarde alleen weer in stappen van 1 Ampère. ',
@@ -2612,14 +2612,105 @@ Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'arge
     'Fijne Kerstdagen namens Security Brother.','happy Christmas from Security Brother.','Joyeux Noël de la part de Security Brother.'
 ),
 /* 737 */ array(
-    '','',''
+    'statistiek','statistics','statistiques'
 ),
 /* 738 */ array(
+    'voeg een record toe','add a record','ajouter un enregistrement'
+),
+/* 739 */ array(
+    'statistieken','statistics','statistiques'
+),
+/* 740 */ array(
+    'aggregatieconfiguraties','aggregation configurations',"configurations d'agrégation"
+),
+/* 741 */ array(
+    'data wordt verwerkt, even geduld aub.','data is being processed, please be patient.','Les données sont en cours de traitement, veuillez patienter.'
+),
+/* 742 */ array(
+    'een uniek getal ter referentie.','a unique number for reference.','Un numéro unique pour référence.'
+),
+/* 743 */ array(
+    'selectie van kWh, Water, enz. per tijdsperiode.',
+    'selection of kWh, water, etc. per time period.',
+    "sélection de kWh, d'eau, etc. par période de temps."
+),
+/* 744 */ array(
+    'de start van de periode waarover de berekening wordt uitgevoerd. Een leeg veld wil zeggen dat alle beschikbare data wordt gebruikt.',
+    'the start of the period over which the calculation is performed. An empty field means that all available data is used.',
+    'début de la période sur laquelle le calcul est effectué. Un champ vide signifie que toutes les données disponibles sont utilisées.'
+),
+/* 745 */ array(
+    'het einde van de periode waarover de berekening wordt uitgevoerd. Een leeg veld wil zeggen dat alle beschikbare data wordt gebruikt.',
+    'the end of the period over which the calculation is performed. An empty field means that all available data is used.',
+    'Fin de la période sur laquelle le calcul est effectué. Un champ vide signifie que toutes les données disponibles sont utilisées.'
+),
+/* 746 */ array(
+    'uit te voeren berekening, gemiddelde, maximum, minimum of som',
+    'calculation to be performed, average, maximum, minimum or sum.',
+    'calcul à effectuer, moyenne, maximum, minimum ou somme.'
+),
+/* 747 */ array(
+    'de berekende waarde.','the calculated value.','la valeur calculée.'
+),
+/* 748 */ array(
+    'de berekening wel of niet uitvoeren.','whether or not to perform the calculation.',"s'il faut ou non effectuer le calcul."
+),
+/* 749 */ array(
+    'inactief','inactive','inactif'
+),
+/* 750 */ array(
+    'laatste aanpassing','last update','dernière modification'
+),
+/* 751 */ array(
+    'item(s)','item(s)','article(s)'
+),
+/* 752 */ array(
+    'waarde','value','valeur'
+),
+/* 753 */ array(
+    'geen logbestanden beschikbaar','no log files available','aucun fichier journal disponible'
+),
+/* 754 */ array(
+    'geen log bestand geselecteerd of het bestand bevat geen data',
+    'no log file selected or the file contains no data',
+    'aucun fichier journal sélectionné ou le fichier ne contient aucune donnée'
+),
+/* 755 */ array(
+    'log bestandsnaam','log file name','nom du fichier journal'
+),
+/* 756 */ array(
+    'laatste wijziging','last change','dernier changement'
+),
+/* 757 */ array(
+    'bytes','bytes','octets'
+),
+/* 758 */ array(
+    'niveau','level','niveau'
+),
+/* 759 */ array(
+    'bericht','message','message'
+),
+/* 760 */ array(
+    'kWh tarief','kWh tariff','tarif kWh'
+),
+/* 761 */ array(
+    'gas tarief','gas tariff','tarif du gaz'
+),
+/* 762 */ array(
+    'dynamisch tarieven','dynamic tariffs','tarifs dynamiques'
+),
+/* 763 */ array(
+    'geen statistiek berekeningen ingesteld.','no statistics calculations set.','aucun calcul statistique défini.'
+),
+/* 764 */ array(
     '','',''
 ),
-
-
-
+/* 765 */ array(
+    '','',''
+),
+/* 766 */ array(
+    '','',''
+),
 
 
 );

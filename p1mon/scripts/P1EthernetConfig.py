@@ -11,6 +11,7 @@ import pwd
 import ethernet_lib
 import network_lib
 import nmcli_lib
+import filesystem_lib
 
 prgname = 'P1EthernetConfig'
 
@@ -19,7 +20,7 @@ prgname = 'P1EthernetConfig'
 def Main(argv): 
 
     flog.info("Start van programma.")
-    my_pid = os.getpid()
+    #my_pid = os.getpid()
     flog.info( inspect.stack()[0][3] + ": wordt uitgevoerd als user -> " + pwd.getpwuid( os.getuid() ).pw_name )
 
     parser = argparse.ArgumentParser(description="Configure the Ethernet network.")
@@ -186,7 +187,11 @@ if __name__ == "__main__":
     try:
         os.umask( 0o002 )
         logfile = const.DIR_FILELOG+prgname + ".log"
-        util.setFile2user( logfile,'p1mon')
+
+        filesystem_lib.set_file_owners( filepath=logfile )
+        filesystem_lib.set_file_permissions( filepath=logfile, permissions='664' )
+
+        #util.setFile2user( logfile,'p1mon')
         flog = logger.fileLogger( logfile,prgname )
         #### aanpassen bij productie
         flog.setLevel( logger.logging.INFO )
@@ -195,7 +200,7 @@ if __name__ == "__main__":
         print ( "critical geen logging mogelijke, gestopt.:" + str(e.args[0]) )
         sys.exit(1)
 
-    Main(sys.argv[1:])       
+    Main(sys.argv[1:])
 
 
 

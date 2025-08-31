@@ -130,9 +130,11 @@ function createChart() {
         },  
         navigator: {
             xAxis: {
-                type: 'datetime',
                 dateTimeLabelFormats: {
-                    day: '%a.<br>%d %B<br/>%Y',
+                    second: '%H:%M:%S',
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: '%B<br/>%Y',
                     month: '%B<br/>%Y',
                     year: '%Y'
                 }
@@ -142,16 +144,8 @@ function createChart() {
             outlineWidth: 1,
             handles: {
                 backgroundColor: '#384042',
-                borderColor: '#6E797C'
-            },
-            series:[ 
-                {
-                    color: '#507ABF'
-                }, 
-                {
-                    color: '#384042'
-                }
-            ]
+                borderColor: '#6E797C',
+            }
         },
         xAxis: {
             type: 'datetime', 
@@ -380,7 +374,6 @@ function createChart() {
             itemDistance: 5
         },
         series: [{
-                showInNavigator: true,
                 yAxis: 0,
                 dashStyle: 'ShortDot',
                 visible: GseriesVisibilty[0],
@@ -399,7 +392,6 @@ function createChart() {
                     } 
             },{
                 visible: GseriesVisibilty[1],
-                showInNavigator: true,
                 name: GserieNames[1],
                 data: GrangeInAvg,
                 type: 'spline',
@@ -414,7 +406,6 @@ function createChart() {
             },{
             dashStyle: 'ShortDot',
             visible: GseriesVisibilty[2],
-            showInNavigator: true,
             name: GserieNames[2],
             data: GrangeOut,
             type: 'areasplinerange',
@@ -430,7 +421,6 @@ function createChart() {
                 }
             },{
                 visible: GseriesVisibilty[3],
-                showInNavigator: true,
                 name: GserieNames[3],
                 data: GrangeOutAvg,
                 type: 'spline',
@@ -451,16 +441,16 @@ function createChart() {
                     legendItemClick: function () {
                         // console.log('legendItemClick index='+this.index);
                         if ( this.index === 0 ) {
-                        toLocalStorage('verwarming-h-in-visible',!this.visible); // #PARAMETER
+                        toLocalStorage('verwarming-h-in-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 1 ) {
-                        toLocalStorage('verwarming-h-in-gem-visible',!this.visible); // #PARAMETER
+                        toLocalStorage('verwarming-h-in-gem-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 2 ) {
-                        toLocalStorage('verwarming-h-uit-visible',!this.visible); // #PARAMETER
+                        toLocalStorage('verwarming-h-uit-visible',this.visible); // #PARAMETER
                         }
                         if ( this.index === 3 ) {
-                        toLocalStorage('verwarming-h-uit-gem-visible',!this.visible); // #PARAMETER
+                        toLocalStorage('verwarming-h-uit-gem-visible',this.visible); // #PARAMETER
                         }
                     }
                 }

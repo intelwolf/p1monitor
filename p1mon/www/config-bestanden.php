@@ -223,7 +223,7 @@ $(function () {
                             
                         <div class="float-left margin-3">    
                             <button class="input-2 but-1 cursor-pointer" id="db_erase_button" name="db_erase_button" type="submit">
-                                <i class="color-menu fas fa-3x fa-trash-alt"></i><br>    
+                                <i class="color-menu fas fa-3x fa-trash-alt"></i><br>
                                 <span class="color-menu text-7">&nbsp;wissen</span>
                             </button>
                         </div>

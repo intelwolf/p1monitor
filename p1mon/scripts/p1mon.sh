@@ -330,7 +330,7 @@ copytodisk(){
 
     # schrijf cache naar disk/flash
     sync
-    echo "[*] 10 seconden wachttijd, zodat data veilig naar disk wordt gekopierd."
+    echo "[*] 10 seconden wachttijd, zodat data veilig naar disk wordt gekopieerd."
     sleep 10
     echo "[*] stop gereed."
 }

@@ -1,6 +1,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+
 ###################################################################
 # get a list of date yyyy-mm-dd when the start en end             #
 # date range is longer then the range value                       #

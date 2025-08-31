@@ -105,7 +105,7 @@ def MainProg():
     #rt_status_db.strset( '', 68,  flog )
     #rt_status_db.strset( '', 110, flog )
 
-    
+
     check_for_new_p1monitor_version()
     get_cpu_temperature()
     DuckDNS()
@@ -126,8 +126,6 @@ def MainProg():
     else:
         rt_status_db.strset("nee",24,flog)
         flog.error(inspect.stack()[0][3]+": geen Internet verbinding.")     
-
-    #sys.exit()
 
     # main loop
     cnt = 0
@@ -303,6 +301,9 @@ def MainProg():
 
             socat()
 
+            # check for statistics config
+            update_statistics_aggregated_config()
+
         # elke 60 sec acties
         if cnt%30 == 0:
             # check if we need to change the cron entries.
@@ -338,6 +339,8 @@ def MainProg():
             rt_status_db.strset( system_info_lib.get_python_version(), 25, flog )
             ## update the NTP network time status.
             ntp_status()
+            ## (her)bereken de statistieken.
+            update_statistics_aggregated()
 
         # elke 300 sec acties
         if cnt%150 == 0:
@@ -352,7 +355,7 @@ def MainProg():
         if cnt%450 == 0:
             # read data via de weather API
             update_weather_data()
-            #run_dynamic_pricing()
+           
 
         # 1800 sec processes (30 min)
         if cnt%900 == 0:
@@ -398,25 +401,58 @@ def DiskRestore(): #180ok
     )
 
 
-"""
-########################################################
-# config wifi and Ethernet                             #
-########################################################
-def network_config():
-    try:
-        _id, needs_to_run_status, _label = config_db.strget( 168, flog )
-        if int( needs_to_run_status ) > 0: # start process
 
-            flog.info( inspect.stack()[0][3] + ": netwerk configuratie gestart." )
-            set_ethernet()
-            set_wifi()
-            config_db.strset( '0', 168, flog ) 
-            flog.info( inspect.stack()[0][3] + ": netwerk configuratie afgerond." )
+##################################################
+# update the aggregated statistics configuration #
+##################################################
+def update_statistics_aggregated_config():
+    try:
+        also_update = False
+        
+        _id, status, _label, _security = rt_status_db.strget(138, flog)
+        if len(status) > 0: # there is a config change, also updates the calculations
+            also_update = True
+
+            flog.debug( inspect.stack()[0][3] + ": configuratie aanpassing." )
+            cmd = "/p1mon/scripts/P1Statistics --configure > /dev/null 2>&1"
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+            if r[2] > 0:
+                flog.error(inspect.stack()[0][3]+" configuratie aanpassing.")
+        
+            if also_update == True:
+                update_statistics_aggregated()
 
     except Exception as e:
-        flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
-        config_db.strset( '0', 168, flog ) # reset run bit # fail save to stop
-"""
+        flog.error( inspect.stack()[0][3] + " Ethernet onverwachte fout: " + str( e ) )
+
+
+
+##################################################
+# update the aggregated statistics               #
+##################################################
+def update_statistics_aggregated():
+    try:
+        flog.debug( inspect.stack()[0][3] + ": periodieke update van statistieken." )
+        cmd = "/p1mon/scripts/P1Statistics --process --silent > /dev/null 2>&1 &"
+        r = process_lib.run_process( 
+            cms_str = cmd,
+            use_shell=True,
+            give_return_value=True,
+            flog=flog,
+            timeout=None
+        )
+        if r[2] > 0:
+            flog.error(inspect.stack()[0][3]+" periodieke update van statistieken.")
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " Ethernet onverwachte fout: " + str( e ) )
+       
+
 
 
 ##################################################
@@ -460,7 +496,7 @@ def set_wifi( forced=False ):
             config_db.strset( 0, 183, flog ) # reset the flag to prevent an endless loop.
 
             flog.info( inspect.stack()[0][3] + ": Wifi configuratie activeren." )
-            cmd = "/p1mon/scripts/P1WifiConfig -c "
+            cmd = "/p1mon/scripts/P1WifiConfig -c > /dev/null 2>&1 &"
             r = process_lib.run_process( 
                 cms_str = cmd,
                 use_shell=True,
@@ -474,9 +510,6 @@ def set_wifi( forced=False ):
     except Exception as e:
         flog.error( inspect.stack()[0][3] + " Wifi onverwachte fout: " + str( e ) )
         config_db.strset( 0, 183, flog ) # fail save.
-
-    
-
 
 
 ######################################################
@@ -658,6 +691,7 @@ def check_cron_backup():
         config_db.strset( "0", 181, flog ) # reset bit needs to run bit
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
+
 
 def update_weather_data():
 
@@ -1518,16 +1552,19 @@ def check_for_new_p1monitor_version(forced=False):
         socket.setdefaulttimeout( 5 )
 
         url = const.ZTATZ_P1_VERSION_URL
-        #url =  "https://www.ztatz.nl/p1monitor/version-test.json" #TODO
+        #url =  "https://www.ztatz.nl/p1monitor/version-test.json"
         request = urllib.request.Request( url + "?" + const.P1_VERSIE  )
         response = urllib.request.urlopen(request)
         data = json.loads( response.read().decode('utf-8') )
-        #print ( data )
         msg_version = 1
+        msg_version = data[const.ZTATZ_P1_VERSION_MSG_VERSION ]
+        
+        #print ( data )
+
+        flog.info(inspect.stack()[0][3] + ' msg_version (1) = '+  str(msg_version) )
 
         if data[const.ZTATZ_P1_VERSION] != const.P1_VERSIE or data[const.ZTATZ_P1_VERSION_PATCH_VERSION] != const.P1_PATCH_LEVEL:
 
-            msg_version = data[const.ZTATZ_P1_VERSION_MSG_VERSION ]
             flog.info(inspect.stack()[0][3]+': nieuwe versie ' + str(data[const.ZTATZ_P1_VERSION]) +\
             ' beschikbaar van de P1 monitor software met versie serienummer ' + str(data[const.ZTATZ_P1_SERIAL_VERSION]) + ' JSON message versie ' +  str( msg_version) + ".")
 
@@ -1541,20 +1578,30 @@ def check_for_new_p1monitor_version(forced=False):
                 rt_status_db.strset( data[const.ZTATZ_P1_VERSION_DOWNLOAD_URL_PATCH],   134, flog )
                 rt_status_db.strset( data[const.ZTATZ_P1_VERSION_COMMENT],              135, flog )
 
+        flog.debug(inspect.stack()[0][3] + ' msg_version(2)  = '+  str(msg_version) )
+
+        # check version 
         if data[const.ZTATZ_P1_VERSION] != const.P1_VERSIE:
-            rt_status_db.strset( 1, 136, flog )
+            rt_status_db.strset( '1', 136, flog )
+            flog.debug(inspect.stack()[0][3] + ' url versie is anders = '+  str(data[const.ZTATZ_P1_VERSION]) )
         else:
-            rt_status_db.strset( 0, 136, flog )
+            flog.debug(inspect.stack()[0][3] + ' url versie is gelijk = '+  str(data[const.ZTATZ_P1_VERSION]) )
+            rt_status_db.strset( '0', 136, flog )
             rt_status_db.strset( '', 66,  flog )
             rt_status_db.strset( '', 67,  flog )
             rt_status_db.strset( '', 68,  flog )
             rt_status_db.strset( '', 110, flog )
 
-        if int(msg_version) > 1:
+        flog.debug(inspect.stack()[0][3] + ' const.ZTATZ_P1_VERSION_PATCH_VERSION]  = '+  str(data[const.ZTATZ_P1_VERSION_PATCH_VERSION]) )
+        flog.debug(inspect.stack()[0][3] + ' const.P1_PATCH_LEVEL  = ' +  str(const.P1_PATCH_LEVEL) )
+
+        if int( msg_version ) > 1:
             if data[const.ZTATZ_P1_VERSION_PATCH_VERSION] != const.P1_PATCH_LEVEL:
-                rt_status_db.strset( 1, 137, flog )
+                flog.debug(inspect.stack()[0][3] + ' url patch versie is anders = '+  str(data[const.ZTATZ_P1_VERSION_PATCH_VERSION]) )
+                rt_status_db.strset( '1', 137, flog )
             else:
-                rt_status_db.strset( 0,  137, flog )
+                flog.debug(inspect.stack()[0][3] + ' url patch versie is gelijk = '+  str(data[const.ZTATZ_P1_VERSION_PATCH_VERSION]) )
+                rt_status_db.strset( '0',137, flog )
                 rt_status_db.strset( '', 133, flog )
                 rt_status_db.strset( '', 134, flog )
                 rt_status_db.strset( '', 135, flog )

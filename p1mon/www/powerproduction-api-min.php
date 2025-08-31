@@ -139,10 +139,10 @@ function createKwhChart() {
                     events: {
                         legendItemClick: function (event) {
                             if  ( this.index === 0 ) {
-                                toLocalStorage('powerprod-api-min-high-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-api-min-high-tariff-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 1 ) {
-                                toLocalStorage('powerprod-api-min-low-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-api-min-low-tariff-visible',this.visible);  // #PARAMETER
                             }
                         }
                     }
@@ -325,8 +325,13 @@ function createKwhChart() {
             navigator: {
                 xAxis: {
                     dateTimeLabelFormats: {
-                        day: '%d %B'    
-                    }    
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%B<br/>%Y',
+                        month: '%B<br/>%Y',
+                        year: '%Y'
+                    }
                 },
                 enabled: true,
                 outlineColor: '#384042',
@@ -336,9 +341,6 @@ function createKwhChart() {
                     borderColor: '#6E797C',
                     enabled: false
                 },
-                series: {
-                    color: '#10D0E7'
-                }
             },
             series: [
             {

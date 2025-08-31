@@ -35,6 +35,9 @@ ROUTE_CONFIG_HELP    = ROUTE_CONFIG    + '/help'
 ROUTE_CONFIG_ID      = ROUTE_CONFIG    + '/{id}'
 ROUTE_CONFIG_ID_HELP = ROUTE_CONFIG_ID + '/help'
 
+ROUTE_STATISTICS      = '/api/v1/statistics'
+ROUTE_STATISTICS_HELP = ROUTE_STATISTICS + '/help'
+
 BASE_FINANCIAL            = 'financial' # don't use in path in the code
 ROUTE_FINANCIAL_DAY       = '/api/v1/financial/day'
 ROUTE_FINANCIAL_DAY_HELP  = ROUTE_FINANCIAL_DAY + '/help'
@@ -162,6 +165,15 @@ JSON_API_VALID_DATA         = 'VALID_DATA'                           # used to f
 JSON_API_FQDN               = 'API_FQDN'                             # Fully Qualified Domain Name for the remote inet access to the API
 JSON_API_P1_TELEGRAM        = 'P1_TELEGRAM'                          # ASCII string P1 telegram.
 
+JSON_API_ID                 = 'ID'                                   # number that identifies a record uniquely. 
+JSON_API_DATA_ID            = 'DATA_ID'                              # number representing the type op data   1:kWh min consumption, 2: kWh hour consumption, 3: kWh day consumption, 4: kWh month consumption 5: kWh year consumption, 6: kWh min production, 7: kWh hour production, 8: kWh day production, 9: kWh month production, 10: kWh year production, 11: gas hour, 12: gas day ,13: gas month ,14: gas year, 15: water min, 16: water hour, 17: water day, 18: water month, 19: water year
+JSON_API_ACTIVE             = 'ACTIVE'                               # record will be updated automatically. 
+JSON_API_TIMESTAMP_START    = 'TIMESTAMP_START'                      # start of the period of time inclusive the given timestamp.
+JSON_API_TIMESTAMP_STOP     = 'TIMESTAMP_STOP'                       # end of the period of time inclusive the given timestamp.
+JSON_API_MODE               = 'MODE'                                 # number indicating the calculation performed.  1:Average, 2:Maximum, 3:Minimum, 4:Sum.
+JSON_API_VALUE              = 'VALUE'                                # calculated value of the mode and selected time period.
+JSON_API_UPDATED            = 'UPDATED'                              # timestamp of last update or empty when never updated. 
+
 JSON_API_CNSMPTN_DLT_KWH    = 'CONSUMPTION_DELTA_KWH'                # the consumption in kilo Watt hour during this period
 JSON_API_PRDCTN_DLT_KWH     = 'PRODUCTION_DELTA_KWH'                 # the production in kilo Watt hour during this period.
 
@@ -242,7 +254,6 @@ JSON_API_PHS_L1_A_CALC      = 'L1_A_CALC'                            # Amperage 
 JSON_API_PHS_L2_A_CALC      = 'L2_A_CALC'                            # Amperage phase L2 calculated
 JSON_API_PHS_L3_A_CALC      = 'L3_A_CALC'                            # Amperage phase L3 calculated
 
-
 JSON_API_PHS_CNSMPTN_L1_W_MAX  = 'CONSUMPTION_L1_W_MAX'              # Consumption of W for phase L1 maximum
 JSON_API_PHS_CNSMPTN_L2_W_MAX  = 'CONSUMPTION_L2_W_MAX'              # Consumption of W for phase L2 maximum
 JSON_API_PHS_CNSMPTN_L3_W_MAX  = 'CONSUMPTION_L3_W_MAX'              # Consumption of W for phase L3 maximum
@@ -304,6 +315,15 @@ EXPL_API_PRDCTN_KWH_H       = 'Production of KWH during high (piek) period. Mete
 EXPL_API_TRFCD              = 'High or low period for production of consumption of kWh. Low = D, High = P'
 EXPL_API_CNSMPTN_KW         = 'The consumption in kilo Watt at this moment.'
 EXPL_API_PRDCTN_KW          = 'The production in kilo Watt at this moment.'
+
+EXPL_API_DATA_ID            = 'number representing the type op data   1:kWh min consumption, 2: kWh hour consumption, 3: kWh day consumption, 4: kWh month consumption 5: kWh year consumption, 6: kWh min production, 7: kWh hour production, 8: kWh day production, 9: kWh month production, 10: kWh year production, 11: gas hour, 12: gas day ,13: gas month ,14: gas year, 15: water min, 16: water hour, 17: water day, 18: water month, 19: water year'
+EXPL_API_ID                 = 'number that identifies a record uniquely.'
+EXPL_API_ACTIVE             = 'record will be updated automatically.'
+EXPL_API_TIMESTAMP_START    = 'start of the period of time inclusive the given timestamp.'
+EXPL_API_TIMESTAMP_STOP     = 'end of the period of time inclusive the given timestamp.'
+EXPL_API_MODE               = 'number indicating the calculation performed.  1:Average, 2:Maximum, 3:Minimum, 4:Sum.'
+EXPL_API_VALUE              = 'calculated value of the mode and selected time period.'
+EXPL_API_UPDATED            = 'timestamp of last update or empty when never updated.'
 
 EXPL_API_CNSMPTN_DLT_KWH    = 'The consumption in kilo Watt hour (kWh) during this period.'
 EXPL_API_PRDCTN_DLT_KWH     = 'The production in kilo Watt hour (kWh) during this period.'
@@ -650,6 +670,60 @@ HELP_ROUTE_DATETIME = {
 
 
 
+# help data
+# SQL AS Reference
+#sqlstr = "SQL = select ID,DATA_ID,ACTIVE,TIMESTAMP_START,TIMESTAMP_STOP, MODE, VALUE, UPDATED from statistics ORDER BY ID
+HELP_ROUTE_STATISTICS_JSON = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       :  API_OPTION_JSON  + ', ' + API_OPTION_ROUND,
+    "api_description"   : "Shows records of aggreged data of the different values measured.",
+    "api_usage"         : "<ip>" + ROUTE_STATISTICS + '?' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + " <ip>" + ROUTE_STATISTICS_HELP,
+    "fields": [
+        {
+           "name" : JSON_API_ID,
+           "description" : EXPL_API_ID,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_DATA_ID,
+           "description" : EXPL_API_DATA_ID,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_ACTIVE,
+           "description" : EXPL_API_ACTIVE,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_TIMESTAMP_START,
+           "description" : EXPL_API_TIMESTAMP_START,
+           "type": TYPE_JSON_STRING
+        },
+        { 
+           "name" : JSON_API_TIMESTAMP_STOP,
+           "description" : EXPL_API_TIMESTAMP_STOP,
+           "type": TYPE_JSON_STRING
+        },
+        { 
+           "name" : JSON_API_MODE,
+           "description" : EXPL_API_MODE,
+           "type": TYPE_JSON_INTEGER
+        },
+        { 
+           "name" : JSON_API_VALUE,
+           "description" : EXPL_API_VALUE,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        }
+        ,
+        { 
+           "name" : JSON_API_UPDATED,
+           "description" : EXPL_API_UPDATED,
+           "type": TYPE_JSON_STRING
+        }
+    ]
+}
+
 
 # help data
 # SQL AS Reference
@@ -720,11 +794,6 @@ HELP_ROUTE_SMARTMETER_JSON = {
         }
     ]
 }
-
-
-# Datetime 
-
-
 
 
 # P1 port telegram '

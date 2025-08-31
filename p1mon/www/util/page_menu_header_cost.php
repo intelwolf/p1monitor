@@ -6,6 +6,7 @@ function page_menu_header_cost($id) {
     $text_days   = strIdx( 122 );
     $text_months = strIdx( 123 );
     $text_years  = strIdx( 124 );
+    $text_dyn_tarriff = strIdx( 762 );
 
     switch ($id) {
         case 0: 
@@ -30,7 +31,7 @@ function page_menu_header_cost($id) {
     echo "<div class='pos-7 content-wrapper $m1'><a href='kosten-m.php' class='$m1'>$text_months</a></div>\n";
     echo "<div class='pos-7 content-wrapper $m2'><a href='kosten-j.php' class='$m2'>$text_years</a></div>\n";
     if ( config_read(204) != 0 ) {
-        echo "<div class='pos-7 content-wrapper $m3'><a href='kosten-dynamic-h.php' class='$m3'>dynamisch tarieven</a></div>\n";
+        echo "<div class='pos-7 content-wrapper $m3'><a href='kosten-dynamic-h.php' class='$m3'>$text_dyn_tarriff</a></div>\n";
     }
     echo "</div>\n";
 }

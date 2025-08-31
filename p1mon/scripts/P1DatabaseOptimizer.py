@@ -1,7 +1,7 @@
 # run manual with ./P1NginxConfig
 
 import argparse
-import base64
+#import base64
 import const
 import calendar
 import datetime
@@ -159,7 +159,7 @@ def Main( argv ):
         if base_folder == const.DIR_RAMDISK:
             flog.info( inspect.stack()[0][3] + ": controle of de P1-monitor actief is." )
 
-            list_of_process_names = ["P1SerReader.py","P1Db.py","P1Watchdog.py","P1DropBoxDeamon.py","P1UdpBroadcaster.py","P1UdpDaemon.py","P1Notifier.py","P1WatermeterV2.py","P1GPIO.py","P1PowerProductionS0.py","P1SolarEdgeReader.py"]
+            list_of_process_names = ["P1SerReader.py","P1Db.py","P1Watchdog.py","P1DropBoxDeamon.py","P1UdpBroadcaster.py","P1UdpDaemon.py","P1Notifier.py","P1WatermeterV2.py","P1GPIO.py","P1PowerProductionS0.py","P1SolarEdgeReader.py","P1Statistics.py"]
 
             list_off_pids = []
             for name in list_of_process_names:
@@ -192,7 +192,7 @@ def Main( argv ):
 
         flog.info( inspect.stack()[0][3] + ": exporten van data naar SQL commando's, geduld!")
 
-        # needs mulitple calls 
+        # needs multiple calls 
         export_create_database( base_folder=base_folder, db_file=const.FILE_DB_CONFIG,               flog=flog )
         export_create_database( base_folder=base_folder, db_file=const.FILE_DB_STATUS,               flog=flog )
         export_create_database( base_folder=base_folder, db_file=const.FILE_DB_FINANCIEEL,           flog=flog )
@@ -204,6 +204,7 @@ def Main( argv ):
         export_create_database( base_folder=base_folder, db_file=const.FILE_DB_PHASEINFORMATION,     flog=flog )
         export_create_database( base_folder=base_folder, db_file=const.FILE_DB_POWERPRODUCTION,      flog=flog )
         export_create_database( base_folder=base_folder, db_file=const.FILE_DB_WATERMETERV2,         flog=flog )
+        export_create_database( base_folder=base_folder, db_file=const.FILE_DB_STATISTICS,           flog=flog )
         
         flog.info( inspect.stack()[0][3] + ": importeren van SQL commando's naar nieuwe databases gestart.")
         import_sql( filepath=FULL_RECOVERY_FOLDER, flog=flog ) 
@@ -221,16 +222,14 @@ def Main( argv ):
                 if total_records > 0:
                     flog.info( inspect.stack()[0][3] + ": " + str(dbfile_source)  + " bevat totaal " + str(total_records) + " records")
                     shutil.copy2( dbfile_source, destination_dbfile  )
-                    flog.info( inspect.stack()[0][3] + ": kopieren van  " + str(dbfile_source)  + " naar " + str(destination_dbfile) + " succesvol.")
+                    flog.info( inspect.stack()[0][3] + ": kopiëren van  " + str(dbfile_source)  + " naar " + str(destination_dbfile) + " succesvol.")
                 else:
                     flog.warning( inspect.stack()[0][3] + ": " + str(dbfile_source)  + " bevat geen records, geen actie uitgevoerd.")
 
             except Exception as e:
-                flog.warning( inspect.stack()[0][3] + ": kopieren van  " + str(dbfile_source)  + " naar " + str(destination_dbfile) + " gefaald. -> "+ str(e.args[0]) )
+                flog.warning( inspect.stack()[0][3] + ": kopiëren van  " + str(dbfile_source)  + " naar " + str(destination_dbfile) + " gefaald. -> "+ str(e.args[0]) )
  
         flog.info( inspect.stack()[0][3] + ": gereed.")
-
-
 
 
 ###############################################
@@ -253,7 +252,7 @@ def count_records_in_db( db_pathfile=None ):
 # watermeter tabel has faulty schema             #
 # was "TIMESTAMP TEXT     TEXT NOT NULL" must be #
 # "TIMESTAMP TEXT  NOT NULL"                     #
-# finance tables, normaly not used               #
+# finance tables, normally not used              #
 ##################################################
 def watermeter_schema_fix( base_folder=None, flog=None ):
 
@@ -354,7 +353,7 @@ def watermeter_schema_fix( base_folder=None, flog=None ):
 
 ###############################################
 # removes gas data from the historie and      #
-# finance tables, normaly not used            #
+# finance tables, normally not used           #
 ###############################################
 def remove_gas_data( base_folder=None ):
 
@@ -435,9 +434,9 @@ def import_sql( filepath=None, flog=None ):
 
 
 
-###############################################
-# create SQL statments en write them to files #
-###############################################
+################################################
+# create SQL statements en write them to files #
+################################################
 def export_create_database( base_folder=None,  db_file=None, flog=None ):
 
     db_pathfile = base_folder + os.path.basename( db_file )
@@ -471,7 +470,7 @@ def export_create_database( base_folder=None,  db_file=None, flog=None ):
 
 
 #################################################
-# just a colllection function for easy use      #
+# just a collection function for easy use       #
 #################################################
 def clean_databases( base_folder = None ):
     process_by_database( base_folder=base_folder, dbase=sqldb.financieelDb(),      db_file=const.FILE_DB_FINANCIEEL,           db_tab=const.DB_FINANCIEEL_DAG_TAB,  flog=flog )
@@ -528,7 +527,7 @@ def process_by_database( base_folder=None, dbase=None, db_file=None, db_tab=None
 
 
 #######################################################
-# delete records older then the expected rentention   #
+# delete records older then the expected retention    #
 # time.                                               #
 # mode is none, use normal timestamp notation         #
 # mode is 1, means table uses epoch timestamp         #
@@ -596,12 +595,12 @@ def all_recovery_copy( base_folder=None ):
         try:
             make_recovery_copy( base_folder=base_folder, filepath=db_file_name )
         except Exception as e:
-            flog.warning( inspect.stack()[0][3] + ": onverwacht fout op database " + str(db_file_name)  + " melding:" + str(e.args[0]) )
+            flog.warning( inspect.stack()[0][3] + ": onverwacht fout op database " + str( db_file_name )  + " melding:" + str(e.args[0]) )
 
 
 #######################################################
 # create recovery folder when it not exists and set   #
-# ownership / folder privilges                        #
+# ownership / folder privileges                       #
 #######################################################
 def check_recovery_folder( filepath=const.DIR_RECOVERY ):
     filesystem_lib.create_folder( filepath=filepath, flog=flog )
@@ -650,7 +649,7 @@ def remove_all_recovery_files():
             flog.warning ( inspect.stack()[0][3] + ": recovery folder kan niet worden gewist. melding:" + str(e.args[0]) )
 
 ########################################################
-# close program when a signal is recieved.             #
+# close program when a signal is received.             #
 ########################################################
 def saveExit(signum, frame):
     flog.info(inspect.stack()[0][3]+" SIGINT ontvangen, gestopt.")
@@ -658,7 +657,7 @@ def saveExit(signum, frame):
     sys.exit(0)
 
 #######################################################
-# create a randop filename in a (ram) filesystem      #
+# create a random filename in a (ram) filesystem      #
 #######################################################
 def random_filename( folder="/p1mon/mnt/ramdisk/", filename_prefix="dboptiomizer.", filename_ext=".db"):
 
@@ -693,34 +692,3 @@ if __name__ == "__main__":
     original_sigint = signal.getsignal(signal.SIGINT)
     signal.signal(signal.SIGINT, saveExit)
     Main(sys.argv[1:])
-
-
-
-
-"""
-#######################################################
-# check if a record can be read,deleted and insterted #
-# first check on a temp file                          #
-#######################################################
-def check_crud( database=None, table=None):
-
-    #sqlutil = sqlite_lib.SqliteUtil()
-    #sqlutil.init( db_pathfile=filename, flog=flog )
-
-    # step one get the oldest record in the table if any 
-    sql_select = "select MIN(TIMESTAMP) FROM " + table
-    print( sql_select )
-    try:
-        rec = database.select_rec(sql_select)
-        if (rec != None):
-            if len(rec) > 0:
-                timestamp = str(rec[0][0])
-                flog.info( inspect.stack()[0][3] + ": select succesvol op tabel " + str(table) )
-                sql_delete = "delete FROM " + table + " where TIMESTAMP = '" + str(timestamp) + "'"
-                sql_insert = "insert INTO tabel"
-                print( sql_delete  )
-               
-    except Exception as e:
-        flog.warning( inspect.stack()[0][3] + ": sql gefaald " + str(sql_delete)  + " melding:" + str(e.args[0]) )
-"""
-

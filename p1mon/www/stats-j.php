@@ -123,16 +123,16 @@ function createKwhChart() {
                     events: {
                         legendItemClick: function (event) {
                             if  ( this.index === 0 ) {
-                                toLocalStorage('stat-j-verbr-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-j-verbr-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 1 ) {
-                                toLocalStorage('stat-j-gelvr-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-j-gelvr-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 2 ) {
-                                toLocalStorage('stat-j-netto-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-j-netto-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 3 ) {
-                                toLocalStorage('stat-j-temp-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('stat-j-temp-visible',this.visible);  // #PARAMETER
                             }
                         }
                     }
@@ -345,11 +345,14 @@ function createKwhChart() {
             },  
             navigator: {
                 xAxis: {
-                    minTickInterval:  5 * 365 * 24 * 3600000, 
-                    maxRange:        30 * 365 * 24 * 3600000,
                     dateTimeLabelFormats: {
-                        day: '%d %B'	
-                    }    
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%B<br/>%Y',
+                        month: '%B<br/>%Y',
+                        year: '%Y'
+                    }
                 },
                 enabled: true,
                 outlineColor: '#384042',
@@ -358,9 +361,6 @@ function createKwhChart() {
                     backgroundColor: '#384042',
                     borderColor: '#6E797C'
                 },
-                series: {
-                    color: '#10D0E7'
-                }
             },
             series: [ 
                 {

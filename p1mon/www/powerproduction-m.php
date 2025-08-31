@@ -136,16 +136,16 @@ function createKwhChart() {
                         legendItemClick: function (event) {
                             //console.log(this.index)
                             if  ( this.index === 0 ) {
-                                toLocalStorage('powerprod-m-high-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-m-high-tariff-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 1 ) {
-                                toLocalStorage('powerprod-m-low-tariff-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-m-low-tariff-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 2 ) {
-                                toLocalStorage('powerprod-m-netto-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-m-netto-visible',this.visible);  // #PARAMETER
                             }
                             if  ( this.index === 3 ) {
-                                toLocalStorage('powerprod-m-temp-visible',!this.visible);  // #PARAMETER
+                                toLocalStorage('powerprod-m-temp-visible',this.visible);  // #PARAMETER
                             }
                         }
                     }
@@ -371,21 +371,21 @@ function createKwhChart() {
             },  
             navigator: {
                 xAxis: {
-                    minTickInterval:       30 * 24 * 3600000,  
-                    maxRange:        120 * 30 * 24 * 3600000,
                     dateTimeLabelFormats: {
-                        day: '%d %B'
-                    }    
+                        second: '%H:%M:%S',
+                        minute: '%H:%M',
+                        hour: '%H:%M',
+                        day: '%B<br/>%Y',
+                        month: '%B<br/>%Y',
+                        year: '%Y'
+                    }
                 },
                 enabled: true,
                 outlineColor: '#384042',
                 outlineWidth: 1,
                 handles: {
                     backgroundColor: '#384042',
-                    borderColor: '#6E797C'
-                },
-                series: {
-                    color: '#10D0E7'
+                    borderColor: '#6E797C',
                 }
             },
             series: [ 

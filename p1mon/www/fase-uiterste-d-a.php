@@ -129,20 +129,22 @@ function createChart() {
         },  
         navigator: {
             xAxis: {
-                type: 'datetime',
                 dateTimeLabelFormats: {
-                    day: '%a.<br>%d %B<br/>%Y',
+                    second: '%H:%M:%S',
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: '%B<br/>%Y',
                     month: '%B<br/>%Y',
                     year: '%Y'
-                } 
+                }
             },
             enabled: true,
             outlineColor: '#384042',
             outlineWidth: 1,
             handles: {
                 backgroundColor: '#384042',
-                borderColor: '#6E797C'
-            },
+                borderColor: '#6E797C',
+            }
         },
         xAxis: {
             type: 'datetime', 
@@ -321,7 +323,6 @@ function createChart() {
         itemDistance: 5
     },
     series: [{
-            showInNavigator: true,
             yAxis: 0,
             dashStyle: 'Solid',
             visible: GseriesVisibilty[0],
@@ -332,7 +333,6 @@ function createChart() {
             color: L1_color,
             fillOpacity: 0.33,
         },{
-            showInNavigator: true,
             yAxis: 0,
             dashStyle: 'ShortDot',
             visible: GseriesVisibilty[1],
@@ -343,7 +343,6 @@ function createChart() {
             color: L2_color,
             fillOpacity: 0.33,
         },{
-            showInNavigator: true,
             yAxis: 0,
             dashStyle: 'ShortDash',
             visible: GseriesVisibilty[2],
@@ -362,13 +361,13 @@ function createChart() {
                     legendItemClick: function () {
                         // console.log('legendItemClick index='+this.index);
                         if ( this.index === 0 ) {
-                            toLocalStorage('fase-uiterste-d-a-L1',!this.visible); // #PARAMETER
+                            toLocalStorage('fase-uiterste-d-a-L1',this.visible); // #PARAMETER
                         }
                         if ( this.index === 1 ) {
-                            toLocalStorage('fase-uiterste-d-a-L2',!this.visible); // #PARAMETER
+                            toLocalStorage('fase-uiterste-d-a-L2',this.visible); // #PARAMETER
                         }
                         if ( this.index === 2 ) {
-                            toLocalStorage('fase-uiterste-d-a-L3',!this.visible); // #PARAMETER
+                            toLocalStorage('fase-uiterste-d-a-L3',this.visible); // #PARAMETER
                         }
                     }
                 }
