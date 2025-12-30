@@ -6,7 +6,7 @@ include_once '/p1mon/www/util/textlib.php';
 function page_menu($id) {
     $noInetCheck = isInternetIPAllowed();
     $localip     = validLocalIpAdress(getClientIP());
-    $m0=$m1=$m2=$m3=$m4=$m5=$m6=$m7=$m8=$m9=$m10=$m11=$m12=$M13='';
+    $m0=$m1=$m2=$m3=$m4=$m5=$m6=$m7=$m8=$m9=$m10=$m11=$m12=$m13='';
 
     passwordSessionExpiredCheck();
 

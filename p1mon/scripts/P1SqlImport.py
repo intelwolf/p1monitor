@@ -17,7 +17,6 @@ import sqldb_pricing
 import sys
 import systemid
 import time
-#import crypto3
 import crypto_lib
 import util
 import listOfPidByName
@@ -349,7 +348,6 @@ def Main(argv):
         flog.error( inspect.stack()[0][3] + ": " + msg )
     else:
         msgToInfoLogAndStatusFile( 'Ethernet aanpassingen gereed.' )
-
 
     msgToInfoLogAndStatusFile( 'CRON wordt aangepast.' )
     try:

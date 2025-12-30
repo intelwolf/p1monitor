@@ -132,20 +132,20 @@ tableColumns =
 
     function rowSetter( row ){
 
-                var data = row.getData(); //get data object for row
-                row.getCell( "mode_set" ).setValue( selectorModeToText( mode=data.MODE, languageIndex=languageIndex ), true );
-                row.getCell( "type_set" ).setValue( selectorTypeToText( mode=data.DATA_ID, languageIndex=languageIndex ), true );
-                if ( row.getCell("TIMESTAMP_START").getValue() !== undefined ) {
-                    row.getCell( "TIMESTAMP_START" ).setValue(data.TIMESTAMP_START.substring(0, 16));
-                }
-                if ( row.getCell("TIMESTAMP_STOP").getValue() !== undefined ) {
-                    row.getCell( "TIMESTAMP_STOP" ).setValue(data.TIMESTAMP_STOP.substring(0, 16));
-                }
-                if ( row.getCell("UPDATED").getValue() !== undefined ) {
-                    row.getCell( "UPDATED" ).setValue(data.UPDATED.substring(0, 16));
-                }
-            }
-            
+        var data = row.getData(); //get data object for row
+        row.getCell( "mode_set" ).setValue( selectorModeToText( mode=data.MODE, languageIndex=languageIndex ), true );
+        row.getCell( "type_set" ).setValue( selectorTypeToText( mode=data.DATA_ID, languageIndex=languageIndex ), true );
+        if ( row.getCell("TIMESTAMP_START").getValue() !== undefined ) {
+            row.getCell( "TIMESTAMP_START" ).setValue(data.TIMESTAMP_START.substring(0, 16));
+        }
+        if ( row.getCell("TIMESTAMP_STOP").getValue() !== undefined ) {
+            row.getCell( "TIMESTAMP_STOP" ).setValue(data.TIMESTAMP_STOP.substring(0, 16));
+        }
+        if ( row.getCell("UPDATED").getValue() !== undefined ) {
+            row.getCell( "UPDATED" ).setValue(data.UPDATED.substring(0, 16));
+        }
+    }
+
 
     function buildTableKwh() {
 
@@ -172,6 +172,17 @@ tableColumns =
             , 30000 ); // reload
         });
     
+        tabualtorkWh.on("dataProcessed", function() {
+            const rowCount = tabualtorkWh.getDataCount("active");
+            //console.log("rowCount = ", rowCount )
+            if ( rowCount == 0 ) {
+                hideStuff('kwhcontainter')
+            } else {
+                showStuff('kwhcontainter'); 
+            }
+            checkForData();
+         });
+
     }
 
     function buildTableGas() {
@@ -199,7 +210,18 @@ tableColumns =
             } 
             , 30000 ); // reload
         });
-    
+
+         tabualtorGas.on("dataProcessed", function() {
+            const rowCount = tabualtorGas.getDataCount("active");
+            //console.log("rowCount = ", rowCount )
+            if ( rowCount == 0 ) {
+                hideStuff('gascontainter')
+            } else {
+                showStuff('gascontainter'); 
+            }
+            checkForData();
+         });
+
     }
 
 
@@ -228,17 +250,45 @@ tableColumns =
             } 
             , 30000 ); // reload
         });
+
+         tabualtorWater.on("dataProcessed", function() {
+            const rowCount = tabualtorWater.getDataCount("active");
+            //console.log("rowCount = ", rowCount )
+            if ( rowCount == 0 ) {
+                hideStuff('watercontainter')
+            } else {
+                showStuff('watercontainter'); 
+            }
+            checkForData();
+         });
     
     }
 
+    // show message as no records are set. 
+    function checkForData() {
+        if ( document.getElementById("watercontainter").checkVisibility() == false && 
+             document.getElementById("gascontainter").checkVisibility()  == false && 
+             document.getElementById("kwhcontainter").checkVisibility() == false ) {
+            showStuff('processingdata');
+        } else {
+            hideStuff('processingdata');
+        }
+    }
 
 
     $(function () {
+        centerPosition('#processingdata');
+        hideStuff('processingdata');
+        hideStuff('watercontainter');
+        hideStuff('gascontainter');
+        hideStuff('kwhcontainter');
+
         buildTableKwh();
         buildTableGas();
         buildTableWater();
 
         screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
+
     });
 
 </script>
@@ -267,37 +317,43 @@ tableColumns =
         
         <div> <!-- right block -->
             
-            <div class="frame-4-top">
-                <span class="text-15">kWh <?php echo strIdx( 737 )?></span>
-            </div>
-            <div class="frame-4-bot">
-                <div class="float-left" >
-                    <div id="kwh-table"></div>
-                    <p></p>
+            <div id="kwhcontainter">
+                <div class="frame-4-top">
+                    <span class="text-15">kWh <?php echo strIdx( 737 )?></span>
+                </div>
+                <div class="frame-4-bot">
+                    <div class="float-left" >
+                        <div id="kwh-table"></div>
+                        <p></p>
+                    </div>
                 </div>
             </div>
 
             <p></p>
 
-            <div class="frame-4-top">
-                <span class="text-15"><?php echo strIdx( 336 )?> <?php echo strIdx( 737 )?></span>
-            </div>
-            <div class="frame-4-bot">
-                <div class="float-left" >
-                    <div id="gas-table"></div>
-                    <p></p>
+            <div id="gascontainter">
+                <div class="frame-4-top">
+                    <span class="text-15"><?php echo strIdx( 336 )?> <?php echo strIdx( 737 )?></span>
+                </div>
+                <div class="frame-4-bot">
+                    <div class="float-left" >
+                        <div id="gas-table"></div>
+                        <p></p>
+                    </div>
                 </div>
             </div>
 
             <p></p>
 
-            <div class="frame-4-top">
-                <span class="text-15"><?php echo strIdx( 220 )?> <?php echo strIdx( 737 )?></span>
-            </div>
-            <div class="frame-4-bot">
-                <div class="float-left" >
-                    <div id="water-table"></div>
-                    <p></p>
+            <div id="watercontainter">
+                <div class="frame-4-top">
+                    <span class="text-15"><?php echo strIdx( 220 )?> <?php echo strIdx( 737 )?></span>
+                </div>
+                <div class="frame-4-bot">
+                    <div class="float-left" >
+                        <div id="water-table"></div>
+                        <p></p>
+                    </div>
                 </div>
             </div>
 
@@ -307,6 +363,12 @@ tableColumns =
 </div>
     
 </div>
+
+    <div id="processingdata">
+        <i class="fa-solid fa-triangle-exclamation fa-beat color-error"></i>
+        <span>&nbsp;<?php echo strIdx( 763 );?></span>
+    </div>
+
 
 </body>
 </html>

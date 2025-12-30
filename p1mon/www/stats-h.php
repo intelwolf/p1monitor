@@ -512,7 +512,7 @@ $(function() {
     GseriesVisibilty[0] =JSON.parse(getLocalStorage('stat-h-verbr-visible'));  // #PARAMETER
     GseriesVisibilty[1] =JSON.parse(getLocalStorage('stat-h-gelvr-visible'));  // #PARAMETER
     GseriesVisibilty[2] =JSON.parse(getLocalStorage('stat-h-netto-visible'));  // #PARAMETER
-    GseriesVisibilty[3] =JSON.parse(getLocalStorage('stat-h-temp-visible'));   // #PARAMETER
+    GseriesVisibilty[3] = JSON.parse(getLocalStorage('stat-h-temp-visible'));   // #PARAMETER
     maxDataIsOn = JSON.parse(getLocalStorage('stat-h-max-data-on'));           // #PARAMETER
     //console.log( "maxDataIsON(1)=" + maxDataIsOn )
 

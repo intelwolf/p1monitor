@@ -354,6 +354,10 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '223',''                 ,'wlan0 default gateway static IP adres.')")
         self.insert_rec( "insert or ignore into " + table + " values ( '224',''                 ,'wlan0 domain name server static IP adres.')")
 
+        self.insert_rec( "insert or ignore into " + table + " values ( '225','0'               ,'vlag voor het verwijderen van de wifi instellingen.')")
+        
+        self.insert_rec( "insert or ignore into " + table + " values ( '226','0'                ,'MQTT miscellaneous dag publish aan/uit (1/0).')")
+
 
         # fix typo's from versions higer then 0.1.5
         sql_update = "update " + table + " set label ='Publieke dynamische DNS naam (FQDN).' where id=150"
@@ -924,6 +928,23 @@ class rtStatusDb():
         self.cur.execute( sqlstr )
         self.con.commit()
         self.close_db()
+
+
+    def all_records(self, flog=None ):
+        try:
+            d = {} # empty dictonary
+            sql_select = "select id, status, label, security from " + self.table
+            self.con = lite.connect(self.dbname)
+            self.cur = self.con.cursor()
+            self.cur.execute( sql_select )
+            r=self.cur.fetchall()
+            self.close_db() 
+            for i in r:
+                d[i[0]] = i[1]
+        except Exception as e:
+            if flog != None:
+                flog.error(inspect.stack()[1][3]+" db status gefaald: " + " Melding=" + str(e.args[0]) )
+        return d
 
 INDEX_SECONDS = 10
 INDEX_MINUTE  = 11

@@ -537,7 +537,8 @@ def update_ip_in_status_db(network_type=1, flog=None):
     if flog != None:
         flog.info(inspect.stack()[0][3]+": starting check if " + str(name) + " is active")
 
-    while ( sec_count < 180 ):
+    #while ( sec_count < 180 ):
+    while ( sec_count < 90 ):
         # try for maximum of 3 minutes (sleep is 5)
         buf = get_nic_info( ifname )
         if buf['ip4'] != None:
