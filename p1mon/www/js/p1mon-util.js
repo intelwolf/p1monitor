@@ -48,7 +48,7 @@ function getStyleRuleValue( selector, style ) {
 };
 
 
-// set the highchart language options.
+// set the HighChart language options.
 function setHighChartLanguageOptions( idx ) {
     
     if ( idx == 0 ) {  // Nederlands

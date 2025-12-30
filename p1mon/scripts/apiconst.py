@@ -38,6 +38,8 @@ ROUTE_CONFIG_ID_HELP = ROUTE_CONFIG_ID + '/help'
 ROUTE_STATISTICS      = '/api/v1/statistics'
 ROUTE_STATISTICS_HELP = ROUTE_STATISTICS + '/help'
 
+BASE_MISCELLANEOUS    =  'miscellaneous'
+
 BASE_FINANCIAL            = 'financial' # don't use in path in the code
 ROUTE_FINANCIAL_DAY       = '/api/v1/financial/day'
 ROUTE_FINANCIAL_DAY_HELP  = ROUTE_FINANCIAL_DAY + '/help'
@@ -165,6 +167,10 @@ JSON_API_VALID_DATA         = 'VALID_DATA'                           # used to f
 JSON_API_FQDN               = 'API_FQDN'                             # Fully Qualified Domain Name for the remote inet access to the API
 JSON_API_P1_TELEGRAM        = 'P1_TELEGRAM'                          # ASCII string P1 telegram.
 
+JSON_API_SWTCHR_POWER_ON    = 'POWER_SWITCHER_IS_ON'                 # shows when the power production switcher is switched on 
+JSON_API_SWTCHR_POWER_W     = 'POWER_SWITCHER_WATT'                  # production switcher is switched on power zero means off
+JSON_API_SWTCHR_TARIFF_ON   = 'POWER_SWITCHER_TARIFF_IS_ON'          # shows when the power tariff switcher is switched on 
+
 JSON_API_ID                 = 'ID'                                   # number that identifies a record uniquely. 
 JSON_API_DATA_ID            = 'DATA_ID'                              # number representing the type op data   1:kWh min consumption, 2: kWh hour consumption, 3: kWh day consumption, 4: kWh month consumption 5: kWh year consumption, 6: kWh min production, 7: kWh hour production, 8: kWh day production, 9: kWh month production, 10: kWh year production, 11: gas hour, 12: gas day ,13: gas month ,14: gas year, 15: water min, 16: water hour, 17: water day, 18: water month, 19: water year
 JSON_API_ACTIVE             = 'ACTIVE'                               # record will be updated automatically. 
@@ -186,6 +192,8 @@ JSON_API_SYSTM_ID           = 'P1_SYSTEM_ID'                         # system ID
 JSON_API_RM_TMPRTR_IN       = 'ROOM_TEMPERATURE_IN'                  # room temperature input,raw data not processed
 JSON_API_RM_TMPRTR_OUT      = 'ROOM_TEMPERATURE_OUT'                 # room temperature output,raw data not processed
 JSON_API_REC_PRCSSD         = 'RECORD_IS_PROCESSED'                  # record is processed into the database
+JSON_API_NET_CNSMPTN_W      = 'CONSUMPTION_NET_W'                    # the net consumption of power (W), minus if any power produced, -value means power production exceeds power consumption.
+
 JSON_API_STTS_ID            = 'STATUS_ID'                            # unique record ID
 JSON_API_STTS               = 'STATUS'                               # the status of the ID/label.
 JSON_API_STTS_LBL           = 'LABEL'                                # description of the status.
@@ -253,6 +261,8 @@ JSON_API_PHS_L3_A           = 'L3_A'                                 # Amperage 
 JSON_API_PHS_L1_A_CALC      = 'L1_A_CALC'                            # Amperage phase L1 calculated
 JSON_API_PHS_L2_A_CALC      = 'L2_A_CALC'                            # Amperage phase L2 calculated
 JSON_API_PHS_L3_A_CALC      = 'L3_A_CALC'                            # Amperage phase L3 calculated
+JSON_API_PHS_CNSMPT_W_TOTAL = 'CONSUMPTION_TOTAL_W'                  # Total of the 3 phase values consumption    
+JSON_API_PHS_PRDCTN_W_TOTAL = 'PRODUCTION_TOTAL_W'                   # Total of the 3 pahse values consumption
 
 JSON_API_PHS_CNSMPTN_L1_W_MAX  = 'CONSUMPTION_L1_W_MAX'              # Consumption of W for phase L1 maximum
 JSON_API_PHS_CNSMPTN_L2_W_MAX  = 'CONSUMPTION_L2_W_MAX'              # Consumption of W for phase L2 maximum
@@ -337,6 +347,9 @@ EXPL_API_SYSTM_ID           = 'System ID that is hardware specific and unique'
 EXPL_API_RM_TMPRTR_IN       = 'Room temperature input,raw data not processed in degrees Celsius.'
 EXPL_API_RM_TMPRTR_OUT      = 'Room temperature output,raw data not processed in degrees Celsius.'
 EXPL_API_REC_PRCSSD         = 'Record is processed into the database. 1 is done, 0 is to do.'
+EXPL_API_NET_CNSMPTN_W      = 'the net consumption of power (W), minus if any power produced, -value means power production exceeds power consumption.'
+
+
 EXPL_API_STTS_ID            = 'Unique record ID'
 EXPL_API_STTS               = 'The status of the ID/label.'
 EXPL_API_STTS_LBL           = 'Description of the status.'
@@ -407,7 +420,8 @@ EXPL_API_PHS_L3_A           = 'Amperage phase L3'
 EXPL_API_PHS_L1_A_CALC      = 'Amperage phase L1 calculated'
 EXPL_API_PHS_L2_A_CALC      = 'Amperage phase L2 calculated'
 EXPL_API_PHS_L3_A_CALC      = 'Amperage phase L3 calculated'
-
+EXPL_API_PHS_CNSMPT_W_TOTAL = 'Total of the 3 phase values consumption'    
+EXPL_API_PHS_PRDCTN_W_TOTAL = 'Total of the 3 pahse values consumption'
 
 EXPL_API_PHS_CNSMPTN_L1_W_MAX = 'Consumption of W for phase L1 maximum'
 EXPL_API_PHS_CNSMPTN_L2_W_MAX = 'Consumption of W for phase L2 maximum'

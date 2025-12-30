@@ -115,7 +115,6 @@ div#processingdata {
 }
 
 
-
 div#slider_dialog {
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
@@ -176,6 +175,26 @@ div#import_sql_message {
     font-size: 1em;
     display: none;
 }
+
+div#slidecontainer_zoom {
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    padding: 10px 0px 10px 0px;
+    width: 300px;
+    text-align: left;
+    /* color: #83B31E; */
+    background-color: #F5F5F5;
+    box-shadow: 0px 5px 8px -2px #eaeaea;
+    font-size: 1em;
+    display: none;
+    z-index: 100;
+    position: relative;
+    top: -38px;
+    left: 69px;
+}
+
 
 div#patch_status_message {
     border-radius: 5px 5px 5px 5px;
@@ -1083,7 +1102,6 @@ div#right-wrapper-config-right-4 {
     color: #6E797C;
     font-size: 2em;
 }
-
 
 .text-32 {
     position: relative;
@@ -2217,6 +2235,21 @@ a:hover {
     top: 5px;
 }
 
+.pos-57 {
+    /* font-size: 1.1em; */
+    margin-top: 5px;
+    margin-left: 4px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #DCE1E3;
+    background-color: #F5F5F5;
+    height: 22px;
+    width: 55px;
+}
 
 
 .fieldset-1 {
@@ -2326,6 +2359,10 @@ a:hover {
 
 .width-24 {
     width: 24px !important; 
+}
+
+.width-30 {
+    width: 30px !important; 
 }
 
 .width-58 {

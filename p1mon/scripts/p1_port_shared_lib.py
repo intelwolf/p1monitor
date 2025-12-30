@@ -17,6 +17,9 @@ import time
 import util
 import process_lib
 
+# TODO
+shared_last_p1_port_timestamp = None
+
 ###########################################################
 # email notification when there is no data seen on the P1 #
 # port                                                    #
@@ -335,8 +338,6 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
 
     #print("#1", data_set)
 
-   
-
     #flog.setLevel( logger.logging.DEBUG )
     # convert the large cosumption values to cosumer code and calculate
     # missing values, where possible
@@ -353,22 +354,6 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
             data_set['gelvr_kwh_281'] = '000000.000'
 
         # try to calculate current consumed power (Watt)
-
-        # old way with total AMP's 
-        """
-        if data_set['act_verbr_kw_170'] == const.NOT_SET:
-            # is total amp set and the voltages used that
-            if data_set['ls_9070'] != const.NOT_SET:
-                v_total = []
-                if phase_db_rec['L1_V'] != const.NOT_SET:
-                       v_total.append( int(phase_db_rec['L1_V']) )
-                if phase_db_rec['L2_V'] != const.NOT_SET:
-                       v_total.append( int(phase_db_rec['L2_V']) ) 
-                if phase_db_rec['L2_V'] != const.NOT_SET:
-                       v_total.append( int(phase_db_rec['L3_V']) )
-
-                data_set['act_verbr_kw_170'] = "{0:06.3f}".format( (float(data_set['ls_9070']) * statistics.mean(v_total))/1000 )
-        """
 
         if data_set['act_verbr_kw_170'] == const.NOT_SET: # fails save if calc fails
             data_set['act_verbr_kw_170'] = "00.000"
@@ -551,7 +536,6 @@ def get_large_consumer_mode( status=None ,configdb=None, flog=None ):
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": sql error( config )" + str(e))
 
-
 #############################################################
 # get country settings for day and night mode               #
 # 0: NL verwerking van E velden                             #
@@ -569,7 +553,6 @@ def get_country_day_night_mode( status=None ,configdb=None, flog=None ):
 
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": sql error( config )"+str(e))
-
 
 #############################################################
 # This flag determines if missing values must be calculated #
@@ -691,7 +674,6 @@ def instert_db_gas_value( data_set=None, status=None, statusdb=None, flog=None )
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": gas per uur fout -> "+str(e))
 
-
 #############################################################
 # set the status database with peak values                  #
 #############################################################
@@ -723,7 +705,6 @@ def set_peak_kw_value(data_set=None, dbstatus=None, flog=None ):
     except Exception as e:
         flog.error( inspect.stack()[0][3] + ": peak waarde update gefaald. Melding = "+str(e.args[0]) )
 
-
 ############################################################
 # make standard timestring from P1 telegram timestring     #
 ############################################################
@@ -734,7 +715,6 @@ def telegram_timestr_conversion( p1_telegram=None, flog=None ) -> str:
         flog.error( inspect.stack()[0][3] + ": tijd conversie gefaald. Melding="+str(e.args[0]) )
         return ""
 
- 
 #############################################################
 # set the status database with the max kWh values           #
 #############################################################
@@ -766,6 +746,51 @@ def max_kWh_day_value(data_set=None, dbstatus=None, dbserial=None, flog=None ):
         flog.error( inspect.stack()[0][3]+": serial e-buffer kwH waarden vorige dag gefaald. Melding="+str(e.args[0]) )
     #flog.setLevel( logger.logging.INFO )
 
+
+##############################################################
+# read the newest record from the serial database. If this   #
+# record is in the past compared to the supplied timestamp   #
+# the return true (all is fine) or else return false meaning #
+# timetravel has occured                                     #
+# parameter: timestamp to insert for record                  #
+##############################################################
+def check_no_timetravel( timestamp=None, dbserial=None, flog=None ):
+    global shared_last_p1_port_timestamp
+    timestampSTR = util.mkLocalTimeString()
+
+    #print("timestamp", timestamp)
+    #print("shared_last_p1_port_timestamp",shared_last_p1_port_timestamp)
+    #print("timestampSTR :", timestampSTR)
+    #print("---------------")
+
+    if shared_last_p1_port_timestamp == None:
+        #print("set once")
+        shared_last_p1_port_timestamp = timestampSTR
+        return True # set when intial value is None
+    
+    if timestamp >= shared_last_p1_port_timestamp:
+        shared_last_p1_port_timestamp = timestampSTR
+        #print("ok")
+        return True 
+    else:
+        flog.warning( inspect.stack()[0][3] + ": tijdrijzen ontdekt laatste record tijd = "  + str(shared_last_p1_port_timestamp)  + " systeem tijd = " + str(timestampSTR) )
+        return False
+
+    """
+    r = True
+    try:
+        rec = dbserial.select_one_record()
+        flog.debug( inspect.stack()[0][3] + ": rec= " + str( rec ) )
+        #print( rec[0] )
+        if rec[0] > timestamp:
+            flog.warning( inspect.stack()[0][3] + ": tijdrijzen ontdekt DB = "  + str(rec[0])  + " New = " + str(timestamp) )
+            return False
+        else:
+            return True
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + ": gefaald. Melding="+str(e.args[0]))    
+    """
+
 #############################################################
 # insert a record in the serial database                    #
 #############################################################
@@ -777,7 +802,12 @@ def insert_db_serial_record( data_set=None, status=None ,dbstatus=None, dbserial
         dbstatus.strset( str( data_set['tarief_code'] ), 85, flog )
 
         timestr = util.mkLocalTimeString()
+        #timeUTC = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
         #timestr_min=timestr[0:16]+":00"
+
+        if check_no_timetravel(timestamp=timestr, dbserial=dbserial, flog=flog ) == False:
+            return
+            #raise Exception("Tijdreizen ondekt, dit is normaal bij de overgang van zomer naar wintertijd.")
 
         if status['gas_present_in_serial_data'] == False:
             #gas_verbr_m3_2421 = 0
@@ -810,7 +840,7 @@ def insert_db_serial_record( data_set=None, status=None ,dbstatus=None, dbserial
        #     backupData()
 
     except Exception as e:
-        flog.error(inspect.stack()[0][3]+": Insert gefaald. Melding="+str(e.args[0]))
+        flog.error(inspect.stack()[0][3]+": insert gefaald. Melding="+str(e.args[0]))
 
 #############################################################
 # read the last/current room temperature values in + out    #

@@ -175,6 +175,7 @@ def MainProg():
             check_and_set_samba_mode( forced=False )
             set_ethernet()
             set_wifi()
+            unset_wifi()
             check_and_run_backup()
             run_patch()
             check_for_new_p1monitor_version(forced=True)
@@ -482,6 +483,35 @@ def set_ethernet( forced=False ):
     except Exception as e:
         flog.error( inspect.stack()[0][3] + " Ethernet onverwachte fout: " + str( e ) )
         config_db.strset( '0', 168, flog ) # reset run bit # fail save to stop
+
+
+
+##################################################
+# unsset wifi configuration                         #
+##################################################
+def unset_wifi( forced=False ):
+
+    try:
+        _id, run_status, _label = config_db.strget( 225, flog )
+
+        if int( run_status ) == 1 or forced == True: # start process
+            config_db.strset( 0, 225, flog ) # reset the flag to prevent an endless loop.
+
+            flog.info( inspect.stack()[0][3] + ": Wifi configuratie deactiveren en verwijderen." )
+            cmd = "/p1mon/scripts/P1WifiConfig -d > /dev/null 2>&1 &"
+            r = process_lib.run_process( 
+                cms_str = cmd,
+                use_shell=True,
+                give_return_value=True,
+                flog=flog,
+                timeout=None
+            )
+            if r[2] > 0:
+                flog.error(inspect.stack()[0][3]+" Wifi aanpassen gefaald.")
+
+    except Exception as e:
+        flog.error( inspect.stack()[0][3] + " Wifi onverwachte fout: " + str( e ) )
+        config_db.strset( 0, 225, flog ) # fail save.
 
 
 ##################################################

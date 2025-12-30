@@ -1221,9 +1221,9 @@ $arr = array (
     'Téléchargez un correctif et exécutez-le automatiquement.'
     ),
 /* 317 */ array(
-    'Met de patch optie kunnen officiële ztatz.nl patches worden geïnstalleerd.',
-    'With the patch option official ztatz.nl patches can be installed.',
-    'Avec l&apos;option de correctif, les correctifs officiels de ztatz.nl peuvent être installés'
+    'Met de patch optie kunnen officiële ztatz.nl patches worden geïnstalleerd. Download de patch bestand. Dit is een zip file dat niet uitgepakt hoeft te worden.  Klik op de patch knop en selecteer het gedownloade bestand.  De patches zijn versie specifiek en werken niet bij andere versies.',
+    "The patch option allows you to install official ztatz.nl patches. Download the patch file. This is a zip file that doesn't need to be unzipped. Click the patch button and select the downloaded file. The patches are version-specific and will not work on other versions.",
+    "L'option patch vous permet d'installer les correctifs officiels de ztatz.nl. Téléchargez le fichier correctif. Il s'agit d'un fichier zip qui n'a pas besoin d'être décompressé. Cliquez sur le bouton patch et sélectionnez le fichier téléchargé. Les correctifs sont spécifiques à chaque version et ne fonctionneront pas sur les autres."
     ),
 /* 318 */ array(
     'socat configuratie','socat configuration','socat de configuration'
@@ -2703,14 +2703,27 @@ Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'arge
     'geen statistiek berekeningen ingesteld.','no statistics calculations set.','aucun calcul statistique défini.'
 ),
 /* 764 */ array(
-    '','',''
+    'wis alle wifi configuratie gegevens en deactiveer de wifiverbinding',
+    'clear all wifi configuration data and disable the wifi connection.',
+    'effacez toutes les données de configuration Wi-Fi et désactivez la connexion Wi-Fi'
 ),
 /* 765 */ array(
-    '','',''
+    'wis instellingen','clear settings','effacer les paramètres'
 ),
 /* 766 */ array(
+    'verzenden diverse informatie','sending miscellaneous information',"envoi d'informations diverses"
+),
+/* 767 */ array(
+    'stel het zoomniveau van deze pagina in','set the zoom level of this page','définissez le niveau de zoom de cette page'
+),
+/* 768 */ array(
     '','',''
 ),
+
+/* 769 */ array(
+    '','',''
+),
+
 
 
 );

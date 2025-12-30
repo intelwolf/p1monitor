@@ -7,6 +7,7 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/p1mon-pagezoom.php';
 include_once '/p1mon/www/util/highchart.php';
 
 ?> 
@@ -25,9 +26,11 @@ include_once '/p1mon/www/util/highchart.php';
 <script src="./js/highstock-link/highstock.js"></script>
 <script src="./js/highstock-link/highcharts-more.js"></script>
 <script src="./js/highstock-link/modules/accessibility.js"></script>
-
 <script src="./js/hc-global-options.js"></script>
+
+<script src="./js/mobile-detect/mobile-detect.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/p1mon-pagezoom.js"></script>
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
 
 <script>
@@ -43,7 +46,6 @@ var gelvrKosten         = 0;
 var wattageMaxValueConsumption  = <?php echo config_read(52); ?>;
 var wattageMaxValueProduction   = <?php echo config_read(53); ?>;
 var showPhaseInformation        = <?php echo config_read(61); ?>;
-//var faseVerbrTitle = 'fase<br>verdeling'
 var consumptionPowerPhase   = [ [0],[0],[0] ];
 var productionPowerPhase    = [ [0],[0],[0] ];            
 var watermeterRecords       = 1
@@ -351,7 +353,6 @@ function autoHideNonPresentPhaseInformation() {
     $("#actVermogenFaseLevering").highcharts().xAxis[0].setCategories( tmpProductionCategories );
 
 }
-
 
 function readJsonApiFinancial(){ 
     $.getScript( "./api/v1/financial/day?limit=1", function( data, textStatus, jqxhr ) {
@@ -909,8 +910,11 @@ $(function () {
     // initial load
     secs = 0
     DataLoop();
-    // set dynamic titles
-
+  
+    // set zoom options for this page
+    zoomSetPage();
+    zoomSetPageFromStorage();
+    
 });
 
 </script>
@@ -928,12 +932,14 @@ $(function () {
     </div>
 </div>
 
+
 <div class="mid-section">
 
     <div class="left-wrapper">
         <?php page_menu(0); ?> 
         <div id="timerText" class="pos-8 color-timer"></div> 
         <?php fullscreen(); ?>
+        <?php pageZoom(); ?>
     </div> 
     
     <!-- peak costs -->

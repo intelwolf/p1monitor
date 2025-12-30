@@ -11,7 +11,7 @@ include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/div_err_succes.php';
 include_once '/p1mon/www/util/pageclock.php';
 
-#print_r($_POST);
+//print_r($_POST);
 loginInit();
 passwordSessionLogoutCheck();
 
@@ -146,6 +146,17 @@ if ( isset($_POST[ "fs_rb_duckdns_force" ]) ) {
         if ( updateConfigDb("update config set parameter = '0' where ID = 153") ) $err_cnt += 1;
     }
 }
+
+
+if ( isset( $_POST['fs_cb_ereasewifi'] )) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST['fs_cb_ereasewifi'] === 'on') { 
+        if ( updateConfigDb("update config set parameter = '' where ID = 11")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '' where ID = 12")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 225")) $err_cnt += 1;
+     }
+} 
+
 
 ?>
 <!doctype html>
@@ -344,7 +355,9 @@ $(function () {
                 <div id="right-wrapper-config-left-2">
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
-                        
+                    
+                       
+
                         <div class="frame-4-top">
                             <span class="text-15">wifi</span>
                         </div>
@@ -354,7 +367,7 @@ $(function () {
                                 <label class="text-10">SSID</label>
                                 <p class="p-1"></p>
                                 <i class="text-10 pad-8 fa-fw fas fa-lock"></i>
-                                <label class="text-10"><?php echo strIdx(226);?></label> 
+                                <label class="text-10"><?php echo strIdx(226);?></label>
                             </div>
                             <div class="float-left pad-1">
                                 <input class="input-5 color-settings color-input-back" id="wifi_essid" name="wifi_essid"  type="text" value="<?php echo config_read(11);?>">
@@ -362,6 +375,7 @@ $(function () {
                                 <input class="input-5 color-settings color-input-back" id="wifi_pw" name="wifi_pw"  type="password" value="<?php echo decodeString(12, 'wifipw');?>">
                                 <p class="p-1"></p>
                             </div>
+
                             <div class="float-right">
 
                                 <!-- <div id="wifi_search" onclick=showWifiList() class="float-left pad-1 cursor-pointer"> -->
@@ -384,11 +398,26 @@ $(function () {
                                 <div id="wifi_password" onclick="toggelPasswordVisibility('wifi_pw')" class="float-left pad-21 cursor-pointer">
                                     <span><i class="color-menu pad-7 fas fa-eye"></i></span>
                                 </div>
+
+
+
                             </div>
 
                             <p class="p-1"></p>
                             
-
+                            <div class="rTable">
+                                <div class="rTableRow" title="<?php echo strIdx(764);?>">
+                                        <div class="rTableCell width-22">
+                                            <i class="pad-7 color-warning fas fa-1x fa-trash-alt"></i>
+                                        </div>
+                                        <div class="rTableCell">
+                                            <label class="text-10"><?php echo strIdx(765);?></label> 
+                                        </div>
+                                        <div class="rTableCell">
+                                            <input class="cursor-pointer" id="fs_cb_ereasewifi" name="fs_cb_ereasewifi" type="checkbox" value="on" <?php if ( config_read( 225 ) == 1 )?>>
+                                        </div>
+                                    </div>
+                            </div>
                         </div>
                         
                         <p></p>

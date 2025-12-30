@@ -39,14 +39,16 @@
 # versie 3.0.0 Upgrade naar Raspberry Pi OS Bookworm (Debian 12)
 # versie 3.0.1 Nginx opstart probleem /var/lib/nginx/proxy
 # versie 3.1.0 added statistic option
+# versie 3.2.0 a lot of fixes and MQTT fixes.
+
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "3.1.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "2"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
-P1_SERIAL_VERSION               = "20250824"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "3.2.0"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
+P1_SERIAL_VERSION               = "20251219"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'

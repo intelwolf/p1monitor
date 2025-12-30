@@ -61,6 +61,9 @@ def Main( argv ):
     flog.info( msg )
     write_status_to_file( msg )
 
+    #print( network_manager_is_active(count=10) )
+    #sys.exit()
+
     parser = argparse.ArgumentParser(description="wegschrijven en lezen van data van externe USB drive/stick voor upgrades.",)
     parser.add_argument('-s', '--save',
         required=False,
@@ -164,88 +167,53 @@ def restore( args=None ):
             except Exception as e:
                  flog.warning ( inspect.stack()[0][3] + ": database bestand " + str( source_file_name ) + " naar ram probleem -> " + str(e) )
 
+        
+        flog.info( inspect.stack()[0][3] + ": controle of NetworkManager service actief is.")
+        if network_manager_is_active(count=60) == False:
+            flog.warning( inspect.stack()[0][3] +": probleem met NetworkManager, niet actief.")
+        flog.info( inspect.stack()[0][3] +": NetworkManager, is actief.")
 
-        # step 2 Ethernet config
-        cmd = "/p1mon/scripts/P1EthernetConfig -c "
-        proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
-        stdout, stderr  = proc.communicate()
-        returncode = int( proc.wait( timeout=60 ) )
-
-        if returncode != 0:
-            flog.warning( inspect.stack()[0][3] + ": P1EthernetConfig stdout " + str(stdout) )
-            flog.warning( inspect.stack()[0][3] + ": PP1EthernetConfig stderr " + str(stderr) )
-            raise Exception( 'Ethernet configuratie lijkt niet correct!' )
-        else:
-            flog.info( inspect.stack()[0][3] + ": Ethernet configuratie is geconfigureerd.")
-
-        # step 3 Wifi config
-        cmd = "/p1mon/scripts/P1WifiConfig -c "
-        proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
-        stdout, stderr  = proc.communicate()
-        returncode = int( proc.wait( timeout=60 ) )
-
-        if returncode != 0:
-            flog.warning( inspect.stack()[0][3] + ": P1WifiConfig stdout " + str(stdout) )
-            flog.warning( inspect.stack()[0][3] + ": P1WifiConfig stderr " + str(stderr) )
-            raise Exception( 'Wifi configuratie lijkt niet correct!' )
-        else:
-            flog.info( inspect.stack()[0][3] + ": Wifi configuratie is geconfigureerd.")
-
-        """ # versie 2.3.4 and older
-        # step 2 copy wifi config files
         try:
-            wifi_usb_pathfile = base_usb_pathfile + AIDE_DIR_WIFI
-            wifi_pathfile = wifi_usb_pathfile + "/" + pathlib.PurePath( wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH ).name + AIDE_EXT_CRYPTO
+            # step 2 Wifi config
+            flog.info( inspect.stack()[0][3] + ": Wifi configuratie aanpassen indien mogelijk.")
+            #cmd = "/p1mon/scripts/P1WifiConfig -c "
+            #proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE )
+            proc = subprocess.Popen( ['/bin/sh', '-c', '/p1mon/scripts/P1WifiConfig --configure' ] )
+            _p_status = proc.communicate( timeout=20 )
+            #flog.info( inspect.stack()[0][3] + ": Wifi wacht periode van 20 seconden")
+            #time.sleep(20)
+            #returncode = int( proc.wait() )
+            flog.info( inspect.stack()[0][3] + ": Wifi configuratie is gereed.")
+        except Exception as e:
+            flog.warning( inspect.stack()[0][3] +": probleem met Wifi configuratie -> " + str(e) )
 
-            #raise Exception( "TEST" )
+        # step 3 Ethernet config
+        try:
+            flog.info( inspect.stack()[0][3] + ": Ethernet configuratie aanpassen indien mogelijk.")
+            #cmd = "/p1mon/scripts/P1EthernetConfig -d "
+            #proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
+            proc = subprocess.Popen( ['/bin/sh', '-c', '/p1mon/scripts/P1EthernetConfig --deconfigure' ] )
+            #flog.info( inspect.stack()[0][3] + ": Ethernet wacht periode van 10 seconden")
+            #time.sleep(10)
+            _p_status = proc.communicate( timeout=20 )
+            #returncode = int( proc.wait() )
+            #p = subprocess.Popen( cmd_str, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True )
 
-            if os.path.exists( wifi_pathfile ):
+            flog.info( inspect.stack()[0][3] + ": Ethernet configuratie toevoegen indien mogelijk.")
+            #cmd = "/p1mon/scripts/P1EthernetConfig -c "
+            proc = subprocess.Popen( ['/bin/sh', '-c', '/p1mon/scripts/P1EthernetConfig --configure' ] )
+            #flog.info( inspect.stack()[0][3] + ": Ethernet wacht periode van 20 seconden")
+            #time.sleep(20)
+            _p_status = proc.communicate( timeout=20 )
+            #returncode = int( proc.wait() )
 
-                #print( "#", wifi_pathfile )
-                copy_and_crypto_file(
-                    mode='decrypt',
-                    source_pathfile=wifi_pathfile, 
-                    destination_pathfile=wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH,
-                    flog=flog,
-                    cryptoseed=CRYPTO_SEED,
-                )
-
-                flog.info( inspect.stack()[0][3] + ": bestand " + pathlib.PurePath( wifi_pathfile ).name + " decrypted en gekopieerd naar " + wifi_lib.WPA_SUPPLICANT_CONF_FILEPATH )
-
-            else:
-                flog.info( inspect.stack()[0][3] + ": Geen wifi configuratie gevonden -> " +  wifi_pathfile )
+            flog.info( inspect.stack()[0][3] + ": Ethernet configuratie is gereed.")
 
         except Exception as e:
-            flog.warning( inspect.stack()[0][3] +": Probleem met WiFi configuratie, probeer dit te herstellen door de WiFi opnieuw in te stellen -> " + str(e) )
-
-        """
+            flog.warning( inspect.stack()[0][3] +": probleem met Ethernet configuratie -> " + str(e) )
 
         # step 4 restore the SOCAT config, when enabled.
         socat_restore()
-
-
-        """
-        # step 3 copy DHCP config files
-        try:
-            #raise Exception( "TEST" )
-            dhcp_usb_pathfile = base_usb_pathfile + AIDE_DIR_DHCP + "/" + pathlib.PurePath( network_lib.DHCPCONFIG ).name 
-            filesystem_lib.move_file_for_root_user( source_filepath=dhcp_usb_pathfile, destination_filepath=network_lib.DHCPCONFIG, permissions='644', copyflag=True )
-            flog.info( inspect.stack()[0][3] + ": DHCP configuratie " + pathlib.PurePath( dhcp_usb_pathfile ).name + " gekopieerd." )
-        except Exception as e:
-            flog.warning( inspect.stack()[0][3] +": Probleem met DHCP configuratie, probeer dit te herstellen door het netwerk opnieuw in te stellen -> " + str(e) )
-
-        # step 4 copy DNS config files
-        try:
-            #raise Exception( "TEST" )
-            dns_usb_pathfile = base_usb_pathfile + AIDE_DIR_DNS+ "/" + pathlib.PurePath( network_lib.RESOLVCONFIG ).name
-            #print ( dns_usb_pathfile , network_lib.DHCPCONFIG,)
-            filesystem_lib.move_file_for_root_user( source_filepath=dns_usb_pathfile, destination_filepath=network_lib.RESOLVCONFIG, permissions='644', copyflag=True )
-            flog.info( inspect.stack()[0][3] + ": DNS configuratie " + pathlib.PurePath( dns_usb_pathfile ).name + " gekopieerd." )
-
-        except Exception as e:
-            flog.warning( inspect.stack()[0][3] +": probleem met DNS configuratie, probeer dit te herstellen door het netwerk opnieuw in te stellen -> " + str(e) )
-        """
-
 
         # step 5 copy crontab config files
         try:
@@ -348,7 +316,6 @@ def restore( args=None ):
         except Exception as e:
             flog.warning( inspect.stack()[0][3] +": probleem met eigen gemaakte webpagina's -> " + str(e) )
 
- 
         # change the restore folder to done status.
         rename_pathfile = base_usb_pathfile.rpartition('.')[0] + AIDE_EXT_DONE
         os.rename( base_usb_pathfile,  rename_pathfile )
@@ -373,8 +340,8 @@ def restore( args=None ):
 
         if args.reboot == True:
            
-            flog.info( inspect.stack()[0][3] +" Reboot van Raspberry Pi wordt uitgevoerd." )
-            time.sleep( 5 )
+            flog.info( inspect.stack()[0][3] +" Reboot van Raspberry Pi wordt uitgevoerd over 10 seconden." )
+            time.sleep( 10 )
             try :
                 cmd_str = '/usr/bin/sudo /sbin/reboot'
                 p = subprocess.Popen( cmd_str, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True )
@@ -1091,6 +1058,23 @@ def write_status_to_file( msg ):
     except Exception as e:
         flog.error( "status file schrijf fout: " + str(e) )
 
+###########################################
+# check if the NetworkManager is running  #
+# if running return true. count is the    #
+# number of tries before giving up in sec #
+# count= 60 means 1 minute to try         #
+###########################################
+def network_manager_is_active(count=1):
+    x = range(0, count)
+    for i in x:
+        with subprocess.Popen(['systemctl', 'is-active', 'NetworkManager' ], stdout=subprocess.PIPE, universal_newlines=True) as proc:
+            output = str(proc.stdout.read().strip())
+            if str(output) == "active":
+                return True
+            else:
+                time.sleep(1)
+    return False
+
 
 #-------------------------------
 if __name__ == "__main__":
@@ -1111,4 +1095,3 @@ if __name__ == "__main__":
         sys.exit( 1 ) #  error: no logging check file rights
 
     Main( sys.argv[1:] )
-

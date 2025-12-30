@@ -7,6 +7,7 @@ include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/p1mon-pagezoom.php';
 include_once '/p1mon/www/util/highchart.php';
 
 ?> 
@@ -26,7 +27,10 @@ include_once '/p1mon/www/util/highchart.php';
 <script src="./js/highstock-link/highcharts-more.js"></script>
 <script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/hc-global-options.js"></script>
+
+<script src="./js/mobile-detect/mobile-detect.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/p1mon-pagezoom.js"></script>
 <script src="./js/moment-link/moment-with-locales.min.js"></script>
 
 <script>
@@ -264,7 +268,6 @@ function autoHideNonPresentPhaseInformation() {
     $("#actVermogenFaseVerbruik").highcharts().xAxis[0].setCategories( tmpConsumptionCategories );
 
 }
-
 
 function createChartPhaseConsuming(){
     $('#actVermogenFaseVerbruik').highcharts({
@@ -805,6 +808,10 @@ $(function () {
     // initial load
     secs = 0
     DataLoop();
+
+     // set zoom options for this page
+    zoomSetPage();
+    zoomSetPageFromStorage();
 });
 </script>
 </head>
@@ -825,6 +832,7 @@ $(function () {
         <?php page_menu(0); ?> 
         <div id="timerText" class="pos-8 color-timer"></div> 
         <?php fullscreen(); ?>
+        <?php pageZoom(); ?> 
     </div> 
     
      <!-- peak costs -->

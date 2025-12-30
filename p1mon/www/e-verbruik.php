@@ -7,6 +7,7 @@ include_once '/p1mon/www/util/check_display_is_active.php';
 include_once '/p1mon/www/util/weather_info.php';
 include_once '/p1mon/www/util/pageclock.php';
 include_once '/p1mon/www/util/fullscreen.php';
+include_once '/p1mon/www/util/p1mon-pagezoom.php';
 include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/highchart.php';
 
@@ -29,7 +30,10 @@ if ( checkDisplayIsActive(18) == false) { return; }
 <script src="./js/highstock-link/modules/accessibility.js"></script>
 <script src="./js/highstock-link/modules/solid-gauge.js"></script>
 <script src="./js/hc-global-options.js"></script>
+
+<script src="./js/mobile-detect/mobile-detect.min.js"></script>
 <script src="./js/p1mon-util.js"></script>
+<script src="./js/p1mon-pagezoom.js"></script>
 
 <script>
 var progressCnt     = 1;
@@ -120,7 +124,8 @@ function readJsonApiFinancial(){
         try {
             var jsondataCost = JSON.parse(data); 
             verbrKosten = jsondataCost[0][2] + jsondataCost[0][3];
-            $("#dailycosttext").text(padXX(parseFloat(verbrKosten), 3, 2));
+            //verbrKosten = 0
+            $("#dailycosttext").text( padXX( parseFloat(verbrKosten), 3, 2) );
         } catch(err) {}
     });
 }
@@ -418,6 +423,10 @@ $(function () {
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     secs = 0;
     DataLoop(); 
+
+    // set zoom options for this page
+    zoomSetPage();
+    zoomSetPageFromStorage();
     
 });
 
@@ -441,6 +450,7 @@ $(function () {
                 <?php page_menu(6); ?>
                 <div id="timerText" class="pos-8 color-timer"></div>
                 <?php fullscreen(); ?>
+                <?php pageZoom(); ?> 
             </div>
 
             <div>
