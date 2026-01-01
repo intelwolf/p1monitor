@@ -231,7 +231,7 @@ def delete_records():
 ########################################################
 # make a minute record to prevent gaps in the data set #
 # and prevent expensive dataset changes                #
-# functie is run as a seperate process                 #
+# functie is run as a separate process                 #
 ########################################################
 def checkAndInsertMinuteRecord():
     #print( "## checkAndInsertMinuteRecord()" )

@@ -43,10 +43,11 @@ p1_status_record = {
     'day_night_mode'                : 0,             # day/night country flag 0 is NL, 1 is Belgium.
     'last_crc_check_timestamp'      : 0,             # timestamp of last crc check.
     'crc_error_cnt'                 : 0,             # number of crc error's until last reset.
-    'dbx_utc_ok_timestamp'          : 0,             # laatste keer dat een dbx message was send succesfull.
+    'dbx_utc_ok_timestamp'          : 0,             # laatste keer dat een dbx message was send successful.
     'p1_time_delta'                 : 0,             # verschil in seconden tussen de P1 timestamp en de systeemtijd.
-    'large_consumption_user'        : False,         # prcocessing of large power meter telegrams that are different the consumer smart meters.
-    'calculate_missing_values'      : False          # try to calculate values that are not supplied by the smart meter. 
+    'large_consumption_user'        : False,         # processing of large power meter telegrams that are different the consumer smart meters.
+    'calculate_missing_values'      : False,         # try to calculate values that are not supplied by the smart meter.
+    'water_code_prefix'             : ''             # P1 telegram code used for water, at least in Belgium.
 }
 
 ##########################################################
@@ -67,6 +68,7 @@ p1_data_base_record = {
     'act_verbr_kw_170'          : const.NOT_SET,
     'act_gelvr_kw_270'          : const.NOT_SET,
     'gas_verbr_m3_2421'         : const.NOT_SET,
+    'water_verbr'               : const.NOT_SET,    # added on 2025-12-07
     'tarief_code'               : 'P',              # default value.
     # lc_xxx specific (large consumer) codes 
     'lc_091'                    : const.NOT_SET,    # time in format hhmmsss
@@ -77,7 +79,7 @@ p1_data_base_record = {
     'peak_quarter_hour_140'     : const.NOT_SET,    # peak value in kwH of the past/current quarter-hour (when available in the telegram).
     'peak_quarter_hour_140_ts'  : '',               # timestamp of peak value in kwH of the past/current quarter-hour, not set by the telegram but by the program. 
     'peak_month_peak_160'       : const.NOT_SET,    # highest monthly peak in kW of the current month (when when available in the telegram).
-    'peak_month_peak_160_ts'    : ''                # timepstamp of highest monthly peak in kW of the current month (when when available in the telegram).
+    'peak_month_peak_160_ts'    : ''                # timestamp of highest monthly peak in kW of the current month (when when available in the telegram).
 }   
 
 #############################################

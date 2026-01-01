@@ -56,7 +56,7 @@ def Main( argv ):
     parser.add_argument( '-s', '--silent', 
     required=False,
     action="store_true",
-    help="only log message from  warning and above"
+    help="only log message from warning and above"
     )
     
     args = parser.parse_args()
@@ -129,8 +129,6 @@ def insert_config_record(rec=None):
     flog.info( inspect.stack()[0][3] + ": insert for new record successful.")
 
 
-
-
 ###########################################################
 # update and existing record by its ID number             #
 ###########################################################
@@ -188,6 +186,7 @@ def update_db_config():
 ###########################################################
 def calc_water(mode=1): 
     
+    #flog.setLevel( logger.logging.DEBUG )
     aggregate = get_aggregate_function(mode=mode)
 
     # get if any active statics records that are active 
@@ -222,7 +221,8 @@ def calc_water(mode=1):
 
                 try:
                    
-                    sql_query = "select " + aggregate + "(VERBR_PER_TIMEUNIT) from " + const.DB_WATERMETERV2_TAB + " where timeperiod_id = " + timeperiod_id + sql_timestamp_start + sql_timestamp_stop
+                    #sql_query = "select " + aggregate + "(VERBR_PER_TIMEUNIT) from " + const.DB_WATERMETERV2_TAB + " where timeperiod_id = " + timeperiod_id + sql_timestamp_start + sql_timestamp_stop
+                    sql_query = "select " + aggregate + "(VERBR_PER_TIMEUNIT) from " + const.DB_WATERMETERV2_TAB + " where " + timeperiod_id + sql_timestamp_start + sql_timestamp_stop
                     flog.debug ( inspect.stack()[0][3] + ": sql_query -> " + str(sql_query ) )
                     rec_aggregate = watermeter_db.select_rec( sql_query )
                     #print ( rec_aggregate )
@@ -238,7 +238,8 @@ def calc_water(mode=1):
 
     except Exception as e:
         flog.warning( inspect.stack()[0][3] + ": sql error on getting statistic table records -> " + str(e) )
-           
+    
+    #flog.setLevel( logger.logging.INFO )
 
 ###########################################################
 # select the data with the aggregate function and update  #
@@ -330,12 +331,21 @@ def get_timeperiod_id(index=0):
 
     ret_value = "INDEX_ERROR" 
 
+    """
     timeperiod_id_indexed = {
         15:  "11",
-        16:  "12",
+        16:  "12"
         17:  "13",
         18:  "14",
         19:  "15",
+    }
+    """
+    timeperiod_id_indexed = {
+        15:  "timeperiod_id = 11 or timeperiod_id == 21",
+        16:  "timeperiod_id = 12 or timeperiod_id == 22",
+        17:  "timeperiod_id = 13 or timeperiod_id == 23",
+        18:  "timeperiod_id = 14 or timeperiod_id == 24",
+        19:  "timeperiod_id = 15 or timeperiod_id == 25"
     }
 
     try:

@@ -151,6 +151,29 @@ ROUTE_POWERPRODUCTION_SOLAR_MONTH_HELP = '/api/v1/powerproductionsolar/month/hel
 ROUTE_POWERPRODUCTION_SOLAR_YEAR     = '/api/v1/powerproductionsolar/year/{power_source_id}/{db_index}'
 ROUTE_POWERPRODUCTION_SOLAR_YEAR_HELP = '/api/v1/powerproductionsolar/year/help'
 
+# note is id= is for the watermeter
+# CAT IS is only used for catalog
+BASE_WATERMETER_DIGITAL              = 'watermeterdigital' # don't use in path in the code
+#ROUTE_WATERMETER_DIGITAL_MIN_CAT     = '/api/v2/watermeterdigital/minute'   
+ROUTE_WATERMETER_DIGITAL_MIN         = '/api/v2/watermeterdigital/minute/{id}'
+ROUTE_WATERMETER_DIGITAL_MIN_HELP    = '/api/v2/watermeterdigital/minute/help'
+
+#ROUTE_WATERMETER_DIGITAL_HOUR_CAT     = '/api/v2/watermeterdigital/hour'
+ROUTE_WATERMETER_DIGITAL_HOUR        = '/api/v2/watermeterdigital/hour/{id}'
+ROUTE_WATERMETER_DIGITAL_HOUR_HELP    = '/api/v2/watermeterdigital/hour/help'
+
+#ROUTE_WATERMETER_DIGITAL_DAY_CAT     = '/api/v2/watermeterdigital/day'
+ROUTE_WATERMETER_DIGITAL_DAY         = '/api/v2/watermeterdigital/day/{id}'
+ROUTE_WATERMETER_DIGITAL_DAY_HELP    = '/api/v2/watermeterdigital/day/help'
+
+#ROUTE_WATERMETER_DIGITAL_MONTH_CAT   = '/api/v2/watermeterdigital/month'
+ROUTE_WATERMETER_DIGITAL_MONTH       = '/api/v2/watermeterdigital/month/{id}'
+ROUTE_WATERMETER_DIGITAL_MONTH_HELP  = '/api/v2/watermeterdigital/month/help'
+
+#ROUTE_WATERMETER_DIGITAL_YEAR_CAT    = '/api/v2/watermeterdigital/year'
+ROUTE_WATERMETER_DIGITAL_YEAR        = '/api/v2/watermeterdigital/year/{id}'
+ROUTE_WATERMETER_DIGITAL_YEAR_HELP   = '/api/v2/watermeterdigital/year/help'
+
 #JSON fields MATCH JSON_xx and EXPL_xxx
 JSON_TS_LCL                 = 'TIMESTAMP_lOCAL'                      # local time in format yyyy-mm-dd hh:mm:ss mkLocalTimeString()
 JSON_TS_LCL_UTC             = 'TIMESTAMP_UTC'                        # utc timestamp getUtcTime()
@@ -233,7 +256,7 @@ JSON_API_WTHR_HMDTY         = 'HUMIDITY'                             # Weather r
 JSON_API_WTHR_WND_SPD       = 'WIND_SPEED'                           # Weather wind speed in meter/sec.
 JSON_API_WTHR_WND_DGRS      = 'WIND_DEGREES'                         # Weather wind degrees (meteorological).
 JSON_API_WTHR_CLDS          = 'CLOUDS'                               # Weather cloudiness percentage (0-100).
-JSON_API_WTHR_WEATHER_ID    = 'WEATHER_ID'                           # Weather condition id, weather provider specfic.
+JSON_API_WTHR_WEATHER_ID    = 'WEATHER_ID'                           # Weather condition id, weather provider specific.
 JSON_API_RM_TMPRTR_RCRD_ID  = 'ROOM_TEMPERATURE_RECORD_TYPE_ID'      # type of record id, 10-15 (current,minute,day,hour,month,year).
 JSON_API_RM_TMPRTR_IN_L     = 'ROOM_TEMPERATURE_IN_LOW'              # room temperature input, low value in degrees Celsius.
 JSON_API_RM_TMPRTR_IN_A     = 'ROOM_TEMPERATURE_IN_AVERAGE'          # room temperature input, average value degrees Celsius.
@@ -312,6 +335,10 @@ JSON_API_VARIANCE           = 'TIME_VARIANCE'                        # variance 
 
 JSON_API_SSID               = 'SSID'                                 # Service set identifier (SSID) for Wifi network (one or more).
 
+JSON_API_PEAK_15_MIN_KW     = 'PEAK_15_MIN_KW'                       # 15-minute peak kWh value (capacity rate) 1.4.0 P1 port telegram code
+JSON_API_PEAK_15_MIN_KW_TS  = 'PEAK_15_MIN_KW_TIMESTAMP'             # 15-minute peak kWh value (capacity rate) timestamp 1.4.0 P1 port telegram code
+JSON_API_PEAK_MONTH_KW      = 'PEAK_MONTH_KW'                        # Monthly peak kWh value (capacity rate) 1.6.0 P1 port telegram code
+JSON_API_PEAK_MONTH_KW_TS   = 'PEAK_MONTH_KW_TIMESTAMP'              # Monthly peak kWh value (capacity rate) timestamp 1.6.0 P1 port telegram code
 
 #JSON field explained.
 EXPL_TS_LCL                 = 'Time in format yyyy-mm-dd hh:mm:ss'
@@ -473,6 +500,10 @@ EXPL_API_VARIANCE           = 'variance between system and inet time (inet - sys
 
 EXPL_API_SSID               = 'Service set identifier (SSID) for Wifi network (one or more).'
 
+EXPL_API_PEAK_15_MIN_KW     = '15-minute peak kWh value (capacity rate) 1.4.0 P1 port telegram code.'
+EXPL_API_PEAK_15_MIN_KW_TS  = '15-minute peak kWh value (capacity rate) timestamp 1.4.0 P1 port telegram code.'
+EXPL_API_PEAK_MONTH_KW      = 'Monthly peak kWh value (capacity rate) 1.6.0 P1 port telegram code.'
+EXPL_API_PEAK_MONTH_KW_TS   = 'Monthly peak kWh value (capacity rate) timestamp 1.6.0 P1 port telegram code.'
 
 #json types
 TYPE_JSON_STRING         = 'string'
@@ -682,8 +713,6 @@ HELP_ROUTE_DATETIME = {
     ]
 }
 
-
-
 # help data
 # SQL AS Reference
 #sqlstr = "SQL = select ID,DATA_ID,ACTIVE,TIMESTAMP_START,TIMESTAMP_STOP, MODE, VALUE, UPDATED from statistics ORDER BY ID
@@ -737,7 +766,6 @@ HELP_ROUTE_STATISTICS_JSON = {
         }
     ]
 }
-
 
 # help data
 # SQL AS Reference
@@ -809,7 +837,6 @@ HELP_ROUTE_SMARTMETER_JSON = {
     ]
 }
 
-
 # P1 port telegram '
 HELP_ROUTE_P1_PORT_TELEGRAM = {
     "api_version"       : 1,
@@ -841,7 +868,6 @@ HELP_ROUTE_P1_PORT_TELEGRAM = {
 
     ]
 }
-
 
 # config data
 # SQL AS Reference
@@ -1427,17 +1453,55 @@ HELP_ROUTE_INDOOR_TEMPERATURE_JSON = {
     ]
 }
 
-# status data
-# SQL AS Reference
-# select TIMESTAMP, cast(strftime('%s', TIMESTAMP, 'utc' ) AS Integer), CITY_ID, CITY, TEMPERATURE_MIN, TEMPERATURE_AVG, TEMPERATURE_MAX, 
-# PRESSURE_MIN, PRESSURE_AVG, PRESSURE_MAX, HUMIDITY_MIN, HUMIDITY_AVG, HUMIDITY_MAX, WIND_SPEED_MIN, WIND_SPEED_AVG, WIND_SPEED_MAX, 
-# WIND_DEGREE_MIN, WIND_DEGREE_AVG, WIND_DEGREE_MAX from
+
+HELP_ROUTE_WATERMETER_DIGITAL_MIN_HOUR_DAY_MONTH_YEAR_JSON = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP + ", " + API_OPTION_RANGE,
+    "api_description"   : "Historical watermeter data.",
+    "api_usage"         : "<ip>{" + ROUTE_WATERMETER_DIGITAL_MIN + ', ' + ROUTE_WATERMETER_DIGITAL_HOUR + ', ' + ROUTE_WATERMETER_DIGITAL_DAY + ', ' + ROUTE_WATERMETER_DIGITAL_MONTH + ', ' + ROUTE_WATERMETER_DIGITAL_YEAR + '}?' + API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2019-11-30 12:03:55, or ' + API_PARAMETER_RANGETIMESTAMP + '=2020-01-03, <ip>{' + ROUTE_WATERMETER_DIGITAL_HOUR + ', ' + ROUTE_WATERMETER_DIGITAL_DAY + ', ' + ROUTE_WATERMETER_DIGITAL_MONTH + ', ' + ROUTE_WATERMETER_DIGITAL_YEAR + '},<ip>{' + ROUTE_WATERMETER_DIGITAL_HOUR_HELP + ', ' + ROUTE_WATERMETER_DIGITAL_DAY_HELP + ', ' + ROUTE_WATERMETER_DIGITAL_MONTH_HELP + ', ' + ROUTE_WATERMETER_DIGITAL_YEAR_HELP + '}',
+    "fields": [
+         {
+           "name" : JSON_TS_LCL,
+           "description" : EXPL_TS_LCL,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_TS_LCL_UTC,
+           "description" : EXPL_TS_LCL_UTC,
+           "type": TYPE_JSON_INTEGER
+         },
+         { 
+           "name" : JSON_API_PROD_PERIOD_ID,
+           "description" : EXPL_API_PROD_PERIOD_ID,
+           "type": TYPE_JSON_INTEGER
+         },
+         { 
+           "name" : JSON_API_WM_PULS_CNT,
+           "description" : EXPL_API_WM_PULS_CNT,
+           "type": TYPE_JSON_INTEGER
+         },
+        { 
+           "name" : JSON_API_WM_CNSMPTN_LTR ,
+           "description" : EXPL_API_WM_CNSMPTN_LTR,
+           "type": TYPE_JSON_NUMBER 
+         },
+         { 
+           "name" : JSON_API_WM_CNSMPTN_LTR_M3,
+           "description" : EXPL_API_WM_CNSMPTN_LTR_M3,
+           "type": TYPE_JSON_NUMBER 
+         }
+         
+    ]
+}
+
+
 HELP_ROUTE_WATERMETER_MIN_HOUR_DAY_MONTH_YEAR_JSON = {
     "api_version"       : 1,
-    "api_status"        : API_STATUS_TEST,
-    "api_options"       :  API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP + ", " + API_OPTION_RANGE,
+    "api_status"        : API_STATUS_DEPRECATED,
+    "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP + ", " + API_OPTION_RANGE,
     "api_description"   : "Historical watermeter data.",
-    "api_usage"         : "<ip>{" + ROUTE_WATERMETER_MIN_V2 + ', ' + ROUTE_WATERMETER_HOUR_V2 + ', ' + ROUTE_WATERMETER_DAY_V2 + ', ' + ROUTE_WATERMETER_MONTH_V2 + ', ' + ROUTE_WATERMETER_YEAR_V2 + '}?' + API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2019-11-30 12:03:55, or ' + API_PARAMETER_RANGETIMESTAMP + '=2020-01-03, <ip>{' + ROUTE_WATERMETER_HOUR_V2 + ', ' + ROUTE_WATERMETER_DAY_V2 + ', ' + ROUTE_WATERMETER_MONTH_V2 + ', ' + ROUTE_WATERMETER_YEAR_V2 + '},<ip>{' + ROUTE_WATERMETER_HOUR_HELP_V2 + ', ' + ROUTE_WATERMETER_DAY_HELP_V2 + ', ' + ROUTE_WATERMETER_MONTH_HELP_V2 + ', ' +ROUTE_WATERMETER_MONTH_HELP_V2 + '}',
+    "api_usage"         : "<ip>{" + ROUTE_WATERMETER_MIN_V2 + ', ' + ROUTE_WATERMETER_HOUR_V2 + ', ' + ROUTE_WATERMETER_DAY_V2 + ', ' + ROUTE_WATERMETER_MONTH_V2 + ', ' + ROUTE_WATERMETER_YEAR_V2 + '}?' + API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2019-11-30 12:03:55, or ' + API_PARAMETER_RANGETIMESTAMP + '=2020-01-03, <ip>{' + ROUTE_WATERMETER_HOUR_V2 + ', ' + ROUTE_WATERMETER_DAY_V2 + ', ' + ROUTE_WATERMETER_MONTH_V2 + ', ' + ROUTE_WATERMETER_YEAR_V2 + '},<ip>{' + ROUTE_WATERMETER_HOUR_HELP_V2 + ', ' + ROUTE_WATERMETER_DAY_HELP_V2 + ', ' + ROUTE_WATERMETER_MONTH_HELP_V2 + ', ' +ROUTE_WATERMETER_YEAR_HELP_V2 + '}',
     "fields": [
          {
            "name" : JSON_TS_LCL,

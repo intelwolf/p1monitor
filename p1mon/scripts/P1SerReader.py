@@ -39,6 +39,7 @@ dev_dummy_gas_value         = 0
 timestamp_last_gas_update   = 0
 system_id                   = systemid.getSystemId()
 
+DUMMY_WATER_TELEGRAM_CODE   = "0-2:24.2.1"
 DEFAULT_SERIAL_PORTS = [ "/dev/ttyUSB0" , "/dev/ttyUSB1" ]
 # list of serial devices tried to use
 # ser_devices_list = DEFAULT_SERIAL_PORTS
@@ -46,14 +47,16 @@ DEFAULT_SERIAL_PORTS = [ "/dev/ttyUSB0" , "/dev/ttyUSB1" ]
 ###################################################################################
 # let op deze optie geef veel foutmelding en in de log deze kunnen geen kwaad     #
 ###################################################################################
-DUMMY_1SEC_PROCCESSING  = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_3PHASE_DATA       = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_LARGE_CONSUMPTION = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_KWH_PEAK          = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_1SEC_PROCCESSING      = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_3PHASE_DATA           = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_LARGE_CONSUMPTION     = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_KWH_PEAK              = False ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_WATER                 = False   ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+
 
 ###################################################################################
 # zet deze op p1_telegram_test_lib.NO_GAS_TEST om de test uit te zetten.          #
-# LETOP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                  #
+# LET OP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                  #
 ###################################################################################
 #gas_test_mode=p1_telegram_test_lib.DUMMY_GAS_MODE_2421
 gas_test_mode=p1_telegram_test_lib.NO_GAS_TEST
@@ -151,8 +154,8 @@ def main_prod():
     flog.info(inspect.stack()[0][3]+": database tabel " + const.DB_FASE_REALTIME_TAB + " succesvol geopend.")
 
     # only make object when tests are active
-    if DUMMY_3PHASE_DATA == True or gas_test_mode != p1_telegram_test_lib.NO_GAS_TEST or DUMMY_LARGE_CONSUMPTION == True or DUMMY_KWH_PEAK == True:
-        flog.warning(inspect.stack()[0][3]+": test functies geactiveerd ! " )
+    if DUMMY_3PHASE_DATA == True or gas_test_mode != p1_telegram_test_lib.NO_GAS_TEST or DUMMY_LARGE_CONSUMPTION == True or DUMMY_KWH_PEAK == True or DUMMY_WATER == True:
+        flog.warning(inspect.stack()[0][3]+": test functies geactiveerd!" )
         p1_test = p1_telegram_test_lib.p1_telegram()
         p1_test.init( flog, statusdb=rt_status_db )
 
@@ -162,7 +165,7 @@ def main_prod():
     p1_port_shared_lib.backup_data_to_disk_by_timestamp( statusdb=rt_status_db, flog=flog )
 
     while check_serial() == False:
-        flog.critical(inspect.stack()[0][3]+": seriele poort niet gevonden, is de kabel aangesloten?" )
+        flog.critical(inspect.stack()[0][3]+": seriële poort niet gevonden, is de kabel aangesloten?" )
         time.sleep(10)
 
     # reset gas per uur waarde als we starten.
@@ -171,11 +174,12 @@ def main_prod():
     rt_status_db.timestamp( 5,flog )
     #read serial settings from status DB
     serCheckCnt = 0
-    check_serial_db_config_settings()
+    check_serial_db_config_settings() 
     p1_port_shared_lib.get_calculate_missing_values( status=p1_status ,configdb=config_db, flog=flog )
     p1_port_shared_lib.get_country_day_night_mode( status=p1_status ,configdb=config_db, flog=flog )
     p1_port_shared_lib.get_large_consumer_mode( status=p1_status ,configdb=config_db, flog=flog )
-    p1_port_shared_lib.get_gas_telgram_prefix( status=p1_status ,configdb=config_db, flog=flog )
+    p1_port_shared_lib.get_gas_telegram_prefix( status=p1_status ,configdb=config_db, flog=flog )
+    p1_port_shared_lib.get_water_telegram_prefix( status=p1_status ,configdb=config_db, flog=flog )
 
     flog.info(inspect.stack()[0][3]+": P1 poort instelling baudrate=" + str(ser1.baudrate)+" bytesize=" +str(ser1.bytesize)+" pariteit="+str(ser1.parity)+" stopbits="+str(ser1.stopbits))
     #serOpen(ser1)
@@ -222,6 +226,12 @@ def main_prod():
         flog.warning(inspect.stack()[0][3]+": DUMMY KWH PEAK staat aan. Zet uit voor productie!")
         flog.warning(inspect.stack()[0][3]+" #### DUMMY KWH PEAK STAAT AAN IS DIT CORRECT? ####")
 
+    if DUMMY_WATER == True:
+        print("DUMMY WATER VERWERKING STAAT AAN? P1 telegram code=" + str(p1_status['water_code_prefix']) +"\r")
+        flog.warning(inspect.stack()[0][3]+" #############################################")
+        flog.warning(inspect.stack()[0][3]+": DUMMY WATER staat aan. Zet uit voor productie!")
+        flog.warning(inspect.stack()[0][3]+" #### DUMMY WATER STAAT AAN IS DIT CORRECT? ####")
+
 
     # read crc check settings from config
     p1_port_shared_lib.get_P1_crc( status=p1_status ,configdb=config_db, flog=flog )
@@ -232,6 +242,7 @@ def main_prod():
     day_values.init( dbstatus=rt_status_db, dbserial=e_db_serial, flog=flog )
 
     while True:
+
         try:
             #print ('ser1.In_waiting='+str(ser1.in_waiting))
             line = ""
@@ -249,7 +260,7 @@ def main_prod():
                 serial_buffer.append( line )
                 #flog.debug(inspect.stack()[0][3]+": [** V2.0]serial buffer bytes waiting = " + str(ser1.inWaiting()) ) 
 
-                # the benthouse BUG has 78 lines
+                # the Benthouse BUG has 78 lines
                 # this check the nummer of items in the dict
                 if len(serial_buffer) > 250: # normale size less then a 100 lines
                     flog.warning(inspect.stack()[0][3] + ": seriële buffer te groot, gewist! Buffer lengte was " + str( len(serial_buffer) ) )
@@ -271,7 +282,10 @@ def main_prod():
                         p1_test.gas_stub_instert( line=line, serialbuffer=serial_buffer, gasmode=gas_test_mode )
 
                     if DUMMY_KWH_PEAK == True:
-                        p1_test.kwh_peak_insert(line=line, serialbuffer=serial_buffer,)
+                        p1_test.kwh_peak_insert(line=line, serialbuffer=serial_buffer)
+
+                    if DUMMY_WATER == True: # don't change this to the dynamic value from config
+                        p1_test.water_stub_insert( line=line, serialbuffer=serial_buffer, telegram_code=DUMMY_WATER_TELEGRAM_CODE)
 
                     #flog.info(inspect.stack()[0][3] + " step 0")
 
@@ -414,7 +428,8 @@ def main_prod():
                     p1_port_shared_lib.get_large_consumer_mode( status=p1_status ,configdb=config_db, flog=flog )
                     p1_port_shared_lib.get_country_day_night_mode( status=p1_status ,configdb=config_db, flog=flog )
                     p1_port_shared_lib.get_calculate_missing_values( status=p1_status ,configdb=config_db, flog=flog )
-                    p1_port_shared_lib.get_gas_telgram_prefix( status=p1_status ,configdb=config_db, flog=flog )
+                    p1_port_shared_lib.get_gas_telegram_prefix( status=p1_status ,configdb=config_db, flog=flog )
+                    p1_port_shared_lib.get_water_telegram_prefix( status=p1_status ,configdb=config_db, flog=flog )
                     #checkCRCsettings()
                     p1_port_shared_lib.get_P1_crc( status=p1_status ,configdb=config_db, flog=flog )
                     serCheckCnt=0

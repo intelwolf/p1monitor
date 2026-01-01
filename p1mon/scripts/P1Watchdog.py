@@ -105,13 +105,14 @@ def MainProg():
     #rt_status_db.strset( '', 68,  flog )
     #rt_status_db.strset( '', 110, flog )
 
-
+     
     check_for_new_p1monitor_version()
     get_cpu_temperature()
     DuckDNS()
     get_default_gateway()
     ntp_status()
     check_and_set_samba_mode( forced=True )
+    ping_api_fqdn()
     
     ## Internet IP adres
     rt_status_db.strset( network_lib.get_public_ip_address(),26,flog )
@@ -162,7 +163,7 @@ def MainProg():
             P1SolarSetup()
             P1SolarResetConfig()
             P1SolarReloadAllData()
-            P1SolarReader()
+            # P1SolarReader() moved to every 30 seconds  in version 3.3.0
             P1SolarFactoryReset()
             #flog.setLevel( logging.INFO )
             DuckDNS()
@@ -307,6 +308,7 @@ def MainProg():
 
         # elke 60 sec acties
         if cnt%30 == 0:
+            P1SolarReader() # moved in version 3.3.0 to prevent to much retries 
             # check if we need to change the cron entries.
             check_cron_backup()
 
@@ -361,6 +363,7 @@ def MainProg():
         # 1800 sec processes (30 min)
         if cnt%900 == 0:
             run_dynamic_pricing()
+            ping_api_fqdn()
 
         # elke 3600 sec acties
         if cnt%1800 == 0:
@@ -383,6 +386,17 @@ def MainProg():
             cnt=1
         time.sleep(2) #DO NOT CHANGE!
 
+
+##################################################
+# used to prime the DNS cache                    #
+##################################################
+def ping_api_fqdn():
+    try:
+        _id, fqdn, _label = config_db.strget( 150, flog )
+        fl = [str(fqdn)]
+        network_lib.fqdn_ping( flog=flog ,info_messages=False, fqdn_list=fl)
+    except Exception as e:
+            flog.warning( inspect.stack()[0][3] + ": ping van API FQDN onverwachte fout melding: " + str(e) ) 
 
 def DiskRestore(): #180ok
     if not util.fileExist(const.FILE_SESSION):
@@ -1127,7 +1141,7 @@ def DuckDNS():
 # data from the api                                    #
 ########################################################
 def P1SolarReader(): #180ok
-    #flog.setLevel( logging.DEBUG )
+    #flog.setLevel( logger.logging.DEBUG )
     try:
         prg_name = "P1SolarEdgeReader" 
        
@@ -1135,7 +1149,7 @@ def P1SolarReader(): #180ok
         pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         flog.debug( inspect.stack()[0][3] + ": " + prg_name + " run status is = " + str( run_status ) + " aantal gevonden PID = " + str(len(pid_list) ) )
 
-        if int(run_status) == 1 and len( pid_list) == 0: # start process
+        if int(run_status) == 1 and len(pid_list) == 0: # start process
 
             #config_db.strset(0, 142, flog)
             flog.info( inspect.stack()[0][3] + ": " + prg_name + " gestart." )
@@ -1160,7 +1174,7 @@ def P1SolarReader(): #180ok
         flog.error( inspect.stack()[0][3] + ": gefaald " + str(e) )
         config_db.strset(0, 141, flog) # fail save to stop
     
-    #flog.setLevel( logging.INFO )
+    #flog.setLevel( logger.logging.INFO )
 
 ########################################################
 # reset to factory settings. Delete config and all)    #

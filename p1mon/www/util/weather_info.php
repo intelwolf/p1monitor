@@ -66,6 +66,7 @@ echo <<<"END"
                 
                 weatherLoop();
 
+
                 function wind_speed_2_beaufort( wind_speed ) {
                     if  ( wind_speed < 1 ) { 
                         return 0; 
@@ -95,6 +96,38 @@ echo <<<"END"
                         return 12;
                     } 
                 }
+
+                /*
+                function wind_speed_2_beaufort( wind_speed ) {
+                    if  ( wind_speed < 1 ) { 
+                        return 0; 
+                    } else if ( wind_speed  >= 1 && wind_speed < 5.5 ) {
+                        return 1;
+                    } else if ( wind_speed  >=5.5  && wind_speed < 11.5 ) {
+                        return 2;
+                    } else if ( wind_speed  >=11.5  && wind_speed < 19.5 ) {
+                        return 3;
+                    } else if ( wind_speed  >=18.5  && wind_speed < 28.5 ) {
+                        return 4;
+                    } else if ( wind_speed  >=28.5  && wind_speed < 38.5 ) {
+                        return 5;
+                    } else if ( wind_speed  >=38.5  && wind_speed < 49.5 ) {
+                        return 6;
+                    } else if ( wind_speed  >=38.5  && wind_speed < 61.5 ) {
+                        return 7;
+                    } else if ( wind_speed  >=61.5  && wind_speed < 74.5 ) {
+                        return 8;
+                    } else if ( wind_speed  >=74.5  && wind_speed < 88.5 ) {
+                        return 9;
+                    } else if ( wind_speed  >=88.5  && wind_speed < 102.5 ) {
+                        return 10;
+                    } else if ( wind_speed  >=102.5  && wind_speed < 117.5 ) {
+                        return 11;
+                    } else if ( wind_speed  >=117.5 ) {
+                        return 12;
+                    } 
+                }
+                */
 
                 function show_weather_detail() {
                     $('#weather_detail').css({

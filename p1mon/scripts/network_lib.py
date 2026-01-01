@@ -355,10 +355,14 @@ class DhcpcdConfig():
     '###############################\n'
         return str
 
-def fqdn_ping( flog=None, info_messages=True ):
+def fqdn_ping( flog=None, info_messages=True, fqdn_list=None ):
 
     li = FQDN_LIST
-    random.shuffle( li )
+
+    if fqdn_list == None:
+        random.shuffle( li )
+    else:
+        li = fqdn_list
 
     for i in range( len(li) ):
 

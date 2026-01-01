@@ -17,7 +17,6 @@ import time
 import util
 import process_lib
 
-# TODO
 shared_last_p1_port_timestamp = None
 
 ###########################################################
@@ -168,7 +167,9 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
             continue
         try:
             buf = line.split('(')
-            #print("#### "+str(buf[0]))
+            #print("str(buf[0]", str(buf[0]))
+            #print("status['water_code_prefix']",status['water_code_prefix'])
+
             if len(buf) < 2: # verwijder velden die niet interessant zijn
                 continue
 
@@ -181,6 +182,12 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
                 data_set['gas_verbr_m3_2421'] = util.cleanDigitStr(content[0])
                 status['gas_present_in_serial_data'] = True
             
+            if buf[0] == status['water_code_prefix']:
+                content = buf[2].split(')')
+                content = content[0].split('*')
+                data_set['water_verbr'] = util.cleanDigitStr( content[0] )
+                #print("data_set['water_verbr'] =", data_set['water_verbr'] )
+
             if buf[0] == '0-' + str( status['gas_record_prefix_number'] ) + ':24.2.1':
                 content = buf[2].split(')')
                 content = content[0].split('*')
@@ -390,7 +397,7 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
     #sys.exit()
 
     if status['day_night_mode']  == 1:
-        flog.debug( inspect.stack()[0][3] + " Dag en nacht tarief staat op mode 1: Belgie" )
+        flog.debug( inspect.stack()[0][3] + " Dag en nacht tarief staat op mode 1: België" )
     
         tmp = data_set['verbrk_kwh_181']
         data_set['verbrk_kwh_181'] = data_set['verbrk_kwh_182']
@@ -400,7 +407,7 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
         data_set['gelvr_kwh_281'] = data_set['gelvr_kwh_282']
         data_set['gelvr_kwh_282'] = tmp
 
-        if tarief_code == 'P': # wisselen van tarief code 00002 is piek in NL maar dal in Belgie.  0001 is dal in NL maar piek in Belgie.
+        if tarief_code == 'P': # wisselen van tarief code 00002 is piek in NL maar dal in België.  0001 is dal in NL maar piek in België.
             tarief_code = 'D'
             data_set['tarief_code'] = 'D'
         else: 
@@ -416,6 +423,10 @@ def parse_serial_buffer( serialbuffer=None, data_set=None, status=None, phase_db
 # 1.3.2 and above.                                        #
 ###########################################################
 def record_sanity_check( data_set=None, status=None, flog=None ):
+
+    # needed because the code can change.
+    if data_set['water_verbr'] == const.NOT_SET:
+        data_set['water_verbr'] = 0 
 
     if status['gas_present_in_serial_data'] == True:
         if data_set['gas_verbr_m3_2421'] == const.NOT_SET:
@@ -536,6 +547,20 @@ def get_large_consumer_mode( status=None ,configdb=None, flog=None ):
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": sql error( config )" + str(e))
 
+
+#############################################################
+# get water prefix code from config                         #
+#############################################################
+def get_water_telegram_prefix( status=None ,configdb=None, flog=None ):
+    try:
+        _id, parameter, _label = configdb.strget( 227,flog )
+        if str( parameter ) != status['water_code_prefix']:
+            status['water_code_prefix'] = str( parameter )
+            flog.info(inspect.stack()[0][3]+": water prefix code aangepast naar " + str(status['water_code_prefix']) + ".")
+    except Exception as e:
+            flog.error(inspect.stack()[0][3]+": sql error( config )"+str(e))
+
+
 #############################################################
 # get country settings for day and night mode               #
 # 0: NL verwerking van E velden                             #
@@ -553,6 +578,7 @@ def get_country_day_night_mode( status=None ,configdb=None, flog=None ):
 
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": sql error( config )"+str(e))
+
 
 #############################################################
 # This flag determines if missing values must be calculated #
@@ -574,7 +600,7 @@ def get_calculate_missing_values( status=None ,configdb=None, flog=None ):
 #############################################################
 #  get the telgram prefix from the datbase                  #
 #############################################################
-def get_gas_telgram_prefix( status=None ,configdb=None, flog=None ):
+def get_gas_telegram_prefix( status=None ,configdb=None, flog=None ):
     #checkGasTelgramPrefix()
     
     try:
@@ -824,7 +850,8 @@ def insert_db_serial_record( data_set=None, status=None ,dbstatus=None, dbserial
         '"+str( data_set['tarief_code'] )+"', \
         '"+str( data_set['act_verbr_kw_170'] )+"', \
         '"+str( data_set['act_gelvr_kw_270'] )+"',\
-        '"+str( data_set['gas_verbr_m3_2421'] )+"')"
+        '"+str( data_set['gas_verbr_m3_2421'] )+"',\
+        '"+str( data_set['water_verbr'] )+"')"
         sqlstr = " ".join(sqlstr.split())
         flog.debug( inspect.stack()[0][3] + ": (2)serial e-buffer insert: sql=" + sqlstr )
 

@@ -14,7 +14,7 @@
 # versie 0.9.7 API rewrite naar Falcon/Gunicorn.
 # versie 0.9.10 meterstanden overzicht toegevoegd.
 # versie 0.9.11 upgrade naar Raspbian Buster email notificatie. Pi4 geschikt.
-# versie 0.9.13 Aanpassingen voor Belgie gedaan en screensaver.
+# versie 0.9.13 Aanpassingen voor België gedaan en screensaver.
 # versie 201912-0.9.14 watermeter DB toegevoegd
 # versie 202002-0.9-15 MQTT
 # versie 202004-0.9.16 fase DB en ui toegevoegd.
@@ -28,7 +28,7 @@
 # Versie 1.5.0 P1UpdateAide en Excel export toegevoegd.
 # Versie 1.6.0 Bug fixes. patch 1 lost een fout in /etc/dhcpcd.conf
 # versie 1.7.0 min max fase info toegevoegd en grootverbruikers meters.
-# versie 2.0.0 os upgrade naar Bulseye OS en introductie van Python virtuele omgevingen.
+# versie 2.0.0 os upgrade naar Bullseye OS en introductie van Python virtuele omgevingen.
 # versie 2.1.0 os upgrade, graaddagen en SOCAT toegevoegd.
 # versie 2.2.0 os upgrade, flexibele tarieven en piek waarde toegevoegd.
 # versie 2.3.0 P1Upgrade assistent en watermeter conversie verwijderd.
@@ -40,15 +40,15 @@
 # versie 3.0.1 Nginx opstart probleem /var/lib/nginx/proxy
 # versie 3.1.0 added statistic option
 # versie 3.2.0 a lot of fixes and MQTT fixes.
-
+# versie 3.3.0 Added Digital watermeter and corresponding changes
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "3.2.0"       # semantische versie nummers.
+P1_VERSIE                       = "3.3.0"       # semantische versie nummers.
 P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
-P1_SERIAL_VERSION               = "20251219"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_SERIAL_VERSION               = "20251230"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'

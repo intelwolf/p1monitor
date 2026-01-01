@@ -33,38 +33,61 @@ if ( checkDisplayIsActive( 102 ) == false) { return; }
 const text_min_short    = "<?php echo strIdx( 128 );?>"
 const text_hour         = "<?php echo strIdx( 129 );?>"
 const text_hours        = "<?php echo strIdx( 121 );?>"
+const text_puls         = "<?php echo strIdx( 440 );?>"
+const text_digital      = "<?php echo strIdx( 772 );?>"
 
-var recordsLoaded   = 0;
+var recordsLoaded       = 0;
 var initloadtimer;
-var mins            = 1;  
-var secs            = mins * 60;
-var currentSeconds  = 0;
-var currentMinutes  = 0;
-var Gselected       = 0;
-var GselectText      = [ '15 '+text_min_short, '30 '+text_min_short, '1 '+text_hour, '8 '+text_hours, '12 '+text_hours, '24 '+text_hours ]; // #PARAMETER
-var GseriesVisibilty= [true];
-var GverbrData      = [];
-var GgelvrData      = [];
-var GnettoData      = [];
-var maxrecords      = 1442;
+var mins                = 1;  
+var secs                = mins * 60;
+var currentSeconds      = 0;
+var currentMinutes      = 0;
+var Gselected           = 0;
+var GselectText         = [ '15 '+text_min_short, '30 '+text_min_short, '1 '+text_hour, '8 '+text_hours, '12 '+text_hours, '24 '+text_hours ]; // #PARAMETER
+var GseriesVisibilty    = [true, true];
+var GDataPuls           = [];
+var GDataDigital1       = [];
+var maxrecords          = 1442;
+
 
 function readJsonApiHistoryMinutes( cnt ){ 
-    $.getScript( "/api/v2/watermeter/minute?limit=" + cnt, function( data, textStatus, jqxhr ) {
+
+    // Puls values
+    $.getScript( "/api/v2/watermeterdigital/minute/1?limit=" + cnt, function( data, textStatus, jqxhr ) {
       try {
         var jsondata = JSON.parse(data); 
         var item;
-        recordsLoaded       = jsondata.length;
-        GverbrData.length   = 0;
+        recordsLoaded      = jsondata.length;
+        GDataPuls.length   = 0;
         
         for (var j = jsondata.length; j > 0; j--){    
             item    = jsondata[ j-1 ];
             item[1] = item[1] * 1000; // highchart likes millisecs.
-            GverbrData.push ( [item[1], item[4] ]);
+            GDataPuls.push ( [item[1], item[4] ]);
         }  
         updateData();
       } catch(err) {}
    });
+
+   // digital values
+   $.getScript( "/api/v2/watermeterdigital/minute/2?limit=" + cnt, function( data, textStatus, jqxhr ) {
+      try {
+        var jsondata = JSON.parse(data); 
+        var item;
+        recordsLoaded       = jsondata.length;
+        GDataDigital1.length   = 0;
+        
+        for (var j = jsondata.length; j > 0; j--){    
+            item    = jsondata[ j-1 ];
+            item[1] = item[1] * 1000; // highchart likes millisecs.
+            GDataDigital1.push ( [item[1], item[4] ]);
+        }  
+        updateData();
+      } catch(err) {}
+   });
+
 }
+
 
 /* preload */
 readJsonApiHistoryMinutes( maxrecords );
@@ -84,16 +107,19 @@ function createWaterUsageChart() {
             },
             plotOptions :{
                 series :{
+                    stacking: 'normal',
                     showInNavigator: true,
                     events: {
                         legendItemClick: function (event) {
-                            console.log(this.index)
+                            //console.log(this.index)
                             if  ( this.index === 0 ) {
-                                toLocalStorage('watermeter-min-verbr-visible',this.visible);  // #PARAMETER
+                                toLocalStorage('watermeter-min-verbr-pulse-visible',this.visible);  // #PARAMETER
+                            }
+                            if  ( this.index === 1 ) {
+                                toLocalStorage('watermeter-min-verbr-digital1-visible',this.visible);  // #PARAMETER
                             }
                         }
                     }
-
                 }
             },
             legend: {
@@ -225,6 +251,7 @@ function createWaterUsageChart() {
                     color: '#6E797C'
                 }]
             },
+                  
             tooltip: {
                 useHTML: false,
                 style: {
@@ -232,26 +259,30 @@ function createWaterUsageChart() {
                     color: '#6E797C'
                 },
                 formatter: function() {
-                    //var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M-%H:59', this.x) +'</b>';
                     var s = '<b>'+ Highcharts.dateFormat('%A, %Y-%m-%d %H:%M', this.x) +'</b>';
                     var d = this.points;
-                    var verbruikt   = "<?php echo strIdx( 340 );?>";
                     var d           = this.points;
+                    var PulsValue = Digital1Value = 0;
+                   
+                    for (var i=0,  tot=d.length; i<tot; i++) {
 
-                    var Pverbruik = 0;
-                
-                    for (var i=0,  tot=d.length; i < tot; i++) {
-                        //console.log (d[i].series.userOptions.id);
-                        if  ( d[i].series.userOptions.id === 'verbruik') {
-                            Pverbruik = d[i].y;
+                        if  ( d[i].series.userOptions.id === text_puls) {
+                            PulsValue =  d[i].y
                         }
+                        if  ( d[i].series.userOptions.id === text_digital) {
+                            Digital1Value = d[i].y
+                        }
+                      
                     }
-                    
+                
                     if ( $('#WaterUsageChart').highcharts().series[0].visible === true ) {
-                        verbruikt = Pverbruik.toFixed(1)+" Liter";
+                        s += '<br/><span style="color: #6699ff;"><?php echo strIdx( 354 );?>:&nbsp;</span>' + text_puls + ' (' + (parseFloat(PulsValue)/1000).toFixed(3) + " m<sup>3</sup>) <?php echo strIdx( 220 );?>";
                     }
-                    
-                    s += '<br/><span style="color: #6699ff;"><?php echo strIdx( 354 );?>:&nbsp;</span>' + verbruikt + " (" + (parseFloat(verbruikt)/1000).toFixed(3) + " m<sup>3</sup>) <?php echo strIdx( 220 );?>";
+
+                    if ( $('#WaterUsageChart').highcharts().series[1].visible === true ) {
+                        s += '<br/><span style="color: #1547aa;"><?php echo strIdx( 354 );?>:&nbsp;</span>' + text_digital + ' (' + (parseFloat(Digital1Value)/1000).toFixed(3) + " m<sup>3</sup>) <?php echo strIdx( 220 );?>";
+                    }
+                   
                     return s;
                 },
             backgroundColor: '#F5F5F5',
@@ -259,6 +290,7 @@ function createWaterUsageChart() {
             crosshairs: [true, true],
             borderWidth: 1
             },  
+                      
             navigator: {
                 xAxis: {
                     dateTimeLabelFormats: {
@@ -281,11 +313,18 @@ function createWaterUsageChart() {
             },
             series: [ 
             {
-                id: 'verbruik', // used in tooltip!
+                id: text_puls, // used in tooltip!
                 visible: GseriesVisibilty[0],
-                name: '<?php echo strIdx( 440 );?>',
+                name: text_puls,
                 color: '#6699ff',
-                data: GverbrData 
+                data: GDataPuls 
+            }, 
+            {
+                id: text_digital, // used in tooltip!
+                visible: GseriesVisibilty[1],
+                name: text_digital,
+                color: '#1547aa',
+                data: GDataDigital1 
             } 
             ],
             lang: {
@@ -306,7 +345,7 @@ function updateData() {
     //console.log("updateData()");
     var chart = $('#WaterUsageChart').highcharts();
     if( typeof(chart) !== 'undefined') {
-        chart.series[0].setData( GverbrData );
+        chart.series[0].setData( GDataPuls );
     }
 }
 
@@ -335,13 +374,16 @@ function DataLoop() {
 $(function() {
     toLocalStorage('watermeter-menu',window.location.pathname);
     Gselected = parseInt( getLocalStorage('watermeter-min-select-index'), 10 );
-    GseriesVisibilty[0] =JSON.parse( getLocalStorage('watermeter-min-verbr-visible') );  // #PARAMETER
+    GseriesVisibilty[0] =JSON.parse( getLocalStorage('watermeter-min-verbr-pulse-visible') );  // #PARAMETER
+    GseriesVisibilty[1] =JSON.parse( getLocalStorage('watermeter-min-verbr-digital1-visible') );  // #PARAMETER
+
     Highcharts.setOptions({
         global: {
             useUTC: false
         },
-        lang: <?php hc_language_json(); ?>
+        lang: <?php hc_language_json(); ?>       
     });
+   
     secs = 0;
     screenSaver( <?php echo config_read(79);?> ); // to enable screensaver for this screen.
     DataLoop();

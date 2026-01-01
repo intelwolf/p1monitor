@@ -157,11 +157,12 @@ def clean_db_by_retention( db=None, flog=None,  table=const.DB_POWERPRODUCTION_S
             " and POWER_SOURCE_ID = 1 " + \
             " and timestamp < '" + str( datetime.datetime.strptime( timestamp, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(days=1096)) + "'"
             flog.debug( inspect.stack()[0][3] + ": wissen van dagen. sql=" + sql_del_str ) 
-            db.excute( sql_del_str )
+            #db.excute( sql_del_str )
         except Exception as e:
             flog.warning (inspect.stack()[0][3]+": wissen van dag records gefaald: " + str(e) )
 
     db.defrag()
+    flog.debug( inspect.stack()[0][3] + ": wissen is gereed.") 
 
 
 ########################################################

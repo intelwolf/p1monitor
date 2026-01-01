@@ -99,8 +99,11 @@ class powerProductionSolar( object ):
         #################################################################################
         self.flog.debug ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": check_path = " +str(check_path) )
 
-        db_index = int(db_index)
-
+        try:
+            db_index = int(db_index)
+        except Exception:
+              db_index = 0 
+               
         if db_index not in solaredge_shared_lib.SQL_INDEX_NUMBERS:
             err_str = 'database index must be a value in the range ' + str( solaredge_shared_lib.SQL_INDEX_NUMBERS )
             self.flog.error ( __class__.__name__ + ":" + inspect.stack()[0][3] + ": " + err_str)
@@ -224,8 +227,9 @@ class powerProductionSolar( object ):
         #print ( sqlstr )
 
         try:
-            # read datbase.
+            # read database.
             records = self.database.select_rec( sqlstr )
+
             #print ( records )
 
             if v_json_mode == 'object': 

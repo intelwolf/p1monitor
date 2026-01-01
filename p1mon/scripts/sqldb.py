@@ -358,6 +358,8 @@ class configDB():
         
         self.insert_rec( "insert or ignore into " + table + " values ( '226','0'                ,'MQTT miscellaneous dag publish aan/uit (1/0).')")
 
+        self.insert_rec( "insert or ignore into " + table + " values ( '227','0-2:24.2.1'       ,'Code van watermeter in het P1 telegram.')")
+
 
         # fix typo's from versions higer then 0.1.5
         sql_update = "update " + table + " set label ='Publieke dynamische DNS naam (FQDN).' where id=150"
@@ -953,6 +955,7 @@ INDEX_DAY     = 13
 INDEX_MONTH   = 14
 INDEX_YEAR    = 15
 
+
 POWER_PRODUCTION_REC = {
     'TIMESTAMP'                 :'', 
     'TIMEPERIOD_ID'             :int(0),
@@ -1292,6 +1295,7 @@ class WatermeterDBV2():
         # table definition
         # TIMESTAMP the timestamp in format yyyy-mm-dd hh:mm:ss 
         # TIMEPERIOD_ID: number that represents the minute:11 hour:12, day,13, month:14, year:15
+        # For P1 Telefgram the nummers are minute:21 hour:22, day,23, month:24, year:25
         # PULS_PER_TIMEUNIT number of pulses detected during the period
         # VERBR_PER_TIMEUNIT Liter of water during the period
         # VERBR_IN_M3_TOTAAL Liter of water in M3 during the period
@@ -2284,6 +2288,7 @@ class SqlDb1():
         # RECORD_VERWERKT: 0= nog niet verwerk 1, wel verwerkt
         # TARIEFCODE D=DAL, P=PIEK
         # VERBR_GAS
+        # VERBR_WATER
         self.cur.execute("CREATE TABLE IF NOT EXISTS "+table+"(\
         TIMESTAMP TEXT PRIMARY KEY NOT NULL, \
         RECORD_VERWERKT INTEGER DEFAULT 0,\
@@ -2294,9 +2299,19 @@ class SqlDb1():
         TARIEFCODE TEXT, \
         ACT_VERBR_KW_170 REAL DEFAULT 0, \
         ACT_GELVR_KW_270 REAL DEFAULT 0, \
-        VERBR_GAS_2421 REAL DEFAULT 0);")
+        VERBR_GAS_2421 REAL DEFAULT 0, \
+        VERBR_WATER REAL DEFAULT 0);")
         # clean up van het database bestand
         self.close_db()
+        # add column, extentions
+        # for older installation
+        try: 
+            sql = "ALTER TABLE " + self.table + " ADD COLUMN VERBR_WATER REAL DEFAULT 0;"
+            #print (sql)
+            self.execute( sql )
+        except:
+            pass # don't fail if column allready exits
+
 
     # volgorde van tuples mag niet worden gewijzigd, wordt gebruikt in MQTT proces.
     def select_one_record(self , order='desc' , db_index=None ):
@@ -2323,7 +2338,6 @@ class SqlDb1():
         except Exception as _e:
             print ( _e )
             return None
-
 
     def close_db(self):
         if self.con:
@@ -2411,7 +2425,6 @@ class SqlDb2():
         );")
         # clean up van het database bestand , file kleiner maken
         self.close_db()
-
 
     def executscript( self, script ): #TODO verder uitzoeken/testen.
         self.con = lite.connect(self.dbname)

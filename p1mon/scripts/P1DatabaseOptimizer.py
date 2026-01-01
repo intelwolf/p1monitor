@@ -81,7 +81,7 @@ def Main( argv ):
     parser.add_argument( '-rgd', '--removegasdata', 
     required=False,
     action="store_true",
-    help="verwijder alle historische gas data inclusief de financiele data. Gevaarlijk!"
+    help="verwijder alle historische gas data inclusief de financiële data. Niet herstelbaar!"
     )
 
     parser.add_argument( '-ws', '--watermeterschema', 
@@ -93,7 +93,7 @@ def Main( argv ):
     parser.add_argument( '-cu', '--cleanup', 
     required=False,
     action="store_true",
-    help="Wis verouderde data."
+    help="Wis data die ouder is dan " + OLDEST_TIMESTAMP_TABLES  + ", data van voor de eerste versie van de P1 monitor."
     )
 
 

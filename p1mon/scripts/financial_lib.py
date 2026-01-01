@@ -70,9 +70,9 @@ class Cost2Database():
         print("\n###########################\n")
         """
      
-        self._update_finacial_db_day( timestamp=timestamp, data=day_cost )
-        self._update_finacial_db( timestamp=timestamp, period='month' ) 
-        self._update_finacial_db( timestamp=timestamp, period='year' )
+        self._update_financial_db_day( timestamp=timestamp, data=day_cost )
+        self._update_financial_db( timestamp=timestamp, period='month' ) 
+        self._update_financial_db( timestamp=timestamp, period='year' )
 
         # clean up, for the next run.
         day_cost.clear()
@@ -85,7 +85,7 @@ class Cost2Database():
     ##############################################################
     # update the cost database for day prices                    #
     ##############################################################
-    def _update_finacial_db_day(self, timestamp=None, data=None ):
+    def _update_financial_db_day(self, timestamp=None, data=None ):
 
         #update record
         try:
@@ -108,7 +108,7 @@ class Cost2Database():
     ##############################################################
     # update the cost database for month or year prices          #
     ##############################################################
-    def _update_finacial_db(self, timestamp=None, period='month'):
+    def _update_financial_db(self, timestamp=None, period='month'):
 
         if period == 'month':
             substr_len=7
@@ -183,7 +183,7 @@ class Cost2Database():
 
         # read te hour records for the day in the timestamp.
         try:
-            sqlstr = "select SUM(VERBR_PER_TIMEUNIT) from " + const.DB_WATERMETERV2_TAB + " where TIMEPERIOD_ID=12 and substr(timestamp,1,10) = '" + timestamp_dag + "'"
+            sqlstr = "select SUM(VERBR_PER_TIMEUNIT) from " + const.DB_WATERMETERV2_TAB + " where (TIMEPERIOD_ID=12 or TIMEPERIOD_ID=22) and substr(timestamp,1,10) = '" + timestamp_dag + "'"
 
             #sqlstr = "select TIMESTAMP, VERBR_PER_TIMEUNIT from " + const.DB_WATERMETERV2_TAB + " where TIMEPERIOD_ID=12 and substr(timestamp,1,10) = '" + timestamp_dag + "'"
 
@@ -256,9 +256,8 @@ class Cost2Database():
 
         #self.flog.setLevel( logging.INFO )
 
-
     ##############################################################
-    # fill the dictonary with prices for every day               #
+    # fill the dictionary with prices for every day              #
     # sets static or dynamic prices                              #
     ##############################################################
     def _set_hour_prices( self, timestamp=None ):

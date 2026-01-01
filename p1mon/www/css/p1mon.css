@@ -669,12 +669,27 @@ select {
     background-color: #EDF0F1;
 }
 
+.top-wrapper-3 {
+    width: 1000px;
+    margin: auto;
+    background-color: #EDF0F1;
+    padding-bottom: 10px;
+}
+
 .mid-section {
     background-color: #EDF0F1;
     overflow: hidden;
     width: 1000px;
     margin: auto;
     padding-bottom: 25px;
+}
+
+.mid-section-1 {
+    background-color: #EDF0F1;
+    overflow: hidden;
+    width: 1000px;
+    margin: auto;
+    padding-bottom: 10px;
 }
 
 .left-wrapper,
@@ -1619,6 +1634,29 @@ a:hover {
     border-top: 0px ;
     width: 58px;
     height: 2.4em;
+}
+
+
+.frame-8-top {
+    border-radius: 5px 5px 0px 0px;
+    -moz-border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    border: 1px solid #DCE1E3;
+    background-color: #F5F5F5;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.frame-8-bot {
+    border-radius: 0px 0px 5px 5px;
+    -moz-border-radius: 0px 0px 5px 5px;
+    -webkit-border-radius: 0px 0px 5px 5px;
+    border: 1px solid #DCE1E3;
+    border-top: 1px solid #ffffff;
+    background-color: #ffffff;
+    overflow: hidden; 
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 

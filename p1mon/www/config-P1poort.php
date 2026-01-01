@@ -96,6 +96,11 @@ if( isset($_POST["gas_prefix_list"]) ) {
 }
 
 
+if( isset($_POST["water_code_list"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( updateConfigDb("update config set parameter = '" . $_POST["water_code_list"] . "' where ID = 227"))  $err_cnt += 1;
+}
+
 if ( isset($_POST["crc"]) ) { 
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ($_POST["crc"] == '1' ) {
@@ -143,14 +148,14 @@ if ( $socat_is_changed == true ) {
 
 function makeSelector($id) {
 
-      // day/night mode
-      if ( $id == 5 ) { 
+    // day/night mode
+    if ( $id == 5 ) { 
         $configValue = config_read(78);
         $g1=$g2=$g3=$g4='';
         if ($configValue == '0' ) { $g1 = 'selected="selected"';} 
         if ($configValue == '1' ) { $g2 = 'selected="selected"';} 
-        echo '<option ' . $g1 . ' value="0">Nederland (standaard)</option>';
-        echo '<option ' . $g2 . ' value="1">Belgie</option>';
+        echo '<option ' . $g1 . ' value="0">' . strIdx( 770 ) . '</option>';
+        echo '<option ' . $g2 . ' value="1">' . strIdx( 771 ) . '</option>';
     }
 
     // values 1 to 4
@@ -269,7 +274,17 @@ function makeSelector($id) {
         echo '<option ' . $baud57k6  . ' value="57600"  >57600 </option>';
         echo '<option ' . $baud115k2 . ' value="115200" >115200</option>';
         echo '<option ' . $baud230k4 . ' value="230400" >230400</option>';
-    }  
+    } 
+    
+    // Watermeter 
+    if ( $id == 11 ) { 
+        $configValue = config_read(227);
+        $g1=$g2='';
+        if ($configValue == '-' )           { $g1 = 'selected="selected"';} 
+        if ($configValue == '0-2:24.2.1' )  { $g2 = 'selected="selected"';} 
+        echo '<option ' . $g1 . ' value="-">-</option>';                    # taal aanpassen ook voor andere controleren
+        echo '<option ' . $g2 . ' value="0-2:24.2.1">0-2:24.2.1</option>';
+    }
 }
 ?>
 <!doctype html>
@@ -621,9 +636,25 @@ $(function () {
                                     </div>
                                 </div>
 
+                                <!-- work -->
+                                <div class="rTableRow" title="<?php echo strIdx( 769);?>">
+                                    <div class="rTableCell width-24">
+                                        <i class="text-10 fa-solid fa-hand-holding-droplet"></i>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <label class="text-10"><?php echo strIdx( 768 );?></label> 
+                                    </div>
+                                    <div class="rTableCell">
+                                        <select class="select-2 color-select color-input-back cursor-pointer" name="water_code_list" id="water_code_list">
+                                            <?php makeSelector(11);?>
+                                        </select>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
- 
+
+                         
                         <!-- placeholder variables for session termination -->
                         <input type="hidden" name="logout" id="logout" value="">
                     </form>

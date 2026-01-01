@@ -17,6 +17,7 @@ import data_struct_lib
 import process_lib
 import util
 import financial_lib
+import p1_telegram_water_lib
 
 prgname = 'P1Db'
 
@@ -36,6 +37,7 @@ fase_db               = sqldb.PhaseDB()
 fase_db_min_max_dag   = sqldb.PhaseMaxMinDB()
 price_db              = sqldb_pricing.PricingDb()
 
+
 VERBR_KWH_181           = 0.0
 VERBR_KWH_182           = 0.0
 GELVR_KWH_281           = 0.0
@@ -48,9 +50,11 @@ ACT_GELVR_KW_270        = 0.0
 VERBR_GAS_2421          = 0.0
 timestamp               = 'x'
 timestamp_min_one       = ''
+p1_water                = None # object to process P1 telegram water data.
 
 def Main():
-    global timestamp
+    global timestamp, p1_water
+
     phasemaxmin = data_struct_lib.phase_db_min_max_record
 
     financial_costs = financial_lib.Cost2Database()
@@ -67,7 +71,7 @@ def Main():
         sys.exit(1)
     flog.info(inspect.stack()[0][3]+": database tabel "+const.DB_STATUS_TAB+" succesvol geopend.")
 
-    # open van seriele database
+    # open van seriële database
     try:
         e_db_serial.init(const.FILE_DB_E_FILENAME ,const.DB_SERIAL_TAB)
     except Exception as e:
@@ -207,6 +211,8 @@ def Main():
         config_db=config_db,
         status_db=rt_status_db,
         flog=flog )
+    
+    p1_water = p1_telegram_water_lib.P1Water2Database( water_database=watermeter_db, serialdb=e_db_serial, flog=flog )
 
     pauze_tijd_hoofdloop = 1
     while 1:
@@ -226,6 +232,16 @@ def Main():
             updateDbMonth()
             updateDbYear()
             updateGas()
+
+            # digital watermeter update
+            #flog.setLevel( logger.logging.DEBUG )
+            _id, parameter, _label = config_db.strget( 227,flog )
+            if parameter != "-": # only process data when the P1 telegram is set
+                p1_water.process_serial_data( timestamp=timestamp, timestamp_min_one=timestamp_min_one )
+            else:
+                flog.debug(inspect.stack()[0][3]+": Digital watermeter is not processed, the P1 telegram code is " + str(parameter))
+            #flog.setLevel( logger.logging.INFO )
+
             #flog.setLevel( logger.logging.DEBUG )
             financial_costs.execute( timestamp=timestamp )
             #flog.setLevel( logger.logging.INFO )
@@ -241,6 +257,7 @@ def Main():
             if util.isMod( timestamp, 15 ) == True:
                 backupData()
                 cleanDb()
+                p1_water.delete_records()
 
             #flog.setLevel(logging.INFO)
      
@@ -754,14 +771,14 @@ def powerUsedPerMin():
     #tariefcode,act_verbr_kw, act_gelvr_kw, timestamp, timestamp_min_one
 
     global VERBR_KWH_181, VERBR_KWH_182, GELVR_KWH_281, GELVR_KWH_282, VERBR_KWH_X, GELVR_KWH_X, \
-            TARIEFCODE, ACT_VERBR_KW_170, ACT_GELVR_KW_270, VERBR_GAS_2421, timestamp, timestamp_min_one
+            TARIEFCODE, ACT_VERBR_KW_170, ACT_GELVR_KW_270, VERBR_GAS_2421, timestamp, timestamp_min_one, p1_water
 
     try:
         sqlstr = "select min(timestamp) from " + const.DB_SERIAL_TAB + " where record_verwerkt=0"
         rec_serial=e_db_serial.select_rec(sqlstr)
         timestamp            = str(rec_serial[0][0])[0:16]
         timestamp_min_one    = str(datetime.datetime.strptime(timestamp,"%Y-%m-%d %H:%M") - datetime.timedelta(minutes=1))[0:16]
-        flog.debug(inspect.stack()[0][3]+": timestamp nog niet verwerkte oudste record in serieele database ="+timestamp+" vorige minuut ="+timestamp_min_one)
+        flog.debug(inspect.stack()[0][3]+": timestamp nog niet verwerkte oudste record in seriële database ="+timestamp+" vorige minuut ="+timestamp_min_one)
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": sql error(find timestamp)"+str(e))
 
@@ -791,6 +808,7 @@ def powerUsedPerMin():
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": probleem met record van een minuut(-1)"+str(e))
 
+    
     try:
         VERBR_KWH_181       = recs_serial_now[0][0]
         VERBR_KWH_182       = recs_serial_now[0][1]
