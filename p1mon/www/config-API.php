@@ -431,7 +431,7 @@ var sec_id     = '<?php echo decodeStringNoBase64( 58,"sysid" );?>'
                         <div class="frame-4-bot">
                             <div class='pad-12'>
                                 <div id="apiList">
-                                  <!-- dynamicly filled -->
+                                  <!-- dynamically filled -->
                                 </div>
                             </div>
                         </div>

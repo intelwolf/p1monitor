@@ -22,3 +22,4 @@ Highcharts.setOptions({
             weekdays: ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag']
         }, 
 });
+

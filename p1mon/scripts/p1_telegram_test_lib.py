@@ -10,13 +10,15 @@ import string
 import util
 
 
-#DUMMY_GAS_TIME_ELAPSED = 300 # sec. die verstreken moet zijn voor volgend gas record in dummy mode.
-DUMMY_GAS_TIME_ELAPSED = 10 
+#DUMMY_XXX_TIME_ELAPSED = 300 # sec. die verstreken moet zijn voor volgend gas record in dummy mode.
+DUMMY_GAS_TIME_ELAPSED = 10
+#DUMMY_wATER_TIME_ELAPSED = 10 
 
 NO_GAS_TEST            = 0
 DUMMY_GAS_MODE_2421    = 1
 DUMMY_GAS_MODE_2430    = 2
 DUMMY_GAS_MODE_2423    = 3
+DUMMY_WATER_METER_2421 = 4
 
 class p1_telegram():
 
@@ -41,14 +43,15 @@ class p1_telegram():
         self.kwh_1_4_0_value            = 0.01  # kwh
         self.kwh_1_4_0_utc_timestamp    = 0  # in seconds
         self.kwh_1_6_0_timestamp        = '20230102030405'
-        self.kwh_1_6_0_value            = 0.01  # kwh 
+        self.kwh_1_6_0_value            = 0.01  # kwh
+        self.water_value                = 0.001
 
         try:
             sqlstr = "select status from " + const.DB_STATUS_TAB + " where id = 43"
             gas_dummy_val_rec=self.statusdb.select_rec(sqlstr)
             self.dev_dummy_gas_value=float(gas_dummy_val_rec[0][0])
         except Exception as e:
-            flog.warning (inspect.stack()[0][3]+": oude gas waarde was niet te lezen in de configuratie database -> " + str( e.args[0] ) )
+            flog.warning (inspect.stack()[0][3]+": oude gas waarde was niet te lezen in de status database -> " + str( e.args[0] ) )
     
     ####################################################################
     # 1-0:1.4.0(00.019*kW) is de piekwaarde van het actief kwartier,   # 
@@ -86,13 +89,35 @@ class p1_telegram():
 
 
     ####################################################
-    # return the timout delay for inserting gas values #
+    # insert a dummy water record telegram code    are #
     ####################################################
+    def water_stub_insert( self, line=None, serialbuffer=None, telegram_code=None ):
+
+        # 0-2:24.2.1(221028213843S)(00004.332*m3). 
+        try:
+            self.flog.debug(inspect.stack()[0][3]+": water dummy string toevoegen.")        
+            del serialbuffer[ len(serialbuffer)-1 ] # remove last ! line to add records
+            
+            line_1 = ''.join( filter(lambda x: x in string.printable, str(telegram_code) + '(221028213843S)(' + '{0:09.3f}'.format(self.water_value) + '*m3)\r\n')).rstrip()[0:1024]
+            #print(line_1, self.water_value)
+
+            serialbuffer.append( line_1 )
+            self.water_value = self.water_value + random.uniform(0.0, 0.00005)
+
+            serialbuffer.append( line ) # replace last line with ! character
+            
+        except Exception as e:
+           self.flog.warning( inspect.stack()[0][3]+": water test insert probleem " +  str( e ) )
+
+    #####################################################
+    # return the timeout delay for inserting gas values #
+    #####################################################
     def gas_interval(self):
         return DUMMY_GAS_TIME_ELAPSED
 
+ 
     ###################################################
-    # instert en dummy gas records telegram codes are #
+    # insert en dummy gas records telegram codes are  #
     # configurable                                    #
     ###################################################
     def gas_stub_instert(self, line=None, serialbuffer=None, gasmode=DUMMY_GAS_MODE_2421 ):
@@ -140,12 +165,11 @@ class p1_telegram():
                 
             serialbuffer.append( line )
 
-
         except Exception as e:
             self.flog.warning( inspect.stack()[0][3]+": test gas test insert probleem " +  str( e ) )
 
     ###################################################
-    # instert an dummy 3 phase telegram codes         #
+    # insert an dummy 3 phase telegram codes          #
     ###################################################
     def phase3_stub_instert ( self, line=None, serialbuffer=None ):
             #voeg een 3 fase regels in, alleen voor ontwikkeling!!!

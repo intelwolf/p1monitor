@@ -273,7 +273,7 @@ function readJsonTopicList(){
             htmlString = "<ol type='1'>";
             var jsondata = JSON.parse(data); 
             for (var j =0;  j<jsondata.length; j++){    
-                htmlString = htmlString + "<li>" + jsondata[j] + "</li>";
+                htmlString = htmlString + "<li title='" + jsondata[j] +"'>" + jsondata[j] + "</li>";
             }
             htmlString = htmlString + "</ol>";
             $('#topic_list').html( htmlString );
@@ -305,7 +305,7 @@ $(function () {
              <?php config_buttons(0);?>
         </div> <!-- end top wrapper-2 -->
         
-        <div class="mid-section">
+        <div class="mid-section-1">
             <div class="left-wrapper-config"> <!-- left block -->
                 <?php menu_control( 14 );?>
             </div>
@@ -555,14 +555,18 @@ $(function () {
 
                             </div>
                         </div>
+                        <!--
                         <br>
                         <div class="frame-4-top">
                             <span class="text-15"><?php echo strIdx( 696 )?></span>
                         </div>
+                        <!--
                         <div class="frame-4-bot">
                             <div class="text-10" id="topic_list"> </div>
                         </div>
+                        
                         <p class="p-1"></p>
+                          -->
                         <!-- placeholder variables for session termination -->
                         <input type="hidden" name="logout" id="logout" value="">
                     </form>
@@ -579,6 +583,16 @@ $(function () {
             </div>    
             <!-- end inner block right part of screen -->
     </div>
+    <div class="top-wrapper-3">
+        <div class="frame-8-top">
+            <span class="text-15"><?php echo strIdx( 696 )?></span>
+        </div>
+                            
+        <div class="frame-8-bot">
+            <div class="text-10" id="topic_list"> </div>
+        </div>
+    </div>
+    
     <script>
 
 $(function() {

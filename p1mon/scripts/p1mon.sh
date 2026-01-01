@@ -136,7 +136,7 @@ start() {
     #echo "running "$pid
     sleep 5 # give some time to start the process
     #sudo renice -n -15 -p $pid >/dev/null 
-    sudo renice -n -15 $(pgrep -P $pid) >/dev/null # make sure the serial processing has an higer priorty
+    sudo renice -n -19 $(pgrep -P $pid) >/dev/null # make sure the serial processing has an higher priority
     echo "[*] $PRG1 process prioriteit verhoogd."
     #echo "running "$pid
     echo "[*] $PRG1 gestart."

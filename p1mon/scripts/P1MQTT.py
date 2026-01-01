@@ -38,17 +38,19 @@ e_db_financieel_dag = sqldb.financieelDb()
 # timestamp process gestart                           DB status index =  95
 # timestamp laatste MQTT publish bericht verstuurd.   DB status index =  96
 
-mqtt_client                     = None
-mqtt_topics_smartmeter          = None
-mqtt_topics_watermeter_minute   = None
-mqtt_topics_watermeter_day      = None
-mqtt_topics_weather             = None
-mqtt_topics_indoor_temperature  = None
-mqtt_topics_phase               = None
-mqtt_topics_powerproduction     = None
-mqtt_topics_powergas_day        = None
-mqtt_topics_cost_day            = None
-mqtt_topics_miscellaneous       = None
+mqtt_client                             = None
+mqtt_topics_smartmeter                  = None
+mqtt_topics_watermeter_minute           = None
+mqtt_topics_watermeter_day              = None
+mqtt_topics_watermeterdigital_minute    = None
+mqtt_topics_watermeterdigital_day       = None
+mqtt_topics_weather                     = None
+mqtt_topics_indoor_temperature          = None
+mqtt_topics_phase                       = None
+mqtt_topics_powerproduction             = None
+mqtt_topics_powergas_day                = None
+mqtt_topics_cost_day                    = None
+mqtt_topics_miscellaneous               = None
 
 status_db_cache = {} # dictionary buffer that is updated periodically 
 
@@ -64,6 +66,7 @@ mqtt_para = {
     'qosglobal': 0,                                 # options are 0,1,2 QoS (Quality of Service) DB config index 113
     'smartmeterprocessedtimestamp': '',             # timestamp of latest time when the publish was performed.
     'watermeterprocessedtimestamp': '',             # timestamp of latest time when the publish was performed.
+    'watermeterdigitalprocessedtimestamp': '',      # timestamp of latest time when the publish was performed.
     'weatherprocessedtimestamp': '',                # timestamp of latest time when the publish was performed.
     'indoortemperatureprocessedtimestamp': '',      # timestamp of latest time when the publish was performed.
     'phaseprocessedtimestamp': '',                  # timestamp of latest time when the publish was performed.
@@ -109,6 +112,22 @@ mqtt_payload_watermeter_minute = {
 }
 
 mqtt_payload_watermeter_day = {
+    0: str( '' ),
+    1: int( 0 ),
+    2: int( 0 ),
+    3: float( 0 ),
+    4: float( 0 )
+}
+
+mqtt_payload_watermeterdigital_minute = {
+    0: str( '' ),
+    1: int( 0 ),
+    2: int( 0 ),
+    3: float( 0 ),
+    4: float( 0 )
+}
+
+mqtt_payload_watermeterdigital_day = {
     0: str( '' ),
     1: int( 0 ),
     2: int( 0 ),
@@ -209,7 +228,11 @@ mqtt_payload_miscellaneous = {
     1: int( 0 ),
     2: int( 0 ),    # power switcher is active (on/off)
     3: int( 0 ),    # power production switcher power in watt (0 means not active)
-    4: int( 0 )     # tariff switcher power is active (on/off)
+    4: int( 0 ),    # tariff switcher power is active (on/off)
+    5: float( 0 ),  # Power peak 15min code 1.4.0 
+    6: str( '' ),   # Power peak 15min code 1.4.0 timestamp
+    7: float( 0 ),  # Power peak month code 1.6.0 
+    8: str( '' ),   # Power peak 15min code 1.6.0 timestamp
 }
 
 # -1 used to trigger a update when starting it is a value that normally
@@ -220,7 +243,9 @@ miscellaneous_last_status = {
     2: int( -1 ),    # power switcher is active (on/off)
     3: int( -1 ),    # power production switcher power in watt (0 means not active)
     4: int( -1 ),    # tariff switcher power is active (on/off)
-    5: int( -1 )     # forced status power switcher
+    5: int( -1 ),    # forced status power switcher
+    6: float( -1 ),  # Power peak 15min code 1.4.0 kW
+    7: float( -1 ),  # Power peak 15min code 1.6.0 Kw
 }
 
 def update_status_db_buffer():
@@ -291,7 +316,7 @@ def checkActiveState():
     #print ( mqtt_para )
     
 def setConfigFromDb():
-    global mqtt_para, mqtt_topics_smartmeter, mqtt_topics_watermeter_minute, mqtt_topics_watermeter_day, mqtt_topics_weather, mqtt_topics_indoor_temperature, mqtt_topics_phase, mqtt_topics_powerproduction, mqtt_topics_powergas_day, mqtt_topics_cost_day, mqtt_topics_miscellaneous
+    global mqtt_para, mqtt_topics_smartmeter, mqtt_topics_watermeter_minute, mqtt_topics_watermeter_day, mqtt_topics_watermeterdigital_minute, mqtt_topics_watermeterdigital_day, mqtt_topics_weather, mqtt_topics_indoor_temperature, mqtt_topics_phase, mqtt_topics_powerproduction, mqtt_topics_powergas_day, mqtt_topics_cost_day, mqtt_topics_miscellaneous
 
     try:
         _id, parameter, _label = config_db.strget( 105, flog )
@@ -369,6 +394,22 @@ def setConfigFromDb():
         2: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_API_WM_PULS_CNT.lower(),
         3: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR.lower(),
         4: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER + '/day'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR_M3.lower()
+    }
+
+    mqtt_topics_watermeterdigital_minute = {
+        0: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/minute'.lower()  + '/' + apiconst.JSON_TS_LCL.lower(),
+        1: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL+ '/minute'.lower()  + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
+        2: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/minute'.lower()  + '/' + apiconst.JSON_API_WM_PULS_CNT.lower(),
+        3: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/minute'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR.lower(),
+        4: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/minute'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR_M3.lower()
+    }
+
+    mqtt_topics_watermeterdigital_day = {
+        0: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL.lower(),
+        1: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/day'.lower()  + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
+        2: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/day'.lower()  + '/' + apiconst.JSON_API_WM_PULS_CNT.lower(),
+        3: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/day'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR.lower(),
+        4: mqtt_para['topicprefix'] + '/' + apiconst.BASE_WATERMETER_DIGITAL + '/day'.lower()  + '/' + apiconst.JSON_API_WM_CNSMPTN_LTR_M3.lower()
     }
 
     mqtt_topics_weather = {
@@ -463,8 +504,24 @@ def setConfigFromDb():
         1:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_TS_LCL_UTC.lower(),
         2:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_SWTCHR_POWER_ON.lower(),
         3:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_SWTCHR_POWER_W.lower(),
-        4:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_SWTCHR_TARIFF_ON.lower()
+        4:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_SWTCHR_TARIFF_ON.lower(),
+        5:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_PEAK_15_MIN_KW.lower(),  
+        6:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_PEAK_15_MIN_KW_TS.lower(),
+        7:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_PEAK_MONTH_KW.lower(),
+        8:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_PEAK_MONTH_KW_TS.lower()
     }
+    
+    """
+    0: str( '' ),
+    1: int( 0 ),
+    2: int( 0 ),    # power switcher is active (on/off)
+    3: int( 0 ),    # power production switcher power in watt (0 means not active)
+    4: int( 0 ),    # tariff switcher power is active (on/off)
+    5: int( 0 ),    # Power peak 15min code 1.4.0 
+    6: str( '' ),   # Power peak 15min code 1.4.0 timestamp
+    7: int( 0 ),    # Power peak month code 1.6.0 
+    8: str( '' ),   # Power peak 15min code 1.6.0 timestamp
+    """
 
     #flog.info (inspect.stack()[0][3]+": MQTT parameters :" + str( mqtt_para ) )
 
@@ -703,6 +760,20 @@ def Main(argv):
                             mqttPublish( mqtt_client, mqtt_topics_watermeter_day,  mqtt_payload_watermeter_day )
                             mqtt_para['watermeterprocessedtimestamp'] = timestamp
 
+                    if ( mqtt_para['watermeterdigitalprocessedtimestamp'] ) != timestamp:
+                        # minute processing
+                        getPayloadFromDB( mqtt_payload_watermeterdigital_minute, watermeter_db , db_index = '21' )
+                        if len( mqtt_payload_watermeterdigital_minute[0] ) > 0: # only send when when we have data
+                            mqttPublish( mqtt_client, mqtt_topics_watermeterdigital_minute,  mqtt_payload_watermeterdigital_minute )
+                            mqtt_para['watermeterdigitalprocessedtimestamp'] = timestamp
+                        # day processing
+                        getPayloadFromDB( mqtt_payload_watermeterdigital_day, watermeter_db , db_index = '23' )
+                        if len( mqtt_payload_watermeterdigital_day[0] ) > 0: # only send when when we have data
+                            mqttPublish( mqtt_client, mqtt_topics_watermeterdigital_day,  mqtt_payload_watermeterdigital_day )
+                            mqtt_para['watermeterdigitalprocessedtimestamp'] = timestamp
+                        
+                       
+
             except Exception as e:
                 flog.warning(inspect.stack()[0][3]+": onverwachte fout bij watermeter publish van melding:"+str(e))
 
@@ -841,6 +912,9 @@ def makeTopicJsonFile():
     if mqtt_para['watermeterpublishisactive'] == True:
         topicToJson( mqtt_topics_watermeter_minute, list_of_topics )
         topicToJson( mqtt_topics_watermeter_day, list_of_topics )
+        topicToJson( mqtt_topics_watermeterdigital_minute, list_of_topics )
+        topicToJson( mqtt_topics_watermeter_day, list_of_topics )
+
     if mqtt_para['weatherpublishisactive'] == True:
         topicToJson( mqtt_topics_weather, list_of_topics ) 
     if mqtt_para['indoortemperaturepublishisactive'] == True:
@@ -991,37 +1065,22 @@ def checkBrokerConnection( rc ):
 def getMiscellaneousPayload(): 
     global miscellaneous_last_status
 
+    ###############################################################
+    # note use the miscellaneous_last_status list for comparision #
+    # use topic_index for filling lists, mqttPublish expects list #
+    # starting with 0!                                            #
+    ###############################################################
+
     r_topics = {}
     r_values = {} #payload
     topic_index = 0
     set_timestamps = False  # if this flag is set. set the timestamps
-
-     #mqttPublish( mqtt_client, mqtt_topics_miscellaneous,  mqtt_payload_miscellaneous )
-
-    """ 
-    miscellaneous_last_status
-    0: str( '' ),
-    1: int( 0 ),
-    2: int( 0 ),    # power switcher is active (on/off)
-    3: int( 0 ),    # power production switcher power in watt (0 means not active)
-    4: int( 0 )     # tariff switcher power is active (on/off)
-    5: int( 0 )     # forced status power switcher
-    }
-    """
-
-    """
-    mqtt_topics_miscellaneous = {
-            0:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_TS_LCL.lower(),
-            1:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_TS_LCL_UTC.lower(),
-            2:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_SWTCHR_POWER_ON.lower(),
-            3:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_SWTCHR_POWER_W.lower(),
-            4:  mqtt_para['topicprefix'] + '/' + apiconst.BASE_MISCELLANEOUS + '/'.lower() + apiconst.JSON_API_SWTCHR_TARIFF_ON.lower()
-        }
-    """
-
+   
     #print( status_db_cache[ 131] )
     #print( status_db_cache[ 83 ] )
     #print( status_db_cache[ 89 ] )
+      
+    # set all topics 
     
     _id, power_sw_forced_on, _label = config_db.strget( 87, flog ) # forced on is selected.
     #print( power_sw_forced_on )
@@ -1058,7 +1117,32 @@ def getMiscellaneousPayload():
         topic_index += 1
         r_values[topic_index] = int(getUtcTime())
         r_topics[topic_index] = mqtt_topics_miscellaneous[1]
-   
+        topic_index += 1
+        
+    if miscellaneous_last_status[6] != status_db_cache[32]: # update whit the value
+        r_values[topic_index] = float(status_db_cache[32])
+        r_topics[topic_index] = mqtt_topics_miscellaneous[5]
+        topic_index += 1
+        r_values[topic_index] = status_db_cache[33]
+        r_topics[topic_index] = mqtt_topics_miscellaneous[6]
+        topic_index += 1
+        miscellaneous_last_status[6] = status_db_cache[32]
+
+    if miscellaneous_last_status[7] != status_db_cache[34]: # update whit the value
+        r_values[topic_index] = float(status_db_cache[34])
+        r_topics[topic_index] = mqtt_topics_miscellaneous[7]
+        topic_index += 1
+        r_values[topic_index] = status_db_cache[35]
+        r_topics[topic_index] = mqtt_topics_miscellaneous[8]
+        topic_index += 1
+        miscellaneous_last_status[7] = status_db_cache[34]
+
+
+    #print( status_db_cache[ 32 ] )
+    #print( status_db_cache[ 33 ] )
+    #print( status_db_cache[ 34 ] )
+    #print( status_db_cache[ 35 ] )
+
     #print( "r_topics = ", r_topics )
     #print( "r_values = ", r_values )
     #print ( "topic_index = ", topic_index )
@@ -1075,21 +1159,6 @@ def getPhasePayloadFromDB( mqtt_payload ):
 
     unixtime = int( time.mktime( datetime_object .timetuple() ) )
     mqtt_payload[1] = str( unixtime )
-
-    """
-    _id, mqtt_payload[ 2  ], _label, _security = rt_status_db.strget( 74,  flog) #L1 Watt consuption
-    _id, mqtt_payload[ 3  ], _label, _security = rt_status_db.strget( 75,  flog) #L2 Watt consuption
-    _id, mqtt_payload[ 4  ], _label, _security = rt_status_db.strget( 76,  flog) #L3 Watt consuption
-    _id, mqtt_payload[ 5  ], _label, _security = rt_status_db.strget( 77,  flog) #L1 Watt production
-    _id, mqtt_payload[ 6  ], _label, _security = rt_status_db.strget( 78,  flog) #L2 Watt production
-    _id, mqtt_payload[ 7  ], _label, _security = rt_status_db.strget( 79,  flog) #L3 Watt production
-    _id, mqtt_payload[ 8  ], _label, _security = rt_status_db.strget( 103, flog) #L1 Volt
-    _id, mqtt_payload[ 9  ], _label, _security = rt_status_db.strget( 104, flog) #L2 Volt
-    _id, mqtt_payload[ 10 ], _label, _security = rt_status_db.strget( 105, flog) #L3 Volt
-    _id, mqtt_payload[ 11 ], _label, _security = rt_status_db.strget( 100, flog) #L1 Ampere
-    _id, mqtt_payload[ 12 ], _label, _security = rt_status_db.strget( 101, flog) #L2 Ampere
-    _id, mqtt_payload[ 13 ], _label, _security = rt_status_db.strget( 102, flog) #L3 Ampere
-    """
 
     mqtt_payload[ 2  ] = int(float(status_db_cache[74]) * 1000) #L1 Watt consuption 
     mqtt_payload[ 3  ] = int(float(status_db_cache[75]) * 1000) #L2 Watt consuption
@@ -1167,12 +1236,12 @@ def getPayloadFromDB( mqtt_payload, database, db_index=None ):
 def mqttPublish( client, topics,  payloads ):
     #print ( '#########')
     #print( payloads )
+    #print( topics )
     #print ( '---------')
-    #flog.setLevel( logging.DEBUG )
+    #log.setLevel( logger.logging.DEBUG )
     flog.debug( inspect.stack()[0][3] + ": qos: " + str( mqtt_para['qosglobal']) )
     try:
-        for i in range(0 , len(topics) ):
-           
+        for i in range(0 , len(topics) ):        
             flog.debug( inspect.stack()[0][3] + ": line: " + str(i) + " topic: " + topics[i] + " payload: " + str( payloads[ i ] ) )
             client.publish( topics[i], payload=payloads[i], qos=mqtt_para['qosglobal'] , retain=False )
         rt_status_db.timestamp( 96,flog ) # update the status db with the latest publish timestamp
@@ -1180,7 +1249,7 @@ def mqttPublish( client, topics,  payloads ):
         mqtt_para['brokerconnectionstatustext'] = str( e.args[0] )
         flog.warning( inspect.stack()[0][3] + ": MQTT publish onverwachte fout -> " + mqtt_para['brokerconnectionstatustext'] )
         rt_status_db.strset( mqtt_para['brokerconnectionstatustext'], 97, flog)
-    #flog.setLevel( logging.INFO )
+    #flog.setLevel( logger.logging.INFO )
 
 def saveExit(signum, frame):
     stop()

@@ -53,11 +53,15 @@ class Catalog( object ):
                    
                     if line.startswith('ROUTE_'):  # add ROUTE entries 
                         #if '_HELP' in line or '{id}' in line or '{power_source_id}' in line: # remove HELP ROUTES & id's routes
-                        if '_HELP' in line or '{id}' in line: # remove HELP ROUTES & id's routes
+                        #if '_HELP' in line or '{id}' in line: # remove HELP ROUTES & id's routes
+                        if '_HELP' in line: # remove HELP ROUTES & id's routes
                             continue
                         
                         #print ( line )
                         route = line.split('=')[1].replace("'","").replace("/{power_source_id}","").strip()
+                        #print (route)
+                        if route.startswith('ROUTE_'):
+                            continue # fix false found routes
                         json_obj_data.append( ipadress + route )
 
                 #json_obj_data.sort() #sort the routes
@@ -74,6 +78,11 @@ class Catalog( object ):
                         continue
                     if apiconst.BASE_POWERPRODUCTION_SOLAR in json_obj_data_routes[ idx ]:
                         json_obj_data_routes[idx] = json_obj_data_routes[idx].replace("/{db_index}","/1/{db_index}").strip()
+
+                for idx in range( len( json_obj_data_routes ) ): 
+                    if apiconst.BASE_WATERMETER_DIGITAL in json_obj_data_routes[ idx ]:
+                        if 'help' in json_obj_data_routes[ idx ]:
+                            json_obj_data_routes[idx] = json_obj_data_routes[idx].replace("/{id}","").strip()
 
             #print ( json_obj_data_routes )
             json_obj_data_routes.sort()

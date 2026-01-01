@@ -1604,7 +1604,7 @@ $arr = array (
     'minuten (liter water)','minutes (liters of water)',"minutes (litres d'eau)"
 ),
 /* 440 */ array(
-    'Liter verbruikt','Liters consumed','Litres consommés'
+    'liter verbruikt puls','liters consumed pulse','litres consommés pulsatille'
 ),
 /* 441 */ array(
     'watermeter uur','watermeter hour',"compteur d'eau uur"
@@ -2717,14 +2717,28 @@ Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'arge
     'stel het zoomniveau van deze pagina in','set the zoom level of this page','définissez le niveau de zoom de cette page'
 ),
 /* 768 */ array(
-    '','',''
+    'watermeter code','watermeter code',"code du compteur d'eau"
 ),
-
 /* 769 */ array(
+    "P1 telegram code die gebruikt wordt voor het meten van watermeter.  Stel deze alleen in als de code voorkomt in het P1 telegram. Voor België is de code 0-2:24.2.1. Het karakter '–' wil zeggen dan de code niet verwerkt wordt.",
+    "P1 telegram code used for measuring water meters. Only set this if the code appears in the P1 telegram. For Belgium, the code is 0-2:24.2.1. The character '–' indicates that the code is not processed.",
+    "Code télégraphique P1 utilisé pour le relevé des compteurs d'eau. Ne le paramétrez que si le code figure dans le télégramme P1. Pour la Belgique, le code est 0-2:24.2.1. Le caractère '–' indique que le code n'est pas traité."
+),
+/* 770 */ array(
+    'Nederland (standaard)','Netherlands (default)','Pays-Bas (par défaut)'
+),
+/* 771 */ array(
+    'België','Belgium','Belgique'
+),
+/* 772 */ array(
+    'liter verbruikt digital','liter consumed digital','litre consommé digital'
+),
+/* 773 */ array(
     '','',''
 ),
-
-
+/* 774 */ array(
+    '','',''
+),
 
 );
 

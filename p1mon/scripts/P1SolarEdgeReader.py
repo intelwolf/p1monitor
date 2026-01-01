@@ -79,6 +79,7 @@ def Main( argv ):
 
     while True:
         time.sleep(time_out_in_seconds) 
+        #print("time_out_in_seconds = ", time_out_in_seconds)
 
         try:
             _id, smart_api_calls, _label = config_db.strget( 146, flog )
@@ -197,14 +198,19 @@ def Main( argv ):
                     #date_set[1] = "2025-06-09" # TEST DATA
                     flog.debug( inspect.stack()[0][3] + ": start date=" + str( date_set[0]) + " stop date=" + str( date_set[1]) )
 
-                    data = api.get_energy( 
-                        api_query_list_of_ids,
-                        date_set[0], 
-                        date_set[1], 
-                        time_unit=solaredge_lib.API_MINUTE #DIFF
-                        )
-                    rt_status_db.timestamp( 111, flog )
-
+                    try:
+                        data = api.get_energy( 
+                            api_query_list_of_ids,
+                            date_set[0], 
+                            date_set[1], 
+                            time_unit=solaredge_lib.API_MINUTE #DIFF
+                            )
+                        rt_status_db.timestamp( 111, flog )
+                    except Exception as e:
+                        flog.warning( inspect.stack()[0][3] + ": probleem met laden van data via de SolarEdge API -> " + str(e.args[0]) )
+                        time_out_in_seconds = LOOP_TIMEOUT_IN_SEC    
+                        continue
+                     
                     #print( data )
                     #sys.exit() 
 
@@ -312,6 +318,7 @@ def Main( argv ):
 
                         # make a string of SQL statements
                         sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog )
+                        #print("clean_list 1", clean_list)
 
                         #print( sql_script )
                         #power_production_solar_db.excute('delete from powerproduction_solar')
@@ -328,9 +335,11 @@ def Main( argv ):
                                 sql_script = solaredge_shared_lib.generate_sql_text ( clean_list, flog , first_idx=idx, last_idx=idx )
                                 power_production_solar_db.executescript( sql_script )
                                 idx += 1
-
                 toc = time.perf_counter()
-                flog.info( inspect.stack()[0][3] + ": " + str( len(clean_list) ) + " minuten records verwerkt in " + f"{toc - tic:0.3f} seconden." )
+              
+                if 'clean_list' in locals():
+                    flog.info( inspect.stack()[0][3] + ": " + str( len(clean_list) ) + " minuten records verwerkt in " + f"{toc - tic:0.3f} seconden." )
+
             except Exception as e:
                 flog.warning( inspect.stack()[0][3] + ": probleem met herladen data voor minuten informatie " + str( site_id ) + " -> " + str(e.args[0]) )
 
@@ -912,9 +921,12 @@ def Main( argv ):
            
             # delete min, hour, day records passed the retention time.
             flog.info( inspect.stack()[0][3] + ": verouderde data wordt verwijderd." )
-            list_of_sites = solaredge_shared_lib.load_list_of_sites_from_config_db( db=config_db, flog=flog )
+            
+            #print ("list_of_sites ", list_of_sites )
+            #flog.setLevel( logger.logging.DEBUG )
             solaredge_shared_lib.clean_db_by_retention(db=power_production_solar_db, flog=flog, site_list=list_of_sites )
-
+            flog.info( inspect.stack()[0][3] + ": verouderde data is verwijderd." )
+            #flog.setLevel( logger.logging.INFO )
         #sys.exit()
 
         if time_out_in_seconds < LOOP_TIMEOUT_IN_SEC: # the timeout is initial set to zero (0) and now set to the normal loop time.
