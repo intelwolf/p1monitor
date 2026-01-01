@@ -152,7 +152,7 @@ def restore( args=None ):
         db_usb_path_file = base_usb_pathfile + AIDE_DIR_DATABASE
 
         for source_file_name in glob.glob( db_usb_path_file + "/*.db" ):
-            
+                       
             destination_file_data = const.DIR_FILEDISK + pathlib.PurePath( source_file_name ).name
             destination_file_ram  = const.DIR_RAMDISK + pathlib.PurePath( source_file_name ).name
             try:
@@ -497,6 +497,14 @@ def save( ):
 
         # step 3: copy the database files from ram to USB
         for file_name in glob.glob( const.DIR_RAMDISK + "/*.db" ):
+  
+            # we don't want to copy the serial data.
+            if const.FILE_DB_E_FILENAME in file_name:
+                msg = "bestand " + pathlib.PurePath( file_name ).name + " NIET gekopieerd naar folder " + restore_path_db + " op de usb drive."
+                write_status_to_file( msg )
+                flog.info( msg )
+                continue 
+
             destination_file = restore_path_db + "/" + pathlib.PurePath( file_name ).name 
             shutil.copy2( file_name, destination_file )
             flog.debug ( "bestand " + file_name + " gekopieerd naar " + destination_file )

@@ -279,11 +279,17 @@ function makeSelector($id) {
     // Watermeter 
     if ( $id == 11 ) { 
         $configValue = config_read(227);
-        $g1=$g2='';
+        $g1=$g2=$g3=$g4=$g5='';
         if ($configValue == '-' )           { $g1 = 'selected="selected"';} 
-        if ($configValue == '0-2:24.2.1' )  { $g2 = 'selected="selected"';} 
-        echo '<option ' . $g1 . ' value="-">-</option>';                    # taal aanpassen ook voor andere controleren
-        echo '<option ' . $g2 . ' value="0-2:24.2.1">0-2:24.2.1</option>';
+        if ($configValue == '0-1:24.2.1' )  { $g2 = 'selected="selected"';}
+        if ($configValue == '0-2:24.2.1' )  { $g3 = 'selected="selected"';} 
+        if ($configValue == '0-3:24.2.1' )  { $g4 = 'selected="selected"';} 
+        if ($configValue == '0-4:24.2.1' )  { $g5 = 'selected="selected"';} 
+        echo '<option ' . $g1 . ' value="-">-</option>';
+        echo '<option ' . $g2 . ' value="0-1:24.2.1">0-1:24.2.1</option>';
+        echo '<option ' . $g3 . ' value="0-2:24.2.1">0-2:24.2.1</option>';
+        echo '<option ' . $g4 . ' value="0-3:24.2.1">0-3:24.2.1</option>';
+        echo '<option ' . $g5 . ' value="0-4:24.2.1">0-4:24.2.1</option>';
     }
 }
 ?>
