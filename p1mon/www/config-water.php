@@ -137,18 +137,18 @@ function readJsonApiStatus(){
 }
 
 function  readJsonApiHistoryWater( cnt ){ 
-    $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
+    $.getScript( "/api/v2/watermeterdigital/day/1?limit=" + cnt, function( data, textStatus, jqxhr ) {
         try {
         var jsondata = JSON.parse(data); 
         if ( jsondata.length == 0 ) {
             $('#verbruikWater').html( padXX( 0 ,5, 3 ) + '&nbsp;m&#179;');
- 
         } else {
             $('#verbruikWater').html( padXX( jsondata[0][5]  ,5, 3 ) + '&nbsp;m&#179;' );
         }
       } catch(err) {}
    });
 }
+
 
 function readUpgradeLogging(){ 
     $.get( '/txt/txt-water-reset-status.php', function( response, status, xhr ) {

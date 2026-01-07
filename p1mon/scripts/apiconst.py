@@ -216,6 +216,7 @@ JSON_API_RM_TMPRTR_IN       = 'ROOM_TEMPERATURE_IN'                  # room temp
 JSON_API_RM_TMPRTR_OUT      = 'ROOM_TEMPERATURE_OUT'                 # room temperature output,raw data not processed
 JSON_API_REC_PRCSSD         = 'RECORD_IS_PROCESSED'                  # record is processed into the database
 JSON_API_NET_CNSMPTN_W      = 'CONSUMPTION_NET_W'                    # the net consumption of power (W), minus if any power produced, -value means power production exceeds power consumption.
+JSON_API_CNSMPTN_WATER     = 'CONSUMPTION_WATER_L'                   # consumption of water in Liters.
 
 JSON_API_STTS_ID            = 'STATUS_ID'                            # unique record ID
 JSON_API_STTS               = 'STATUS'                               # the status of the ID/label.
@@ -352,7 +353,7 @@ EXPL_API_PRDCTN_KWH_H       = 'Production of KWH during high (piek) period. Mete
 EXPL_API_TRFCD              = 'High or low period for production of consumption of kWh. Low = D, High = P'
 EXPL_API_CNSMPTN_KW         = 'The consumption in kilo Watt at this moment.'
 EXPL_API_PRDCTN_KW          = 'The production in kilo Watt at this moment.'
-
+ 
 EXPL_API_DATA_ID            = 'number representing the type op data   1:kWh min consumption, 2: kWh hour consumption, 3: kWh day consumption, 4: kWh month consumption 5: kWh year consumption, 6: kWh min production, 7: kWh hour production, 8: kWh day production, 9: kWh month production, 10: kWh year production, 11: gas hour, 12: gas day ,13: gas month ,14: gas year, 15: water min, 16: water hour, 17: water day, 18: water month, 19: water year'
 EXPL_API_ID                 = 'number that identifies a record uniquely.'
 EXPL_API_ACTIVE             = 'record will be updated automatically.'
@@ -375,7 +376,7 @@ EXPL_API_RM_TMPRTR_IN       = 'Room temperature input,raw data not processed in 
 EXPL_API_RM_TMPRTR_OUT      = 'Room temperature output,raw data not processed in degrees Celsius.'
 EXPL_API_REC_PRCSSD         = 'Record is processed into the database. 1 is done, 0 is to do.'
 EXPL_API_NET_CNSMPTN_W      = 'the net consumption of power (W), minus if any power produced, -value means power production exceeds power consumption.'
-
+EXPL_API_CNSMPTN_WATER      = 'Consumption of water in Liters.'
 
 EXPL_API_STTS_ID            = 'Unique record ID'
 EXPL_API_STTS               = 'The status of the ID/label.'
@@ -614,7 +615,7 @@ HELP_ROUTE_SMARTMETER_JSON = {
     "api_version"       : 1,
     "api_status"        : API_STATUS_PRODUCTION,
     "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP,
-    "api_description"   : "The standardised and verified data that the smart meter can deliver. The number of entries returned is optional. The data is added with a frequency of 10 seconds. Data is ordered on timestamp.",
+    "api_description"   : "The standardised and verified data that the smart meter can deliver. The number of entries returned is optional. Data is ordered on timestamp.",
     "api_usage"         : "<ip>" + ROUTE_SMARTMETER + '?'+ API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2018-01-03 12:03:55, <ip>' + ROUTE_SMARTMETER + ", <ip>" + ROUTE_SMARTMETER_HELP,
     "fields": [
         {
@@ -671,6 +672,11 @@ HELP_ROUTE_SMARTMETER_JSON = {
         { 
            "name" : JSON_API_CNSMPTN_GAS_M3,
            "description" : EXPL_API_CNSMPTN_GAS_M3,
+           "type": TYPE_JSON_NUMBER_INTEGER
+        },
+        { 
+           "name" : JSON_API_CNSMPTN_WATER,
+           "description" : EXPL_API_CNSMPTN_WATER,
            "type": TYPE_JSON_NUMBER_INTEGER
         }
     ]
@@ -763,76 +769,6 @@ HELP_ROUTE_STATISTICS_JSON = {
            "name" : JSON_API_UPDATED,
            "description" : EXPL_API_UPDATED,
            "type": TYPE_JSON_STRING
-        }
-    ]
-}
-
-# help data
-# SQL AS Reference
-#sqlstr = "select TIMESTAMP, cast(strftime('%s',TIMESTAMP) as Integer), RECORD_VERWERKT, VERBR_KWH_181, VERBR_KWH_182, GELVR_KWH_281, \
-#            GELVR_KWH_282, TARIEFCODE, ACT_VERBR_KW_170, ACT_GELVR_KW_270, VERBR_GAS_2421
-HELP_ROUTE_SMARTMETER_JSON = {
-    "api_version"       : 1,
-    "api_status"        : API_STATUS_PRODUCTION,
-    "api_options"       : API_OPTION_LIMIT + ', ' + API_OPTION_SORT_TIMESTAMP + ', ' + API_OPTION_JSON  + ', ' + API_OPTION_ROUND + ", " + API_OPTION_STARTTIMESTAMP,
-    "api_description"   : "The standardised and verified data that the smart meter can deliver. The number of entries returned is optional. The data is added with a frequency of 10 seconds. Data is ordered on timestamp.",
-    "api_usage"         : "<ip>" + ROUTE_SMARTMETER + '?'+ API_PARAMETER_LIMIT +'=10&' + API_PARAMETER_SORT + '=asc&' + API_PARAMETER_JSON_TYPE + '=object&' + API_PARAMETER_ROUND + '=on&' + API_PARAMETER_STARTTIMESTAMP + '=2018-01-03 12:03:55, <ip>' + ROUTE_SMARTMETER + ", <ip>" + ROUTE_SMARTMETER_HELP,
-    "fields": [
-        {
-           "name" : JSON_TS_LCL,
-           "description" : EXPL_TS_LCL,
-           "type": TYPE_JSON_STRING
-        },
-        { 
-           "name" : JSON_TS_LCL_UTC,
-           "description" : EXPL_TS_LCL_UTC,
-           "type": TYPE_JSON_INTEGER
-        },
-        { 
-           "name" : JSON_API_REC_PRCSSD,
-           "description" : EXPL_API_REC_PRCSSD,
-           "type": TYPE_JSON_INTEGER
-        },
-        { 
-           "name" : JSON_API_CNSMPTN_KWH_L,
-           "description" : EXPL_API_CNSMPTN_KWH_L,
-           "type": TYPE_JSON_NUMBER_INTEGER
-        },
-        { 
-           "name" : JSON_API_CNSMPTN_KWH_H,
-           "description" : EXPL_API_CNSMPTN_KWH_H,
-           "type": TYPE_JSON_NUMBER_INTEGER
-        },
-        { 
-           "name" : JSON_API_PRDCTN_KWH_L,
-           "description" : EXPL_API_PRDCTN_KWH_L,
-           "type": TYPE_JSON_NUMBER_INTEGER
-        },
-        { 
-           "name" : JSON_API_PRDCTN_KWH_H,
-           "description" : EXPL_API_PRDCTN_KWH_H,
-           "type": TYPE_JSON_NUMBER_INTEGER
-        },
-        { 
-           "name" : JSON_API_TRFCD ,
-           "description" : EXPL_API_TRFCD,
-           "type": TYPE_JSON_STRING
-        }
-        ,
-        { 
-           "name" : JSON_API_CNSMPTN_W,
-           "description" : EXPL_API_CNSMPTN_W,
-           "type": TYPE_JSON_NUMBER_INTEGER
-        },
-        { 
-           "name" : JSON_API_PRDCTN_W,
-           "description" : EXPL_API_PRDCTN_W,
-           "type": TYPE_JSON_NUMBER_INTEGER
-        },
-        { 
-           "name" : JSON_API_CNSMPTN_GAS_M3,
-           "description" : EXPL_API_CNSMPTN_GAS_M3,
-           "type": TYPE_JSON_NUMBER_INTEGER
         }
     ]
 }

@@ -80,6 +80,7 @@ function readJsonApiHistoryDay( cnt ){
    });
 }
 
+/*
 function readJsonApiHistoryWaterDay( cnt ){ 
     $.getScript( "/api/v2/watermeter/day", function( data, textStatus, jqxhr ) {
       try {
@@ -98,6 +99,43 @@ function readJsonApiHistoryWaterDay( cnt ){
       }
    });
 }
+*/
+
+function readJsonApiHistoryWaterDay( cnt ){ 
+    $.getScript( "/api/v2/watermeterdigital/day/1", function( data, textStatus, jqxhr ) {
+      try {
+        var jsondata = JSON.parse(data); 
+
+        for( var j=0; j<jsondata.length; j++ ) {
+            for ( var n=0; n<consumptionWater.length; n++) {
+                if ( (jsondata[j][1] * 1000) == consumptionWater[n][0] ) {
+                    consumptionWater[n][1] =consumptionWater[n][1] + jsondata[j][5];
+                }
+            }
+        }
+        updateData(); 
+      } catch(err) {
+        console.log( err )
+      }
+   });
+   $.getScript( "/api/v2/watermeterdigital/day/2", function( data, textStatus, jqxhr ) {
+      try {
+        var jsondata = JSON.parse(data); 
+
+        for( var j=0; j<jsondata.length; j++ ) {
+            for ( var n=0; n<consumptionWater.length; n++) {
+                if ( (jsondata[j][1] * 1000) == consumptionWater[n][0] ) {
+                    consumptionWater[n][1] =consumptionWater[n][1] + jsondata[j][5];
+                }
+            }
+        }
+        updateData(); 
+      } catch(err) {
+        console.log( err )
+      }
+   });
+}
+
 
 // change items with the marker #PARAMETER
 function createMeterReadingsChart() {

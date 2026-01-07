@@ -63,7 +63,7 @@ app = falcon.App()
 app.set_error_serializer( p1_serializer )
 
 # open databases
-# open van seriele database
+# open van seriële database
 try:
      e_db_serial.init(const.FILE_DB_E_FILENAME ,const.DB_SERIAL_TAB)
 except Exception as e:
@@ -1861,7 +1861,8 @@ class SmartMeter( object ):
         TARIEFCODE, \
         CAST( ACT_VERBR_KW_170 * 1000 AS INT), \
         CAST( ACT_GELVR_KW_270 * 1000 AS INT), \
-        VERBR_GAS_2421 \
+        VERBR_GAS_2421, \
+        VERBR_WATER \
         from " + const.DB_SERIAL_TAB + " "
     
     sqlstr_base_round = "select \
@@ -1875,10 +1876,10 @@ class SmartMeter( object ):
         TARIEFCODE, \
         CAST(ACT_VERBR_KW_170 * 1000 AS INT), \
         CAST(ACT_GELVR_KW_270 * 1000 AS INT), \
-        CAST( VERBR_GAS_2421 as INT ) \
+        CAST(VERBR_GAS_2421 as INT), \
+        CAST(VERBR_WATER as INT)\
         from " + const.DB_SERIAL_TAB + " "
     
-
     def on_get(self, req, resp):
         """Handles all GET requests."""
 
@@ -1897,7 +1898,8 @@ class SmartMeter( object ):
             apiconst.JSON_API_TRFCD          : '',
             apiconst.JSON_API_CNSMPTN_W      : 0,
             apiconst.JSON_API_PRDCTN_W       : 0,
-            apiconst.JSON_API_CNSMPTN_GAS_M3 : 0
+            apiconst.JSON_API_CNSMPTN_GAS_M3 : 0,
+            apiconst.JSON_API_CNSMPTN_WATER  : 0
         }
 
         if req.path == apiconst.ROUTE_SMARTMETER_HELP:
@@ -1994,9 +1996,9 @@ class SmartMeter( object ):
                         new_dict[ apiconst.JSON_API_CNSMPTN_W ]      = a[8]
                         new_dict[ apiconst.JSON_API_PRDCTN_W ]       = a[9]
                         new_dict[ apiconst.JSON_API_CNSMPTN_GAS_M3 ] = a[10]
+                        new_dict[ apiconst.JSON_API_CNSMPTN_WATER ]  = a[11]
                         json_obj_data.append( new_dict )
 
-                    
                     resp.text = json.dumps( json_obj_data , ensure_ascii=False , sort_keys=True )
                 else:
                     

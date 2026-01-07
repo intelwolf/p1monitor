@@ -105,7 +105,7 @@ function readJsonApiFinancial( cnt ){
             GGasDataGelvr.push   ( [item[1], item[6] ]);
             GNettoCost.push      ( [item[1], ( item[2] + item[3] + item[6] + item[7] ) - ( item[4] +item[5] ) ]); 
             GWaterDataGelvr.push ( [item[1], item[7] ]); // water added
-            GExtraData.push( [item[1], costLimit, -1, -1, -1, -1 ] ); //NEW
+            GExtraData.push( [item[1], costLimit, 0, 0, 0, 0 ] ); //NEW
         }  
 
         readJsonApiPowerGas( cnt );
@@ -139,6 +139,7 @@ function readJsonApiPowerGas( cnt ){
    });
 }
 
+/*
 function readJsonApiWater( cnt ){ 
     $.getScript( "/api/v2/watermeter/year?limit=" + cnt, function( data, textStatus, jqxhr ) {
       try {
@@ -158,6 +159,43 @@ function readJsonApiWater( cnt ){
       } catch(err) {}
    });
 }
+*/
+
+function readJsonApiWater( cnt ){ 
+    $.getScript( "/api/v2/watermeterdigital/year/1?limit=" + cnt, function( data, textStatus, jqxhr ) {
+      try {
+        var jsondata = JSON.parse(data); 
+
+        for (var j = 0; j < jsondata.length; j++){    
+            var item = jsondata[ j ];
+            for ( var k=0 ; k < GpiekDataVerbr.length; k++ ) {
+                if ( GpiekDataVerbr[k][0] == item[1] * 1000 ) {
+                    GExtraData[k][5] = GExtraData[k][5] + item[3]
+                    break;
+                }
+            }
+        }  
+        updateData();
+      } catch(err) {}
+   });
+    $.getScript( "/api/v2/watermeterdigital/year/2?limit=" + cnt, function( data, textStatus, jqxhr ) {
+      try {
+        var jsondata = JSON.parse(data); 
+
+        for (var j = 0; j < jsondata.length; j++){    
+            var item = jsondata[ j ];
+            for ( var k=0 ; k < GpiekDataVerbr.length; k++ ) {
+                if ( GpiekDataVerbr[k][0] == item[1] * 1000 ) {
+                    GExtraData[k][5] = GExtraData[k][5] + item[3]
+                    break;
+                }
+            }
+        }  
+        updateData();
+      } catch(err) {}
+   });
+}
+
 
 // change items with the marker #PARAMETER
 function createCostChart() {

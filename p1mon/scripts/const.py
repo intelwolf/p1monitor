@@ -47,15 +47,15 @@
 # elke release aanpassen                  #
 ###########################################
 P1_VERSIE                       = "3.3.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "2"           # standaard op 0, wordt verhoogd als op een image een patch wordt uitgevoerd.
-P1_SERIAL_VERSION               = "20260101"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_PATCH_LEVEL                  = "3"           # standaard op 0, wordt verhoogd als op een image een patch wordt toegevoegd
+P1_SERIAL_VERSION               = "20260107"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'
 # NEW DB FILE NAMES START WITH A NUMBER THAT MUST BE UNIQUE 
 # DBX_ = DROPBOX
 INTERNET_TIME_URL               ="https://timeapi.io/api/time/current/zone?timeZone=Europe%2FAmsterdam"
-ZTATZ_P1_VERSION_URL            ="https://www.ztatz.nl/p1monitor/version.json"
+ZTATZ_P1_VERSION_URL            ="https://p1-monitor.nl/p1monitor/version.json" # V3.3.0 patch 3
 ZTATZ_P1_VERSION_MSG_VERSION    ='MSG_VERSION'
 ZTATZ_P1_VERSION_TIMESTAMP      ='TIMESTAMP_LOCAL'
 ZTATZ_P1_VERSION                ='P1MON_VERSION'
