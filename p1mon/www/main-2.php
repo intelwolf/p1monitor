@@ -56,28 +56,45 @@ var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "t
 var hideWaterUi                 = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hideGaSUi                   = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hidePeakKw                  = <?php if ( config_read( 206 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
+var water_pulse                 = 0
+var water_smartmeter            = 0
+var water_timestamp             = ''
 
 const power_text                = "<?php echo strIdx( 361 );?>"
 const gas_consumend_text        = "<?php echo strIdx( 367 );?>"
 
-
 function readJsonApiWaterHistoryDay( cnt ){ 
-    $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
-      try {
-        var jsondata = JSON.parse(data); 
-        if ( jsondata.length == 0 ) {
+     $.getScript( "/api/v2/watermeterdigital/day/2?limit=" + cnt, function( data, textStatus, jqxhr ) {
+        try {
+            var jsondata = JSON.parse(data); 
+            water_smartmeter = jsondata[0][4]
+            setWaterValue()
+            water_timestamp = jsondata[0][0]. substr( 0, 10 )
+        } catch(err) {}
+    });
+    $.getScript( "/api/v2/watermeterdigital/day/1?limit=" + cnt, function( data, textStatus, jqxhr ) {
+        try {
+            var jsondata = JSON.parse(data); 
+            water_pulse = jsondata[0][4]
+            setWaterValue()
+            water_timestamp = jsondata[0][0].substr( 0, 10 )
+        } catch(err) {}
+    });
+}
+
+function setWaterValue(){
+    var total =  water_pulse + water_smartmeter
+    if ( total == 0 ) {
             $('#verbruikWater').text( padXX( 0 ,5, 3 ) );
+    } else {
+        $('#verbruikWater').text( padXX( total ,5, 3 ) );
+        // day value 
+        if ( water_timestamp == moment().format('YYYY-MM-DD') ) {
+            $('#verbruikWaterDag').text( padXX( total ,8, 1 ) );
         } else {
-            $('#verbruikWater').text( padXX( jsondata[0][5] ,5, 3 ) );
-            // day value 
-            if ( jsondata[0][0]. substr( 0, 10 ) == moment().format('YYYY-MM-DD') ) {
-                $('#verbruikWaterDag').text( padXX( jsondata[0][4] ,8, 1 ) );
-            } else {
-                $('#verbruikWaterDag').text( padXX( 0 ,8, 1 ) );
-            }
+            $('#verbruikWaterDag').text( padXX( 0 ,8, 1 ) );
         }
-      } catch(err) {}
-   });
+    }
 }
 
 function readJsonApiHistoryDay(){ 

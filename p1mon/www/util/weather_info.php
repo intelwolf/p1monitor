@@ -66,68 +66,54 @@ echo <<<"END"
                 
                 weatherLoop();
 
-
-                function wind_speed_2_beaufort( wind_speed ) {
-                    if  ( wind_speed < 1 ) { 
-                        return 0; 
-                    } else if ( wind_speed  >= 1 && wind_speed < 5.5 ) {
-                        return 1;
-                    } else if ( wind_speed  >=5.5  && wind_speed < 11.5 ) {
-                        return 2;
-                    } else if ( wind_speed  >=11.5  && wind_speed < 19.5 ) {
-                        return 3;
-                    } else if ( wind_speed  >=18.5  && wind_speed < 28.5 ) {
-                        return 4;
-                    } else if ( wind_speed  >=28.5  && wind_speed < 38.5 ) {
-                        return 5;
-                    } else if ( wind_speed  >=38.5  && wind_speed < 49.5 ) {
-                        return 6;
-                    } else if ( wind_speed  >=38.5  && wind_speed < 61.5 ) {
-                        return 7;
-                    } else if ( wind_speed  >=61.5  && wind_speed < 74.5 ) {
-                        return 8;
-                    } else if ( wind_speed  >=74.5  && wind_speed < 88.5 ) {
-                        return 9;
-                    } else if ( wind_speed  >=88.5  && wind_speed < 102.5 ) {
-                        return 10;
-                    } else if ( wind_speed  >=102.5  && wind_speed < 117.5 ) {
-                        return 11;
-                    } else if ( wind_speed  >=117.5 ) {
-                        return 12;
-                    } 
-                }
-
                 /*
+                Tabel KNMI windkracht en windsnelheid
+                Windkracht (Bft)
+                0    < 1 km/u
+                1    1-5 km/u
+                2    6-11 km/u
+                3    12-19 km/u
+                4    20-28 km/u
+                5    29-38 km/u
+                6    39-49 km/u
+                7    50-61 km/u
+                8    62-74 km/u
+                9    75-88 km/u
+                10    89-102 km/u
+                11    103-117 km/u
+                12    > 117 km/u
+                */
+
+
                 function wind_speed_2_beaufort( wind_speed ) {
                     if  ( wind_speed < 1 ) { 
                         return 0; 
-                    } else if ( wind_speed  >= 1 && wind_speed < 5.5 ) {
+                    } else if ( wind_speed  >= 1 && wind_speed < 6 ) {
                         return 1;
-                    } else if ( wind_speed  >=5.5  && wind_speed < 11.5 ) {
+                    } else if ( wind_speed  >=6 && wind_speed < 12 ) {
                         return 2;
-                    } else if ( wind_speed  >=11.5  && wind_speed < 19.5 ) {
+                    } else if ( wind_speed  >=12  && wind_speed < 20 ) {
                         return 3;
-                    } else if ( wind_speed  >=18.5  && wind_speed < 28.5 ) {
+                    } else if ( wind_speed  >=20  && wind_speed < 29 ) {
                         return 4;
-                    } else if ( wind_speed  >=28.5  && wind_speed < 38.5 ) {
+                    } else if ( wind_speed  >=29  && wind_speed < 39 ) {
                         return 5;
-                    } else if ( wind_speed  >=38.5  && wind_speed < 49.5 ) {
+                    } else if ( wind_speed  >=39  && wind_speed < 50 ) {
                         return 6;
-                    } else if ( wind_speed  >=38.5  && wind_speed < 61.5 ) {
+                    } else if ( wind_speed  >=50  && wind_speed < 62 ) {
                         return 7;
-                    } else if ( wind_speed  >=61.5  && wind_speed < 74.5 ) {
+                    } else if ( wind_speed  >=62  && wind_speed < 75 ) {
                         return 8;
-                    } else if ( wind_speed  >=74.5  && wind_speed < 88.5 ) {
+                    } else if ( wind_speed  >=75  && wind_speed < 89 ) {
                         return 9;
-                    } else if ( wind_speed  >=88.5  && wind_speed < 102.5 ) {
+                    } else if ( wind_speed  >=89  && wind_speed < 103) {
                         return 10;
-                    } else if ( wind_speed  >=102.5  && wind_speed < 117.5 ) {
+                    } else if ( wind_speed  >=103  && wind_speed < 117 ) {
                         return 11;
-                    } else if ( wind_speed  >=117.5 ) {
+                    } else if ( wind_speed  >=117 ) {
                         return 12;
                     } 
                 }
-                */
 
                 function show_weather_detail() {
                     $('#weather_detail').css({
