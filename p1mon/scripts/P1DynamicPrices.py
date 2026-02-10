@@ -141,7 +141,7 @@ def main(argv):
 # remove entries from the database             #
 # mode = older then the retention time         #
 # mode = all remove all records.               #
-# return true is ok, false is an error occured #
+# return true is ok, false is an error occurred #
 ################################################
 def clean_database(mode="old"):
     timestr=util.mkLocalTimeString() 
