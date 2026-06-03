@@ -1118,25 +1118,32 @@ def getMiscellaneousPayload():
         r_values[topic_index] = int(getUtcTime())
         r_topics[topic_index] = mqtt_topics_miscellaneous[1]
         topic_index += 1
+    
+    try:
+        cache_float_value = float(status_db_cache[32])
+        if miscellaneous_last_status[6] != cache_float_value : # update the value
+            r_values[topic_index] = cache_float_value
+            r_topics[topic_index] = mqtt_topics_miscellaneous[5]
+            topic_index += 1
+            r_values[topic_index] = status_db_cache[33]
+            r_topics[topic_index] = mqtt_topics_miscellaneous[6]
+            topic_index += 1
+            miscellaneous_last_status[6] = status_db_cache[32]
+    except:
+        pass # silent do nothing
         
-    if miscellaneous_last_status[6] != status_db_cache[32]: # update whit the value
-        r_values[topic_index] = float(status_db_cache[32])
-        r_topics[topic_index] = mqtt_topics_miscellaneous[5]
-        topic_index += 1
-        r_values[topic_index] = status_db_cache[33]
-        r_topics[topic_index] = mqtt_topics_miscellaneous[6]
-        topic_index += 1
-        miscellaneous_last_status[6] = status_db_cache[32]
-
-    if miscellaneous_last_status[7] != status_db_cache[34]: # update whit the value
-        r_values[topic_index] = float(status_db_cache[34])
-        r_topics[topic_index] = mqtt_topics_miscellaneous[7]
-        topic_index += 1
-        r_values[topic_index] = status_db_cache[35]
-        r_topics[topic_index] = mqtt_topics_miscellaneous[8]
-        topic_index += 1
-        miscellaneous_last_status[7] = status_db_cache[34]
-
+    try:
+        cache_float_value = float(status_db_cache[34])
+        if miscellaneous_last_status[7] != status_db_cache[34]: # update whit the value
+            r_values[topic_index] = cache_float_value 
+            r_topics[topic_index] = mqtt_topics_miscellaneous[7]
+            topic_index += 1
+            r_values[topic_index] = status_db_cache[35]
+            r_topics[topic_index] = mqtt_topics_miscellaneous[8]
+            topic_index += 1
+            miscellaneous_last_status[7] = status_db_cache[34]
+    except:
+        pass # silent do nothing
 
     #print( status_db_cache[ 32 ] )
     #print( status_db_cache[ 33 ] )

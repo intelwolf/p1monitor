@@ -256,8 +256,17 @@ if ( isset($_POST["ui_header"]) ) {
         
         if ( updateConfigDb("update config set parameter = '1' where ID = 134"))$err_cnt += 1;
     } else {
-        
         if ( updateConfigDb("update config set parameter = '0' where ID = 134"))$err_cnt += 1;
+    }
+}
+
+if ( isset($_POST["statistics"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["statistics"] == '1' ) {
+        
+        if ( updateConfigDb("update config set parameter = '1' where ID = 228"))$err_cnt += 1;
+    } else {
+        if ( updateConfigDb("update config set parameter = '0' where ID = 228"))$err_cnt += 1;
     }
 }
 
@@ -623,6 +632,7 @@ function makeSelectorAmpere( $id ) {
                                     <div class="text-10"><?php echo strIdx( 189 );?></div>
                                     <div class="text-10"><?php echo strIdx( 190 );?></div>
                                     <div class="text-10"><?php echo strIdx( 191 );?></div>
+                                    <div class="text-10"><?php echo strIdx( 739 );?></div>
                                 </div>
                                 <!-- right side -->
                                 <div class="float-right">
@@ -665,6 +675,10 @@ function makeSelectorAmpere( $id ) {
                                     <div>
                                         <input class="cursor-pointer" name="kWhleveringSolarEdge" type="radio" value="1" <?php if ( config_read( 147 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" name="kWhleveringSolarEdge" type="radio" value="0" <?php if ( config_read( 147 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                     <div>
+                                        <input class="cursor-pointer" name="statistics" type="radio" value="1" <?php if ( config_read( 228 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" name="statistics" type="radio" value="0" <?php if ( config_read( 228 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div>
                             </div>

@@ -1,4 +1,4 @@
-<?php
++<?php
 session_start(); #must be here for every page using login
 include_once '/p1mon/www/util/auto_logout.php';
 include_once '/p1mon/www/util/page_header.php';
@@ -179,7 +179,7 @@ if  ( readStatusDb(137) == 1 ) {
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
 
-
+                       
                         <div class="frame-4-top">
                             <span class="text-15"><?php echo ucfirst(strIdx( 726 ))?></span><span id="busy_indicator">&nbsp;&nbsp;&nbsp;<i class="fas fa-spinner fa-pulse fa-1x fa-fw"></i></span>
                         </div>
@@ -191,11 +191,9 @@ if  ( readStatusDb(137) == 1 ) {
                                 <p></p>
                                 <div class='pad-12x'>
                                     <div>
-                                        <!-- left side -->
                                         <div class="float-left" title="<?php echo strIdx(725);?>">
                                             <div class="text-10"><?php echo ucfirst(strIdx( 724 ))?>&nbsp;</div>
                                         </div>
-                                        <!-- right side -->
                                         <div class="float-right">
                                             <div>
                                                 <input class="cursor-pointer" id="fs_cb_set_time" name="fs_cb_set_time" type="checkbox">
@@ -206,6 +204,7 @@ if  ( readStatusDb(137) == 1 ) {
                             </div> 
                         </div> 
                         <p></p>
+                       
 
                         <div class="frame-4-top">
                             <span class="text-15"><?php echo ucfirst(strIdx( 376 ))?></span>
@@ -398,6 +397,7 @@ if  ( readStatusDb(137) == 1 ) {
 
 var tmp_scroll_crc32_hash = -1;
 
+
 function readJsonApiDateTime(){
 
     $.getScript( "./api/v1/datetime", function( data, textStatus, jqxhr ) {
@@ -459,9 +459,6 @@ function readPatchStatusLogging(){
                 $('#scroll_window').html( "<b>Even geduld aub, gegevens worden verwerkt.</b><br>" );
             }
         }
-
-
-
     });
 }
 
@@ -489,7 +486,6 @@ function DataLoop() {
 
 $(function() {
 
-    //readJsonApiDateTime();  
     DataLoop();
 
     hideStuff('dump_dl_link')

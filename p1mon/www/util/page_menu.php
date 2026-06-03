@@ -57,7 +57,6 @@ function page_menu($id) {
 
     echo "<div class=\"menu-left\">"."\n";
     
-   
     $t=strIdx(103);
     echo "<a title=\"$t\" id=\"menu0\" href=\"home.php\">
         <span class=\"fa-layers frame-1-top $m0\">
@@ -65,8 +64,9 @@ function page_menu($id) {
         </span>
     </a>"."\n";
 
-    $t=strIdx(104);
+    
     if ( config_read(18) == 1 ) {
+        $t=strIdx(104);
         echo "<a title=\"$t\" id=\"menu6\" href=\"e-verbruik.php\">
             <span class=\"fa-layers fa-gw frame-1-mid $m6\">
                 <i class=\"fas fa-signal\" data-fa-transform=\"grow-18\"></i>
@@ -75,8 +75,8 @@ function page_menu($id) {
         </a>"."\n";
     }
 
-    $t=strIdx(105);
     if ( config_read(19) == 1 ) {
+        $t=strIdx(105);
         echo "<a title=\"$t\" id=\"menu1\" href=\"stats.php\">
                 <span class=\"fa-layers fa-gw frame-1-mid $m1\">
                     <i class=\"fas fa-signal\" data-fa-transform=\"grow-18\"></i>
@@ -86,8 +86,8 @@ function page_menu($id) {
     }
 
     // levering van energie kWh S0
-    $t=strIdx(106);
     if ( config_read( 129 ) == 1 ) {
+        $t=strIdx(106);
         echo "<a title=\"$t\" id=\"menu11\" href=\"powerproduction-min.php\">
             <span class=\"fa-layers fa-gw frame-1-mid $m11\">
                 <i class=\"fas fa-signal\" data-fa-transform=\"grow-18\"></i>
@@ -98,8 +98,8 @@ function page_menu($id) {
     }
 
     // levering van energie Solar Edge API
-    $t=strIdx(107);
     if ( config_read( 147 ) == 1 ) {
+        $t=strIdx(107);
         echo "<a title=\"$t\" id=\"menu12\" href=\"powerproduction-api-min.php\">
             <span class=\"fa-layers fa-gw frame-1-mid $m12\">
                 <i class=\"fas fa-signal\" data-fa-transform=\"grow-18\"></i>
@@ -109,8 +109,8 @@ function page_menu($id) {
         </a>"."\n";
     }
 
-    $t=strIdx(108);
     if ( config_read(20) == 1 ) {
+        $t=strIdx(108);
         echo "<a title=\"$t\" id=\"menu5\" href=\"stats-h-gas.php\">
         <span class=\"fa-layers fa-gw frame-1-mid $m5\">
             <i class=\"fas fa-signal\" data-fa-transform=\"grow-18\"></i>
@@ -120,8 +120,8 @@ function page_menu($id) {
     }
 
     // watermeter
-    $t=strIdx(109);
     if ( config_read( 102 ) == 1 ) {
+        $t=strIdx(109);
         echo "<a title=\"$t\" id=\"menu9\" href=\"watermeter-h.php\">
         <span class=\"fa-layers fa-gw frame-1-mid $m9\">
             <i class=\"fas fa-signal\" data-fa-transform=\"grow-18\"></i>
@@ -131,8 +131,8 @@ function page_menu($id) {
     }
 
     // verwarming
-    $t=strIdx(110);
     if ( config_read(46) == 1 ) { 
+        $t=strIdx(110);
         echo "<a title=\"$t\" id=\"menu7\" href=\"verwarming-a.php\">
         <span class=\"fa-layers fa-gw frame-1-mid $m7\">
             <i class=\"fas fa-home\" data-fa-transform=\"grow-13 right-7\"></i>
@@ -142,8 +142,8 @@ function page_menu($id) {
     }
 
     // kosten overzicht
-    $t=strIdx(111);
     if ( config_read(21) == 1 ) {
+        $t=strIdx(111);
         echo "<a title=\"$t\" id=\"menu4\" href=\"kosten-d.php\">
                     <span class=\"fa-layers fa-gw frame-1-mid $m4\">
                         <i class=\"fas fa-euro-sign\" data-fa-transform=\"grow-18 left-2\"></i>
@@ -152,8 +152,8 @@ function page_menu($id) {
     }
     
     // meterstanden
-    $t=strIdx(112);
     if ( config_read(62) == 1 ) {
+        $t=strIdx(112);
         echo "<a title=\"$t\" id=\"menu8\" href=\"meterreadings-d-kwh.php\">
                 <span class=\"fa-layers fa-gw frame-1-mid $m8\">
                     <i class=\"fas fa-pager\" data-fa-transform=\"grow-18\"></i>
@@ -162,8 +162,8 @@ function page_menu($id) {
     }
 
     // fase informatie.
-    $t=strIdx(113);
     if ( config_read(61) == 1 ) {
+        $t=strIdx(113);
         echo "<a title=\"$t\" id=\"menu10\" href=\"fase-a-home.php\">
             <span class=\"fa-layers fa-gw frame-1-mid $m10\">
                 <i class=\"far fa-circle\" data-fa-transform=\"grow-18\"></i>
@@ -174,18 +174,19 @@ function page_menu($id) {
         </a>"."\n";
     }
 
-
     // statistics 
-    $t=ucfirst(strIdx(737));
-    echo "<a title=\"$t\" id=\"menu13\" href=\"statistics.php\">
-        <span class=\"fa-layers frame-1-mid $m13\">
-            <i class=\"fa-solid fa-chart-column\" data-fa-transform=\"grow-18\"></i>
-        </span>
-    </a>"."\n";
+    if ( config_read(228) == 1 ) {
+        $t=ucfirst(strIdx(737));
+        echo "<a title=\"$t\" id=\"menu13\" href=\"statistics.php\">
+            <span class=\"fa-layers frame-1-mid $m13\">
+                <i class=\"fa-solid fa-chart-column\" data-fa-transform=\"grow-18\"></i>
+            </span>
+        </a>"."\n";
+    }
 
     // informatie pagina
-    $t=ucfirst(strIdx(114));
     if ( config_read(22) == 1 ) {
+        $t=ucfirst(strIdx(114));
         echo "<a title=\"$t\" id=\"menu3\" href=\"info.php\">
                     <span class=\"fa-layers frame-1-mid $m3\">
                         <i class=\"fas fa-info-circle\" data-fa-transform=\"grow-18\"></i>
@@ -194,8 +195,8 @@ function page_menu($id) {
     }
     
     // tariff page
-    $t=strIdx(115);
     if($localip == True or $noInetCheck == True){
+        $t=strIdx(115);
         echo "<a  title=\"$t\" id=\"menu2\" href=\"config-tarief.php\">
                     <span class=\"fa-layers frame-1-bot $m2\">
                         <i class=\"fas fa-wrench\" data-fa-transform=\"grow-18\"></i>

@@ -7,6 +7,7 @@ import time
 import psutil
 import platform
 import string
+import os
 
 ####################################################################
 # get Rpi CPU information                                          #
@@ -57,18 +58,23 @@ def get_cpu_info():
             if 'Serial' in line:
                     result['Serial'] = line.split(':')[1].strip()
 
+            if 'Model' in line:
+                    result['Hardware'] = line.split(':')[1].strip()
+            if 'model name' in line:
+                    result['Hardware'] = line.split(':')[1].strip()
+            if 'cpu family' in line:
+                    result['Revision'] = line.split(':')[1].strip()
+
         #model = list(open('/proc/device-tree/model', 'r'))
         model = {0:'Container'}
-        result['Hardware'] = 'Container'
-        result['Revision'] = '1'
-        result['Serial'] = '-'
         clean_str = "".join(filter( lambda x: x in string.printable, model[0] ))
         result['Pi-model'] = clean_str
 
         # Bookworm used other way give CPU info 
         if( len(result['Hardware']) == 0 ):
-            compatible = list(open('/proc/device-tree/compatible'))
-            result['Hardware']  = "".join(filter( lambda x: x in string.printable, str(compatible[0]).split(",")[2] ))
+            result['Hardware'] = 'Container'
+            #compatible = list(open('/proc/device-tree/compatible'))
+            #result['Hardware']  = "".join(filter( lambda x: x in string.printable, str(compatible[0]).split(",")[2] ))
 
 
     except Exception as e:
@@ -113,13 +119,16 @@ def get_disk_pct_used( path ): #180ok
 def get_system_uptime( flog=None ): #180ok
     #flog.setLevel(logging.DEBUG)
     try:
-        proc = subprocess.Popen(['/bin/cat','/proc/uptime'], stdout=subprocess.PIPE)
-        tmp = proc.stdout.read().decode('utf-8')
-        #secpassed = long(tmp.split()[0].split('.',1)[0])
-        secpassed = int(tmp.split()[0].split('.',1)[0])
-        #secpassed = secpassed + 180000
+#        proc = subprocess.Popen(['/bin/cat','/proc/uptime'], stdout=subprocess.PIPE)
+#        tmp = proc.stdout.read().decode('utf-8')
+#        #secpassed = long(tmp.split()[0].split('.',1)[0])
+#        secpassed = int(tmp.split()[0].split('.',1)[0])
+#        #secpassed = secpassed + 180000
+        stat = os.stat('/proc/1/status')
+        start_time = stat.st_mtime  # or st_ctime
+        secpassed = time.time() - start_time
         days = int(secpassed/86400)
-        flog.debug(inspect.stack()[0][3]+" raw secs ="+str(tmp)+" secs. cleaned="+str(secpassed)+" dagen verstreken="+str(days) )
+#        flog.debug(inspect.stack()[0][3]+" raw secs ="+str(tmp)+" secs. cleaned="+str(secpassed)+" dagen verstreken="+str(days) )
         timestr = ''
         if days > 1:
             timestr =  str(days)+  " dagen "

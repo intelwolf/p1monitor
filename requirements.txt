@@ -1,0 +1,47 @@
+# Core dependencies
+beautifultable
+certifi
+cffi
+chardet
+colorzero
+dropbox
+future
+gpiozero
+gunicorn
+idna
+iso8601
+
+# MQTT and IoT
+paho-mqtt
+pigpio
+rpi-lgpio
+
+# System utilities
+psutil
+pyserial
+
+# Cryptography
+pycparser
+pycryptodome
+
+# Scheduling and cron
+python-crontab
+python-dateutil
+pythoncrc
+
+# Date/Time
+pytz
+
+# Data formats
+PyYAML
+xlsxwriter
+
+# HTTP
+requests
+urllib3
+
+# Build tools
+setuptools
+
+# Hardware interface
+spidev

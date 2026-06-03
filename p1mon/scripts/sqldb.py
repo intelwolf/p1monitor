@@ -360,6 +360,8 @@ class configDB():
 
         self.insert_rec( "insert or ignore into " + table + " values ( '227','0-2:24.2.1'       ,'Code van watermeter in het P1 telegram.')")
 
+        self.insert_rec("insert or ignore into " + table + " values ( '228','1'                 ,'statistiek zichtbaar 1/0)')")
+
 
         # fix typo's from versions higer then 0.1.5
         sql_update = "update " + table + " set label ='Publieke dynamische DNS naam (FQDN).' where id=150"
