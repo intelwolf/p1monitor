@@ -44,6 +44,7 @@ def get_os_timestamp(flog=None):
 
     return datetime_str, datetime_utc
 
+
 #####################################################
 # return the str timestamp and UTC seconds from the #
 # internet                                          #
@@ -53,9 +54,13 @@ def get_inet_timestamp(flog=None):
         url = const.INTERNET_TIME_URL
         if ( flog != None ):
             flog.debug(inspect.stack()[0][3]+": API URL "+url)
-        output = json.loads( urllib.request.urlopen(url).read().decode('utf-8') )
 
-        datetime_str = output['dateTime'][:19].replace("T"," ")
+        output = json.loads( urllib.request.urlopen(url).read().decode('utf-8') )
+        
+        if ( flog != None ):
+            flog.debug(inspect.stack()[0][3]+": API URL output" +  str(output) )
+
+        datetime_str = output['datetime'][:19].replace("T"," ")
 
         date_object = datetime.datetime.strptime( datetime_str, "%Y-%m-%d %H:%M:%S" )
         datetime_utc = int(datetime.datetime.timestamp(date_object))

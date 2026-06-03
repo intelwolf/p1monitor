@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# Exit on error for better debugging
+set -e
+
 if [ ! -f /var/tmp/.firstrun ]; then
     echo "Modifying scripts.."
-
+    
     # Combine multiple sed operations on same file
     sed -i \
         -e "s/\$PRG_PATH\$PRG18/#&/" \
@@ -11,28 +14,27 @@ if [ ! -f /var/tmp/.firstrun ]; then
         -e "s/sudo renice/#&/" \
         -e 's/PRG14 2>\&1 /PRG14 \&/' \
         /p1mon/scripts/p1mon.sh
-
+    
     # Single sed for P1Watchdog.py
     sed -i "s/crontab_lib.set_crontab_logcleaner/pass #&/" /p1mon/scripts/P1Watchdog.py
-
+    
     # Check thermal zone
     if [ ! -f /sys/class/thermal/thermal_zone0/temp ]; then
         echo "Disable CPU temperature check"
         sudo sed -i "s/^ *get_cpu_temperature/#&/" /p1mon/scripts/P1Watchdog.py
     fi
-
+    
     # Mimic local gunicorn
     mkdir -p /p1mon/p1monenv/bin
     touch /p1mon/p1monenv/bin/activate
     ln -sf /usr/local/bin/gunicorn /p1mon/p1monenv/bin/gunicorn
-
+    
     # Timezone configuration
     if [ -n "$TZ" ]; then
-
         sudo ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
         sudo dpkg-reconfigure -f noninteractive tzdata
     fi
-
+    
     # Proxy path configuration
     if [ -n "$PROXYPATH" ]; then
         echo "Setting reverse proxy configurations"
@@ -42,25 +44,25 @@ if [ ! -f /var/tmp/.firstrun ]; then
         sudo sed -i 's/"\/api/".\/api/' /p1mon/www/util/*.php
         sudo sed -i "s|PROXY_PATH_REPLACE|${PROXYPATH}|" /etc/nginx/sites-enabled/default
     fi
-
+    
     # Socat configuration
     if [ -n "$SOCAT_CONF" ]; then
         echo "Setting socat option file"
         echo "OPTIONS=$SOCAT_CONF" | sudo tee /etc/default/socat > /dev/null
         echo '* * * * * /p1mon/scripts/socat_check.sh >> /var/log/socat.log' | sudo crontab -
     fi
-
+    
     # Logrotate configuration
     if [ -n "$LOGROTATE" ]; then
         sudo sed -i "s/daily/${LOGROTATE}/" /etc/p1monitor
         sudo mv /etc/p1monitor /etc/logrotate.d/
     fi
-
+    
     # Crontab addition
     if [ -n "$CRONTAB" ]; then
         { crontab -l 2>/dev/null || true; cat "$CRONTAB"; } | crontab -
     fi
-
+    
     sudo chown -R p1mon:p1mon /p1mon/mnt /p1mon/data
     touch /var/tmp/.firstrun
 fi
@@ -92,7 +94,5 @@ echo "Writing cron"
 # On SIGTERM stop services
 trap "/p1mon/scripts/p1mon.sh stop; exit 0" SIGTERM
 
-# Keep container running and wait for signals
-while true; do
-    sleep 60 & wait $!
-done
+# Keep container running
+exec tail -f /dev/null

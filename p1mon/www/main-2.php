@@ -56,9 +56,11 @@ var p1TelegramMaxSpeedIsOn      = <?php if ( config_read( 154 ) == 1 ) { echo "t
 var hideWaterUi                 = <?php if ( config_read( 157 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hideGaSUi                   = <?php if ( config_read( 158 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
 var hidePeakKw                  = <?php if ( config_read( 206 ) == 1 ) { echo "true;"; } else { echo "false\n"; } ?>
-var water_pulse                 = 0
-var water_smartmeter            = 0
-var water_timestamp             = ''
+var water_pulse_meter           = 0;
+var water_smartmeter_meter      = 0;
+var water_pulse_day             = 0;
+var water_smartmeter_day        = 0;
+var water_timestamp             = '';
 
 const power_text                = "<?php echo strIdx( 361 );?>"
 const gas_consumend_text        = "<?php echo strIdx( 367 );?>"
@@ -67,35 +69,39 @@ function readJsonApiWaterHistoryDay( cnt ){
      $.getScript( "/api/v2/watermeterdigital/day/2?limit=" + cnt, function( data, textStatus, jqxhr ) {
         try {
             var jsondata = JSON.parse(data); 
-            water_smartmeter = jsondata[0][4]
-            setWaterValue()
-            water_timestamp = jsondata[0][0]. substr( 0, 10 )
+            water_smartmeter_meter = jsondata[0][5];
+            water_smartmeter_day   = jsondata[0][4];
+            water_timestamp = jsondata[0][0]. substr( 0, 10 );
+            setWaterValue();
         } catch(err) {}
     });
     $.getScript( "/api/v2/watermeterdigital/day/1?limit=" + cnt, function( data, textStatus, jqxhr ) {
         try {
             var jsondata = JSON.parse(data); 
-            water_pulse = jsondata[0][4]
-            setWaterValue()
-            water_timestamp = jsondata[0][0].substr( 0, 10 )
+            water_pulse_meter = jsondata[0][5];
+            water_pulse_day   = jsondata[0][4];
+            water_timestamp = jsondata[0][0].substr( 0, 10 );
+            setWaterValue();
         } catch(err) {}
     });
 }
 
 function setWaterValue(){
-    var total =  water_pulse + water_smartmeter
-    if ( total == 0 ) {
+    var total_meter =  water_pulse_meter + water_smartmeter_meter
+    if ( total_meter == 0 ) {
             $('#verbruikWater').text( padXX( 0 ,5, 3 ) );
     } else {
-        $('#verbruikWater').text( padXX( total ,5, 3 ) );
+        $('#verbruikWater').text( padXX( total_meter ,5, 3 ) );
         // day value 
         if ( water_timestamp == moment().format('YYYY-MM-DD') ) {
-            $('#verbruikWaterDag').text( padXX( total ,8, 1 ) );
+            var total_day =  water_pulse_day + water_smartmeter_day
+            $('#verbruikWaterDag').text( padXX( total_day ,8, 1 ) );
         } else {
             $('#verbruikWaterDag').text( padXX( 0 ,8, 1 ) );
         }
     }
 }
+
 
 function readJsonApiHistoryDay(){ 
     $.getScript( "/api/v1/powergas/day?limit=1", function( data, textStatus, jqxhr ) {

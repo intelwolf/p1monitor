@@ -62,13 +62,18 @@ if ( isset(  $_GET['list'] ) ) {
 
     $id = 1;
 
+    date_default_timezone_set('Europe/Amsterdam');
+
     foreach ( glob( $dir."*.log" ) as $filename) {
+        //echo basename($filename) . " - " . date("Y-m-d H:i:s", substr(filemtime($filename), 0, 10)). "\n";;
         //echo "$filename size " . filesize( $filename ) . "\n";
-        //echo "$filename was last modified: " . date ( "Y-m-d H:i:s", filemtime($filename) );
+        //echo "$filename raw: " . filemtime($filename) ."\n";
+        //echo "$filename was last modified: " . date ( "Y-m-d H:i:s", filemtime($filename) . "\n");
         //echo basename( $filename );
         
         if ( filesize( $filename ) > 0 ) { // when the file is empty, skip it.
-            $tmp_arr = array( "id" => $id, "filename" => basename( $filename ), "filesize" => filesize( $filename ), "timestamp" => date( "Y-m-d H:i:s", filemtime($filename) ) );
+            //$tmp_arr = array( "id" => $id, "filename" => basename( $filename ), "filesize" => filesize( $filename ), "timestamp" => date( "Y-m-d H:i:s", filemtime($filename) ) );
+            $tmp_arr = array( "id" => $id, "filename" => basename( $filename ), "filesize" => filesize( $filename ), "timestamp" =>  date("Y-m-d H:i:s", substr(filemtime($filename), 0, 10)) );
             $id++;
             array_push( $files_arr, $tmp_arr);
         }

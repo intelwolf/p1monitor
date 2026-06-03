@@ -40,21 +40,23 @@
 # versie 3.0.1 Nginx opstart probleem /var/lib/nginx/proxy
 # versie 3.1.0 added statistic option
 # versie 3.2.0 a lot of fixes and MQTT fixes.
-# versie 3.3.0 Added Digital watermeter and corresponding changes
+# versie 3.3.0 Added Digital watermeter and corresponding changes.
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
 P1_VERSIE                       = "3.3.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "3"           # standaard op 0, wordt verhoogd als op een image een patch wordt toegevoegd
-P1_SERIAL_VERSION               = "20260107"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_PATCH_LEVEL                  = "6"           # standaard op 0, wordt verhoogd als op een image een patch wordt toegevoegd
+P1_SERIAL_VERSION               = "20260601"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'
 # NEW DB FILE NAMES START WITH A NUMBER THAT MUST BE UNIQUE 
 # DBX_ = DROPBOX
-INTERNET_TIME_URL               ="https://timeapi.io/api/time/current/zone?timeZone=Europe%2FAmsterdam"
+#INTERNET_TIME_URL               ="https://timeapi.io/api/time/current/zone?timeZone=Europe%2FAmsterdam"
+#INTERNET_TIME_URL               ="http://worldtimeapi.org/api/timezone/Europe/Brussels"
+INTERNET_TIME_URL                ="https://time.now/developer/api/timezone/Europe/Amsterdam"
 ZTATZ_P1_VERSION_URL            ="https://p1-monitor.nl/p1monitor/version.json" # V3.3.0 patch 3
 ZTATZ_P1_VERSION_MSG_VERSION    ='MSG_VERSION'
 ZTATZ_P1_VERSION_TIMESTAMP      ='TIMESTAMP_LOCAL'

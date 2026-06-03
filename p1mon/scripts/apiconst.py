@@ -216,7 +216,7 @@ JSON_API_RM_TMPRTR_IN       = 'ROOM_TEMPERATURE_IN'                  # room temp
 JSON_API_RM_TMPRTR_OUT      = 'ROOM_TEMPERATURE_OUT'                 # room temperature output,raw data not processed
 JSON_API_REC_PRCSSD         = 'RECORD_IS_PROCESSED'                  # record is processed into the database
 JSON_API_NET_CNSMPTN_W      = 'CONSUMPTION_NET_W'                    # the net consumption of power (W), minus if any power produced, -value means power production exceeds power consumption.
-JSON_API_CNSMPTN_WATER     = 'CONSUMPTION_WATER_L'                   # consumption of water in Liters.
+JSON_API_CNSMPTN_WATER      = 'CONSUMPTION_WATER_M3'                 # consumption of water in M3.
 
 JSON_API_STTS_ID            = 'STATUS_ID'                            # unique record ID
 JSON_API_STTS               = 'STATUS'                               # the status of the ID/label.
@@ -376,7 +376,7 @@ EXPL_API_RM_TMPRTR_IN       = 'Room temperature input,raw data not processed in 
 EXPL_API_RM_TMPRTR_OUT      = 'Room temperature output,raw data not processed in degrees Celsius.'
 EXPL_API_REC_PRCSSD         = 'Record is processed into the database. 1 is done, 0 is to do.'
 EXPL_API_NET_CNSMPTN_W      = 'the net consumption of power (W), minus if any power produced, -value means power production exceeds power consumption.'
-EXPL_API_CNSMPTN_WATER      = 'Consumption of water in Liters.'
+EXPL_API_CNSMPTN_WATER_M3   = 'Consumption of water in M3'
 
 EXPL_API_STTS_ID            = 'Unique record ID'
 EXPL_API_STTS               = 'The status of the ID/label.'
@@ -676,14 +676,12 @@ HELP_ROUTE_SMARTMETER_JSON = {
         },
         { 
            "name" : JSON_API_CNSMPTN_WATER,
-           "description" : EXPL_API_CNSMPTN_WATER,
+           "description" : EXPL_API_CNSMPTN_WATER_M3,
            "type": TYPE_JSON_NUMBER_INTEGER
         }
     ]
 }
 
-
-# Datetime
 HELP_ROUTE_DATETIME = {
     "api_version"       : 1,
     "api_status"        : API_STATUS_PRODUCTION,
@@ -718,6 +716,30 @@ HELP_ROUTE_DATETIME = {
          },
     ]
 }
+
+
+"""
+HELP_ROUTE_DATETIME = {
+    "api_version"       : 1,
+    "api_status"        : API_STATUS_PRODUCTION,
+    "api_options"       : API_OPTION_JSON,
+    #"api_description"   : "Display the current date and time of the operating system (rpi) and of the Internet in the format YYYY-DD-MM HH:M:SS and in the Epoc format (seconds) elapsed since January 1 1970.",
+    "api_description"   : "Display the current date and time of the operating system (rpi) in the format YYYY-DD-MM HH:M:SS and in the Epoc format (seconds) elapsed since January 1 1970.",
+    "api_usage"         : "<ip>" + ROUTE_DATETIME + "?" + API_PARAMETER_JSON_TYPE + "=object",
+    "fields": [
+        {
+           "name" : JSON_API_SYSTEM_DT,
+           "description" : EXPL_API_SYSTEM_DT,
+           "type": TYPE_JSON_STRING
+         },
+         { 
+           "name" : JSON_API_SYSTEM_DT_UTC,
+           "description" : EXPL_API_SYSTEM_DT_UTC,
+           "type": TYPE_JSON_INTEGER
+         },
+    ]
+}
+"""
 
 # help data
 # SQL AS Reference
