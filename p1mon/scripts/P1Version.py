@@ -9,19 +9,6 @@ import time
 
 OUTPUT_FILE = '/p1mon/var/version.json'
 
-
-"""
-    {
-    "MSG_VERSION": 1,
-    "TIMESTAMP_LOCAL": "2024-12-28 12:43:55",
-    "P1MON_VERSION":   "2.4.3",
-    "SERIAL_VERSION":  20241228,
-    "VERSION_TEXT":    "December 2024",
-    "DOWNLOAD_URL":    "https://www.ztatz.nl/p1-monitor-download-202412-v2-4-3/"
-    }
-"""
-
-
 # DATA set
 version_dict = {
     "MSG_VERSION":          2,

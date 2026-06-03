@@ -748,11 +748,7 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into "+table+\
         " values ( '92','onbekend','Serial device dat gebruikt wordt:',0)")
 
-        # removed in version 2.4.0
-        # can be reused in future versions
-        # used for status of sql auto import
-        self.insert_rec("insert or ignore into "+table+\
-        " values ( '93','onbekend','',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '93','onbekend','',0)")
 
         self.insert_rec("insert or ignore into "+table+\
         " values ( '94','onbekend','',0)")

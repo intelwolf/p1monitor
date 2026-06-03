@@ -50,13 +50,13 @@ DEFAULT_SERIAL_PORTS = [ "/dev/ttyUSB0" , "/dev/ttyUSB1" ]
 DUMMY_1SEC_PROCCESSING      = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 DUMMY_3PHASE_DATA           = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 DUMMY_LARGE_CONSUMPTION     = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_KWH_PEAK              = False ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_WATER                 = False   ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_KWH_PEAK              = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_WATER                 = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 
 
 ###################################################################################
 # zet deze op p1_telegram_test_lib.NO_GAS_TEST om de test uit te zetten.          #
-# LET OP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                  #
+# LET OP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                 #
 ###################################################################################
 #gas_test_mode=p1_telegram_test_lib.DUMMY_GAS_MODE_2421
 gas_test_mode=p1_telegram_test_lib.NO_GAS_TEST

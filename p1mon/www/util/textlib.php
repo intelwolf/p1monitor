@@ -2734,7 +2734,7 @@ Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'arge
     'liter verbruikt digital','liter consumed digital','litre consommé digital'
 ),
 /* 773 */ array(
-    '','',''
+    'besturingssysteem beschrijving','operating system description',"description système d'exploitation"
 ),
 /* 774 */ array(
     '','',''

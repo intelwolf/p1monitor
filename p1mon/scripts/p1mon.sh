@@ -253,7 +253,7 @@ function process_kill() {
         else
             echo "[*] Failsave kill gestart, dit is niet normaal voor proces "$1
             echo "[*] ------------------------------------------------------------"
-            ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' | xargs sudo kill -s SIGKILL
+            ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' | xargs sudo kill -9
         fi
     fi
 }
@@ -281,7 +281,7 @@ stop() {
     process_kill $PRG6 4
 
     # DB stop
-    process_kill $PRG2 12 
+    process_kill $PRG2 16 # 4.0.0 changend from 12 16
 
     # Watchdog stop
     process_kill $PRG3 2

@@ -297,10 +297,7 @@ function readJsonApiStatus(){
                     $('#db19v').text(jsonarr[j][1]);
                     break;
                 case 93:
-                    $('#db20v').text(jsonarr[j][1]);
-                    break;
-                case 94:
-                    $('#db21v').text(jsonarr[j][1]);
+                    $('#sy12v').text(jsonarr[j][1]);
                     break;
                 case 95:
                     $('#pr7v').text(jsonarr[j][1]);
@@ -814,10 +811,6 @@ $(function () {
                     <div id="watermeter">
                         <div class="text-9"><?php echo strIdx( 569 );?>:</div><div id="db19v" class="text-9"></div><br>
                     </div>
-                    <!--
-                    <div class="text-9"><?php echo strIdx( 570 );?>:</div><div id="db20v" class="text-9"></div><br>
-                    <div class="text-9"><?php echo strIdx( 571 );?>:</div><div id="db21v" class="text-9"></div><br>
-                    -->
                     <div class="text-9"><?php echo strIdx( 572 );?>:</div><div id="db22v" class="text-9"></div><br>
                     <div id="powerProductionS0">
                         <div class="text-9"><?php echo strIdx( 573 );?>:</div><div id="db23v" class="text-9"></div><br>
@@ -858,6 +851,7 @@ $(function () {
                   <div id="systeem" class="frame-2-bot">
                     <div class="text-9"><?php echo strIdx( 586 );?>:</div><div id="sy1v" class="text-9"></div><br>
                     <div class="text-9"><?php echo strIdx( 587 );?>:</div><div id="sy2v" class="text-9"></div><br>
+                    <div class="text-9"><?php echo strIdx( 773 );?>:</div><div id="sy12v" class="text-9"></div><br>
                     <div class="text-9"><?php echo strIdx( 588 );?>:</div><div id="sy3v" class="text-9"></div><br>
                     <div class="text-9"><?php echo strIdx( 589 );?>:</div><div id="sy4v" class="text-9"></div><br>
                     <div class="text-9"><?php echo strIdx( 590 );?>:</div><div id="sy10v" class="text-9"></div><br>

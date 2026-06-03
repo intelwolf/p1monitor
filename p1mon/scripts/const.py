@@ -41,14 +41,15 @@
 # versie 3.1.0 added statistic option
 # versie 3.2.0 a lot of fixes and MQTT fixes.
 # versie 3.3.0 Added Digital watermeter and corresponding changes.
+# versie 4.0.0 upgrade van Bookworm to Trixie
 
 ###########################################
 # onderstaande drie versie constanten bij #
 # elke release aanpassen                  #
 ###########################################
-P1_VERSIE                       = "3.3.0"       # semantische versie nummers.
-P1_PATCH_LEVEL                  = "6"           # standaard op 0, wordt verhoogd als op een image een patch wordt toegevoegd
-P1_SERIAL_VERSION               = "20260601"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_VERSIE                       = "4.0.0"       # semantische versie nummers.
+P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt toegevoegd
+P1_SERIAL_VERSION               = "20260603"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'

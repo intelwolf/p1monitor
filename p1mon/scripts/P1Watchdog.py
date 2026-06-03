@@ -338,6 +338,7 @@ def MainProg():
 
             ## besturingssysteem versie
             rt_status_db.strset( system_info_lib.get_os_version(), 22, flog )
+            rt_status_db.strset( system_info_lib.get_os_description(), 93, flog )
             ## Python versie die we gebruiken.
             rt_status_db.strset( system_info_lib.get_python_version(), 25, flog )
             ## update the NTP network time status.
@@ -414,8 +415,6 @@ def DiskRestore(): #180ok
         give_return_value=True,
         flog=flog 
     )
-
-
 
 ##################################################
 # update the aggregated statistics configuration #
@@ -1556,7 +1555,7 @@ def get_cpu_temperature(): #2.0.0
 
 ########################################################
 # checks there is a new P1 sofware version available   #
-# by an https url request to www.ztatz.nl              #
+# by an https url request to www.p1-monitor.nl         #
 ########################################################
 def check_for_new_p1monitor_version(forced=False):
 
@@ -1596,7 +1595,6 @@ def check_for_new_p1monitor_version(forced=False):
         socket.setdefaulttimeout( 5 )
 
         url = const.ZTATZ_P1_VERSION_URL
-        #url =  "https://www.ztatz.nl/p1monitor/version-test.json"
         request = urllib.request.Request( url + "?" + const.P1_VERSIE  )
         response = urllib.request.urlopen(request)
         data = json.loads( response.read().decode('utf-8') )

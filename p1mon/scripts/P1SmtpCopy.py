@@ -32,7 +32,7 @@ rt_status_db = sqldb.rtStatusDb()
 smtp_para = {
     'mailuser':'',
     'mailuserpassword':'',
-    'mailserver':'',                # smtp.gmail.com / mail.ztatz.nl
+    'mailserver':'',                # smtp.gmail.com
     'mailserverport_ssl':465,
     'mailserverport_starttls':587,
     'mailserverport_plaintext':25,
@@ -109,8 +109,8 @@ def Main(argv):
 
     # send a test mail with default value
     if args.testmail != None:
-        smtp_para['messagetext'] = "Dit is een test mail van de P1 monitor en mag genegeert worden. De mail is op " +  makeLocalTimeString.makeLocalTimeString() + " verzonden." + \
-        "\n\n" + quote_lib.get_quote() + "\n\nBezoek https://www.ztatz.nl voor meer informatie over de P1 monitor." 
+        smtp_para['messagetext'] = "Dit is een test mail van de P1 monitor en mag genegeerd worden. De mail is op " +  makeLocalTimeString.makeLocalTimeString() + " verzonden." + \
+        "\n\n" + quote_lib.get_quote() + "\n\nBezoek https://www.p1-monitor.nl voor meer informatie over de P1 monitor." 
         smtp_para['subject']     = "P1 monitor test email van " + makeLocalTimeString.makeLocalTimeString() + "."
 
     if args.mailuser != None:

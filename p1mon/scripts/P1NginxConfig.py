@@ -115,7 +115,7 @@ server {
 """
 
 base_80 =\
-""" 
+r""" 
 server {
 
 ###P1HEADER###
