@@ -8,21 +8,23 @@ import calendar
 import os
 import grp
 import stat
-#import commands
 import re
 import sys
-import string
 import psutil
 import logging
-import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pwd import getpwnam
 
 
 # the number of seconds from 1970-01-01
+#def getUtcTime():
+#    now = datetime.utcnow()
+#    return int((now - datetime(1970, 1, 1)).total_seconds())
+
+# the number of seconds from 1970-01-01
 def getUtcTime():
-    now = datetime.utcnow()
-    return int((now - datetime(1970, 1, 1)).total_seconds())
+    epoch_time = int(datetime.now(timezone.utc).timestamp())
+    return epoch_time 
 
 def restart_program():
     """Restarts the current program, with file objects and descriptors

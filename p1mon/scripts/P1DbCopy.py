@@ -136,7 +136,7 @@ def makeBackupFileSet( filePath ):
 
     ####################################
     # deactivated in version 1.7.0.    #
-    # limited value, mayby used in the #
+    # limited value, maybe used in the #
     # future.                          #
     ####################################
 

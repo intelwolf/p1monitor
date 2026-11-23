@@ -7,11 +7,11 @@ import day_values_lib
 import filesystem_lib
 import inspect
 import logger
-from PyCRC.CRC16 import CRC16
+from PyCRC.CRC16 import CRC16 # type: ignore
 import subprocess
 import systemid
 import sqldb
-import serial
+import serial # type: ignore
 import signal
 import sys
 import os
@@ -50,13 +50,13 @@ DEFAULT_SERIAL_PORTS = [ "/dev/ttyUSB0" , "/dev/ttyUSB1" ]
 DUMMY_1SEC_PROCCESSING      = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 DUMMY_3PHASE_DATA           = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 DUMMY_LARGE_CONSUMPTION     = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_KWH_PEAK              = False ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
-DUMMY_WATER                 = False   ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_KWH_PEAK              = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
+DUMMY_WATER                 = False  ######### DEZE OP FALSE ZETTEN BIJ PRODUCTIE CODE!!!!
 
 
 ###################################################################################
 # zet deze op p1_telegram_test_lib.NO_GAS_TEST om de test uit te zetten.          #
-# LET OP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                  #
+# LET OP! CRC CONTROLE UIT ZETTEN VOOR HET TESTEN                                 #
 ###################################################################################
 #gas_test_mode=p1_telegram_test_lib.DUMMY_GAS_MODE_2421
 gas_test_mode=p1_telegram_test_lib.NO_GAS_TEST
@@ -69,8 +69,10 @@ ser1.bytesize = 8
 ser1.parity   = "N"
 ser1.stopbits = 1
 
-ser1.xonxoff = 0 # changed from version 0.9.2 onwards
-ser1.rtscts  = 0
+#ser1.xonxoff = 0 # changed from version 0.9.2 onwards
+ser1.xonxoff = False # changed from version 4.2.0 onwards
+#ser1.rtscts  = 0
+ser1.rtscts  = False # changed from version 4.2.0 onwards#
 ser1.timeout = 1
 ser1.port    = DEFAULT_SERIAL_PORTS[0]
 
@@ -477,7 +479,7 @@ def read_custom_serial_device():
     global custom_serial_port_list
 
     try:
-        _id, device, _label = config_db.strget( 197, flog )
+        _id, device, _label = config_db.strget( 197, flog ) # type: ignore
         custom_serial_port_list.clear()
         if len( str( device ).strip() ) > 0:
             custom_serial_port_list.append( str( device ))
@@ -539,7 +541,7 @@ def check_serial():
                 return True
 
             except Exception as e:
-                flog.warning(inspect.stack()[0][3]+": serial port niet te openen ("+ser1.port+") is de USB serial kabel aangesloten? melding:"+str(e.args) )
+                flog.warning(inspect.stack()[0][3] + ": serial port niet te openen (" + str(ser1.port) + ") is de USB serial kabel aangesloten? melding:" + str(e.args) )
 
         else:
             flog.debug( inspect.stack()[0][3] + ": serial port " + tty + " is niet aanwezig" )
@@ -554,7 +556,7 @@ def update_data_set( data_set=None, status=None, phase_db_record=None, flog=None
 
     if p1_port_shared_lib.record_sanity_check( data_set=data_set, status=status, flog=flog ) == True:
 
-        rt_status_db.strset( status['p1_time_delta'] , 125 , flog )
+        rt_status_db.strset( status['p1_time_delta'] , 125 , flog ) # type: ignore
 
         p1_port_shared_lib.insert_db_serial_record( data_set=data_set, status=status, dbstatus=rt_status_db, dbserial=e_db_serial, flog=flog )
 
@@ -577,15 +579,15 @@ def update_data_set( data_set=None, status=None, phase_db_record=None, flog=None
             sysid=system_id
         )
 
-        status['dbx_utc_ok_timestamp'] = p1_port_shared_lib.write_p1_json_dbx_folder( 
+        status['dbx_utc_ok_timestamp'] = p1_port_shared_lib.write_p1_json_dbx_folder(  # type: ignore
             configdb=config_db,
             data=json_data,
             flog=flog,
             sysid=system_id,
-            utc_ok_timestamp=status['dbx_utc_ok_timestamp']
+            utc_ok_timestamp=status['dbx_utc_ok_timestamp'] # type: ignore
         )
 
-        if status['gas_present_in_serial_data'] == True:
+        if status['gas_present_in_serial_data'] == True: # type: ignore
             p1_port_shared_lib.instert_db_gas_value( data_set=data_set, status=p1_status, statusdb=rt_status_db, flog=flog )
 
         phase_shared_lib.write_phase_status_to_db( phase_db_rec=phase_db_record, statusdb=rt_status_db, flog=flog )
@@ -593,7 +595,7 @@ def update_data_set( data_set=None, status=None, phase_db_record=None, flog=None
         p1_port_shared_lib.clear_data_buffer( buffer=phase_db_record )
 
     else:
-        flog.error(inspect.stack()[0][3]+": p1 bericht verworpen wegens fout.")
+        flog.error(inspect.stack()[0][3]+": p1 bericht verworpen wegens fout.") # type: ignore
     #flog.setLevel(logging.INFO)
 
 def check_serial_db_config_settings():
@@ -615,7 +617,7 @@ def check_serial_db_config_settings():
     updateNeeded = False
 
     try:
-        _id, is_active, _label = config_db.strget( 200, flog )
+        _id, is_active, _label = config_db.strget( 200, flog ) # type: ignore
         #print( "#0 config socat_is_active = " + str(is_active) + " socat_is_actived = " + str(socat_is_actived))
 
         if int(is_active) != socat_is_actived:
@@ -682,7 +684,8 @@ def check_serial_db_config_settings():
             #    time.sleep(5) # give it some time.
 
             # added in version > 1.6.0 
-            ser1.flushInput()
+            #ser1.flushInput()
+            ser1.flush()
 
             ser1.baudrate = int(ser_config[0][0])
 
@@ -709,7 +712,8 @@ def check_serial_db_config_settings():
                 flog.info( inspect.stack()[0][3]+": P1 poort device=" + str( custom_serial_port_list ) )
                 check_serial() # to force update of the device.
 
-            ser1.flushInput()
+           #ser1.flushInput()
+            ser1.flush()
             
     except Exception as e:
             flog.error(inspect.stack()[0][3]+": sql error(1)"+str(e))

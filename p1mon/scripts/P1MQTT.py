@@ -13,15 +13,13 @@ import sqldb
 import time 
 import os
 import process_lib
-
-import paho.mqtt.client as mqtt
-from datetime import datetime
+import datetime 
+import paho.mqtt.client as mqtt   # type: ignore
 
 from util import setFile2user, getUtcTime
 
 #const
 MQTT_PREFIX         = 'p1monitor'
-
 prgname             = 'P1MQTT'
 
 config_db           = sqldb.configDB()
@@ -51,6 +49,7 @@ mqtt_topics_powerproduction             = None
 mqtt_topics_powergas_day                = None
 mqtt_topics_cost_day                    = None
 mqtt_topics_miscellaneous               = None
+mqtt_topics_p1_telegram                 = None
 
 status_db_cache = {} # dictionary buffer that is updated periodically 
 
@@ -65,6 +64,7 @@ mqtt_para = {
     'protocol': mqtt.MQTTv311,                      # options available MQTTv31 = 3, MQTTv311 = 4 and MQTTv5 = 5 DB config index 112
     'qosglobal': 0,                                 # options are 0,1,2 QoS (Quality of Service) DB config index 113
     'smartmeterprocessedtimestamp': '',             # timestamp of latest time when the publish was performed.
+    'p1telegramprocessedtimestamp': '',             # timestamp of latest time when the publish was performed.
     'watermeterprocessedtimestamp': '',             # timestamp of latest time when the publish was performed.
     'watermeterdigitalprocessedtimestamp': '',      # timestamp of latest time when the publish was performed.
     'weatherprocessedtimestamp': '',                # timestamp of latest time when the publish was performed.
@@ -87,6 +87,7 @@ mqtt_para = {
     'costdaypublishisactive': False,                # publish on or off DB config index 177
     'miscellaneousisactive': False,                 # publish on or off DB config index 226
     'anypublishisactive': False,                    # publish on or off for all publish.
+    'p1telegrampublishisactive': False,              # publish on or off for all p1telegram.
 }
 
 mqtt_payload_smartmeter = {
@@ -235,6 +236,48 @@ mqtt_payload_miscellaneous = {
     8: str( '' ),   # Power peak 15min code 1.6.0 timestamp
 }
 
+mqtt_payload_p1_telegram = {
+    0: str( '' ),
+    1: int( 0 ),
+    2: str( '' ),  # text of telegram,
+    3: str( '' ),
+    4: str( '' ),
+    5: str( '' ),
+    6: str( '' ),
+    7: str( '' ),
+    8: str( '' ),
+    9: str( '' ),
+    10: str( '' ),
+    11: str( '' ),
+    12: str( '' ),
+    13: str( '' ),
+    14: str( '' ),
+    15: str( '' ),
+    16: str( '' ),
+    17: str( '' ),
+    18: str( '' ),
+    19: str( '' ),
+    20: str( '' ),
+    21: str( '' ),
+    22: str( '' ),
+    23: str( '' ),
+    24: str( '' ),
+    25: str( '' ),
+    26: str( '' ),
+    27: str( '' ),
+    28: str( '' ),
+    29: str( '' ),
+    30: str( '' ),
+    31: str( '' ),
+    32: str( '' ),
+    33: str( '' ),
+    34: str( '' ),
+    35: str( '' ),
+    36: str( '' )
+}
+
+
+
 # -1 used to trigger a update when starting it is a value that normally
 # never occurs 
 miscellaneous_last_status = {
@@ -256,75 +299,82 @@ def update_status_db_buffer():
 def checkActiveState():
     global mqtt_para
 
-    _id, parameter, _label = config_db.strget( 136, flog )
+    _id, parameter, _label = config_db.strget( 136, flog )  # type: ignore
     if int(parameter) == 1:
         mqtt_para['powerproductionpublishisactive'] = True
     else:
         mqtt_para['powerproductionpublishisactive'] = False
 
-    _id, parameter, _label = config_db.strget( 120, flog )
+    _id, parameter, _label = config_db.strget( 120, flog ) # type: ignore
     if int(parameter) == 1:
         mqtt_para['phasepublishisactive'] = True
     else:
         mqtt_para['phasepublishisactive'] = False
 
-    _id, parameter, _label = config_db.strget( 114, flog )
+    _id, parameter, _label = config_db.strget( 114, flog ) # type: ignore
     if int(parameter) == 1:
         mqtt_para['smartmeterpublishisactive'] = True
     else:
         mqtt_para['smartmeterpublishisactive'] = False
 
-    _id, parameter, _label = config_db.strget( 115, flog )
+    _id, parameter, _label = config_db.strget( 115, flog ) # type: ignore
     if int(parameter) == 1:
         mqtt_para['watermeterpublishisactive'] = True
     else:
         mqtt_para['watermeterpublishisactive'] = False
 
-    _id, parameter, _label = config_db.strget( 116, flog )
+    _id, parameter, _label = config_db.strget( 116, flog )  # type: ignore
     if int(parameter) == 1:
         mqtt_para['weatherpublishisactive'] = True
     else:
         mqtt_para['weatherpublishisactive'] = False
     
-    _id, parameter, _label = config_db.strget( 117, flog )
+    _id, parameter, _label = config_db.strget( 117, flog )  # type: ignore
     if int(parameter) == 1:
         mqtt_para['indoortemperaturepublishisactive'] = True
     else:
         mqtt_para['indoortemperaturepublishisactive'] = False
 
-    _id, parameter, _label = config_db.strget( 176, flog )
+    _id, parameter, _label = config_db.strget( 176, flog )  # type: ignore
     if int(parameter) == 1:
         mqtt_para['powergasdaypublishisactive'] = True
     else:
         mqtt_para['powergasdaypublishisactive'] = False
 
-    _id, parameter, _label = config_db.strget( 177, flog )
+    _id, parameter, _label = config_db.strget( 177, flog )  # type: ignore
     if int(parameter) == 1:
         mqtt_para['costdaypublishisactive'] = True
     else:
         mqtt_para['costdaypublishisactive'] = False
 
-    _id, parameter, _label = config_db.strget( 226, flog )
+    _id, parameter, _label = config_db.strget( 226, flog )  # type: ignore
     if int(parameter) == 1:
         mqtt_para['miscellaneousisactive'] = True
     else:
         mqtt_para['miscellaneousisactive'] = False
+
+    _id, parameter, _label = config_db.strget( 231, flog )  # type: ignore
+    if int(parameter) == 1:
+         mqtt_para['p1telegrampublishisactive'] = True
+    else:
+        mqtt_para['p1telegrampublishisactive'] = False
+    
     
     mqtt_para['anypublishisactive'] = (mqtt_para['smartmeterpublishisactive'] or mqtt_para['watermeterpublishisactive'] or \
-        mqtt_para['weatherpublishisactive'] or mqtt_para['indoortemperaturepublishisactive'] or mqtt_para['phasepublishisactive'] or mqtt_para['powergasdaypublishisactive'] or mqtt_para['costdaypublishisactive'] ) or mqtt_para['miscellaneousisactive']
+        mqtt_para['weatherpublishisactive'] or mqtt_para['indoortemperaturepublishisactive'] or mqtt_para['phasepublishisactive'] or mqtt_para['powergasdaypublishisactive'] or mqtt_para['costdaypublishisactive'] ) or mqtt_para['miscellaneousisactive'] or mqtt_para['p1telegrampublishisactive']
 
     #print ( mqtt_para )
     
 def setConfigFromDb():
-    global mqtt_para, mqtt_topics_smartmeter, mqtt_topics_watermeter_minute, mqtt_topics_watermeter_day, mqtt_topics_watermeterdigital_minute, mqtt_topics_watermeterdigital_day, mqtt_topics_weather, mqtt_topics_indoor_temperature, mqtt_topics_phase, mqtt_topics_powerproduction, mqtt_topics_powergas_day, mqtt_topics_cost_day, mqtt_topics_miscellaneous
+    global mqtt_para, mqtt_topics_smartmeter, mqtt_topics_watermeter_minute, mqtt_topics_watermeter_day, mqtt_topics_watermeterdigital_minute, mqtt_topics_watermeterdigital_day, mqtt_topics_weather, mqtt_topics_indoor_temperature, mqtt_topics_phase, mqtt_topics_powerproduction, mqtt_topics_powergas_day, mqtt_topics_cost_day, mqtt_topics_miscellaneous, mqtt_topics_p1_telegram
 
     try:
-        _id, parameter, _label = config_db.strget( 105, flog )
-        if parameter == None:
+        _id, parameter, _label = config_db.strget( 105, flog )  # type: ignore
+        if parameter == None: 
             parameter = ''
         mqtt_para['clientname'] = str(parameter).replace(" ", "")
        
-        _id, parameter, _label = config_db.strget( 106, flog )
+        _id, parameter, _label = config_db.strget( 106, flog )  # type: ignore
         if parameter == None:
             parameter = ''
 
@@ -332,10 +382,10 @@ def setConfigFromDb():
         if len( mqtt_para['topicprefix'] ) < 1:
             mqtt_para['topicprefix'] = 'p1monitor' # topic may not start with a / this would happen with an empty topicprefix
         
-        _id, parameter, _label = config_db.strget( 107, flog )
+        _id, parameter, _label = config_db.strget( 107, flog )  # type: ignore
         mqtt_para['brokeruser'] = str(parameter)
 
-        _id, parameter, _label = config_db.strget( 108, flog )
+        _id, parameter, _label = config_db.strget( 108, flog )  # type: ignore
         if len(parameter) > 0:
             cb = crypto_lib.CryptoBase64()
             decoded_password  = base64.standard_b64decode(cb.p1Decrypt( cipher_text=parameter, seed='mqttclpw')).decode( 'utf-8' )
@@ -344,20 +394,20 @@ def setConfigFromDb():
         else:
              mqtt_para['brokerpassword'] = ''
 
-        _id, parameter, _label = config_db.strget( 109, flog )
+        _id, parameter, _label = config_db.strget( 109, flog )  # type: ignore
         mqtt_para['brokerhost'] = str(parameter).replace(" ", "") # no whitespace in hostname or IP
 
-        _id, parameter, _label = config_db.strget( 110, flog )
+        _id, parameter, _label = config_db.strget( 110, flog )  # type: ignore
         mqtt_para['brokerport'] = int( (parameter).replace(" ", "") ) # no whitespace in port number
 
-        _id, parameter, _label = config_db.strget( 111, flog )
+        _id, parameter, _label = config_db.strget( 111, flog )  # type: ignore
         mqtt_para['brokerkeepalive'] = int( (parameter).replace(" ", "") ) # no whitespace keep alive seconds.
 
-        _id, parameter, _label = config_db.strget( 112, flog )
+        _id, parameter, _label = config_db.strget( 112, flog )  # type: ignore
         mqtt_para['protocol'] = int ( (parameter).replace(" ", "") )# no whitespace number of version 
         mqtt_para['protocol'] = 4
        
-        _id, parameter, _label = config_db.strget( 113, flog )
+        _id, parameter, _label = config_db.strget( 113, flog )  # type: ignore
         mqtt_para['qosglobal'] = int( (parameter).replace(" ", "") ) # no whitespace QoS number
 
         flog.debug( inspect.stack()[0][3] + ": mqtt_para = " + str(mqtt_para) )
@@ -366,6 +416,46 @@ def setConfigFromDb():
         flog.warning( inspect.stack()[0][3]+ ": DB configuratie heeft een probeem -> " + str(e.args[0]) )
 
     # update the topics
+    mqtt_topics_p1_telegram = {
+        0:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + apiconst.JSON_TS_LCL.lower(),
+        1:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
+        2:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + apiconst.JSON_API_P1_TELEGRAM.lower(),
+        3:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-3:0.2.8",
+        4:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-0:1.0.0",
+        5:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-0:96.1.1",
+        6:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:1.8.11",
+        7:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:1.8.2",
+        8:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:2.8.1",
+        9:   mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:2.8.2",
+        10:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-0:96.14.0",
+        11:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:1.7.0",
+        12:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:2.7.0",
+        13:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-0:96.7.21",
+        14:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-0:96.7.9",
+        15:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:99.97.0",
+        16:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:32.32.0",
+        17:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:32.36.0",
+        18:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-0:96.13.0",
+        19:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:32.7.0",
+        20:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:52.7.0",
+        21:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:72.7.0",
+        22:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:31.7.0",
+        23:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:51.7.0",
+        24:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:71.7.0",
+        25:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:22.7.0",
+        26:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:42.7.0",
+        27:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:62.7.0",
+        28:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-1:24.1.0",
+        29:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-1:24.1.0",
+        30:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-1:96.1.0",
+        31:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-1:24.2.1",
+        32:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-2:24.2.1",
+        33:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-3:24.2.1",
+        34:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "0-4:24.2.1",
+        35:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:1.4.0",
+        36:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_P1_PORT_TELEGRAM ) + '/' + "1-0:1.6.0",
+    }
+
     mqtt_topics_smartmeter = {
         0:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_SMARTMETER) + '/' + apiconst.JSON_TS_LCL.lower(),
         1:  mqtt_para['topicprefix'] + '/' + os.path.basename(apiconst.ROUTE_SMARTMETER) + '/' + apiconst.JSON_TS_LCL_UTC.lower(),
@@ -537,7 +627,7 @@ def minimalBrokerSettingsAvailable():
         flog.debug(inspect.stack()[0][3]+":broker host poort en naam zijn gezet.")
         return True
     except Exception as e:
-        flog.critical( inspect.stack()[0][3]+": Broker parameters niet te lezen! " + +str(e.args[0]))
+        flog.critical( inspect.stack()[0][3]+": Broker parameters niet te lezen! " + str(e.args[0]))
         return True # don't fail on checks
 
 def Main(argv): 
@@ -676,7 +766,7 @@ def Main(argv):
                             str(mqtt_para['brokerhost']) + " broker port = " + str(mqtt_para['brokerport']) )
 
         try:
-            _id, parameter, _label = config_db.strget( 118, flog )
+            _id, parameter, _label = config_db.strget( 118, flog ) # type: ignore
             flog.debug( inspect.stack()[0][3]+ ": DB configuratie flag = " + str(parameter) )
             if int(parameter) == 1: # do the changes.
                 flog.info( inspect.stack()[0][3]+ ": MQTT configuratie wordt aangepast." )
@@ -691,7 +781,16 @@ def Main(argv):
             flog.warning( inspect.stack()[0][3]+ ": DB configuratie flag probleem -> " + str(e.args[0]) )
       
         if mqtt_para['brokerconnectionisok'] == True: 
-            
+
+
+        #######################################################################
+        # Important to determine if we have to send data the timestamp when   #
+        # data is updated must be set in the status database by the process   #
+        # responsible for the processing.                                     #
+        # check the index in the lines like this                              #
+        # _id, timestamp, _label, _security = rt_status_db.strget( xx, flog ) #
+        #######################################################################
+
             # smart meter processing
             try:
                 #_id, parameter, _label = config_db.strget( 114, flog )
@@ -707,13 +806,16 @@ def Main(argv):
                 flog.warning(inspect.stack()[0][3]+": onverwachte fout bij smartmeter publish van melding:"+str(e))
 
 
-            #######################################################################
-            # Important to determine if we have to send data the timestamp when   #
-            # data is updated must be set in the status database by the process   #
-            # responsible for the processing.                                     #
-            # check the index in the lines like this                              #
-            # _id, timestamp, _label, _security = rt_status_db.strget( xx, flog ) #
-            #######################################################################
+            # P1 telegram is differenty processed due the source is a ramdisk file
+            try:
+                if mqtt_para['p1telegrampublishisactive'] == True:
+                    timestamp = status_db_cache[16] 
+                    if ( mqtt_para['p1telegramprocessedtimestamp'] ) != timestamp:
+                        processP1Telegram( mqtt_payload_p1_telegram )
+                        mqttPublish( mqtt_client, mqtt_topics_p1_telegram,  mqtt_payload_p1_telegram )
+                        mqtt_para['p1telegramprocessedtimestamp'] = timestamp
+            except Exception as e:
+                    flog.warning(inspect.stack()[0][3]+": onverwachte fout bij P1 monitor publish. melding:" + str(e) )
 
             # cost day processing
             try:
@@ -746,7 +848,7 @@ def Main(argv):
             # watermeter processing
             try:
                 if mqtt_para['watermeterpublishisactive'] == True:  #is active
-                    #_id, timestamp, _label, _security = rt_status_db.strget( 90, flog )
+                  
                     timestamp = status_db_cache[90] 
                     if ( mqtt_para['watermeterprocessedtimestamp'] ) != timestamp:
                         # minute processing
@@ -760,6 +862,7 @@ def Main(argv):
                             mqttPublish( mqtt_client, mqtt_topics_watermeter_day,  mqtt_payload_watermeter_day )
                             mqtt_para['watermeterprocessedtimestamp'] = timestamp
 
+                    timestamp = status_db_cache[16] # smartmeter timestamp
                     if ( mqtt_para['watermeterdigitalprocessedtimestamp'] ) != timestamp:
                         # minute processing
                         getPayloadFromDB( mqtt_payload_watermeterdigital_minute, watermeter_db , db_index = '21' )
@@ -848,7 +951,7 @@ def Main(argv):
         flog.debug( inspect.stack()[0][3] + ": sleeping... mqtt_para['brokerconnectionisok'] = "  +  str(mqtt_para['brokerconnectionisok']) )
 
         checkActiveState() # controleer de DB op welke publish aan of uit staat
-        if mqtt_para['anypublishisactive'] == False: # ga in langzame modes als alle publish uit staat.
+        if mqtt_para['anypublishisactive'] == False: # ga in langzame mode als alle publish uit staat.
             runCheck()
             time.sleep( 30 ) #slow poll
         else:
@@ -869,7 +972,7 @@ def make_json_topic_link():
             give_return_value=True,
             flog=flog 
         )
-        if r[2] == 0:
+        if r[2] == 0:  # type: ignore
             flog.info( inspect.stack()[0][3] + ": leeg " + target + " bestand gemaakt." )
 
     if not os.path.isfile( link_name ):
@@ -884,7 +987,7 @@ def make_json_topic_link():
             give_return_value=True,
             flog=flog 
         )
-        if r[2] > 0:
+        if r[2] > 0:  # type: ignore
             flog.error( inspect.stack()[0][3] + ": link maken van " + link_name +  " gefaald" )
         else: 
             flog.info( inspect.stack()[0][3] + ": link maken van " + link_name + " gelukt." )
@@ -899,7 +1002,7 @@ def runCheck():
         #print ("no check")
         return # only do a check every 10 seconds
     #print ("check")    
-    _id, run_status, _label = config_db.strget( 135, flog )
+    _id, run_status, _label = config_db.strget( 135, flog )  # type: ignore
     if int( run_status ) == 0: # stop process
         flog.info( inspect.stack()[0][3] + ": programma is niet als actief geconfigureerd, programma wordt gestopt.")
         stop()
@@ -928,7 +1031,11 @@ def makeTopicJsonFile():
     if mqtt_para['costdaypublishisactive'] == True:
         topicToJson( mqtt_topics_cost_day, list_of_topics )
     if mqtt_para['miscellaneousisactive'] == True:
-         topicToJson( mqtt_topics_miscellaneous, list_of_topics )
+        topicToJson( mqtt_topics_miscellaneous, list_of_topics )
+    if mqtt_para['miscellaneousisactive'] == True:
+        topicToJson( mqtt_topics_miscellaneous, list_of_topics )
+    if mqtt_para['p1telegrampublishisactive'] == True:
+        topicToJson( mqtt_topics_p1_telegram, list_of_topics )
 
 
     try:
@@ -952,8 +1059,8 @@ def closeMqtt():
     global mqtt_client
     flog.debug( inspect.stack()[0][3] + ": start." )
     try:
-        mqtt_client.disconnect()
-        mqtt_client.loop_stop()
+        mqtt_client.disconnect()  # type: ignore
+        mqtt_client.loop_stop()   # type: ignore
         mqtt_para['brokerconnectionisok'] = False
         mqtt_para['brokerconnectionstatustext'] = "connectie verbroken."
         rt_status_db.strset( mqtt_para['brokerconnectionstatustext'], 97, flog )
@@ -1082,7 +1189,7 @@ def getMiscellaneousPayload():
       
     # set all topics 
     
-    _id, power_sw_forced_on, _label = config_db.strget( 87, flog ) # forced on is selected.
+    _id, power_sw_forced_on, _label = config_db.strget( 87, flog )  # type: ignore # forced on is selected. 
     #print( power_sw_forced_on )
 
     if miscellaneous_last_status[3] != int(status_db_cache[83]) or miscellaneous_last_status[5] != int(power_sw_forced_on): # power production switcher power in watt (0 means not active)
@@ -1090,7 +1197,7 @@ def getMiscellaneousPayload():
         miscellaneous_last_status[5] = int(power_sw_forced_on)
         v = int(status_db_cache[83])
         r_values[topic_index] = v
-        r_topics[topic_index] = mqtt_topics_miscellaneous[3]
+        r_topics[topic_index] = mqtt_topics_miscellaneous[3]  # type: ignore
         miscellaneous_last_status[3] = v
         topic_index += 1
 
@@ -1101,32 +1208,32 @@ def getMiscellaneousPayload():
             r_values[topic_index] = 1
         else:
             r_values[topic_index] = 0
-        r_topics[topic_index] = mqtt_topics_miscellaneous[2]
+        r_topics[topic_index] = mqtt_topics_miscellaneous[2]  # type: ignore
         topic_index += 1
 
     if miscellaneous_last_status[4] != int(status_db_cache[89]):  # tariff switcher power is active (on/off)
         set_timestamps = True
         r_values[topic_index] = int(status_db_cache[89])
-        r_topics[topic_index] = mqtt_topics_miscellaneous[4]
+        r_topics[topic_index] = mqtt_topics_miscellaneous[4]  # type: ignore
         miscellaneous_last_status[4] = int(status_db_cache[89])
         topic_index += 1
 
     if set_timestamps:
         r_values[topic_index] = mkLocalTimeString()
-        r_topics[topic_index] = mqtt_topics_miscellaneous[0]
+        r_topics[topic_index] = mqtt_topics_miscellaneous[0]  # type: ignore
         topic_index += 1
         r_values[topic_index] = int(getUtcTime())
-        r_topics[topic_index] = mqtt_topics_miscellaneous[1]
+        r_topics[topic_index] = mqtt_topics_miscellaneous[1]  # type: ignore
         topic_index += 1
     
     try:
         cache_float_value = float(status_db_cache[32])
         if miscellaneous_last_status[6] != cache_float_value : # update the value
             r_values[topic_index] = cache_float_value
-            r_topics[topic_index] = mqtt_topics_miscellaneous[5]
+            r_topics[topic_index] = mqtt_topics_miscellaneous[5]  # type: ignore
             topic_index += 1
             r_values[topic_index] = status_db_cache[33]
-            r_topics[topic_index] = mqtt_topics_miscellaneous[6]
+            r_topics[topic_index] = mqtt_topics_miscellaneous[6]  # type: ignore
             topic_index += 1
             miscellaneous_last_status[6] = status_db_cache[32]
     except:
@@ -1136,10 +1243,10 @@ def getMiscellaneousPayload():
         cache_float_value = float(status_db_cache[34])
         if miscellaneous_last_status[7] != status_db_cache[34]: # update whit the value
             r_values[topic_index] = cache_float_value 
-            r_topics[topic_index] = mqtt_topics_miscellaneous[7]
+            r_topics[topic_index] = mqtt_topics_miscellaneous[7]  # type: ignore
             topic_index += 1
             r_values[topic_index] = status_db_cache[35]
-            r_topics[topic_index] = mqtt_topics_miscellaneous[8]
+            r_topics[topic_index] = mqtt_topics_miscellaneous[8]  # type: ignore
             topic_index += 1
             miscellaneous_last_status[7] = status_db_cache[34]
     except:
@@ -1162,7 +1269,7 @@ def getPhasePayloadFromDB( mqtt_payload ):
 
     #_id, mqtt_payload[ 0 ], _label, _security = rt_status_db.strget( 106, flog)
     mqtt_payload[0] = status_db_cache[106] 
-    datetime_object = datetime.strptime( mqtt_payload[0], '%Y-%m-%d %H:%M:%S' )
+    datetime_object = datetime.datetime.strptime( mqtt_payload[0], '%Y-%m-%d %H:%M:%S' )
 
     unixtime = int( time.mktime( datetime_object .timetuple() ) )
     mqtt_payload[1] = str( unixtime )
@@ -1275,8 +1382,39 @@ def mkLocalTimeString():
     % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec)
 
 def getUtcTime():
-    now = datetime.utcnow()
-    return int((now - datetime(1970, 1, 1)).total_seconds())
+    epoch_time = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    return epoch_time 
+
+
+def processP1Telegram( mqtt_payload_p1_telegram ):
+    global mqtt_topics_p1_telegram
+    try:
+        with open( const.FILE_P1MSG ,"r" ) as f:
+            buffer = f.readlines()
+            mqtt_payload_p1_telegram[0] = mkLocalTimeString()
+            mqtt_payload_p1_telegram[1] = getUtcTime()
+            mqtt_payload_p1_telegram[2] = x = "".join(buffer)
+
+            # process dynamic topics
+            # only topics in the telegram available will 
+            # be updated 
+            for line in buffer:
+                #print(line)
+                try:
+                    index = line.index("(") # find the seperator between topic and value
+                    assert mqtt_topics_p1_telegram is not None
+                    for key, val in mqtt_topics_p1_telegram.items():
+                        if line[:index] in val: # topic = line[:index]
+                            #print("key = ", key, " value = ", val ) 
+                            mqtt_payload_p1_telegram[key] = line[index:] # line[index:] value of topic
+                            break
+                except ValueError:
+                    pass # skip if there is no prefix topic to be found
+               
+    except Exception as e:
+        flog.warning(inspect.stack()[0][3]+": " + const.FILE_P1MSG + " probleem -> " + str(e) )
+        return # nothing to do :(
+
 
 #-------------------------------
 if __name__ == "__main__":

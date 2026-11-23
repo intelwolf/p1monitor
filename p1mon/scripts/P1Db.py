@@ -272,47 +272,67 @@ def Main():
 
 # functions 
 
+# WORK 
+
 def updateGas():
     
+    #flog.setLevel( logger.logging.DEBUG )  
+
     timestamp_dag = timestamp[0:10]
     timestamp_yesterday    = str(datetime.datetime.strptime(timestamp,"%Y-%m-%d %H:%M") - datetime.timedelta(minutes=1440))[0:10]
     #print(timestamp_dag)
     #print(timestamp_yesterday)
     min_gas_value=max_gas_value=0
     max_value_from_yesterday = 0
+
+    sql_startdate_found = "" 
     
     # Algorithm to find time window.
-    #find max date from yesterday (start date),
+    # find max date from yesterday (start date),
     # if no date found for yesterday find minimum date for today (start date).
     # Find last record from today
     # subtract value from last record from today from start date 
 
     try:
+
+        sqlstr = "select verbr_GAS_2421, timestamp from " + const.DB_HISTORIE_MIN_TAB + " where substr(timestamp,1,10) = '" + timestamp_yesterday + "' and verbr_GAS_2421 > 0 ORDER BY TIMESTAMP desc limit 1"
+       
+        """
         sqlstr = "select verbr_GAS_2421 from "+const.DB_HISTORIE_MIN_TAB+\
         " where timestamp = (select max(timestamp) from "+const.DB_HISTORIE_MIN_TAB+\
         " where substr(timestamp,1,10) = '"+timestamp_yesterday+"' and verbr_GAS_2421 > 0)"
+        """
+
         sqlstr=" ".join(sqlstr.split())
         flog.debug(inspect.stack()[0][3]+": sql(1)="+sqlstr)
         rec=e_db_history_min.select_rec(sqlstr)
+        flog.debug(inspect.stack()[0][3]+": sql(1) rec =" + str(rec))
         if len(rec) > 0:
             min_gas_value = rec[0][0]
             max_value_from_yesterday = min_gas_value
-        flog.debug(inspect.stack()[0][3]+": waarde van bestaande record"+str(rec))
+            sql_startdate_found = rec[0][1]
+        flog.debug(inspect.stack()[0][3]+": max_value_from_yesterday = " + str(max_value_from_yesterday) + " timestamp = " + str(sql_startdate_found) )
     except Exception as e:
         flog.warning(inspect.stack()[0][3]+": sql error(1)"+str(e))
 
     if len(rec) == 0 : # no record found for yesterday
         flog.debug(inspect.stack()[0][3]+": Geen start record gevonden voor GISTEREN ("+str(timestamp_yesterday)+")")
         try:
+
+            sqlstr = "select verbr_GAS_2421, timestamp from " + const.DB_HISTORIE_MIN_TAB + " where substr(timestamp,1,10) = '" + timestamp_dag + "' and verbr_GAS_2421 > 0 ORDER BY TIMESTAMP asc limit 1"
+
+            """
             sqlstr = "select verbr_GAS_2421 from "+const.DB_HISTORIE_MIN_TAB+\
             " where timestamp = (select min(timestamp) from "+const.DB_HISTORIE_MIN_TAB+\
             " where substr(timestamp,1,10) = '"+timestamp_dag+"' and verbr_GAS_2421 > 0)"
+            """
             sqlstr=" ".join(sqlstr.split())
-            flog.debug(inspect.stack()[0][3]+": sql(2)="+sqlstr)
+            flog.debug(inspect.stack()[0][3]+": sql(2)=" + sqlstr )
             rec=e_db_history_min.select_rec(sqlstr)
-            flog.debug(inspect.stack()[0][3]+": waarde van bestaande record"+str(rec))
+            flog.debug(inspect.stack()[0][3]+": waarde van bestaande record" +str(rec) )
             if len(rec) > 0:
                 min_gas_value = rec[0][0]
+                sql_startdate_found = rec[0][1]
             else:
                 flog.debug(inspect.stack()[0][3]+": Geen start record gevonden voor VANDAAG ("+str(timestamp_yesterday)+"). Gestopt met verwerken GAS records.")
                 return
@@ -322,32 +342,59 @@ def updateGas():
     #    min_gas_value = rec[0][0]
     
     # find max value for today
-    
     try:
+
+        sqlstr = "select verbr_GAS_2421, timestamp from " + const.DB_HISTORIE_MIN_TAB + " where substr(timestamp,1,10) = '" + timestamp_dag + "' ORDER BY TIMESTAMP desc limit 1"
+        """
         sqlstr = "select verbr_GAS_2421 from "+const.DB_HISTORIE_MIN_TAB+\
         " where timestamp = (select max(timestamp) from "+const.DB_HISTORIE_MIN_TAB+\
         " where substr(timestamp,1,10) = '"+timestamp_dag+"')"
+        """
         sqlstr=" ".join(sqlstr.split())
         flog.debug(inspect.stack()[0][3]+": sql(3)="+sqlstr)
         rec=e_db_history_min.select_rec(sqlstr)
-        flog.debug(inspect.stack()[0][3]+": waarde van bestaande record"+str(rec))
+        flog.debug(inspect.stack()[0][3]+": waarde van bestaande record vandaag "+str(rec))
     except Exception as e:
         flog.error(inspect.stack()[0][3]+": sql error(3)"+str(e))
     
+    #flog.setLevel( logger.logging.INFO )   
+
     if len(rec) > 0:
         max_gas_value = rec[0][0]
     else:
         flog.error(inspect.stack()[0][3]+": Geen stop record gevonden voor VANDAAG ("+str(timestamp_yesterday)+"). Gestopt met verwerken GAS records.")
         return
     
+    #flog.setLevel( logger.logging.DEBUG )  
+
     VERBR_GAS_X = max_gas_value - min_gas_value
-    flog.debug(inspect.stack()[0][3]+": min_gas_value="+str(min_gas_value)+" max_gas_value="+str(max_gas_value)+" VERBR_GAS_X="+str(VERBR_GAS_X))
+    flog.debug(inspect.stack()[0][3] + ": min_gas_value=" + str(min_gas_value) + " max_gas_value=" + str(max_gas_value) + " VERBR_GAS_X=" + str(VERBR_GAS_X) )
     
     # failsafe verbruik kan nooit negatief zijn
     if VERBR_GAS_X  < 0:
         VERBR_GAS_X  = 0
-    flog.debug(inspect.stack()[0][3]+": min_gas_value="+str(min_gas_value)+" max_gas_value="+str(max_gas_value)+" VERBR_GAS_X="+str(VERBR_GAS_X))
     
+    # check if there is suspicious m3 of gas used and ignore the value is exceeded. 
+    if VERBR_GAS_X > 10: # using more than 20 m3 in a day is not realistic, average 10 m3 a day.
+        flog.warning( inspect.stack()[0][3] + ": verbruikte hoeveelheid gas is verdacht (" + str(VERBR_GAS_X) + ") waarde niet verwerkt")
+         # update day GAS record
+        try:
+            timestamp_today = timestamp[0:10]
+            #sqlstr = "update " + const.DB_HISTORIE_MIN_TAB + " set verbr_GAS_2421 = " + str(min_gas_value) +" where substr(timestamp,1,10) = '" + timestamp[0:10] + "' and verbr_GAS_2421 > " + str(min_gas_value)
+            sqlstr = "update " + const.DB_HISTORIE_MIN_TAB + " set verbr_GAS_2421 = " + str(max_gas_value) +" where timestamp = '" + str(sql_startdate_found) + "'"
+            sqlstr=" ".join(sqlstr.split())
+            flog.debug(inspect.stack()[0][3]+": sql(4)="+sqlstr)
+            e_db_history_min.update_rec(sqlstr)
+            flog.setLevel( logger.logging.INFO ) 
+            return       
+        except Exception as e:
+            flog.error( inspect.stack()[0][3] + ": sql error(update)" +str(e) ) 
+
+    
+    flog.debug(inspect.stack()[0][3]+": min_gas_value="+str(min_gas_value)+" max_gas_value="+str(max_gas_value)+" VERBR_GAS_X="+str(VERBR_GAS_X))
+
+    #flog.setLevel( logger.logging.INFO )  
+
     # update day GAS record
     try:
         sqlstr = "update "+const.DB_HISTORIE_DAG_TAB+" set verbr_gas_x ="+str(VERBR_GAS_X)+" where timestamp = '"+timestamp_dag+" 00:00:00'"
@@ -644,6 +691,7 @@ def updateDbMonth():
 def updateDbDay():
     timestamp_dag = timestamp[0:10]+" 00:00:00"
 
+   
     try:
         sqlstr= "select timestamp, VERBR_KWH_X, GELVR_KWH_X from "+const.DB_HISTORIE_DAG_TAB+" where timestamp = '"+timestamp_dag+"'"
         sqlstr=" ".join(sqlstr.split())

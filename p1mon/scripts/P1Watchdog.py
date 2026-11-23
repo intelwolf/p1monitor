@@ -301,6 +301,17 @@ def MainProg():
                 use_python_launcer=False
             )
 
+            # MDNS update.
+            trigger_function( 
+                prg_name="/p1mon/scripts/P1mDNS", 
+                prg_parameters="--configure &",
+                db_config_index=230,
+                start_msg="mDNS configuratie gestart.",
+                stop_msg="mDNS configuratie gereed.",
+                err_msg="mDNS configuratie gefaald.",
+                use_python_launcer=False
+            )
+
             socat()
 
             # check for statistics config
@@ -338,6 +349,7 @@ def MainProg():
 
             ## besturingssysteem versie
             rt_status_db.strset( system_info_lib.get_os_version(), 22, flog )
+            rt_status_db.strset( system_info_lib.get_os_description(), 93, flog )
             ## Python versie die we gebruiken.
             rt_status_db.strset( system_info_lib.get_python_version(), 25, flog )
             ## update the NTP network time status.
@@ -414,8 +426,6 @@ def DiskRestore(): #180ok
         give_return_value=True,
         flog=flog 
     )
-
-
 
 ##################################################
 # update the aggregated statistics configuration #
@@ -501,7 +511,7 @@ def set_ethernet( forced=False ):
 
 
 ##################################################
-# unsset wifi configuration                         #
+# unset wifi configuration                       #
 ##################################################
 def unset_wifi( forced=False ):
 
@@ -582,11 +592,11 @@ def socat():
 
 
 ###########################################################
-# general use trigger fuction to start other processes    #
+# general use trigger function to start other processes   #
 # TODO: refactor older functions to this general function #
 ###########################################################
 def trigger_function(
-    prg_name=None,
+    prg_name="",
     prg_parameters="",
     db_config_index=None,
     db_config_parameter_index=None, # use this if the parameter is set in the database
@@ -600,9 +610,20 @@ def trigger_function(
 
     #flog.setLevel( logger.logging.DEBUG )
 
+    needs_to_run_status = 0
+
     try:
-        _id, needs_to_run_status, _label = config_db.strget( int(db_config_index), flog )
-        
+
+        #raise ValueError('A very specific bad thing happened')
+    
+        _id, value, _label = config_db.strget( int(db_config_index), flog )
+
+        try:
+             needs_to_run_status = int(value)
+        except Exception as e:
+            flog.error( inspect.stack()[0][3] + ": " + prg_name + " " + str(prg_parameters) + " needs_to_run_status is not valid, gestopt." )
+            return
+
         if ignore_running_processes == False:
             pid_list, _process_list = listOfPidByName.listOfPidByName( prg_name )
         else:
@@ -640,10 +661,12 @@ def trigger_function(
                 flog.info(inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " +stop_msg )
 
     except Exception as e:
-        flog.error( inspect.stack()[0][3] + " " + prg_name + " " + parameter_by_index + " " + prg_parameters + " " + err_msg + " onverwachte fout: " + str( e ) )
+        flog.error( inspect.stack()[0][3] + " " + prg_name  + str(prg_parameters) + " " + err_msg + " onverwachte fout: " + str( e ) )
         config_db.strset( '0', int(db_config_index), flog ) # reset run bit # fail save to stop
 
     #flog.setLevel( logger.logging.INFO )
+
+
 
 def check_and_set_samba_mode(forced=False ):
 
@@ -1556,7 +1579,7 @@ def get_cpu_temperature(): #2.0.0
 
 ########################################################
 # checks there is a new P1 sofware version available   #
-# by an https url request to www.ztatz.nl              #
+# by an https url request to www.p1-monitor.nl         #
 ########################################################
 def check_for_new_p1monitor_version(forced=False):
 
@@ -1596,7 +1619,6 @@ def check_for_new_p1monitor_version(forced=False):
         socket.setdefaulttimeout( 5 )
 
         url = const.ZTATZ_P1_VERSION_URL
-        #url =  "https://www.ztatz.nl/p1monitor/version-test.json"
         request = urllib.request.Request( url + "?" + const.P1_VERSIE  )
         response = urllib.request.urlopen(request)
         data = json.loads( response.read().decode('utf-8') )

@@ -28,11 +28,13 @@ class time_slot_selector:
             if now.minute >= slots[0] and now.minute <= slots[1]:
                 #print ( slots[0], slots[1] )
                 if self.last_time_processed_minute >= slots[0] and self.last_time_processed_minute <= slots[1]:
+                    assert self.flog is not None
                     self.flog.debug( stack()[0][3] + " GEEN "+ str(slots[0]) + "-"+ str(slots[1]) +\
                          " minuten bereik verwerking. Laatste verwerkings minuut " +\
-                              str( self.last_time_processed_minute) )
+                              str( self.last_time_processed_minute) ) 
                     return False
                 else:
+                    assert self.flog is not None
                     self.flog.debug( stack()[0][3] + " WEL "+ str(slots[0]) + "-"+ str(slots[1]) +\
                          " minuten bereik verwerking. Laatste verwerkings minuut " +\
                               str( self.last_time_processed_minute) )

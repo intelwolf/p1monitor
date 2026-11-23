@@ -11,7 +11,7 @@ include_once '/p1mon/www/util/textlib.php';
 include_once '/p1mon/www/util/div_err_succes.php';
 include_once '/p1mon/www/util/pageclock.php';
 
-//print_r($_POST);
+#print_r($_POST);
 loginInit();
 passwordSessionLogoutCheck();
 
@@ -38,6 +38,7 @@ $dns_previous_ip            = config_read( 167 );
 $dns_previous_ip_wlan0      = config_read( 224 );
 $wifi_previous_ssd          = config_read( 11  );
 $wifi_previous_pw           = config_read( 12  );
+$mDNS_previous_name         = config_read( 229 );      
 
 #echo $ethO_previous_ip."<br>";
 #echo $wlan0_previous_ip."<br>";
@@ -67,7 +68,6 @@ if( isset($_POST["ip_router"]) ) {
     if ( $_POST["ip_router"] != $router_previous_ip ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_router"]."' where ID = 166")) $err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
-        #if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
     }
 }
 
@@ -75,7 +75,6 @@ if( isset($_POST["ip_router_wlan0"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( $_POST["ip_router_wlan0"] != $router_previous_ip_wlan0  ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_router_wlan0"]."' where ID = 223")) $err_cnt += 1;
-        #if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
     }
 }
@@ -86,7 +85,6 @@ if( isset($_POST["ip_dns"]) ) {
     if ( $_POST["ip_dns"] != $dns_previous_ip ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_dns"]."' where ID = 167")) $err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
-        #if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
     }
 }
 
@@ -94,14 +92,20 @@ if( isset($_POST["ip_dns_wlan0"]) ) {
     if ( $err_cnt == -1 ) $err_cnt=0;
     if ( $_POST["ip_dns_wlan0"] != $dns_previous_ip_wlan0 ) {
         if ( updateConfigDb("update config set parameter = '".$_POST["ip_dns_wlan0"]."' where ID = 224")) $err_cnt += 1;
-        #if ( updateConfigDb("update config set parameter = '1' where ID = 168")) $err_cnt += 1;
         if ( updateConfigDb("update config set parameter = '1' where ID = 183")) $err_cnt += 1;
     }
 }
 
+if( isset($_POST["mDNS"]) ) {
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ( $_POST["mDNS"] != $mDNS_previous_name ) {
+        if ( updateConfigDb("update config set parameter = '".$_POST["mDNS"]."' where ID = 229")) $err_cnt += 1;
+        if ( updateConfigDb("update config set parameter = '1' where ID = 230")) $err_cnt += 1; 
+    }
+}
 
-if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
-{
+
+if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) ) {
 
     if ( $err_cnt == -1 ) $err_cnt=0;
 
@@ -110,8 +114,10 @@ if( isset($_POST["wifi_essid"]) && isset($_POST["wifi_pw"]) )
     if ( updateConfigDb("update config set parameter = '".$_POST["wifi_essid"]."' where ID = 11")) $err_cnt += 1;
     if ( updateConfigDb("update config set parameter = '".$crypto_wifi_pw."' where ID = 12"))      $err_cnt += 1;
 
+    #debugLog('config-netwerk $crypto_wifi_pw ='.$crypto_wifi_pw ); 
+
     if ( strcmp( $wifi_previous_ssd, $_POST["wifi_essid"]) != 0 OR strcmp( $wifi_previous_pw , $crypto_wifi_pw) !=0 ) {
-        #echo("set wifi<br>");
+       #echo("set wifi<br>");
         if ( updateConfigDb("update config set parameter = '1' where ID = 183") ) $err_cnt += 1;
     } 
 
@@ -356,8 +362,7 @@ $(function () {
                     <!-- start of content -->
                     <form name="formvalues" id="formvalues" method="POST">
                     
-                       
-
+                    
                         <div class="frame-4-top">
                             <span class="text-15">wifi</span>
                         </div>
@@ -372,7 +377,7 @@ $(function () {
                             <div class="float-left pad-1">
                                 <input class="input-5 color-settings color-input-back" id="wifi_essid" name="wifi_essid"  type="text" value="<?php echo config_read(11);?>">
                                 <p class="p-1"></p>
-                                <input class="input-5 color-settings color-input-back" id="wifi_pw" name="wifi_pw"  type="password" value="<?php echo decodeString(12, 'wifipw');?>">
+                                <input class="input-5 color-settings color-input-back" id="wifi_pw" name="wifi_pw"  type="password" value="<?php echo htmlentities(decodeString(12, 'wifipw'));?>">
                                 <p class="p-1"></p>
                             </div>
 
@@ -500,6 +505,25 @@ $(function () {
                                     </div>
                                 </div>
 
+                            </div>
+                        </div>
+
+                        <!- mDNS settings ->
+                        <p></p>
+                        <div class="frame-4-top">
+                            <span class="text-15"><?php echo strIdx( 774 );?></span>
+                        </div>
+                        <div class="frame-4-bot" title="<?php echo strIdx( 775 );?>">
+                            <div class="rTable">
+                                <div class="rTableRow">
+                                    <div class="rTableCell">
+                                        <i class="pad-7 text-10 fas fa-globe"></i>
+                                    </div>  
+                                    <div class="rTableCell">
+                                        <input class="input-10 color-settings color-input-back" id="mDNS" name="mDNS" type="text" placeholder="p1monitor" value="<?php echo config_read( 229 );?>">
+                                        <p class="p-1"></p> 
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -761,9 +785,28 @@ jQuery.validator.addMethod( "ztatz_ipset", function( value, element) {
 }, '');
 
 
+jQuery.validator.addMethod("mDNS_validator", function( value, element ) {
+
+        if ( value === "" ) {
+            return true; // empty field is allowed
+        }
+        var regex = new RegExp("^[a-zA-Z0-9-]+$");
+        var key = value;
+
+        console.log(value)
+
+        if (!regex.test(key)) {
+           return false;
+        }
+        return true;
+    }, '');
+
 $(function() {
     $("#formvalues").validate({
-        rules: {
+        rules: {      
+            'mDNS': {
+                mDNS_validator: true 
+            },
             'ip_eth0': {
                 ipv4: true,
                 ztatz_NotEqualTo: true

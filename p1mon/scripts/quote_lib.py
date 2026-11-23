@@ -15,7 +15,7 @@ quoteStrings = [
     'Een optimist heeft het vliegtuig uitgevonden, een pessimist de parachute',
     'Vannacht om half 3 belde mijn buurman aan de deur! Hoe gek is dat, hij had geluk dat ik nog aan het drummen was.',
     'Ik heb geen wespentaille, ik heb hommelheupen',
-    'Ik weet dat ik gewicht moet verliezen, maar ik kan alleen niet zo goed tegen mijn verlies',
+    'Ik weet dat ik gewicht moet verliezen, maar ik kan alleen niet zo goed tegen mijn verlies.',
     'Een waterlelie is een levensgevaarlijke plant, want als je er langer dan vijf minuten onder zit, ben je dood.', 
     'Wie zwijgt stemt niet altijd toe, want soms hebben ze geen zin om met idioten te discussiëren.', 
     'Je waardeert pas wat je hebt, tot je het mist, zoals toiletpapier.',

@@ -10,6 +10,7 @@ import logger
 import os
 import pwd
 import patch_lib
+import re
 import sqldb
 import signal
 import sys
@@ -94,8 +95,8 @@ def Main( argv ):
         sys.exit(0)
     
     # run status >0 means run
-    # 1 means only allow sigend patch files
-    # 2 means signed and unsignend will be processed 
+    # 1 means only allow signed patch files
+    # 2 means signed and unsigned will be processed 
     if int( data['run_status'] ) == 2:
         data['allow_unsinged_patches'] = True
         msg = ": Unsignend patches zijn toegestaan"
@@ -170,7 +171,7 @@ def Main( argv ):
             writeLineToStatusFile( msg )
             flog.info( inspect.stack()[0][3] + msg )
             stop ( 6 )
-
+       
         msg = ": uitvoeren van de patch succesvol."
         writeLineToStatusFile( msg )
         flog.info( inspect.stack()[0][3] + msg )
@@ -181,7 +182,51 @@ def Main( argv ):
     flog.warning( inspect.stack()[0][3] + msg )
     stop ( 100 )
 
+####################################################
+# reads the content of the patch file and compares #
+# the version of the P1 software with the patch    #
+# version                                          #
+####################################################
+def patch_version_check(filepath=None):
+    VERSION_TAG_PATCH = 'SW_VERSION'
+    VERSION_TAG_SYSTEM = 'P1_VERSIE'  
+    patch_version = "onbekend"
+    system_version = "onbekend"
 
+    try:
+        # patch file version 
+        with open( filepath, 'r') as fp:
+            lines = fp.readlines()
+            for row in lines:
+                if row.find(VERSION_TAG_PATCH) != -1:
+                    #flog.debug( inspect.stack()[0][3] + " patch row = " + row)
+                    split_str = row.split('#')
+                    patch_version = re.sub(r'[^0-9.]', '', split_str[0].replace(VERSION_TAG_PATCH,""))
+                    #flog.debug( inspect.stack()[0][3] + " patch_version = " + patch_version )
+                    break
+
+        with open( const.DIR_SCRIPTS + "const.py", 'r') as fp:
+            lines = fp.readlines()
+            for row in lines:
+                if row.find(VERSION_TAG_SYSTEM) != -1:
+                    #flog.debug( inspect.stack()[0][3] + " system row = " + row)
+                    split_str = row.split('#')
+                    system_version = re.sub(r'[^0-9.]', '', split_str[0].replace(VERSION_TAG_SYSTEM,""))
+                    #flog.debug( inspect.stack()[0][3] + " system_version = " + system_version )
+                    break
+
+        flog.debug( inspect.stack()[0][3] + " patch_version = " + patch_version )
+        flog.debug( inspect.stack()[0][3] + " system_version = " + system_version )
+        
+        if patch_version == system_version:
+            return True, patch_version, system_version
+
+    except Exception as e:
+        msg = ": versie controle gefaald"
+        writeLineToStatusFile( msg )
+        flog.critical( inspect.stack()[0][3] + "versie " + str(e) )
+
+    return False, patch_version, system_version
 
 ###################################################
 # run the patch when the start file exist in the  #
@@ -199,14 +244,28 @@ def run_patch( extract_folderpath=None ):
 
         if len( start_file_name ) == 0: # there is no  start file
             raise Exception( patch_lib.PATCH_START_SCRIPT_NAME + " niet gevonden." )
+        
+        version_ok, patch_version, system_version = patch_version_check( filepath=start_file_name[0] )
 
-        # check if file is executabel. 
+        if version_ok == True:
+            msg = ": Patch is geschikt voor deze P1 monitor versie."
+            writeLineToStatusFile( msg )
+            flog.info( inspect.stack()[0][3] + msg )
+        else:
+            msg = ": Patch is niet geschikt voor deze P1 monitor versie " + system_version + " en patch versie " + patch_version
+            writeLineToStatusFile( msg )
+            flog.info( inspect.stack()[0][3] + msg )
+            return False
+        
+        # check if file is executable. 
         if os.access( start_file_name[0], os.X_OK ) == False:
              raise Exception( patch_lib.PATCH_START_SCRIPT_NAME + " is niet uitvoerbaar!" )
 
         # find folder and file to execute without the path.
         working_folder, file_to_excute =  os.path.split( start_file_name[0] )
+        flog.debug( inspect.stack()[0][3] + " working_folder = " + str(working_folder) + " file_to_excute = " + str(file_to_excute) )
        
+
         cmd = "cd " + working_folder + "; ./" + file_to_excute + " " + str( const.FILE_PATCH_STATUS )
         flog.debug( inspect.stack()[0][3] + " cmd =  " + str(cmd) )
 
@@ -272,13 +331,13 @@ def extract_unsigned_file(zip_source_filepath=None, extract_folderpath=None):
 # return true                                    #
 ##################################################
 def extract_signed_file(source_filepath=None, destination_filepath=None ):
-    flog.debug( inspect.stack()[0][3] + " sigend file " + str(source_filepath) + " destination_filepath "  + str(destination_filepath) )
+    flog.debug( inspect.stack()[0][3] + " signed file " + str(source_filepath) + " destination_filepath "  + str(destination_filepath) )
 
     r=False
     ds=crypto_lib.DigitalSignature( debug=False )
     for idx in range( 1, len(crypto_lib.digital_signing_verify_keys_b64 )+1 ):
         try:
-            flog.debug( inspect.stack()[0][3] + " probeer verfiy key " + str(str(idx)) + " "  + crypto_lib.digital_signing_verify_keys_b64[str(idx)])
+            flog.debug( inspect.stack()[0][3] + " probeer verify key " + str(str(idx)) + " "  + crypto_lib.digital_signing_verify_keys_b64[str(idx)])
             ds.verify_write_file( source_filepath=source_filepath, destination_filepath=destination_filepath, verify_key_b64=crypto_lib.digital_signing_verify_keys_b64[str(idx)] )
             msg = ": verificatie van digitale handtekening met index " + str(idx) + " succesvol."
             writeLineToStatusFile( msg )
@@ -330,7 +389,7 @@ def writeLineToStatusFile( msg ):
 #####################################################
 def stop( exit=0 ):
   
-    # remove patch sourche filefolder
+    # remove patch source filefolder
     head, _tail =  os.path.split( data['patchfile'])
     if os.path.isdir( head ) == True:
         filesystem_lib.rm_folder_with_delay( head, timeout=0, flog=flog )
@@ -354,7 +413,7 @@ def stop( exit=0 ):
 
     # trigger de P1Watchdog to reread the version status. 
     config_db.strset( 1, 222, flog) 
-    msg = ": controle van de versie op ztatz.nl wordt uitgevoerd."
+    msg = ": controle van de versie op p1-monitor.nl wordt uitgevoerd."
     writeLineToStatusFile( msg )
     flog.info( inspect.stack()[0][3] + msg )
 

@@ -115,7 +115,7 @@ server {
 """
 
 base_80 =\
-""" 
+r""" 
 server {
 
 ###P1HEADER###
@@ -332,7 +332,7 @@ def Main( argv ):
             proc = subprocess.Popen( [ cmd ], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             stdout, stderr  = proc.communicate( timeout=60 )
             exit_code       = int( proc.wait() )
-            if exit_code == 0: # last succesfull try to renew the certificate.
+            if exit_code == 0: # last successful try to renew the certificate.
                 rt_status_db.strset( makeLocalTimeString.makeLocalTimeString(), 120, flog )
                 cert_info() # update database with how long the cert is valid.
         except Exception as e:

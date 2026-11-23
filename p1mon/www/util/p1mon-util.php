@@ -28,8 +28,8 @@ function encodeString ( $input, $seed ) {
         $command = "/p1mon/scripts/P1CryptoV2 --enc ".base64_encode( $input )." --seed ".$seed;
         //$command = "/usr/bin/ls";
 
-        #debugLog('$input='.$input); 
-        #debugLog('$seed='.$seed);
+        #debugLog('encodeString $input='.$input); 
+        #debugLog('encodeString $seed='.$seed);
 
         $arr_execoutput_enc = []; // make sure old stuff is cleared.
         exec( $command ,$arr_execoutput_enc, $exec_ret_value );
@@ -46,11 +46,13 @@ function decodeString( $config_id, $seed ) {
     $decoded_string = '';
     $command = "/p1mon/scripts/P1CryptoV2 --dec ".config_read($config_id)." --seed ".$seed;
 
-
     $arr_execoutput_dec = []; // make sure old stuff is cleared.
     exec($command ,$arr_execoutput_dec, $exec_ret_value );
     #debugLog('$decodeString output='.$arr_execoutput_dec);
     #debugLog('$decodeString return value='.$exec_ret_value);
+    #debugLog('$decodeString return value[0]='.$arr_execoutput_dec[0]);
+    #debugLog('$decodeString return value[0] base64 decoded ='.base64_decode($arr_execoutput_dec[0], true));
+
     if (empty($arr_execoutput_dec)) { return ''; } // nothing to decode.
     return base64_decode($arr_execoutput_dec[0], true);
 }

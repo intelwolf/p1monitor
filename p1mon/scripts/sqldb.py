@@ -354,13 +354,18 @@ class configDB():
         self.insert_rec( "insert or ignore into " + table + " values ( '223',''                 ,'wlan0 default gateway static IP adres.')")
         self.insert_rec( "insert or ignore into " + table + " values ( '224',''                 ,'wlan0 domain name server static IP adres.')")
 
-        self.insert_rec( "insert or ignore into " + table + " values ( '225','0'               ,'vlag voor het verwijderen van de wifi instellingen.')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '225','0'                ,'vlag voor het verwijderen van de wifi instellingen.')")
         
         self.insert_rec( "insert or ignore into " + table + " values ( '226','0'                ,'MQTT miscellaneous dag publish aan/uit (1/0).')")
 
         self.insert_rec( "insert or ignore into " + table + " values ( '227','0-2:24.2.1'       ,'Code van watermeter in het P1 telegram.')")
 
-        self.insert_rec("insert or ignore into " + table + " values ( '228','1'                 ,'statistiek zichtbaar 1/0)')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '228','1'                 ,'statistiek zichtbaar 1/0)')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '229',''                 ,'naam van de mDNS zonder de .local extensie')")
+        self.insert_rec( "insert or ignore into " + table + " values ( '230','0'                ,'vlag voor het updaten van de mDNS settings.')")
+
+        self.insert_rec( "insert or ignore into " + table + " values ( '231','0'                ,'MQTT P1 telegram publish aan/uit (1/0).')")
 
 
         # fix typo's from versions higer then 0.1.5
@@ -748,11 +753,7 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into "+table+\
         " values ( '92','onbekend','Serial device dat gebruikt wordt:',0)")
 
-        # removed in version 2.4.0
-        # can be reused in future versions
-        # used for status of sql auto import
-        self.insert_rec("insert or ignore into "+table+\
-        " values ( '93','onbekend','',0)")
+        self.insert_rec("insert or ignore into " + table + " values ( '93','onbekend','',0)")
 
         self.insert_rec("insert or ignore into "+table+\
         " values ( '94','onbekend','',0)")
@@ -796,7 +797,7 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '116','" + util.mkLocalTimeString() + "','Min dagwaarde Kw geleverd (timestamp)',0)")
 
         # Lets Encrypt stuff.
-        # status 1=error/not ok, 0=ok/succes, 2=unknow
+        # status 1=error/not ok, 0=ok/succes, 2=unknown
         self.insert_rec("insert or ignore into " + table + " values ( '117','2','HTTPS certificaat',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '118','2','HTTPS certificaat vernieuwen certificaat',0)")
         self.insert_rec("insert or ignore into " + table + " values ( '119','2','Webserver configuratie',0)")
@@ -832,6 +833,10 @@ class rtStatusDb():
         self.insert_rec("insert or ignore into " + table + " values ( '137','0','Nieuwe versie van P1 monitor software patch beschikbaar:',0)") 
 
         self.insert_rec("insert or ignore into " + table + " values ( '138','','JSON formaat statistiek instellingen:',0)") 
+
+        self.insert_rec("insert or ignore into " + table + " values ( '139','','mDNS naam in gebruik:',0)") 
+
+
 
         # fix typo's from version 0.9.15a and up
         sql_update = "update status set label ='Tijdstip laatste verwerkte minuten gegevens:' where id=7"

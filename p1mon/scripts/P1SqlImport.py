@@ -400,6 +400,9 @@ def Main(argv):
     msgToInfoLogAndStatusFile( 'SOCAT aanpassingen, als deze actief is.' )
     config_db.strset( 1, 201, flog ) # set the flag so the watchdog processes the changes
 
+    msgToInfoLogAndStatusFile( 'mDNS aanpassingen doorvoeren.' )
+    config_db.strset( 1, 230, flog ) # set the flag so the watchdog processes the changes
+
     timestop = time.time()
     m, s = divmod( timestop - timestart , 60 ) # make minutes and seconds from total secs count
     msgToInfoLogAndStatusFile( "Gereed verwerkings tijd is " + '{:02d}:{:02d}.'.format( int(m), int(s) ) )

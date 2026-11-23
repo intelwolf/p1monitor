@@ -55,26 +55,6 @@ var maxDataText     = ['MAX. data','MIN. data']
 var maxDataCount    = [ 36000, 366 ]
 var maxrecords      = maxDataCount[1];
 
-/*
-function readJsonApiHistoryDay( cnt ){ 
-    $.getScript( "/api/v2/watermeter/day?limit=" + cnt, function( data, textStatus, jqxhr ) {
-      try {
-        var jsondata = JSON.parse(data); 
-        var item;
-        recordsLoaded       = jsondata.length;
-        GverbrData.length   = 0;
-        
-        for (var j = jsondata.length; j > 0; j--){    
-            item    = jsondata[ j-1 ];
-            item[1] = item[1] * 1000; // highchart likes millisecs.
-            GverbrData.push ( [item[1], item[4] ]);
-        }  
-        updateData();
-      } catch(err) {}
-   });
-}
-*/
-
 function readJsonApiHistoryDay( cnt ){ 
 
     // Puls values

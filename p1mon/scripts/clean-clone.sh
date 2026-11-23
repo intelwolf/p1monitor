@@ -239,7 +239,14 @@ ACTIVE_DIR=$CLONE/p1mon/data
 if [ -d "$ACTIVE_DIR" ]; then
     cd $ACTIVE_DIR 
     PWD=$(pwd)
-    delete_from_dir *.db *.txt .*Store ._* *.db.bak
+    delete_from_dir * .*Store ._*
+fi
+
+ACTIVE_DIR=$CLONE/p1mon/data/backup
+if [ -d "$ACTIVE_DIR" ]; then
+    cd $ACTIVE_DIR 
+    PWD=$(pwd)
+    delete_from_dir * .*Store ._*
 fi
 
 ACTIVE_DIR=$CLONE/p1mon/export
@@ -260,7 +267,7 @@ ACTIVE_DIR=$CLONE/p1mon/mnt/ramdisk
 if [ -d "$ACTIVE_DIR" ]; then
     cd $ACTIVE_DIR 
     PWD=$(pwd)
-    delete_from_dir *.db *.txt .*Store ._*
+    delete_from_dir * .*Store ._*
 fi
 
 ACTIVE_DIR=$CLONE/var/log/p1monitor
@@ -453,6 +460,14 @@ if [ -d "$ACTIVE_DIR" ]; then
 fi
 
 ACTIVE_DIR=$CLONE/var/lib/php5
+if [ -d "$ACTIVE_DIR" ]; then
+    cd $ACTIVE_DIR 
+    PWD=$(pwd)
+    delete_from_dir * .*Store ._*
+fi
+
+
+ACTIVE_DIR=$CLONE/var/lib/NetworkManager/
 if [ -d "$ACTIVE_DIR" ]; then
     cd $ACTIVE_DIR 
     PWD=$(pwd)

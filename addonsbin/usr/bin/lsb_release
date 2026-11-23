@@ -1,0 +1,3 @@
+#!/bin/bash
+desc=$(grep -oP '(?<=^PRETTY_NAME=").+(?=")' /etc/os-release)
+echo "Description:	$desc"
