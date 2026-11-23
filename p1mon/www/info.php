@@ -362,7 +362,9 @@ function readJsonApiStatus(){
                     break;
                 case 129:
                     $('#db25v').text(jsonarr[j][1]);
-                    //$('#db25t').text(jsonarr[j][2]);
+                    break;
+                case 139:
+                    $('#ne11v').text(jsonarr[j][1]);
                     break;
                 default:
                     break;
@@ -881,6 +883,7 @@ $(function () {
                     <div class="text-9"><?php echo strIdx( 603 );?>:</div><div id="ne7v" class="text-9"></div><div><br id="ne7b"></div>
                     <div class="text-9"><?php echo strIdx( 604 );?>:</div><div id="ne8v" class="text-9"></div><div><br id="ne8b"></div>
                     <div class="text-9"><?php echo strIdx( 605 );?>:</div><div id="ne10v" class="text-9"></div><div><br id="ne10b"></div>
+                    <div class="text-9"><?php echo strIdx( 774 );?>:</div><div id="ne11v" class="text-9"></div><br>
                  </div>
 
                  <br>

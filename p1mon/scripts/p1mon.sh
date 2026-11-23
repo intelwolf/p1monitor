@@ -44,6 +44,7 @@ PRG20="P1Notifier"
 PRG21="P1DbCopy"
 PRG22="P1DatabaseOptimizer"
 P1FILE="p1msg.txt"
+TIMESTAMP=+'%FT%T.%3N'
 
 
 # failsave folders
@@ -57,8 +58,8 @@ sudo mkdir -p $FOLDER_BASE/recovery
 sudo ln -s /run/php/php-fpm.sock /run/php/php7.3-fpm.sock  2>/dev/null # /dev/null to be silent when link allready exits.
 
 ## reset rechten wegens dev werk en kopie acties.
-sudo /bin/chmod 775 $DATADISK $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE  &>/dev/null
-sudo /bin/chown p1mon:p1mon $TMP_PATH $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE &>/dev/null
+sudo /bin/chmod 775 $FOLDER_BASE/data $DATADISK $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE  &>/dev/null
+sudo /bin/chown p1mon:p1mon $FOLDER_BASE/data $TMP_PATH $PRG_PATH$PRG8 $PRG_PATH$PRG1 $PRG_PATH$PRG2 $PRG_PATH$PRG3 $PRG_PATH$PRG5 $PRG_PATH$PRG6 $LOG_PATH$PRG4 $PID_PATH$P1FILE &>/dev/null
 sudo /bin/chmod 770 $TMP_PATH
 
 cd $PRG_PATH
@@ -69,14 +70,14 @@ sudo chmod 660 *_lib.py
 ## set de bash stub scripts
 sudo ls P1*|grep -v py|xargs -n 1 chmod 750
 
-# make p1monitor log folder (new from june 2019)
+# make p1monitor log folder (new from June 2019)
 sudo mkdir -p p1monitor $LOG_PATH
 sudo /bin/chown p1mon:p1mon $LOG_PATH $WWW_DOWLOAD_PATH $EXPORT_PATH $RAMDISK
 sudo /bin/chmod 775 $LOG_PATH 
 sudo /bin/chmod 770 $WWW_DOWLOAD_PATH $EXPORT_PATH
 
 #PHP sessions path, PHP will not create this directory structure automatically
-echo "[*] PHP folder $PHP_SESSIONS wordt aangemaakt."
+echo "[*] $(date $TIMESTAMP) PHP folder $PHP_SESSIONS wordt aangemaakt."
 sudo /usr/bin/mkdir -p $PHP_SESSIONS
 sudo /usr/bin/chmod 733 $PHP_SESSIONS
 sudo /usr/bin/chmod +t $PHP_SESSIONS
@@ -89,10 +90,11 @@ sudo /bin/chmod 664 *.log
 # script clean when gets full. Should never happen ;)
 sudo $PRG_PATH$PRG11
 
-# setup the python enviroment
+# setup the python environment
 cd $PYTHONENV
 source bin/activate
 cd $PRG_PATH
+
 
 start() {
 
@@ -104,19 +106,19 @@ start() {
     # the drive.
     $PRG_PATH$PRG19 --restore --reboot
     #eval "$MY_PYTHON $PRG19 --restore --reboot"
-    echo "[*] $PRG19 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG19 gestart."
 
     # disable power save van de wifi.
-    echo "[*] Wifi power save wordt uitgezet."
+    echo "[*] $(date $TIMESTAMP) Wifi power save wordt uitgezet."
     sudo /sbin/iw dev wlan0 set power_save off
     /sbin/iw wlan0 get power_save
-    echo "[*] Wifi power save is uitgezet."
+    echo "[*] $(date $TIMESTAMP) Wifi power save is uitgezet."
 
     # note the watchdog does the import from /p1mon/data 
     # failsave stop of processed that may stil be running
-    echo "[*] failsave stop voor dat de processen weer worden gestart."
+    echo "[*] $(date $TIMESTAMP) failsave stop voor dat de processen weer worden gestart."
     stop
-    echo "[*] 2 seconden wachttijd"
+    echo "[*] $(date $TIMESTAMP) 2 seconden wachttijd"
     sleep 2
 
     # set sticky bit for C program to run als p1mon 
@@ -126,7 +128,7 @@ start() {
 
     # Database fix
     # do flash disk, before the copy to ram.
-    echo "[*] $PRG22 gestart. watermeter fix."
+    echo "[*] $(date $TIMESTAMP) $PRG22 gestart. watermeter fix."
     $PRG_PATH$PRG22 -ws -d 2>&1 >/dev/null
 
     # Start P1 port reader.
@@ -136,18 +138,18 @@ start() {
     #echo "running "$pid
     sleep 5 # give some time to start the process
     sudo renice -n -15 $(pgrep -P $pid) >/dev/null # make sure the serial processing has an higher priority
-    echo "[*] $PRG1 process prioriteit verhoogd."
+    echo "[*] $(date $TIMESTAMP) $PRG1 process prioriteit verhoogd."
     #echo "running "$pid
-    echo "[*] $PRG1 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG1 gestart."
     # tijd zodat de serial db bij het starten gedefragmenteerd kan worden
-    echo "[*] 3 seconden wachttijd"
+    echo "[*] $(date $TIMESTAMP) 3 seconden wachttijd"
     sleep 3
 
     # start the database process
     $PRG_PATH$PRG2 2>&1 >/dev/null &
     #eval "$MY_PYTHON $PRG2 2>&1 >/dev/null &"
-    echo "[*] $PRG2 gestart."
-    echo "[*] 3 seconden wachttijd"
+    echo "[*] $(date $TIMESTAMP) $PRG2 gestart."
+    echo "[*] $(date $TIMESTAMP) 3 seconden wachttijd"
     sleep 3
 
     # DropBoxDaemon start
@@ -159,61 +161,61 @@ start() {
     sudo /bin/chown p1mon:p1mon $DBX_ROOT $DBX_ROOT$DBX_DATA $DBX_ROOT$DBX_BACKUP
     #eval "$MY_PYTHON $PRG7 2>&1 >/dev/null &"
     $PRG_PATH$PRG7 2>&1 >/dev/null &
-    echo "[*] $PRG7 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG7 gestart."
 
     # Watchdog start
     $PRG_PATH$PRG3 2>&1 >/dev/null &
     #eval "$MY_PYTHON $PRG3 2>&1 >/dev/null &"
-    echo "[*] $PRG3 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG3 gestart."
 
     # run weather once to make sure we have the weather database, fixes import issues.
     #eval "$MY_PYTHON $PRG5 --getweather 2>&1 >/dev/null &"
     $PRG_PATH$PRG5 --getweather 2>&1 >/dev/null &
-    echo "[*] $PRG5 -getweather gestart."
-    echo "[*] 2 seconden wachttijd"
+    echo "[*] $(date $TIMESTAMP) $PRG5 -getweather gestart."
+    echo "[*] $(date $TIMESTAMP) 2 seconden wachttijd"
     sleep 2
 
     # run weather once to recover graaddagen when not set
     # when set do nothing. use UI to force the recalculating
     # eval "$MY_PYTHON $PRG5 --recover 2>&1 >/dev/null &"
     $PRG_PATH$PRG5 --recover 2>&1 >/dev/null &
-    echo "[*] $PRG5 --recover gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG5 --recover gestart."
 
     # UDP deamon start
     $PRG_PATH$PRG6 2>&1 >/dev/null &
     #eval "$MY_PYTHON $PRG6 2>&1 >/dev/null &"
-    echo "[*] $PRG6 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG6 gestart."
 
     # UDP broadcast start
     $PRG_PATH$PRG8 &>/dev/null &
     #eval "$MY_PYTHON $PRG8 2>&1 >/dev/null &"
     $PRG_PATH$PRG8 2>&1 >/dev/null &
-    echo "[*] $PRG8 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG8 gestart."
 
     # API start
     cd $PRG_PATH
     # $PRG9_PATH$PRG9$PRG9_PARAMETERS 2>&1 >/dev/null &
     eval "$PRG9_PATH$PRG9 $PRG9_PARAMETERS 2>&1 >/dev/null &"
-    echo "[*] $PRG9_ALIAS gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG9_ALIAS gestart."
 
     # GPIO start
     #$PRG_PATH$PRG14 &>/dev/null &
     #eval "$MY_PYTHON $PRG14 2>&1 >/dev/null &"
     $PRG_PATH$PRG14 2>&1 >/dev/null &
-    echo "[*] $PRG14 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG14 gestart."
  
     # Notifier start
     #$PRG_PATH$PRG20 2>&1 >/dev/null &
     #eval "$MY_PYTHON $PRG20 2>&1 >/dev/null &"
     $PRG_PATH$PRG20 2>&1 >/dev/null &
-    echo "[*] $PRG20 gestart."
+    echo "[*] $(date $TIMESTAMP) $PRG20 gestart."
 
     # set database rechten
-    echo "[*] file rechten database bestanden aanpassen."
+    echo "[*] $(date $TIMESTAMP) file rechten database bestanden aanpassen."
     sleep 3
     sudo  /bin/chmod 664 $DB_PATH*.db
-    echo "[*] file rechten database bestanden correct gezet."
-    echo "[*] start gereed."
+    echo "[*] $(date $TIMESTAMP) file rechten database bestanden correct gezet."
+    echo "[*] $(date $TIMESTAMP) start gereed."
 
 }
 
@@ -225,16 +227,16 @@ function process_kill() {
     # do a normal kill
     if [ -z "${pids}" ]
     then
-        echo "[*] Geen pid gevonden voor proces $1, proces is niet actief."
+        echo "[*] $(date $TIMESTAMP) Geen pid gevonden voor proces $1, proces is niet actief."
         return
     else
-        echo "[*] Killing pid(s) "$pidslist" proces naam is "$1
+        echo "[*] $(date $TIMESTAMP) Killing pid(s) "$pidslist" proces naam is "$1
         ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' | xargs sudo kill -s SIGINT
     fi
 
     if [ ! -z "$2" ]
     then
-        echo "[*] Wacht "$2" seconden tot "$1" met pid(s) $pidslist gestopt is."
+        echo "[*] $(date $TIMESTAMP) Wacht "$2" seconden tot "$1" met pid(s) $pidslist gestopt is."
         sleep $2 #wait $2 sec for next test
     fi
 
@@ -248,11 +250,11 @@ function process_kill() {
         pids=$( ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' )
         if [ -z "${pids}" ]
         then
-            echo "[*] Er lopen geen processen meer met de naam "$1
-            echo "[*] --------------------------------------------"
+            echo "[*] $(date $TIMESTAMP) Er lopen geen processen meer met de naam "$1
+            echo "[*] $(date $TIMESTAMP) --------------------------------------------"
         else
-            echo "[*] Failsave kill gestart, dit is niet normaal voor proces "$1
-            echo "[*] ------------------------------------------------------------"
+            echo "[*] $(date $TIMESTAMP) Failsave kill gestart, dit is niet normaal voor proces "$1
+            echo "[*] $(date $TIMESTAMP) ------------------------------------------------------------"
             ps -ef | grep $1 | grep -v grep | awk '{ print $2 }' | xargs sudo kill -9
         fi
     fi
@@ -260,7 +262,7 @@ function process_kill() {
 
 stop() {
 
-    echo "[*] Processen worden gestopt, even geduld aub."
+    echo "[*] $(date $TIMESTAMP) Processen worden gestopt, even geduld aub."
 
     # Notifier stop
     process_kill $PRG20 3
@@ -271,9 +273,6 @@ stop() {
     # GPIO stop
     process_kill $PRG14 3
 
-    # UDP broadcast stop
-    process_kill $PRG8 3
-
     # Dropbox stop
     process_kill $PRG7 3
 
@@ -281,7 +280,7 @@ stop() {
     process_kill $PRG6 4
 
     # DB stop
-    process_kill $PRG2 16 # 4.0.0 changend from 12 16
+    process_kill $PRG2 16 # 4.0.0 changed from 12 to 16
 
     # Watchdog stop
     process_kill $PRG3 2
@@ -298,8 +297,11 @@ stop() {
     # MQTT stop
     process_kill $PRG13 3
 
+     # UDP broadcast stop
+    process_kill $PRG8 3
+
     # API stop
-    process_kill $PRG9_PATH$PRG9 3
+    process_kill $PRG9_PATH$PRG9 6 # 4.0.1 changed from 3 to 6 
 
     # copy ram to disk
     copytodisk
@@ -307,15 +309,15 @@ stop() {
 }
 
 cleardb() {
-  echo "[*] wissen van database gestart."
+  echo "[*] $(date $TIMESTAMP) wissen van database gestart."
   # database files worden hernoemd en niet gewist als noodmaatregel.
   # in ram zullen ze verdwijnen op disk blijven ze bestaan.
-  echo "[*] database files worden hernoemd met .bak extentie"
+  echo "[*] $(date $TIMESTAMP) database files worden hernoemd met .bak extentie"
   # geef de bestaande db bestanden een bak extentie.
-  echo "[*] Backup maken van data folder "${DATADISK}
+  echo "[*] $(date $TIMESTAMP) Backup maken van data folder "${DATADISK}
   cd $DATADISK &>/dev/null
   /usr/bin/rename --verbose --force "s/db$/db.bak/g" *
-  echo "[*] verwijderen van de ramdisk folder "${RAMDISK} 
+  echo "[*] $(date $TIMESTAMP) verwijderen van de ramdisk folder "${RAMDISK} 
   cd $RAMDISK &>/dev/null
   rm --force --verbose *.db
   cd $PRG_PATH &>/dev/null
@@ -323,15 +325,17 @@ cleardb() {
 
 copytodisk(){
      # force all the ram DB to disk
-    echo "[*] Ram naar disk copy starten."
+    echo "[*] $(date $TIMESTAMP) 5 seconden wachttijd voor ram naar disk copy."
+    sleep 5
+    echo "[*] $(date $TIMESTAMP) Ram naar disk copy starten."
     $PRG_PATH$PRG21 --allcopy2disk --forcecopy 2>&1 >/dev/null 
-    echo "[*] $PRG21 Ram naar disk copy gereed."
+    echo "[*] $(date $TIMESTAMP) $PRG21 Ram naar disk copy gereed."
 
     # schrijf cache naar disk/flash
     sync
-    echo "[*] 10 seconden wachttijd, zodat data veilig naar disk wordt gekopieerd."
+    echo "[*] $(date $TIMESTAMP) 10 seconden wachttijd, zodat data veilig naar disk wordt gekopieerd."
     sleep 10
-    echo "[*] stop gereed."
+    echo "[*] $(date $TIMESTAMP) stop gereed."
 }
 
 case "$1" in
@@ -356,7 +360,7 @@ case "$1" in
         exit 0
     ;;
     **)
-        echo "[*] Usage: $0 {start|stop|restart|cleardatabase}" 
+        echo "[*] $(date $TIMESTAMP) Usage: $0 {start|stop|restart|cleardatabase}" 
         exit 1
     ;;
 esac

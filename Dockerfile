@@ -1,5 +1,5 @@
 # Build stage - includes compilation tools
-FROM debian:bookworm-slim AS builder
+FROM debian:trixie-slim AS builder
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -27,7 +27,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --target=/install/lib/python3.11/site-packages --no-cache-dir --break-system-packages -r /tmp/requirements.txt
 
 # Runtime stage - minimal dependencies
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 ENV TZ="Europe/Amsterdam" \
     PYTHONUNBUFFERED=1 \

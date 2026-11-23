@@ -91,6 +91,21 @@ def get_python_version():
     except Exception:
         return "onbekend"
 
+def get_os_description():
+    try :
+        #return platform.platform(aliased=0, terse=0)
+        proc = subprocess.Popen(['/usr/bin/lsb_release','-d'], stdout=subprocess.PIPE)
+        stdout, stderr  = proc.communicate()
+        exit_code = int( proc.wait( timeout=10 ) )
+        #print ( stdout )
+        if exit_code == 0:
+            tmp = stdout.decode('utf-8')
+            parts = tmp.split(':')
+            return str(parts[1].strip())
+    except Exception as _e:
+        return "onbekend"
+
+
 ####################################################################
 # get name of the os like Linux-5.15.32-v7l..................      #
 ####################################################################

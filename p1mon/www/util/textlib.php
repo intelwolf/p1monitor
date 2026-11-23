@@ -2192,7 +2192,7 @@ $arr = array (
     'Wifi ESSID','Wi-Fi ESSID','Wi-Fi ESSID'
 ),
 /* 604 */ array(
-    'WifI IP-adres:','Wi-Fi IP address','adresse IP Wi-Fi'
+    'WifI IP-adres','Wi-Fi IP address','adresse IP Wi-Fi'
 ),
 /* 605 */ array(
     'Wifi MAC adres','Wi-Fi MAC address','adresse MAC du Wi-Fi'
@@ -2737,6 +2737,17 @@ Pour la consommation : avec un prix du kWh négatif, le tarif rapporte de l'arge
     'besturingssysteem beschrijving','operating system description',"description système d'exploitation"
 ),
 /* 774 */ array(
+    'multicast DNS naam (mDNS)','multicast DNS name (mDNS)','Nom DNS multicast (mDNS)'
+),
+/* 775 */ array(
+    'de DNS naam die in de browser of app gebruikt kan worden, standaard is dit p1monitor. De extentie .local moet niet ingevuld worden.',
+    'the DNS name that can be used in the browser or app; by default, this is p1monitor. The .local extension should not be entered.',
+    "Le nom DNS qui peut être utilisé dans le navigateur. Ou app par défaut, il s'agit de p1monitor. L'extension .local ne doit pas être saisie."
+),
+/* 776 */ array(
+     'verzenden p1 telegram','send p1 telegram',"envoyer télégramme P1"
+),
+/* 777 */ array(
     '','',''
 ),
 

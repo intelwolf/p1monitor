@@ -319,7 +319,7 @@ def restore( args=None ):
         # change the restore folder to done status.
         rename_pathfile = base_usb_pathfile.rpartition('.')[0] + AIDE_EXT_DONE
         os.rename( base_usb_pathfile,  rename_pathfile )
-        flog.info( inspect.stack()[0][3] + ": folder " + base_usb_pathfile + " gewijzigt naar " +  rename_pathfile )
+        flog.info( inspect.stack()[0][3] + ": folder " + base_usb_pathfile + " gewijzigd naar " +  rename_pathfile )
 
         # sync the filesystem, this could speed up the unmount 
         flog.info( inspect.stack()[0][3] + ": filesystem buffers update. Dit kan enkele seconden (10-120) duren, geduld aub." )
@@ -336,7 +336,14 @@ def restore( args=None ):
         except Exception as e:
             flog.warning( inspect.stack()[0][3] +": probleem met het vergroten van het filesysteem -> " + str(e) )
 
-        flog.info( inspect.stack()[0][3] +"Data herstelt vanaf de USB drive." )
+        # step 10 mDNS
+        try:
+            flog.info( inspect.stack()[0][3] + ": mDNS configuratie aanpassen.")
+            proc = subprocess.Popen( ['/bin/sh', '-c', '/p1mon/scripts/P1mDNS --configure' ] )
+            flog.info( inspect.stack()[0][3] + ": mDNS configuratie is gereed.")
+            time.sleep( 3 )
+        except Exception as e:
+            flog.warning( inspect.stack()[0][3] +": probleem met mDNS configuratie aanpassen -> " + str(e) )
 
         if args.reboot == True:
            
@@ -348,6 +355,8 @@ def restore( args=None ):
                 _p_status = p.wait( timeout=30 )
             except Exception as _e:
                 raise Exception( "Reboot niet gelukt, voer deze met de hand uit." )
+
+        flog.info( inspect.stack()[0][3] +"Data herstelt vanaf de USB drive." )
 
     except Exception as e:
         flog.error( str(e) )

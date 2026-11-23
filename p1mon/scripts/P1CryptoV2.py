@@ -5,9 +5,8 @@ import argparse
 import const
 import inspect
 import logger
-import util
-import filesystem_lib
-#import crypto3
+#import util
+#import filesystem_li
 import crypto_lib
 
 prgname = 'P1CryptoV2'
@@ -29,6 +28,7 @@ def Main(argv):
 
     try:
         if enc != None:
+            flog.debug(inspect.stack()[0][3] + ": enc parameter (base64): " + str(enc) )
             cb = crypto_lib.CryptoBase64()
             if seed != None:
                 result = cb.p1Encrypt( plain_text=enc, seed=seed )
@@ -38,13 +38,14 @@ def Main(argv):
             flog.debug(inspect.stack()[0][3]+": encoding result: "+str(result))
     
         if dec != None:
+            flog.debug(inspect.stack()[0][3] + ": dec parameter (base64): " + str(dec) )
             cb = crypto_lib.CryptoBase64()
             if seed != None:  
                 result = cb.p1Decrypt( cipher_text=dec, seed=seed )
             else:
                 result = cb.p1Decrypt( cipher_text=dec )
             print ( result )
-            flog.debug(inspect.stack()[0][3]+": encoding result: "+str(result))
+            flog.debug(inspect.stack()[0][3]+": decoding result: " + str(result) )
     except Exception as e:    
         flog.error(inspect.stack()[0][3]+": gestopt."+str(e))
     

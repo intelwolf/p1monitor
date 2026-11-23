@@ -40,6 +40,11 @@ def main(argv):
     parser.add_argument('-wv', '--writevalue',
         required=False,
         help="schrijf de waarde van het configuratie item aan de hand van de opgeven index, is afhankelijk van writeindex." )
+    
+    parser.add_argument('-c', '--clear',
+        required=False,
+         action="store_true",
+        help="wis veld van het configuratie item aan de hand van de opgeven index, is afhankelijk van writeindex." )
 
     args = parser.parse_args()
     
@@ -75,17 +80,18 @@ def main(argv):
             flog.critical( inspect.stack()[0][3] + ": writeindex " + str( e.args ))
             sys.exit(1)
 
+    if args.writeindex != None and args.clear != None:
+        try:
+            # value, index, flog
+            config_db.strset( "", str(args.writeindex) , flog )
+            sys.exit(0)
+        except Exception as e:
+            flog.critical( inspect.stack()[0][3] + ": writeindex " + str( e.args ))
+            sys.exit(1)
+
     
-    sys.exit(1) # somthing went wrong 
+    sys.exit(1) # something went wrong 
 
-
-########################################################
-# reset signals and close stuff                        #
-########################################################
-def saveExit(signum, frame):
-    signal.signal(signal.SIGINT, original_sigint)
-    print("SIGINT ontvangen, gestopt.")
-    sys.exit(0)
 
 ########################################################
 # init                                                 #
@@ -107,6 +113,4 @@ if __name__ == "__main__":
         print ("critical geen logging mogelijke, gestopt.:" + str(e.args[0]))
         sys.exit(1)
 
-    original_sigint = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, saveExit)
     main(sys.argv[1:])

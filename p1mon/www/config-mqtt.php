@@ -186,6 +186,20 @@ if ( isset($_POST["publish_miscellaneous_data"]) ) {
     $update_MQTT_setting_flag = True;
 }
 
+if ( isset($_POST["publish_p1_telegram_data"]) ) { 
+    if ( $err_cnt == -1 ) $err_cnt=0;
+    if ($_POST["publish_p1_telegram_data"] == '1' ) {
+        if ( updateConfigDb( "update config set parameter = '1' where ID = 231") )$err_cnt += 1;
+    } else {
+        if ( updateConfigDb( "update config set parameter = '0' where ID = 231") )$err_cnt += 1;
+    }
+    $update_MQTT_setting_flag = True;
+}
+
+
+
+
+
 
 if ( isset( $_POST["fs_rb_mqtt"] ) ) { //ok
     if ( $err_cnt == -1 ) $err_cnt=0;
@@ -550,6 +564,17 @@ $(function () {
                                     <div class="rTableCell">
                                         <input class="cursor-pointer" id="publish_miscellaneous_data_on"  name="publish_miscellaneous_data" type="radio" value="1" <?php if ( config_read( 226 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
                                         <input class="cursor-pointer" id="publish_miscellaneous_data_off" name="publish_miscellaneous_data" type="radio" value="0" <?php if ( config_read( 226 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
+                                    </div>
+                                </div> <!-- row end -->
+
+                                <div class="rTableRow" title="<?php echo strIdx( 150 )?>">
+                                    <div class="rTableCell width-290 text-10">
+                                        <i class="fas fa-toggle-off"></i>
+                                        <label><?php echo strIdx( 776 )?></label>
+                                    </div>
+                                    <div class="rTableCell">
+                                        <input class="cursor-pointer" id="publish_p1_telegram_data_on"  name="publish_p1_telegram_data" type="radio" value="1" <?php if ( config_read( 231 ) == 1 ) { echo 'checked'; }?>><?php echo $sw_on ?>
+                                        <input class="cursor-pointer" id="publish_p1_telegram_data_off" name="publish_p1_telegram_data" type="radio" value="0" <?php if ( config_read( 231 ) == 0 ) { echo 'checked'; }?>><?php echo $sw_off ?>
                                     </div>
                                 </div> <!-- row end -->
 

@@ -23,28 +23,19 @@ function page_header() {
     }
     
     // check if the watchdog has set an new version available
+    //echo "readStatusDb(136) = " . readStatusDb(136);
     if  ( readStatusDb(136) == 1 ) {
         $text_version = ucfirst(strIdx( 375 )) . '&#10;' .  ucfirst( strIdx( 733 )) . ' '. readStatusDb(66) . '&#10;' . ucfirst(strIdx( 734 )) . ": ". readStatusDb(67); 
         $download_url_version = readStatusDb(86);
-	$shownew ='';
-    }
-    else
-    {
-        $shownew='style="display: none;"';
     }
 
     // check if the watchdog has an new PATCH version available
     if  ( readStatusDb(137) == 1 )  { 
         $text_patch =  ucfirst(strIdx( 735 )) . ' '. readStatusDb(133) . '&#10;'; 
         $download_url_patch = readStatusDb(134);
-	$showpatch ='';
-    }
-    else
-    {
-        $showpatch='style="display: none;"';
     }
 
-   
+
 echo <<< EOT
 <div class="top-wrapper">
     <div class="content-wrapper">
@@ -60,8 +51,12 @@ echo <<< EOT
                     <span class="text-1">P1-monitor</span>
                 </div>
 
-                <div class="rTableCell width-58" $shownew>
-        
+EOT;
+
+
+if  ( readStatusDb(136) == 1 ) {
+echo <<< EOT
+                <div id="version_icon" class="rTableCell width-58">
                     <div title="$text_version">
                         <a target="_blank" href="$download_url_version"
                             <span class="fa-stack fa-2x">
@@ -72,8 +67,13 @@ echo <<< EOT
                     </div>
                         
                 </div>
+EOT;
+}
 
-                 <div class="rTableCell width-58" $showpatch>
+if  ( readStatusDb(137) == 1 )  { 
+echo <<< EOT
+
+                 <div id="patch_icon" class="rTableCell width-58">
                     <div title="$text_patch">
                         <a target="_blank" href="$download_url_patch"
                              <span class="fa-stack fa-2x">
@@ -83,7 +83,10 @@ echo <<< EOT
                         </a>
                     </div>
                 </div>
+EOT;
+}
 
+echo <<< EOT
                  <div class="rTableCell">
                     $xmas
                  </div>
@@ -94,5 +97,6 @@ echo <<< EOT
     </div>
 </div>
 EOT;
+
 }
 ?>
