@@ -51,7 +51,7 @@
 ###########################################
 P1_VERSIE                       = "4.2.0"       # semantische versie nummers.
 P1_PATCH_LEVEL                  = "0"           # standaard op 0, wordt verhoogd als op een image een patch wordt toegevoegd
-P1_SERIAL_VERSION               = "20261123"    # moet altijd gewijzigd worden bij een nieuwe versie
+P1_SERIAL_VERSION               = "20261125"    # moet altijd gewijzigd worden bij een nieuwe versie
 
 #CRYPTO_SEED                     ="bee31cd96a3ce221"
 DEFAULT_EMAIL_NOTIFICATION      = 'P1 monitor notificatie'
